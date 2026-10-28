@@ -114,9 +114,9 @@
           <g mask="url(#cut)"><circle class="disc-a" cx="400" cy="198" r="155"/><circle cx="400" cy="198" r="155" fill="url(#disc-b)"/><circle cx="400" cy="198" r="155" fill="url(#disc-c)"/></g>
           <text class="name" x="400" y="276.7" text-anchor="middle">DOTNET SOLUTION KIT</text>
         </svg></h1>
-        <p class="hero__line" lang="en">A <code>dotnet new</code> template for .NET 8 and PostgreSQL or SQL Server. It creates the structure of a solution and the projects of its microservices, already wired together. The rest comes with flags.</p>
-        <p class="hero__line" lang="ru">Шаблон <code>dotnet new</code> для .NET 8 и PostgreSQL или SQL Server. Создаёт структуру решения и проекты микросервисов, уже связанные между собой. Остальное включается флагами.</p>
-        <p class="hero__pkg"><a class="pkg" href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit"><span class="pkg__where">NuGet</span><span class="pkg__id">SawKing.DotNetSolutionKit</span></a></p>
+        <p class="hero__line" lang="en">A configurable <code>dotnet new</code> template and lifecycle toolkit for .NET 8 solutions on PostgreSQL or SQL Server. The template generates microservices with CI, deployment and tests, wired together; flags add the rest. The tool <code>dotskit</code> adds services and flags to a solution and upgrades it to a new version, keeping the team's code.</p>
+        <p class="hero__line" lang="ru">Настраиваемый шаблон <code>dotnet new</code> и инструмент сопровождения решений на .NET 8 с PostgreSQL или SQL Server. Шаблон генерирует связанные между собой микросервисы с CI, деплоем и тестами, остальное включается флагами. Инструмент <code>dotskit</code> добавляет в решение сервисы и флаги и обновляет его до новой версии, сохраняя код команды.</p>
+        <p class="hero__pkg"><a class="pkg" href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit"><span class="pkg__where">NuGet</span><span class="pkg__id">SawKing.DotNetSolutionKit</span></a> <a class="pkg" href="https://www.nuget.org/packages/SawKing.DotsKit.Tool"><span class="pkg__where">NuGet</span><span class="pkg__id">SawKing.DotsKit.Tool</span></a></p>
         <p class="hero__cmd"><code>dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution</code></p>
       </div>
     </header>
@@ -127,8 +127,8 @@
     <div class="wrap">
       <h2 lang="en">Start with the business logic</h2>
       <h2 lang="ru">Начните сразу с бизнес-логики</h2>
-      <p class="lede" lang="en">Setting up a new microservice usually eats a week: layers, errors, auth, logging, tests, Docker, CI. Here it takes one command, and the first commit is already the product.</p>
-      <p class="lede" lang="ru">Настройка нового микросервиса обычно съедает неделю: слои, ошибки, авторизация, логи, тесты, Docker, CI. Здесь это одна команда, и первый коммит уже про продукт.</p>
+      <p class="lede" lang="en">Layers, errors, auth, logging, tests, Docker and CI are in place after the first command. The solution is an ordinary .NET project the team owns, and its first commit is about the product.</p>
+      <p class="lede" lang="ru">Слои, ошибки, авторизация, логи, тесты, Docker и CI на месте после первой команды. Решение - обычный .NET-проект, которым владеет команда, и её первый коммит уже про продукт.</p>
       <div class="cols">
         <p lang="en"><b>A new service in one command.</b> <code>dotnet new</code> adds it to the solution with its layers, references, tests and deployment files in place.</p>
         <p lang="ru"><b>Новый сервис одной командой.</b> <code>dotnet new</code> добавляет его в решение сразу со слоями, ссылками, тестами и файлами деплоя.</p>
@@ -138,8 +138,8 @@
         <p lang="ru"><b>Рутина уже сделана.</b> Ошибки в одном формате, валидация, авторизация, проверки здоровья, фоновые задачи и один ID запроса, который проходит через все сервисы и логи.</p>
         <p lang="en"><b>Only what you need.</b> A message bus, secrets from Infisical or Vault, object storage, ClickHouse, MongoDB, email, an audit journal, an API gateway - each is a flag, switched on when you need it.</p>
         <p lang="ru"><b>Только то, что нужно.</b> Шина сообщений, секреты из Infisical или Vault, объектное хранилище, ClickHouse, MongoDB, почта, журнал аудита, API-шлюз - каждое включается флагом, когда понадобится.</p>
-        <p lang="en"><b>Ready for production.</b> Docker images, compose or Kubernetes, blue-green deployment and CI on GitHub Actions with tests on a real database.</p>
-        <p lang="ru"><b>Готово к продакшену.</b> Docker-образы, compose или Kubernetes, blue-green деплой и CI на GitHub Actions с тестами на настоящей базе.</p>
+        <p lang="en"><b>Deployment included.</b> Docker images, compose or Kubernetes, blue-green deployment and CI on GitHub Actions with tests on a real database.</p>
+        <p lang="ru"><b>Деплой в комплекте.</b> Docker-образы, compose или Kubernetes, blue-green деплой и CI на GitHub Actions с тестами на настоящей базе.</p>
         <p lang="en"><b>See it before you use it.</b> <a href="https://github.com/sawking-tech/DotNetSolutionKit.Samples">DotNetSolutionKit.Samples</a> holds generated solutions to read through: the full kit, a single service and a gateway with services, generated again from every release, and <code>full-dev</code>, generated from <code>dev</code>, where the next release is built. Each runs its own CI.</p>
         <p lang="ru"><b>Посмотрите до того, как взять.</b> В <a href="https://github.com/sawking-tech/DotNetSolutionKit.Samples">DotNetSolutionKit.Samples</a> лежат сгенерированные решения: полный комплект, один сервис и шлюз с сервисами, которые пересобираются из каждого релиза, и ветка <code>full-dev</code>, собранная из <code>dev</code>, где готовится следующий релиз. В каждой работает свой CI.</p>
       </div>
@@ -157,9 +157,9 @@
       <p lang="en">The shared libraries, the solution and the first service:</p>
       <p lang="ru">Общие библиотеки, решение и первый сервис:</p>
       <p class="hero__cmd"><code>dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution</code></p>
-      <p lang="en">Every next service:</p>
-      <p lang="ru">Каждый следующий сервис:</p>
-      <p class="hero__cmd"><code>dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Billing</code></p>
+      <p lang="en">Every next service, by the template's short name <code>dotskit</code>:</p>
+      <p lang="ru">Каждый следующий сервис, по короткому имени шаблона <code>dotskit</code>:</p>
+      <p class="hero__cmd"><code>dotnet new dotskit -N MyCompany -P MyProduct -S Billing</code></p>
       <p lang="en">Or with <a href="docs.html#dotskit">dotskit</a>, the template's tool, which also adds a flag to a service and upgrades a solution to a new version:</p>
       <p lang="ru">Или через <a href="docs.html#dotskit">dotskit</a>, инструмент шаблона, который также добавляет флаг сервису и обновляет решение до новой версии:</p>
       <p class="hero__cmd"><code>dotnet tool install -g SawKing.DotsKit.Tool</code></p>
