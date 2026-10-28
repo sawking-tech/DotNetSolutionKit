@@ -54,9 +54,10 @@ body .hero.hero--kit {
 
 .hero--kit .hero__line { max-width: 52ch; text-shadow: none; }
 .hero--kit .hero__line b { color: var(--focus-text); }
-/* the package as a pill: where it is published, then its id; written in the page, so it takes its place
-   with the first paint and nothing below it moves */
-.hero__pkg { margin: 0; }
+/* the packages as pills, the template and its tool: where each is published, then its id; written in the
+   page, so they take their place with the first paint and nothing below them moves. On a narrow screen the
+   second goes under the first. */
+.hero__pkg { margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
 .pkg { display: inline-flex; max-width: 100%; border-radius: 6px; overflow: hidden; text-decoration: none;
   font: 500 0.85rem/1 "IBM Plex Mono", monospace; border: 1px solid var(--line); }
 .pkg__where { padding: 0.4rem 0.6rem; background: var(--net); color: #fff; }
