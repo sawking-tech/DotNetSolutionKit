@@ -87,7 +87,7 @@ public interface IOrderPolicy
 - A platform user and a tenant's user have different rules: check both paths.
 - A service method without its policy call is a bug.
 - Where tenants form a tree, the policy compares paths with `HierarchyRules` (`--HierarchyRules`), so the
-  tree means the same in every service: [hierarchy rules](https://dnsk.sawking.tech/docs.html#hierarchy-rules).
+  tree means the same in every service: [hierarchy rules](https://dotskit.sawking.tech/docs.html#hierarchy-rules).
 
 ## Three-tier defence
 
@@ -99,7 +99,7 @@ Service       policy.EnsureCanCancel(order, actor)            <- access to this 
 Domain        order.EnsureCanCancel()                         <- invariant
 ```
 
-A missing layer is a finding: [authentication and permissions](https://dnsk.sawking.tech/docs.html#auth).
+A missing layer is a finding: [authentication and permissions](https://dotskit.sawking.tech/docs.html#auth).
 
 ## Aggregate boundaries
 
@@ -145,7 +145,7 @@ builder.Property(x => x.Id).HasDefaultValueSql("NEWID()");             // SQL Se
 **Integer identifiers** have the same problem when the entity's events carry `Id`. In order of
 preference:
 1. take the number from a sequence before constructing the entity: `IShortIdGenerator.GetNextAsync`, see
-   readable numbers in [persistence](https://dnsk.sawking.tech/docs.html#persistence);
+   readable numbers in [persistence](https://dotskit.sawking.tech/docs.html#persistence);
 2. `UseHiLo()`, with the events raised after `Add`, not in the constructor;
 3. an `IDomainPostCommitHandler`, if that event does not need the outbox guarantee.
 
@@ -191,4 +191,4 @@ builder.Property(o => o.Status)
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
