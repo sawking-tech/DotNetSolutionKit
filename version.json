@@ -11,7 +11,8 @@
         "Containers run on a read-only filesystem.",
         "The test servers start with one command, the same on a developer's machine as in CI.",
         "Coverage on demand, with a report per service.",
-        "The solution is generated with --Solution; -M false still works."
+        "The solution is generated with --Solution; -M false still works.",
+        "The template answers to the short name dotskit too: dotnet new dotskit."
       ],
       "ru": {
         "headline": "dotskit держит решение в ногу с шаблоном и сохраняет правки команды.",
@@ -23,7 +24,8 @@
           "Контейнеры работают с файловой системой только для чтения.",
           "Тестовые серверы запускаются одной командой, одинаково на машине разработчика и в CI.",
           "Покрытие по запросу, с отчётом по каждому сервису.",
-          "Решение генерируется с --Solution; -M false по-прежнему работает."
+          "Решение генерируется с --Solution; -M false по-прежнему работает.",
+          "Шаблон отвечает и на короткое имя dotskit: dotnet new dotskit."
         ]
       }
     },
