@@ -27,8 +27,8 @@ dotnet new install SawKing.DotNetSolutionKit
 # the shared Common projects, the solution file and the first service
 dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
 
-# every further service
-dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Billing
+# every further service; dotskit is the template's second short name
+dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 ```
 
 The package is [SawKing.DotNetSolutionKit on nuget.org](https://www.nuget.org/packages/SawKing.DotNetSolutionKit);

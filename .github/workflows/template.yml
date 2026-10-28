@@ -90,7 +90,8 @@ jobs:
           mkdir solution && cd solution
           dotnet new DotNetSolutionKit ${{ matrix.first }}
           # A service generated into the solution adds itself to All.sln by a post-action that runs a command.
-          if [ -n "${{ matrix.more }}" ]; then dotnet new DotNetSolutionKit ${{ matrix.more }} --allow-scripts yes; fi
+          # The second service by the short name dotskit, the others by DotNetSolutionKit, so both keep working.
+          if [ -n "${{ matrix.more }}" ]; then dotnet new dotskit ${{ matrix.more }} --allow-scripts yes; fi
           if [ -n "${{ matrix.gateway }}" ]; then dotnet new DotNetSolutionKit ${{ matrix.gateway }} --allow-scripts yes; fi
           dotnet sln src/services/*.All.sln list
 
