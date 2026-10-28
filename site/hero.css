@@ -63,10 +63,15 @@ body .hero.hero--kit {
 .pkg__where { padding: 0.4rem 0.6rem; background: var(--net); color: #fff; }
 .pkg__id { padding: 0.4rem 0.6rem; background: var(--panel); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pkg:hover .pkg__id { background: var(--panel-2); }
-.hero__cmd { margin: 0; max-width: 100%; overflow-x: auto; }
+.hero__cmd { margin: 0; min-width: 0; max-width: 100%; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
 .hero__cmd code { display: inline-block; font: 0.95rem "IBM Plex Mono", monospace; color: var(--text);
-                  background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 0.55rem 0.9rem; white-space: nowrap; }
+                  background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 0.55rem 0.9rem; white-space: nowrap;
+                  max-width: 100%; box-sizing: border-box; overflow-x: auto; }
 .hero__cmd code::before { content: "$ "; color: var(--muted); }
+/* the template alone, under the recommended way by dotskit */
+.install__alone { margin-top: 1.4rem; }
+.install__alone > summary { cursor: pointer; color: var(--muted); }
+.install__alone > summary:hover { color: var(--text); }
 
 /* On load the arm swings up from the shoulder in one movement; the graph lies on the band, tilted, and
    is picked up on the way, without a stop, the moment the hand reaches it; from then on both turn

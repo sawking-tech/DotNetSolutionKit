@@ -6,30 +6,12 @@ It provides ready-to-use architectural building blocks, modules, and integration
 
 **Site and documentation, in English and Russian: [dotskit.sawking.tech](https://dotskit.sawking.tech/)**
 
-## Install
+## Install and generate
 
-```bash
-dotnet new install SawKing.DotNetSolutionKit
-```
-
-## Generate
-
-```bash
-# the shared Common projects, the solution file and the first service
-dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
-
-# every further service; dotskit is the template's second short name
-dotnet new dotskit -N MyCompany -P MyProduct -S Billing
-```
-
-Generated solutions, regenerated from every release with their CI running:
-[DotNetSolutionKit.Samples](https://dotskit.sawking.tech/samples.html).
-
-## dotskit
-
-The template's command-line tool, [SawKing.DotsKit.Tool](https://www.nuget.org/packages/SawKing.DotsKit.Tool),
-adds a service or a flag to a solution it has and upgrades a solution to a newer version of the template,
-keeping the team's changes by a three-way merge:
+The recommended way is the template's command-line tool,
+[SawKing.DotsKit.Tool](https://www.nuget.org/packages/SawKing.DotsKit.Tool): it generates a solution, adds
+services and flags to it, and upgrades it to a newer version of the template, keeping the team's changes by
+a three-way merge.
 
 ```bash
 dotnet tool install -g SawKing.DotsKit.Tool
@@ -40,6 +22,21 @@ dotskit upgrade                                    # bring a solution to the too
 ```
 
 [dotskit](https://dotskit.sawking.tech/docs.html#dotskit) in the documentation.
+
+## The template alone
+
+```bash
+dotnet new install SawKing.DotNetSolutionKit
+
+# the shared Common projects, the solution file and the first service
+dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
+
+# every further service; dotskit is the template's second short name
+dotnet new dotskit -N MyCompany -P MyProduct -S Billing
+```
+
+Generated solutions, regenerated from every release with their CI running:
+[DotNetSolutionKit.Samples](https://dotskit.sawking.tech/samples.html).
 
 ## Parameters
 

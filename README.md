@@ -21,23 +21,10 @@ What it gives a solution in full - the principles, the economics, the cost:
 
 ## Install and generate
 
-```bash
-dotnet new install SawKing.DotNetSolutionKit
-
-# the shared Common projects, the solution file and the first service
-dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
-
-# every further service; dotskit is the template's second short name
-dotnet new dotskit -N MyCompany -P MyProduct -S Billing
-```
-
-The package is [SawKing.DotNetSolutionKit on nuget.org](https://www.nuget.org/packages/SawKing.DotNetSolutionKit);
-every [release](https://github.com/sawking-tech/DotNetSolutionKit/releases) also carries it as a `.nupkg` file.
-To try the template from a clone: `dotnet new install /path/to/DotNetSolutionKit/template`.
-
-From 2.8 the tool [dotskit](docs/getting-started/dotskit.md) does the same with shorter commands, adds a flag
-to a service generated earlier, and upgrades a solution to a newer version of the template, keeping the
-team's changes by a three-way merge:
+The recommended way is the tool [dotskit](docs/getting-started/dotskit.md): it generates a solution, adds
+services and flags to it, and upgrades it to a newer version of the template, keeping the team's changes by
+a three-way merge. A solution it generates carries its manifest, so `dotskit upgrade` works from the first
+commit.
 
 ```bash
 dotnet tool install -g SawKing.DotsKit.Tool
@@ -48,6 +35,28 @@ dotskit new -S Orders --MongoDB true              # in the solution: a flag for 
 dotskit init                                      # in a solution made without dotskit: describe it in its manifest
 dotskit upgrade                                   # in the solution: bring it to the tool's version of the template
 ```
+
+<details>
+<summary>The template alone, by <code>dotnet new</code></summary>
+
+```bash
+dotnet new install SawKing.DotNetSolutionKit
+
+# the shared Common projects, the solution file and the first service
+dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
+
+# every further service; dotskit is the template's second short name
+dotnet new dotskit -N MyCompany -P MyProduct -S Billing
+```
+
+A solution generated this way is upgraded by `dotskit` after `dotskit init`.
+To try the template from a clone: `dotnet new install /path/to/DotNetSolutionKit/template`.
+
+</details>
+
+The packages are [SawKing.DotsKit.Tool](https://www.nuget.org/packages/SawKing.DotsKit.Tool) and
+[SawKing.DotNetSolutionKit](https://www.nuget.org/packages/SawKing.DotNetSolutionKit) on nuget.org; every
+[release](https://github.com/sawking-tech/DotNetSolutionKit/releases) also carries them as `.nupkg` files.
 
 What the generated solutions look like:
 [DotNetSolutionKit.Samples](https://github.com/sawking-tech/DotNetSolutionKit.Samples), a branch each for a
