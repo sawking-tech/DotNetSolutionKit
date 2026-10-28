@@ -9,6 +9,18 @@
         "highlights": []
       }
     },
+    "2.8.1": {
+      "headline": "Start with dotskit: the README, the package page and the site lead with it.",
+      "highlights": [
+        "The commands of the template alone are one click further, under the dotskit ones."
+      ],
+      "ru": {
+        "headline": "Начните с dotskit: с него начинаются README, страница пакета и сайт.",
+        "highlights": [
+          "Команды одного шаблона - на клик дальше, под командами dotskit."
+        ]
+      }
+    },
     "2.8.0": {
       "headline": "dotskit keeps a solution up with the template, keeping the team's changes.",
       "highlights": [
