@@ -26,10 +26,11 @@ Pass `--Solution` for it:
 dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
 ```
 
-Every further service is added from the solution's root:
+Every further service is added from the solution's root. The template also answers to its short name
+`dotskit`:
 
 ```bash
-dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Billing
+dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 ```
 
 It generates the service folder and, after asking to run a command (`--allow-scripts yes` runs it without

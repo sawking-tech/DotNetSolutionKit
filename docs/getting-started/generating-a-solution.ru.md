@@ -26,10 +26,10 @@ dotnet new install /path/to/DotNetSolutionKit/template --force
 dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
 ```
 
-Каждый следующий сервис добавляется из корня решения:
+Каждый следующий сервис добавляется из корня решения. Шаблон отвечает и на короткое имя `dotskit`:
 
 ```bash
-dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Billing
+dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 ```
 
 Он генерирует папку сервиса и, спросив разрешения запустить команду (`--allow-scripts yes` запускает без
