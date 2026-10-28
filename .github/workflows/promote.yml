@@ -193,11 +193,16 @@ jobs:
       - run: gh workflow run site.yml -R "$GITHUB_REPOSITORY" --ref "$TARGET"
 
   # A run again on a target already moved still publishes what a failed run left out.
+  # A called workflow gets no more than its caller grants: id-token is for the nuget.org key.
   release:
     name: Publish
     needs: promote
+    permissions:
+      contents: write
+      actions: read
+      packages: write
+      id-token: write
     uses: ./.github/workflows/release.yml
     with:
       ref: ${{ needs.promote.outputs.target }}
       publish: ${{ needs.promote.outputs.publish == 'true' }}
-    secrets: inherit
