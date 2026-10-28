@@ -26,7 +26,6 @@ gantt
     bluegreen.sh says what is missing when a solution has no service to deploy (#103) :s34, after s33, 300ms
     a table of flags - what a flag requires, excludes or gives with another (#113) :s35, after s34, 500ms
     Samples - a branch that lives a product's life, upgraded by dotskit (#104) :s36, after s10, 1500ms
-    a marketplace on the template, end to end; what it finds is fixed :s13, after s36, 2000ms
 
     section Next
     3.0 on .NET 8 - shared code by kind, the configuration store, flags in lower case (#101, #105, #106) :s15, after s32, 3000ms
