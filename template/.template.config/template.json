@@ -9,7 +9,7 @@
   "identity": "SawKing.DotNetSolutionKit",
   "name": "DotNet Solution Kit",
   "description": "Microservices on .NET 8 and PostgreSQL: shared Common libraries and services split into domain, application, infrastructure and API projects; the message bus, secrets, feature flags, object storage, ClickHouse, MongoDB, email, a gateway, deployment files and CI by flags. Documentation: https://dnsk.sawking.tech/",
-  "shortName": "DotNetSolutionKit",
+  "shortName": ["DotNetSolutionKit", "dotskit"],
   "preferNameDirectory": false,
 
   "symbols": {
