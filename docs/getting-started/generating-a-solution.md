@@ -26,8 +26,8 @@ Pass `--Solution` for it:
 dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
 ```
 
-Every further service is added from the solution's root. The template also answers to its short name
-`dotskit`:
+Every further service is added from the solution's root. The template answers to a second short name,
+`dotskit`, in any command; the tool of the same name is `dotskit new` ([dotskit](dotskit.md)):
 
 ```bash
 dotnet new dotskit -N MyCompany -P MyProduct -S Billing
