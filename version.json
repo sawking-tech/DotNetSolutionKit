@@ -1,6 +1,14 @@
 {
-  "version": "2.8.0",
+  "version": "2.9.0-rc",
   "releaseNotes": {
+    "2.9.0-rc": {
+      "headline": "",
+      "highlights": [],
+      "ru": {
+        "headline": "",
+        "highlights": []
+      }
+    },
     "2.8.0": {
       "headline": "dotskit keeps a solution up with the template, keeping the team's changes.",
       "highlights": [
