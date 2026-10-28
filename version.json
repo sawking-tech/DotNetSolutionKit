@@ -2,7 +2,7 @@
   "version": "2.8.0-rc",
   "releaseNotes": {
     "2.8.0-rc": {
-      "headline": "",
+      "headline": "dotskit keeps a solution up with the template, keeping the team's changes.",
       "highlights": [
         "A solution keeps up with the template: dotskit adds services and flags to it and upgrades it to a new version, keeping the team's changes.",
         "A service generated into a solution adds itself to All.sln.",
@@ -15,7 +15,7 @@
         "The template answers to the short name dotskit too: dotnet new dotskit."
       ],
       "ru": {
-        "headline": "",
+        "headline": "dotskit держит решение в ногу с шаблоном и сохраняет правки команды.",
         "highlights": [
           "Решение не отстаёт от шаблона: dotskit добавляет в него сервисы и флаги и переводит его на новую версию, сохраняя правки команды.",
           "Сервис, сгенерированный в готовое решение, сам добавляется в All.sln.",
