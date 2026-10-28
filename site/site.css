@@ -359,6 +359,37 @@ th { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
 .tag--now { color: var(--now); }
 .tag--wait { color: var(--wait); }
 /* when a roadmap item started and ended, under its status: a line of its own, so the table keeps three columns on a phone */
+/* a parameter's default, under its name: the description keeps the width, on a phone too */
+/* the columns keep their width when the rest of the parameters open, so the rows already seen do not move */
+#parameters table { table-layout: fixed; }
+#parameters th:first-child { width: 16.5rem; }
+#parameters td:first-child code { white-space: nowrap; }
+.default { display: block; margin-top: 0.3rem; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+/* The parameters go by what they shape, the databases together, the secrets together; closed, the table
+   shows only what a team sets first - the names, the database, the bus and CI. One switch opens the rest,
+   without a script for the table itself */
+#parameters:not(:has(.params__all:checked)) tbody tr:not(.top) { display: none; }
+#parameters { overflow-anchor: none; }
+/* the switch is the releases' older-button: a pill as tall as theirs, full width on a phone; the checkbox
+   stands right under it, so focusing it on a click scrolls nothing */
+.params__switch { position: relative; display: flex; justify-content: center; margin: -0.6rem 0 1.4rem; }
+.params__all { position: absolute; inset: 0; margin: 0; opacity: 0; pointer-events: none; }
+.params__more { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  height: 2.4rem; padding: 0 0.85rem; box-sizing: border-box; cursor: pointer; font-size: 0.86rem; color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px; }
+.params__more:hover { color: var(--text); border-color: var(--focus); }
+.params__all:focus-visible + .params__more { outline: 2px solid var(--focus); outline-offset: 2px; }
+.params__hide, .params__all:checked + .params__more .params__show { display: none; }
+.params__all:checked + .params__more .params__hide { display: inline; }
+.params__all:checked + .params__more > [aria-hidden] { transform: rotate(180deg); }
+@media (max-width: 480px) { .params__more { flex: 1; height: 2rem; } }
+/* on a phone a parameter's description goes under its name, at the full width */
+@media (max-width: 560px) {
+  #parameters thead { display: none; }
+  #parameters tr { display: block; padding: 0.7rem 0; border-bottom: 1px solid var(--line); }
+  #parameters td { display: block; padding: 0; border: 0; }
+  #parameters td + td { margin-top: 0.4rem; }
+}
 .when { display: block; margin-top: 0.25rem; font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
 
 /* The rule above the footer runs at the width of the content, not of the window: a line across
