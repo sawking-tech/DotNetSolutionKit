@@ -8,8 +8,8 @@ Implement a domain event: the event record and its handlers in the three-phase p
 ## Usage
 `/add-domain-event <EventName>` - e.g. `/add-domain-event OrderCancelled`
 
-The pipeline: [domain events](https://dnsk.sawking.tech/docs.html#domain-events), why three phases:
-[ADR-001](https://dnsk.sawking.tech/docs.html#adr-001).
+The pipeline: [domain events](https://dotskit.sawking.tech/docs.html#domain-events), why three phases:
+[ADR-001](https://dotskit.sawking.tech/docs.html#adr-001).
 
 ## What to do
 
@@ -214,4 +214,4 @@ ordinary way to publish and it goes through the outbox.
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.

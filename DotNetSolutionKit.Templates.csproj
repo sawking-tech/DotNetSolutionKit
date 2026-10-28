@@ -17,7 +17,7 @@
     <Description>A .NET 8 microservice solution template for high-load systems, proven in production. Layered services on PostgreSQL or SQL Server; secrets from Infisical or HashiCorp Vault, RabbitMQ with a transactional outbox, Hangfire jobs, ClickHouse, MongoDB, email, object storage, a YARP gateway, deployment files and CI are one flag away, wired and tested.</Description>
     <PackageTags>dotnet-new;templates;template;microservices;solution;clean-architecture;ddd;net8;aspnetcore;postgresql;sqlserver;efcore;vault;infisical;rabbitmq;masstransit;outbox;hangfire;clickhouse;mongodb;email;smtp;yarp</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://dnsk.sawking.tech/</PackageProjectUrl>
+    <PackageProjectUrl>https://dotskit.sawking.tech/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/sawking-tech/DotNetSolutionKit</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <!-- the package's own README and icon (nuget/): nuget.org does not resolve the repository README's

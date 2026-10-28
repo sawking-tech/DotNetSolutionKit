@@ -1,4 +1,4 @@
-// Part of DotNetSolutionKit (https://dnsk.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
+// Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
 
 using System.Collections.Concurrent;
 using Microsoft.Data.SqlClient;

@@ -9,7 +9,7 @@ Scaffold or review the specifications of a domain entity.
 - `/add-specification <EntityName>` - scaffold `<EntityName>Specifications.cs` and its filter extension
 - `/add-specification review <file>` - review existing specifications
 
-Why repositories take specifications: [ADR-002](https://dnsk.sawking.tech/docs.html#adr-002).
+Why repositories take specifications: [ADR-002](https://dotskit.sawking.tech/docs.html#adr-002).
 
 ---
 
@@ -171,4 +171,4 @@ The repository that runs the query: `/add-repository`.
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.

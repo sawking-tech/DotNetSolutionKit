@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-# Part of DotNetSolutionKit (https://dnsk.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
+# Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
 #
 #
 # One Dockerfile for every service. Build a service from the solution root:
