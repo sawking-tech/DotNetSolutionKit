@@ -34,8 +34,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site/site.css?v=140">
-<link rel="stylesheet" href="site/hero.css?v=103">
+<link rel="stylesheet" href="site/site.css?v=141">
+<link rel="stylesheet" href="site/hero.css?v=104">
 <script src="site/config.js?v=103"></script>
 <script src="site/boot.js?v=103"></script>
 </head>
@@ -118,7 +118,7 @@
         <p class="hero__line" lang="en">A configurable <code>dotnet new</code> template and lifecycle toolkit for .NET 8 solutions on PostgreSQL or SQL Server. The template generates microservices with CI, deployment and tests, wired together; flags add the rest. The tool <code>dotskit</code> adds services and flags to a solution and upgrades it to a new version, keeping the team's code.</p>
         <p class="hero__line" lang="ru">Настраиваемый шаблон <code>dotnet new</code> и инструмент сопровождения решений на .NET 8 с PostgreSQL или SQL Server. Шаблон генерирует связанные между собой микросервисы с CI, деплоем и тестами, остальное включается флагами. Инструмент <code>dotskit</code> добавляет в решение сервисы и флаги и обновляет его до новой версии, сохраняя код команды.</p>
         <p class="hero__pkg"><a class="pkg" href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit"><span class="pkg__where">NuGet</span><span class="pkg__id">SawKing.DotNetSolutionKit</span></a> <a class="pkg" href="https://www.nuget.org/packages/SawKing.DotsKit.Tool"><span class="pkg__where">NuGet</span><span class="pkg__id">SawKing.DotsKit.Tool</span></a></p>
-        <p class="hero__cmd"><code>dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution</code></p>
+        <p class="hero__cmd"><code>dotnet tool install -g SawKing.DotsKit.Tool</code><code>dotskit new -N MyCompany -P MyProduct -S Orders</code></p>
       </div>
     </header>
 
@@ -131,8 +131,8 @@
       <p class="lede" lang="en">Layers, errors, auth, logging, tests, Docker and CI are in place after the first command. The solution is an ordinary .NET project the team owns, and its first commit is about the product.</p>
       <p class="lede" lang="ru">Слои, ошибки, авторизация, логи, тесты, Docker и CI на месте после первой команды. Решение - обычный .NET-проект, которым владеет команда, и её первый коммит уже про продукт.</p>
       <div class="cols">
-        <p lang="en"><b>A new service in one command.</b> <code>dotnet new</code> adds it to the solution with its layers, references, tests and deployment files in place.</p>
-        <p lang="ru"><b>Новый сервис одной командой.</b> <code>dotnet new</code> добавляет его в решение сразу со слоями, ссылками, тестами и файлами деплоя.</p>
+        <p lang="en"><b>A new service in one command.</b> <code>dotskit new</code> adds it to the solution with its layers, references, tests and deployment files in place.</p>
+        <p lang="ru"><b>Новый сервис одной командой.</b> <code>dotskit new</code> добавляет его в решение сразу со слоями, ссылками, тестами и файлами деплоя.</p>
         <p lang="en"><b>A solution that keeps up.</b> <code>dotskit</code> adds a service or a flag to an existing solution and upgrades it to a new version of the template, keeping the team's changes.</p>
         <p lang="ru"><b>Решение не отстаёт.</b> <code>dotskit</code> добавляет в готовое решение сервис или флаг и обновляет его до новой версии шаблона, сохраняя правки команды.</p>
         <p lang="en"><b>The boring part is done.</b> Errors in one format, validation, authorization, health checks, background jobs and one request ID that follows a call through every service and log.</p>
@@ -152,20 +152,32 @@
     <div class="wrap">
       <h2 lang="en">Try it in a minute</h2>
       <h2 lang="ru">Попробуйте за минуту</h2>
-      <p lang="en">Install the template from <a href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit">nuget.org</a>:</p>
-      <p lang="ru">Установите шаблон с <a href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit">nuget.org</a>:</p>
-      <p class="hero__cmd"><code>dotnet new install SawKing.DotNetSolutionKit</code></p>
-      <p lang="en">The shared libraries, the solution and the first service:</p>
-      <p lang="ru">Общие библиотеки, решение и первый сервис:</p>
-      <p class="hero__cmd"><code>dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution</code></p>
-      <p lang="en">Every next service, by the template's short name <code>dotskit</code>:</p>
-      <p lang="ru">Каждый следующий сервис, по короткому имени шаблона <code>dotskit</code>:</p>
-      <p class="hero__cmd"><code>dotnet new dotskit -N MyCompany -P MyProduct -S Billing</code></p>
-      <p lang="en">Or with <a href="docs.html#dotskit">dotskit</a>, the template's tool, which also adds a flag to a service and upgrades a solution to a new version:</p>
-      <p lang="ru">Или через <a href="docs.html#dotskit">dotskit</a>, инструмент шаблона, который также добавляет флаг сервису и обновляет решение до новой версии:</p>
+      <p lang="en">Install <a href="docs.html#dotskit">dotskit</a>, the template's tool, from <a href="https://www.nuget.org/packages/SawKing.DotsKit.Tool">nuget.org</a>:</p>
+      <p lang="ru">Установите <a href="docs.html#dotskit">dotskit</a>, инструмент шаблона, с <a href="https://www.nuget.org/packages/SawKing.DotsKit.Tool">nuget.org</a>:</p>
       <p class="hero__cmd"><code>dotnet tool install -g SawKing.DotsKit.Tool</code></p>
+      <p lang="en">The shared libraries, the solution and the first service, in an empty folder:</p>
+      <p lang="ru">Общие библиотеки, решение и первый сервис, в пустой папке:</p>
       <p class="hero__cmd"><code>dotskit new -N MyCompany -P MyProduct -S Orders</code></p>
+      <p lang="en">Every next service, and a flag for a service the solution has:</p>
+      <p lang="ru">Каждый следующий сервис и флаг для сервиса, который уже есть:</p>
+      <p class="hero__cmd"><code>dotskit new -S Billing</code><code>dotskit new -S Orders --MongoDB true</code></p>
+      <p lang="en">A new version of the template, keeping the team's changes:</p>
+      <p lang="ru">Новая версия шаблона с сохранением правок команды:</p>
       <p class="hero__cmd"><code>dotskit upgrade</code></p>
+      <details class="install__alone">
+        <summary><span lang="en">The template alone, by <code>dotnet new</code></span><span lang="ru">Только шаблон, через <code>dotnet new</code></span></summary>
+        <p lang="en">Install the template from <a href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit">nuget.org</a>:</p>
+        <p lang="ru">Установите шаблон с <a href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit">nuget.org</a>:</p>
+        <p class="hero__cmd"><code>dotnet new install SawKing.DotNetSolutionKit</code></p>
+        <p lang="en">The shared libraries, the solution and the first service:</p>
+        <p lang="ru">Общие библиотеки, решение и первый сервис:</p>
+        <p class="hero__cmd"><code>dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution</code></p>
+        <p lang="en">Every next service, by the template's short name <code>dotskit</code>:</p>
+        <p lang="ru">Каждый следующий сервис, по короткому имени шаблона <code>dotskit</code>:</p>
+        <p class="hero__cmd"><code>dotnet new dotskit -N MyCompany -P MyProduct -S Billing</code></p>
+        <p lang="en">Such a solution is upgraded by <code>dotskit</code> after <code>dotskit init</code>.</p>
+        <p lang="ru">Такое решение обновляется через <code>dotskit</code> после <code>dotskit init</code>.</p>
+      </details>
     </div>
   </section>
 
@@ -194,33 +206,38 @@
       <h2 lang="ru">Параметры</h2>
       <div class="scroller">
         <table>
-          <thead><tr><th><span lang="en">Parameter</span><span lang="ru">Параметр</span></th><th><span lang="en">Default</span><span lang="ru">По умолчанию</span></th><th><span lang="en">What it does</span><span lang="ru">Что делает</span></th></tr></thead>
+          <thead><tr><th><span lang="en">Parameter</span><span lang="ru">Параметр</span></th><th><span lang="en">What it does</span><span lang="ru">Что делает</span></th></tr></thead>
           <tbody>
-            <tr><td><code>-N</code>, <code>--NamespaceRoot</code></td><td><code>MyCompany</code></td><td><span lang="en">Organization name, the root namespace. May be dotted.</span><span lang="ru">Название организации, корневое пространство имён. Может быть с точками.</span></td></tr>
-            <tr><td><code>-P</code>, <code>--ProductName</code></td><td><code>Product</code></td><td><span lang="en">Product name. May be dotted.</span><span lang="ru">Название продукта. Может быть с точками.</span></td></tr>
-            <tr><td><code>-S</code>, <code>--ServiceNameOrCustom</code></td><td><code>Service</code></td><td><span lang="en">Service name. May be dotted.</span><span lang="ru">Название сервиса. Может быть с точками.</span></td></tr>
-            <tr><td><code>--Solution</code></td><td><code>false</code></td><td><span lang="en">Generates the solution: <code>Common</code>, <code>All.sln</code> and the root files, with the first service. Without it, only the service folder, into a solution already there.</span><span lang="ru">Генерирует решение: <code>Common</code>, <code>All.sln</code> и корневые файлы вместе с первым сервисом. Без него - только папка сервиса, в уже существующее решение.</span></td></tr>
-            <tr><td><code>-H</code>, <code>--Hangfire</code></td><td><code>true</code></td><td><span lang="en"><a href="docs.html#jobs">Background jobs</a> on Hangfire.</span><span lang="ru"><a href="docs.html#jobs">Фоновые задачи</a> на Hangfire.</span></td></tr>
-            <tr><td><code>--Database</code></td><td><code>postgres</code></td><td><span lang="en"><a href="docs.html#persistence:sql-server">Database</a>: <code>postgres</code> or <code>mssql</code> (SQL Server).</span><span lang="ru"><a href="docs.html#persistence:sql-server">СУБД</a>: <code>postgres</code> или <code>mssql</code> (SQL Server).</span></td></tr>
-            <tr><td><code>--Messaging</code></td><td><code>none</code></td><td><span lang="en"><a href="docs.html#messaging">Message bus</a>: <code>outbox</code> or <code>direct</code>.</span><span lang="ru"><a href="docs.html#messaging">Шина сообщений</a>: <code>outbox</code> или <code>direct</code>.</span></td></tr>
-            <tr><td><code>-I</code>, <code>--Infisical</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#secrets">Secrets and settings from Infisical</a>.</span><span lang="ru"><a href="docs.html#secrets">Секреты и настройки из Infisical</a>.</span></td></tr>
-            <tr><td><code>--Vault</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#secrets:hashicorp-vault">Secrets and settings from HashiCorp Vault</a>.</span><span lang="ru"><a href="docs.html#secrets:hashicorp-vault">Секреты и настройки из HashiCorp Vault</a>.</span></td></tr>
-            <tr><td><code>--DiffApi</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#api-diff">API contract diff</a> on pull requests.</span><span lang="ru"><a href="docs.html#api-diff">Дифф контракта API</a> в пулл-реквестах.</span></td></tr>
-            <tr><td><code>--GitHubCiCd</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#ci">CI on GitHub Actions</a>: build, tests on real servers, coverage on demand, secret scan.</span><span lang="ru"><a href="docs.html#ci">CI на GitHub Actions</a>: сборка, тесты на настоящих серверах, покрытие по запросу, поиск секретов.</span></td></tr>
-            <tr><td><code>--FeatureFlags</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#feature-flags">Feature flags</a>.</span><span lang="ru"><a href="docs.html#feature-flags">Фича-флаги</a>.</span></td></tr>
-            <tr><td><code>--HierarchyRules</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#hierarchy-rules">Access rules over a tenant tree</a>.</span><span lang="ru"><a href="docs.html#hierarchy-rules">Правила доступа по дереву тенантов</a>.</span></td></tr>
-            <tr><td><code>--Storage</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#storage">Object storage</a>, S3-compatible.</span><span lang="ru"><a href="docs.html#storage">Объектное хранилище</a>, совместимое с S3.</span></td></tr>
-            <tr><td><code>--ClickHouse</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#clickhouse">ClickHouse</a>: connections, schema check, readiness.</span><span lang="ru"><a href="docs.html#clickhouse">ClickHouse</a>: подключения, проверка схемы, готовность.</span></td></tr>
-            <tr><td><code>--MongoDB</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#mongodb">MongoDB</a> beside the main database: the client, the service's database, readiness.</span><span lang="ru"><a href="docs.html#mongodb">MongoDB</a> рядом с основной базой: клиент, база сервиса, готовность.</span></td></tr>
-            <tr><td><code>--Notify</code></td><td><span lang="en">none</span><span lang="ru">нет</span></td><td><span lang="en">Channels of <a href="docs.html#notifications">notifications</a>: <code>email</code> - through SMTP or Graph API, with a sandbox outside Production; with <code>--Messaging</code> other services ask for it by a bus command.</span><span lang="ru">Каналы <a href="docs.html#notifications">уведомлений</a>: <code>email</code> - через SMTP или Graph API, с песочницей вне Production; с <code>--Messaging</code> другие сервисы просят письмо командой шины.</span></td></tr>
-            <tr><td><code>--TestFramework</code></td><td><code>nunit</code></td><td><span lang="en">Test framework of the service's tests: <code>nunit</code> or <code>xunit</code> (v3).</span><span lang="ru">Тестовый фреймворк тестов сервиса: <code>nunit</code> или <code>xunit</code> (v3).</span></td></tr>
-            <tr><td><code>--Audit</code></td><td><code>false</code></td><td><span lang="en"><a href="docs.html#audit">Audit journal</a> of entity changes, through the outbox; with <code>--Messaging outbox</code>.</span><span lang="ru"><a href="docs.html#audit">Журнал аудита</a> изменений сущностей, через outbox; с <code>--Messaging outbox</code>.</span></td></tr>
-            <tr><td><code>--ApiGateway</code></td><td><code>false</code></td><td><span lang="en">An <a href="docs.html#gateway">API gateway</a> on YARP in place of a service, into a solution already there (without <code>--Solution</code>).</span><span lang="ru"><a href="docs.html#gateway">API-шлюз</a> на YARP вместо сервиса, в уже существующее решение (без <code>--Solution</code>).</span></td></tr>
-            <tr><td><code>--Deploy</code></td><td><code>compose</code></td><td><span lang="en"><a href="docs.html#deployment">Deployment files</a>: <code>compose</code>, <code>k8s</code> or <code>none</code>.</span><span lang="ru"><a href="docs.html#deployment">Файлы развёртывания</a>: <code>compose</code>, <code>k8s</code> или <code>none</code>.</span></td></tr>
-            <tr><td><code>--Agent</code></td><td><code>claude</code></td><td><span lang="en"><a href="docs.html#agents">Rules and skills for an AI agent</a>: <code>claude</code>, <code>opencode</code> or <code>none</code>; with <code>--Solution</code>.</span><span lang="ru"><a href="docs.html#agents">Правила и скиллы для ИИ-агента</a>: <code>claude</code>, <code>opencode</code> или <code>none</code>; с <code>--Solution</code>.</span></td></tr>
-            <tr><td><code>--HttpPort</code></td><td><span lang="en">free port</span><span lang="ru">свободный порт</span></td><td><span lang="en">Port in <code>launchSettings.json</code> and on the host under compose.</span><span lang="ru">Порт в <code>launchSettings.json</code> и на хосте под compose.</span></td></tr>
+            <tr class="top"><td><code>-N</code>, <code>--NamespaceRoot</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>MyCompany</code></span></td><td><span lang="en">Organization name, the root namespace. May be dotted.</span><span lang="ru">Название организации, корневое пространство имён. Может быть с точками.</span></td></tr>
+            <tr class="top"><td><code>-P</code>, <code>--ProductName</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>Product</code></span></td><td><span lang="en">Product name. May be dotted.</span><span lang="ru">Название продукта. Может быть с точками.</span></td></tr>
+            <tr class="top"><td><code>-S</code>, <code>--ServiceNameOrCustom</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>Service</code></span></td><td><span lang="en">Service name. May be dotted.</span><span lang="ru">Название сервиса. Может быть с точками.</span></td></tr>
+            <tr class="top"><td><code>--Database</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>postgres</code></span></td><td><span lang="en"><a href="docs.html#persistence:sql-server">Database</a>: <code>postgres</code> or <code>mssql</code> (SQL Server).</span><span lang="ru"><a href="docs.html#persistence:sql-server">СУБД</a>: <code>postgres</code> или <code>mssql</code> (SQL Server).</span></td></tr>
+            <tr><td><code>--MongoDB</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#mongodb">MongoDB</a> beside the main database: the client, the service's database, readiness.</span><span lang="ru"><a href="docs.html#mongodb">MongoDB</a> рядом с основной базой: клиент, база сервиса, готовность.</span></td></tr>
+            <tr><td><code>--ClickHouse</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#clickhouse">ClickHouse</a>: connections, schema check, readiness.</span><span lang="ru"><a href="docs.html#clickhouse">ClickHouse</a>: подключения, проверка схемы, готовность.</span></td></tr>
+            <tr><td><code>--Storage</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#storage">Object storage</a>, S3-compatible.</span><span lang="ru"><a href="docs.html#storage">Объектное хранилище</a>, совместимое с S3.</span></td></tr>
+            <tr class="top"><td><code>--Messaging</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>none</code></span></td><td><span lang="en"><a href="docs.html#messaging">Message bus</a>: <code>outbox</code> or <code>direct</code>.</span><span lang="ru"><a href="docs.html#messaging">Шина сообщений</a>: <code>outbox</code> или <code>direct</code>.</span></td></tr>
+            <tr><td><code>--ApiGateway</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en">An <a href="docs.html#gateway">API gateway</a> on YARP in place of a service, into a solution already there (without <code>--Solution</code>).</span><span lang="ru"><a href="docs.html#gateway">API-шлюз</a> на YARP вместо сервиса, в уже существующее решение (без <code>--Solution</code>).</span></td></tr>
+            <tr><td><code>--Notify</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <span lang="en">none</span><span lang="ru">нет</span></span></td><td><span lang="en">Channels of <a href="docs.html#notifications">notifications</a>: <code>email</code> - through SMTP or Graph API, with a sandbox outside Production; with <code>--Messaging</code> other services ask for it by a bus command.</span><span lang="ru">Каналы <a href="docs.html#notifications">уведомлений</a>: <code>email</code> - через SMTP или Graph API, с песочницей вне Production; с <code>--Messaging</code> другие сервисы просят письмо командой шины.</span></td></tr>
+            <tr><td><code>--Audit</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#audit">Audit journal</a> of entity changes, through the outbox; with <code>--Messaging outbox</code>.</span><span lang="ru"><a href="docs.html#audit">Журнал аудита</a> изменений сущностей, через outbox; с <code>--Messaging outbox</code>.</span></td></tr>
+            <tr class="top"><td><code>--GitHubCiCd</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#ci">CI on GitHub Actions</a>: build, tests on real servers, coverage on demand, secret scan.</span><span lang="ru"><a href="docs.html#ci">CI на GitHub Actions</a>: сборка, тесты на настоящих серверах, покрытие по запросу, поиск секретов.</span></td></tr>
+            <tr><td><code>--Deploy</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>compose</code></span></td><td><span lang="en"><a href="docs.html#deployment">Deployment files</a>: <code>compose</code>, <code>k8s</code> or <code>none</code>.</span><span lang="ru"><a href="docs.html#deployment">Файлы развёртывания</a>: <code>compose</code>, <code>k8s</code> или <code>none</code>.</span></td></tr>
+            <tr><td><code>--DiffApi</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#api-diff">API contract diff</a> on pull requests.</span><span lang="ru"><a href="docs.html#api-diff">Дифф контракта API</a> в пулл-реквестах.</span></td></tr>
+            <tr><td><code>--Agent</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>claude</code></span></td><td><span lang="en"><a href="docs.html#agents">Rules and skills for an AI agent</a>: <code>claude</code>, <code>opencode</code> or <code>none</code>; with <code>--Solution</code>.</span><span lang="ru"><a href="docs.html#agents">Правила и скиллы для ИИ-агента</a>: <code>claude</code>, <code>opencode</code> или <code>none</code>; с <code>--Solution</code>.</span></td></tr>
+            <tr><td><code>--Vault</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#secrets:hashicorp-vault">Secrets and settings from HashiCorp Vault</a>.</span><span lang="ru"><a href="docs.html#secrets:hashicorp-vault">Секреты и настройки из HashiCorp Vault</a>.</span></td></tr>
+            <tr><td><code>-I</code>, <code>--Infisical</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#secrets">Secrets and settings from Infisical</a>.</span><span lang="ru"><a href="docs.html#secrets">Секреты и настройки из Infisical</a>.</span></td></tr>
+            <tr><td><code>-H</code>, <code>--Hangfire</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>true</code></span></td><td><span lang="en"><a href="docs.html#jobs">Background jobs</a> on Hangfire.</span><span lang="ru"><a href="docs.html#jobs">Фоновые задачи</a> на Hangfire.</span></td></tr>
+            <tr><td><code>--FeatureFlags</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#feature-flags">Feature flags</a>.</span><span lang="ru"><a href="docs.html#feature-flags">Фича-флаги</a>.</span></td></tr>
+            <tr><td><code>--HierarchyRules</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#hierarchy-rules">Access rules over a tenant tree</a>.</span><span lang="ru"><a href="docs.html#hierarchy-rules">Правила доступа по дереву тенантов</a>.</span></td></tr>
+            <tr><td><code>--TestFramework</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>nunit</code></span></td><td><span lang="en">Test framework of the service's tests: <code>nunit</code> or <code>xunit</code> (v3).</span><span lang="ru">Тестовый фреймворк тестов сервиса: <code>nunit</code> или <code>xunit</code> (v3).</span></td></tr>
+            <tr><td><code>--HttpPort</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <span lang="en">free port</span><span lang="ru">свободный порт</span></span></td><td><span lang="en">Port in <code>launchSettings.json</code> and on the host under compose.</span><span lang="ru">Порт в <code>launchSettings.json</code> и на хосте под compose.</span></td></tr>
+            <tr><td><code>--Solution</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en">Generates the solution: <code>Common</code>, <code>All.sln</code> and the root files, with the first service. Without it, only the service folder, into a solution already there.</span><span lang="ru">Генерирует решение: <code>Common</code>, <code>All.sln</code> и корневые файлы вместе с первым сервисом. Без него - только папка сервиса, в уже существующее решение.</span></td></tr>
+            <tr><td><code>-M</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>true</code></span></td><td><span class="tag tag--legacy">legacy</span> <span lang="en">Kept for the commands of earlier versions: <code>-M false</code> means <code>--Solution</code>. Removed in 3.0.</span><span lang="ru">Оставлен для команд прежних версий: <code>-M false</code> означает <code>--Solution</code>. Уходит в 3.0.</span></td></tr>
           </tbody>
         </table>
+      </div>
+      <div class="params__switch">
+        <input type="checkbox" id="params-all" class="params__all">
+        <label for="params-all" class="params__more"><span aria-hidden="true">▼</span><span class="params__show"><span lang="en">Show all parameters</span><span lang="ru">Показать все параметры</span></span><span class="params__hide"><span lang="en">Show fewer</span><span lang="ru">Свернуть</span></span></label>
       </div>
       <p lang="en">Details, dotted names and running locally: <a href="docs.html#generating">generating a solution</a>.</p>
       <p lang="ru">Подробности, имена с точками и локальный запуск: <a href="docs.html#generating">генерация решения</a>.</p>
@@ -270,6 +287,7 @@
 <script src="site/sections.js?v=103"></script>
 <script src="site/jump.js?v=138"></script>
 <script src="site/releases.js?v=142"></script>
+<script src="site/params.js?v=2"></script>
 <script>
 /* Transitions come back only once the panel and the sheet stand where storage says - two frames
    later, so the browser has laid the page out and painted it at rest. This lives in the page, next
