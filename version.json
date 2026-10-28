@@ -1,7 +1,7 @@
 {
-  "version": "2.8.0-rc",
+  "version": "2.8.0",
   "releaseNotes": {
-    "2.8.0-rc": {
+    "2.8.0": {
       "headline": "dotskit keeps a solution up with the template, keeping the team's changes.",
       "highlights": [
         "A solution keeps up with the template: dotskit adds services and flags to it and upgrades it to a new version, keeping the team's changes.",
