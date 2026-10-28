@@ -89,8 +89,9 @@ Merged into `master`, it makes [release.yml](.github/workflows/release.yml) tag 
 (`scripts/release-notes.sh <version>` prints the same text), the package
 `DotNetSolutionKit.Templates.csproj` packs, on nuget.org as `SawKing.DotNetSolutionKit`, and the tool
 `dotskit` of the same version, packed from `tool/DotsKit` as `SawKing.DotsKit.Tool`; both are attached to the
-release and published on nuget.org, the tool first, and in GitHub Packages. The nuget.org key
-(`NUGET_API_KEY`) must cover both package IDs. A version on nuget.org cannot be deleted, only unlisted. DotNetSolutionKit.Samples regenerates its release branches from the new tag within a day.
+release and published on nuget.org, the tool first, and in GitHub Packages. nuget.org takes them by
+Trusted Publishing, with no stored key: the policy of the profile `sawking.tech` names this repository and
+`release.yml` and covers `SawKing.*`. A version on nuget.org cannot be deleted, only unlisted. DotNetSolutionKit.Samples regenerates its release branches from the new tag within a day.
 
 A patch version is only for a fix that cannot wait for the next release. If `dev` can be released as it is -
 what is new in it is finished or behind a flag - the fix goes into `dev` and `dev` is released. If it
