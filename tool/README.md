@@ -5,7 +5,7 @@ the `dotnet new` template of .NET microservice solutions. It makes a solution wi
 to it and flags to its services, and upgrades it to a newer version of the template. Where the team and the
 template changed the same file, it merges the two the way git merges branches.
 
-**Documentation, in English and Russian: [dnsk.sawking.tech](https://dnsk.sawking.tech/docs.html#dotskit)**
+**Documentation, in English and Russian: [dotskit.sawking.tech](https://dotskit.sawking.tech/docs.html#dotskit)**
 
 ## Install
 

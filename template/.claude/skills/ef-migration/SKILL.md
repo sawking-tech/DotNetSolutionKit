@@ -45,7 +45,7 @@ dotnet ef migrations add <MigrationName> \
 ## Notes
 
 - The migrations run at startup, under a lock, so two replicas do not migrate one schema twice:
-  [persistence](https://dnsk.sawking.tech/docs.html#persistence).
+  [persistence](https://dotskit.sawking.tech/docs.html#persistence).
 - With `--Messaging outbox` the first migration also creates the outbox tables.
 - A table that needs SQL the model cannot express (a sequence for readable numbers, a partial index) is
   written in the migration with `migrationBuilder.Sql(...)`.
@@ -55,4 +55,4 @@ dotnet ef migrations add <MigrationName> \
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.

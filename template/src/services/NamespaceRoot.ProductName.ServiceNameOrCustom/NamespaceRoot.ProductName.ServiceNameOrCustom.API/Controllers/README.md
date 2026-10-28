@@ -129,9 +129,9 @@ public static class SampleRoutes
 8. Status codes match the operation: `201` with `Location` for creation, `404` when a resource is
    looked up by id, `422` for input a validator refuses, `400` for a request the code refuses with
    `BadRequestException`, such as sorting by a field the list does not offer
-   ([validation](https://dnsk.sawking.tech/docs.html#validation)).
+   ([validation](https://dotskit.sawking.tech/docs.html#validation)).
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
-The current version of the web layer: [dnsk.sawking.tech](https://dnsk.sawking.tech/docs.html#web-layer).
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+The current version of the web layer: [dotskit.sawking.tech](https://dotskit.sawking.tech/docs.html#web-layer).

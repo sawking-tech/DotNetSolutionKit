@@ -23,7 +23,7 @@ import sys
 
 LIST = '<div class="releases__list" tabindex="0" aria-label="Versions"></div>'
 LD_END = "</script>"
-SITE = "https://dnsk.sawking.tech/"
+SITE = "https://dotskit.sawking.tech/"
 
 
 def fail(message):

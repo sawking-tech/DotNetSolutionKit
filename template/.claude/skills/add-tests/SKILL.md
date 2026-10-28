@@ -11,8 +11,8 @@ Generate tests for a service method using the solution's test infrastructure (`C
 
 **Full service:** `/add-tests <ServiceName>` - a test base and one fixture per public method.
 
-The approach is [ADR-005](https://dnsk.sawking.tech/docs.html#adr-005); how to start:
-[testing](https://dnsk.sawking.tech/docs.html#testing).
+The approach is [ADR-005](https://dotskit.sawking.tech/docs.html#adr-005); how to start:
+[testing](https://dotskit.sawking.tech/docs.html#testing).
 
 ## What to do
 
@@ -204,4 +204,4 @@ paths.
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.

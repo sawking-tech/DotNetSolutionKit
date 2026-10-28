@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Part of DotNetSolutionKit (https://dnsk.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
+# Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
 #
 #
 # Blue-green deployment on one host with docker compose:

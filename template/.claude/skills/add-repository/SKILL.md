@@ -11,8 +11,8 @@ Scaffold or review a repository.
 
 Ask the user (in their language): is `<EntityName>` an aggregate root or a child entity?
 
-Why specifications: [ADR-002](https://dnsk.sawking.tech/docs.html#adr-002); the shared base:
-[persistence](https://dnsk.sawking.tech/docs.html#persistence).
+Why specifications: [ADR-002](https://dotskit.sawking.tech/docs.html#adr-002); the shared base:
+[persistence](https://dotskit.sawking.tech/docs.html#persistence).
 
 ---
 
@@ -78,7 +78,7 @@ Register it in the service's Infrastructure `DependencyInjection.cs`:
 - With no sort field, `DefaultSortField` orders the rows; paging without a total order returns arbitrary
   rows per page, so there always is one.
 - Page and page size are checked before the action (422 outside 1..1000 or the request's
-  `[PaginationLimit]`): [validation and pagination](https://dnsk.sawking.tech/docs.html#validation).
+  `[PaginationLimit]`): [validation and pagination](https://dotskit.sawking.tech/docs.html#validation).
 
 **Never** hand-roll `Skip`/`Take` or `OrderBy` in a repository; `ListPageAsync` does it once for all.
 
@@ -140,4 +140,4 @@ public interface IOrderLineQueries
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
