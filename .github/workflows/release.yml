@@ -111,6 +111,18 @@ jobs:
           echo "::error::no finished template.yml run on $SHA after $CHECKS_WAIT_MIN minutes"
           exit 1
 
+      # nuget.org by Trusted Publishing: its policy for this repository and release.yml (the file, also when
+      # promote.yml calls it) trades the job's OIDC token for a key that lives an hour, so no key is stored.
+      # The key is asked for after the checks and before the tag: a policy that does not match stops the
+      # release before anything is out. Should nuget.org refuse the token of the label's run
+      # (pull_request_target), promote.yml started by hand releases the same.
+      - name: A short-lived key for nuget.org
+        id: nuget
+        if: steps.what.outputs.publish == 'true'
+        uses: NuGet/login@v1
+        with:
+          user: ${{ env.NUGET_USER }}
+
       - name: Tag the version
         if: steps.what.outputs.publish == 'true'
         env:
@@ -161,19 +173,9 @@ jobs:
           [ "$PUBLISH" = true ] || exit 0
           gh release upload "$TAG" package/*.nupkg --clobber
 
-      # nuget.org by Trusted Publishing: its policy for this repository and release.yml (the file, also when
-      # promote.yml calls it) trades the job's OIDC token for a key that lives an hour, so no key is stored.
-      # The key is asked for right before the push. A version published there cannot be deleted, only
-      # unlisted, so it goes out only from what passed the template checks. The tool goes first: a push that
-      # fails stops the step before the template is out, and a run again publishes both, --skip-duplicate
-      # passing over what is there.
-      - name: A short-lived key for nuget.org
-        id: nuget
-        if: steps.what.outputs.publish == 'true'
-        uses: NuGet/login@v1
-        with:
-          user: ${{ env.NUGET_USER }}
-
+      # A version published on nuget.org cannot be deleted, only unlisted, so it goes out only from what passed
+      # the template checks. The tool goes first: a push that fails stops the step before the template is out,
+      # and a run again publishes both, --skip-duplicate passing over what is there.
       - name: Publish to nuget.org
         if: steps.what.outputs.publish == 'true'
         env:
