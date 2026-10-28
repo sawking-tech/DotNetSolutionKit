@@ -169,5 +169,5 @@ options.ApplyDomainEventInterceptors(sp);
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
-The current version of domain events: [dnsk.sawking.tech](https://dnsk.sawking.tech/docs.html#domain-events).
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+The current version of domain events: [dotskit.sawking.tech](https://dotskit.sawking.tech/docs.html#domain-events).

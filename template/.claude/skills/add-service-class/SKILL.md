@@ -105,7 +105,7 @@ public Task<PlaceOrderResponse> PlaceAsync(PlaceOrder request, CancellationToken
   `services.AddIdempotency<TDbContext>()` in Infrastructure; both come from
   `NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Idempotency`.
 
-Details: [persistence](https://dnsk.sawking.tech/docs.html#persistence). Notifications and confirmations
+Details: [persistence](https://dotskit.sawking.tech/docs.html#persistence). Notifications and confirmations
 that are side effects only, and reads, take no key.
 
 ## Async and cancellation - mandatory
@@ -249,4 +249,4 @@ value a validator already refused). Validate at the boundaries: user input, exte
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.

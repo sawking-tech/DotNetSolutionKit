@@ -4,8 +4,8 @@
 
 Made by Vladimir Savkin at [sawking.tech](https://sawking.tech/).
 
-Site: [dnsk.sawking.tech](https://dnsk.sawking.tech/). Documentation, in English and Russian:
-[dnsk.sawking.tech/docs.html](https://dnsk.sawking.tech/docs.html).
+Site: [dotskit.sawking.tech](https://dotskit.sawking.tech/). Documentation, in English and Russian:
+[dotskit.sawking.tech/docs.html](https://dotskit.sawking.tech/docs.html).
 
 > **Version 2 breaks version 1. Do not apply this template with `--force` over a solution generated from
 > v1:** namespaces, project references, package management, versioning and the shape of error responses
@@ -52,7 +52,7 @@ dotskit upgrade                                   # in the solution: bring it to
 What the generated solutions look like:
 [DotNetSolutionKit.Samples](https://github.com/sawking-tech/DotNetSolutionKit.Samples), a branch each for a
 single service, a gateway with services and the full kit, regenerated from every release with their CI
-running, and `full-dev`, generated from `dev`, where the next release is built. The [samples page](https://dnsk.sawking.tech/samples.html)
+running, and `full-dev`, generated from `dev`, where the next release is built. The [samples page](https://dotskit.sawking.tech/samples.html)
 shows their files and how their CI ran.
 
 | Parameter | Default | What it does |
@@ -88,7 +88,7 @@ Details, dotted names and running locally:
 
 Everything else is in [docs](docs/README.md): the architecture, each feature, operations, the decisions
 behind the parts that depart from common practice, and the roadmap. The
-[site](https://dnsk.sawking.tech/docs.html) shows the same documents with a menu and rendered diagrams, in
+[site](https://dotskit.sawking.tech/docs.html) shows the same documents with a menu and rendered diagrams, in
 English and Russian.
 
 What each version brings: [version.json](version.json) and the

@@ -17,7 +17,7 @@
     <Description>A configurable dotnet new template and lifecycle toolkit for standardized .NET 8 solutions: layered microservices on PostgreSQL or SQL Server with CI, deployment and tests. Secrets from Infisical or HashiCorp Vault, RabbitMQ with a transactional outbox, Hangfire jobs, ClickHouse, MongoDB, email, object storage and a YARP gateway come by flag. Its tool dotskit (SawKing.DotsKit.Tool) adds services and flags to a solution and upgrades it to a new version, keeping the team's code.</Description>
     <PackageTags>dotnet-new;templates;dotskit;template;microservices;solution;clean-architecture;ddd;net8;aspnetcore;postgresql;sqlserver;efcore;vault;infisical;rabbitmq;masstransit;outbox;hangfire;clickhouse;mongodb;email;smtp;yarp</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://dnsk.sawking.tech/</PackageProjectUrl>
+    <PackageProjectUrl>https://dotskit.sawking.tech/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/sawking-tech/DotNetSolutionKit</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <!-- the package's own README and icon (nuget/): nuget.org does not resolve the repository README's

@@ -193,5 +193,5 @@ The values shown for `Host`, the credentials and the retries are the defaults.
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
-The current version of the message bus: [dnsk.sawking.tech](https://dnsk.sawking.tech/docs.html#messaging).
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+The current version of the message bus: [dotskit.sawking.tech](https://dotskit.sawking.tech/docs.html#messaging).

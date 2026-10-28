@@ -15,10 +15,10 @@ Ask the user (in their language):
 2. Which operations?
 3. The permission group name (e.g. `InvoicePermissions`)?
 4. Is the service behind the API gateway? A path under `/api/{version}/<resource>` is reached through the
-   gateway once the gateway has a route for it: [API gateway](https://dnsk.sawking.tech/docs.html#gateway).
+   gateway once the gateway has a route for it: [API gateway](https://dotskit.sawking.tech/docs.html#gateway).
 
 Then scaffold the files below. The service's own guide is `Controllers/README.md` in its API project; the
-web pipeline: [web layer](https://dnsk.sawking.tech/docs.html#web-layer).
+web pipeline: [web layer](https://dotskit.sawking.tech/docs.html#web-layer).
 
 ---
 
@@ -49,7 +49,7 @@ Not idempotent and not keyed: notifications, side-effect-only confirmations, rea
 
 A validator is a FluentValidation class in the API assembly, found by scanning; an invalid request is
 refused before the action with 422 and the fields named:
-[validation and pagination](https://dnsk.sawking.tech/docs.html#validation).
+[validation and pagination](https://dotskit.sawking.tech/docs.html#validation).
 
 ```csharp
 public sealed class CreateInvoiceRequestValidator : AbstractValidator<CreateInvoiceRequest>
@@ -120,7 +120,7 @@ public class InvoicesController(IInvoiceService service) : ControllerBase
 - A create returns `ActionResult<T>` through `CreatedAtAction`: 201 with `Location`. It is the one place a
   controller awaits.
 - No `try`/`catch`: throw the exceptions from `Common/Exceptions`, the shared handler maps them
-  ([errors](https://dnsk.sawking.tech/docs.html#errors)).
+  ([errors](https://dotskit.sawking.tech/docs.html#errors)).
 - `[RequiredPermissions(...)]` on every action; an action without it is not checked.
 - `HttpContext.RequestAborted` is the cancellation token, always passed on.
 - An XML `<summary>` on the class and every action and parameter: they become the Swagger descriptions.
@@ -178,7 +178,7 @@ Swagger builds one document per version from the version in the path.
 **A versioned route is public.** A path under `/api/v1/` is meant for clients; naming it `internal`
 (`/api/v1/internal/invoices`) does not make it internal, and through the gateway anyone with a token
 reaches it. An endpoint meant only for other services stays out of the gateway's routes and is called with
-the internal key ([calling another service](https://dnsk.sawking.tech/docs.html#auth)).
+the internal key ([calling another service](https://dotskit.sawking.tech/docs.html#auth)).
 
 ---
 
@@ -225,4 +225,4 @@ public sealed record InvoiceFilter : IPaginationRequest, ISortableRequest, ISear
 
 ---
 
-Part of [DotNetSolutionKit](https://dnsk.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
+Part of [DotNetSolutionKit](https://dotskit.sawking.tech/), MIT License, Copyright (c) 2025 Vladimir Savkin.
