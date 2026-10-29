@@ -53,7 +53,9 @@ The template's parameters are passed as they are, in short or long form, in any 
    and after it.
 3. Compares the base, the new template output and the solution file by file, and shows the plan: every
    file with what happens to it and why, and the projects added to `All.sln` or removed from it.
-4. Asks before writing. `--yes` writes without asking.
+4. Asks before writing. `--yes` writes without asking. A tree that was clean at the start is written only while it
+   is clean at the same commit: a file saved or a commit made while the plan is built or waits for a yes stops the
+   write, and nothing is written.
 5. Writes the files. Each new content goes beside its file first, then the files are swapped in with the
    originals kept aside. An error or Ctrl+C before the write is done puts the originals back; a file the disk
    refuses to put back is named in the error, with its original beside it as `*.dotskit-old`, and a new file it

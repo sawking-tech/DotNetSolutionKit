@@ -34,9 +34,10 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
         }
 
         var current = root is null ? null : await LoadCheckedAsync(root, options, ct);
+        var startHead = root is null || options.AllowDirty ? null : await git.CleanHeadAsync(root, ct);
         var next = Next(current, command);
         var plan = await planner.BuildAsync(root ?? folder, current, next, new Merging.MergeMode(options.ByGit, options.Force), ct);
-        return await execution.RunAsync(plan, options, ct);
+        return await execution.RunAsync(plan, options, startHead, ct);
     }
 
     /// <summary>
