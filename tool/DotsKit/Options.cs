@@ -20,6 +20,7 @@ internal sealed class Options
           --allow-dirty             run on a working tree with uncommitted changes
           --template-version 2.x.y  init: the version a solution was made by, where it does not say
           --to 2.x.y                upgrade: the release to go to, not newer than the tool
+          --merge files             merge by the tool and write the files, instead of a git merge of dotskit/template
         """;
 
     private const string YesOption = "--yes";
@@ -28,6 +29,7 @@ internal sealed class Options
     private const string AllowDirtyOption = "--allow-dirty";
     private const string TemplateVersionOption = "--template-version";
     private const string ToOption = "--to";
+    private const string MergeOption = "--merge";
 
     public bool Yes { get; private init; }
     public bool Force { get; private init; }
@@ -35,6 +37,9 @@ internal sealed class Options
     public bool AllowDirty { get; private init; }
     public string? TemplateVersion { get; private init; }
     public string? To { get; private init; }
+
+    /// <summary>A solution there already is merged by git (dotskit/template), or with --merge files by the tool itself.</summary>
+    public bool ByGit { get; private init; } = true;
     public List<string> TemplateArgs { get; private init; } = [];
 
     /// <summary>The options of <paramref name="command"/>, refusing one that belongs to another command.</summary>
@@ -45,6 +50,8 @@ internal sealed class Options
             throw new ArgumentException($"{TemplateVersionOption} is an option of dotskit init.");
         if (options.To is not null && command != "upgrade")
             throw new ArgumentException($"{ToOption} is an option of dotskit upgrade.");
+        if (command == "init" && args.Any(a => Is(a, MergeOption)))
+            throw new ArgumentException($"{MergeOption} is an option of dotskit new and dotskit upgrade: init merges nothing.");
         return options;
     }
 
@@ -52,7 +59,10 @@ internal sealed class Options
     {
         string[] flags = [YesOption, ForceOption, NoBuildOption, AllowDirtyOption];
         var (templateVersion, afterVersion) = Valued(args, TemplateVersionOption);
-        var (to, rest) = Valued(afterVersion, ToOption);
+        var (to, afterTo) = Valued(afterVersion, ToOption);
+        var (merge, rest) = Valued(afterTo, MergeOption);
+        if (merge is not null and not (Merging.MergeMode.Git or Merging.MergeMode.Files))
+            throw new ArgumentException($"{MergeOption} {merge}: name {Merging.MergeMode.Git} or {Merging.MergeMode.Files}.");
         return new Options
         {
             Yes = rest.Any(a => Is(a, YesOption)),
@@ -61,6 +71,7 @@ internal sealed class Options
             AllowDirty = rest.Any(a => Is(a, AllowDirtyOption)),
             TemplateVersion = templateVersion,
             To = to,
+            ByGit = merge != Merging.MergeMode.Files,
             TemplateArgs = [.. rest.Where(a => !flags.Any(f => Is(a, f)))],
         };
     }
@@ -72,7 +83,7 @@ internal sealed class Options
         if (at < 0)
             return (null, args);
         if (at + 1 >= args.Count)
-            throw new ArgumentException($"{option} needs a version: {option} 2.7.0.");
+            throw new ArgumentException($"{option} needs a value: {option} {(option == MergeOption ? Merging.MergeMode.Files : "2.7.0")}.");
         return (args[at + 1], [.. args.Take(at), .. args.Skip(at + 2)]);
     }
 

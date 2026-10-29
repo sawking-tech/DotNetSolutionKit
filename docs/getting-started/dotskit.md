@@ -71,6 +71,33 @@ What happens to a file:
 `All.sln` is changed by `dotnet sln`, project by project, and never merged as text: `dotnet sln add` gives
 a project a new GUID each time.
 
+### Merged by git
+
+In a solution there already, `dotskit new` and `dotskit upgrade` merge by git, the same three-way merge:
+
+- the branch `dotskit/template` holds what the template gave the solution, a commit per version. git knows the
+  base when the branch's last commit has the base's files and the working branch has that commit in its history;
+  otherwise, as the first time or on another branch, the base is committed there and merged into the working
+  branch with `git merge -s ours`: the solution's files stay as they are, and git knows the base from then on.
+  `git merge --abort` leaves this commit, it changes no file;
+- the command commits the template's new output there and runs `git merge --no-ff --no-commit dotskit/template`.
+  git takes the template's changes and the team's, follows the files the template moved, and marks the lines
+  both changed for the IDE or `git mergetool`. The merge stays uncommitted: look at it, commit it, or undo it
+  with `git merge --abort`;
+- the plan shows the template's own changes: a file it adds, changes or removes;
+- what the solution's git ignores, by any of its `.gitignore` files, a local secret among them, and `All.sln`
+  are never in the branch; the manifest and `All.sln` the command writes join the merge, so `git merge --abort`
+  puts them back too;
+- `--force` merges with `-X theirs`: a line both changed takes the template's; a file one side removed and the
+  other changed stays a conflict.
+
+What git then shows: `git log dotskit/template` - what each version of the template gave the solution;
+`git diff dotskit/template HEAD`, once the merge is committed - the team's own changes over the template of its
+version, and nothing else.
+
+`--merge files` merges by the tool itself, as in the table above, and writes the files with no branch and no
+merge commit. `--allow-dirty` takes `--merge files`: a git merge needs a clean tree.
+
 ## Manifest
 
 `.dotskit/manifest.json` records what the solution was generated from: the template's version, the
@@ -217,6 +244,7 @@ template changed - is the team's to decide, and its tests show it.
 | `--allow-dirty` | runs on a working tree with uncommitted changes |
 | `--template-version 2.x.y` | `init`: the version the solution was made by, where it does not say it |
 | `--to 2.x.y` | `upgrade`: the release to bring the solution to, not newer than the tool |
+| `--merge files` | `new` and `upgrade`: merge by the tool and write the files, instead of a git merge of `dotskit/template` |
 
 ## Exit codes
 

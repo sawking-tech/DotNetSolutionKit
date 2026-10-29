@@ -34,8 +34,10 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
             throw new InvalidOperationException(whyNotTo);
         if (!options.AllowDirty && !await git.IsCleanAsync(root, ct))
             throw new InvalidOperationException("The git working tree has uncommitted changes: commit or stash them, so what dotskit writes can be seen and undone (--allow-dirty to go on).");
+        if (options.AllowDirty && options.ByGit)
+            throw new ArgumentException("--allow-dirty needs --merge files: a git merge runs on a clean tree.");
         terminal.Info($"Upgrading the solution from the template {current.Template} to {target}.");
-        var plan = await planner.BuildAsync(root, current, current.WithTemplate(target), options.Force, ct);
+        var plan = await planner.BuildAsync(root, current, current.WithTemplate(target), new Merging.MergeMode(options.ByGit, options.Force), ct);
         return await execution.RunAsync(plan, options, ct);
     }
 }
