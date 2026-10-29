@@ -44,4 +44,8 @@ It writes all files or none, then builds the solution. A conflict is marked
 
 What a solution was made from is kept in `.dotskit/manifest.json`: commit it with the solution.
 
+What a solution may have to change by hand, release by release, is in
+[upgrading.md](https://github.com/sawking-tech/DotNetSolutionKit/blob/master/docs/getting-started/upgrading.md);
+`dotskit upgrade` names its sections for the versions it crosses.
+
 The template works without the tool; this package is the way to keep a solution up with it.
