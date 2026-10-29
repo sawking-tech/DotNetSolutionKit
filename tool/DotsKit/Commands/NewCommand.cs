@@ -12,7 +12,7 @@ namespace DotsKit.Commands;
 /// </summary>
 /// <param name="planner">Builds the plan: the trees of the template, their merge with the solution and the report.</param>
 /// <param name="execution">Shows the plan, asks, writes it and builds.</param>
-/// <param name="git">Tells whether the solution's working tree is clean before anything is written.</param>
+/// <param name="git">Tells whether the solution's working tree is clean, and whether it is at the root of its repository, before anything is written.</param>
 /// <param name="toolVersion">The version of the tool, the template's version a new service is generated with.</param>
 /// <param name="onSources">The tool runs against the template's sources: it generates with them, as version "source".</param>
 internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit git, string toolVersion, bool onSources)
@@ -64,15 +64,7 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
                 : $"The solution is of the template {manifest.Template}, dotskit is {version}: bring the solution to {version} first, dotskit upgrade.");
         }
 
-        if (!options.AllowDirty && !await git.IsCleanAsync(root, ct))
-        {
-            throw new InvalidOperationException("The git working tree has uncommitted changes: commit or stash them, so what dotskit writes can be seen and undone (--allow-dirty to go on).");
-        }
-
-        if (options.AllowDirty && options.ByGit)
-        {
-            throw new ArgumentException("--allow-dirty needs --merge files: a git merge runs on a clean tree.");
-        }
+        await GitPreconditions.CheckAsync(git, root, options, ct);
 
         return manifest;
     }
