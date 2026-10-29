@@ -48,6 +48,31 @@ internal sealed class ThreeWayMergeTests
     }
 
     [Test]
+    public async Task Should_MergeTheTeamsLineIntoTheTemplatesStyle_When_TheTemplateChangedOnlyItsStyle()
+    {
+        var trees = new Trees();
+        trees.Put(trees.Base, "a  \nb", bom: true).Put(trees.Solution, "a  \nb\nteam\n", bom: true).Put(trees.New, "a\nb\n");
+
+        var change = await trees.MergeAsync();
+
+        change.ShouldNotBeNull().Kind.ShouldBe(ChangeKind.Merge);
+        change.Content.ShouldBe(new FileText("a\nb\nteam\n", false));
+    }
+
+    [Test]
+    public async Task Should_MarkAConflict_InTheTemplatesStyle_When_BothChangedOneLine()
+    {
+        var trees = new Trees();
+        trees.Put(trees.Base, "a\nb", bom: true).Put(trees.Solution, "a\nteam  \n", bom: true).Put(trees.New, "a\ntemplate\n");
+
+        var change = await trees.MergeAsync();
+
+        change.ShouldNotBeNull().Kind.ShouldBe(ChangeKind.Conflict);
+        change.Content.ShouldNotBeNull().Bom.ShouldBeFalse();
+        change.Content.Text.ShouldContain("team\n=======");
+    }
+
+    [Test]
     public async Task AMergedText_KeepsItsCharactersBeyondAscii_WhateverTheConsolesCodePage()
     {
         // A dash and Cyrillic: read by the console's code page they came back as "тАФ".
