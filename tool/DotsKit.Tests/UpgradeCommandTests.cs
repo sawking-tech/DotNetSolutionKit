@@ -133,6 +133,17 @@ internal sealed class UpgradeCommandTests
     }
 
     [Test]
+    public async Task ForceOnAnUncommittedTree_IsRefused_AsItWouldLoseTheTeamsLines()
+    {
+        var fakes = new Fakes { Clean = false };
+
+        (await Should.ThrowAsync<ArgumentException>(() =>
+            fakes.Command().RunAsync(Options.Parse(["--yes", "--allow-dirty", "--merge", "files", "--force"]), Solution("2.7.0"), CancellationToken.None)))
+            .Message.ShouldContain("--force needs a clean tree");
+        fakes.Next.ShouldBeNull();
+    }
+
+    [Test]
     public async Task AnUncleanTree_IsRefused_BeforeAnythingIsPlanned()
     {
         var fakes = new Fakes { Clean = false };

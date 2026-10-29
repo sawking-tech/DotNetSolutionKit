@@ -21,7 +21,13 @@ internal static class GitPreconditions
 
         if (!options.AllowDirty && !await git.IsCleanAsync(root, ct))
         {
-            throw new InvalidOperationException("The git working tree has uncommitted changes: commit or stash them, so what dotskit writes can be seen and undone (--allow-dirty to go on).");
+            throw new InvalidOperationException("The git working tree has uncommitted changes: commit or stash them, so what dotskit writes can be seen and undone"
+                + (options.Force ? "; --force needs them committed." : " (--allow-dirty to go on)."));
+        }
+
+        if (options.AllowDirty && options.Force)
+        {
+            throw new ArgumentException("--force needs a clean tree: the team's lines it replaces stay in git history only when they are committed.");
         }
 
         if (options.AllowDirty && options.ByGit)
