@@ -42,9 +42,11 @@ internal sealed class GitTemplateMerge(IProcessRunner runner) : IGitMerge
     public async Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
     {
         await RefuseAMergeInProgressAsync(root, ct);
-        var baseCommit = await KnownBaseAsync(root, @base, ct);
+        var tip = await TipAsync(root, ct);
+        var baseCommit = await KnownBaseAsync(root, tip, @base, ct);
         var nextCommit = await CommitAsync(root, next.Tree, baseCommit, $"dotskit: the template {next.Version}", ct);
-        await runner.RunCheckedAsync("git", ["update-ref", BranchRef, nextCommit], root, ct);
+        // Moved only from the tip read above: a commit another run put there in between is not lost (empty: no branch yet).
+        await runner.RunCheckedAsync("git", ["update-ref", BranchRef, nextCommit, tip ?? ""], root, ct);
         var merge = await runner.RunAsync("git", ["merge", "--no-ff", "--no-commit", .. preferTemplate ? new[] { "-X", "theirs" } : [], Branch], root, ct);
         var conflicts = await PathsAsync(root, ["diff", "--name-only", "-z", "--diff-filter=U"], null, ct);
         if (merge.Code != 0 && conflicts.Count == 0)
@@ -67,10 +69,9 @@ internal sealed class GitTemplateMerge(IProcessRunner runner) : IGitMerge
     /// The commit git merges over: the branch's tip when it is the base and the working branch has it; otherwise the
     /// base, committed on the tip (or as the first commit) and merged keeping the solution's files.
     /// </summary>
-    private async Task<string> KnownBaseAsync(string root, TemplateCommit @base, CancellationToken ct)
+    private async Task<string> KnownBaseAsync(string root, string? tip, TemplateCommit @base, CancellationToken ct)
     {
         var tree = await TreeAsync(root, @base.Tree, ct);
-        var tip = await TipAsync(root, ct);
         if (tip is not null && await TreeOfAsync(root, tip, ct) == tree && await IsInHistoryAsync(root, tip, ct))
             return tip;
         var commit = await CommitTreeAsync(root, tree, tip, $"dotskit: the template {@base.Version}, the base of the solution", ct);
