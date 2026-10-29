@@ -47,10 +47,11 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
         }
 
         await GitPreconditions.CheckAsync(git, root, options, ct);
+        var startHead = options.AllowDirty ? null : await git.CleanHeadAsync(root, ct);
 
         terminal.Info($"Upgrading the solution from the template {current.Template} to {target}.");
         terminal.Info(UpgradeGuide.Of(current.Template, target));
         var plan = await planner.BuildAsync(root, current, current.WithTemplate(target), new Merging.MergeMode(options.ByGit, options.Force), ct);
-        return await execution.RunAsync(plan, options, ct);
+        return await execution.RunAsync(plan, options, startHead, ct);
     }
 }

@@ -16,13 +16,16 @@ internal sealed class UpgradeCommandTests
     {
         public bool Clean { get; init; } = true;
 
+        /// <summary>The commit git names for a clean tree, call by call; null for a tree not clean.</summary>
+        public Queue<string?> Heads { get; init; } = new();
+
         public string Prefix { get; init; } = "";
 
         public Manifest? Next { get; private set; }
         public List<string> Lines { get; } = [];
 
         public UpgradeCommand Command() =>
-            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(), new Builder(), new ReferenceRepair(new RepairWriter(new ProcessRunner()), new Builder()), new Terminal(this)),
+            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(), new Builder(), new ReferenceRepair(new RepairWriter(new ProcessRunner()), new Builder()), new Terminal(this), new Git(this)),
                 new Git(this), new Terminal(this), ToolVersion, onSources: false);
 
         private sealed class Planner(Fakes fakes) : IPlanner
@@ -42,6 +45,9 @@ internal sealed class UpgradeCommandTests
         private sealed class Git(Fakes fakes) : IGit
         {
             public Task<bool> IsCleanAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Clean);
+
+            public Task<string?> CleanHeadAsync(string root, CancellationToken ct) =>
+                Task.FromResult(fakes.Heads.Count > 0 ? fakes.Heads.Dequeue() : fakes.Clean ? "head" : null);
 
             public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
         }
@@ -141,6 +147,18 @@ internal sealed class UpgradeCommandTests
             fakes.Command().RunAsync(Options.Parse(["--yes", "--allow-dirty", "--merge", "files", "--force"]), Solution("2.7.0"), CancellationToken.None)))
             .Message.ShouldContain("--force needs a clean tree");
         fakes.Next.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ATreeChangedOrCommittedAfterTheStart_IsNotWrittenOver()
+    {
+        // Clean at the start; before the write, a file is saved, or a commit made over a clean tree.
+        foreach (var later in new string?[] { null, "a commit made meanwhile" })
+        {
+            var fakes = new Fakes { Heads = new(["head", later]) };
+
+            (await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(Solution("2.7.0")))).Message.ShouldContain("changed after the command started");
+        }
     }
 
     [Test]
