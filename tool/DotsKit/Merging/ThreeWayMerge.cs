@@ -95,8 +95,11 @@ internal sealed class ThreeWayMerge(ITextMerger merger)
         }
 
         var content = solution with { Text = LineEndings.Apply(result.Text, LineEndings.Of(solution.Text)) };
-        return result.Conflicts == 0
-            ? new(path, ChangeKind.Merge, content, merge.Reason)
-            : new(path, ChangeKind.Conflict, content, merge.Reason + $"; {result.Conflicts} conflict(s) marked");
+        return result switch
+        {
+            { Conflicts: > 0 } => new(path, ChangeKind.Conflict, content, merge.Reason + $"; {result.Conflicts} conflict(s) marked"),
+            { Taken: > 0 } => new(path, ChangeKind.Merge, content, merge.Reason + $"; {result.Taken} conflict(s) take the template's lines, by --force"),
+            _ => new(path, ChangeKind.Merge, content, merge.Reason),
+        };
     }
 }
