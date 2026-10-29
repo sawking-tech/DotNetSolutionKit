@@ -15,7 +15,7 @@ internal interface IPlanner
     Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, MergeMode mode, CancellationToken ct);
 }
 
-internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionProjects projects, IRenames renames) : IPlanner
+internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionProjects projects, IRenames renames, IIgnoredFiles ignored) : IPlanner
 {
     /// <param name="root">The solution's root, or the folder a new solution is made in.</param>
     /// <param name="current">The solution's manifest; null when there is no solution yet, and the base is empty.</param>
@@ -43,11 +43,16 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
             byGit ? (new TemplateCommit(baseDir!, current!.Template), new TemplateCommit(nextDir, next.Template)) : null, mode.PreferTemplate);
     }
 
-    /// <summary>The tool's own merge: the files the template moved are followed, then each file is decided and merged.</summary>
+    /// <summary>
+    /// The tool's own merge: the files the template moved are followed, then each file is decided and merged. A file
+    /// of the solution its git ignores is left as it is, as the merge by git leaves it.
+    /// </summary>
     private async Task<List<Change>> MergeAsync(string root, string? baseDir, string nextDir, MergeMode mode, CancellationToken ct)
     {
         var moved = baseDir is null ? null : await renames.FindAsync(baseDir, nextDir, ct);
-        return await merge.ComputeAsync(root, baseDir, nextDir, mode.PreferTemplate, moved, ct);
+        var changes = await merge.ComputeAsync(root, baseDir, nextDir, mode.PreferTemplate, moved, ct);
+        var leftAlone = await ignored.InAsync(root, ct);
+        return [.. changes.Where(c => !leftAlone.Contains(c.Path))];
     }
 
     private async Task<string?> BaseAsync(Manifest current, CancellationToken ct) => await staging.BuildAsync(current, withSolutionFile: false, ct);

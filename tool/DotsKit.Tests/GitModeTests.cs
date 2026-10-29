@@ -1,3 +1,4 @@
+using DotsKit.Io;
 using DotsKit.Merging;
 
 namespace DotsKit.Tests;
@@ -28,5 +29,23 @@ internal sealed class GitModeTests
         Options.Parse("new", ["-S", "Billing", "--merge", "git"]).ByGit.ShouldBeTrue();
         Should.Throw<ArgumentException>(() => Options.Parse("upgrade", ["--merge", "svn"])).Message.ShouldContain("name git or files");
         Should.Throw<ArgumentException>(() => Options.Parse("init", ["--merge", "files"])).Message.ShouldContain("init merges nothing");
+    }
+
+    [Test]
+    public async Task TheFilesTheSolutionsGitIgnores_AreNamed_AndNoneOutsideGit()
+    {
+        var runner = new ProcessRunner();
+        var root = Folders.NewTemp("ignored");
+        Directory.CreateDirectory(Path.Combine(root, "src", "Api"));
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, ".gitignore"), "**/appsettings.Secrets.json\n");
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "Api", "appsettings.Secrets.json"), "{}\n");
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "Api", "appsettings.json"), "{}\n");
+        var outsideGit = await new GitIgnoredFiles(runner).InAsync(root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["init", "-q"], root, CancellationToken.None);
+
+        var ignored = await new GitIgnoredFiles(runner).InAsync(root, CancellationToken.None);
+
+        ignored.ShouldBe(["src/Api/appsettings.Secrets.json"]);
+        outsideGit.ShouldBeEmpty();
     }
 }

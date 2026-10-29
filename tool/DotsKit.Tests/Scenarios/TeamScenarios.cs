@@ -99,6 +99,20 @@ internal sealed class TeamScenarios
     }
 
     [Test]
+    public async Task ALocalSecretTheTemplateChanges_StaysAsTheTeamWroteIt_InTheMergeByFiles()
+    {
+        var solution = await Sandbox.SolutionAsync();
+        var secrets = $"src/services/{Orders}/{Orders}.API/appsettings.Secrets.json";
+        var mine = solution.Read(secrets).Replace("\"DefaultConnection\": \"\"", "\"DefaultConnection\": \"Host=mine\"", StringComparison.Ordinal);
+        solution.Write(secrets, mine);
+
+        var changed = await solution.DotskitAsync("new", "-S", "Orders", "--Hangfire", "false", "--merge", "files", "--yes", "--no-build");
+
+        changed.Code.ShouldBe((int)ExitCode.Done, changed.Output + changed.Error);
+        solution.Read(secrets).ShouldBe(mine);
+    }
+
+    [Test]
     public async Task ServiceNamedAgainInAnotherCase_IsNotASecondService_When_TheTemplateAloneIsUsed()
     {
         var solution = await Sandbox.SolutionAsync();
