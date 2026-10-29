@@ -72,6 +72,7 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     private const string IndexVariable = "GIT_INDEX_FILE";
     private const string Driver = "dotskit";
     private const string GlobalAttributes = "git/attributes";
+    private const string IndexLock = "index.lock";
 
     /// <summary>--force: a line both sides changed takes the template's.</summary>
     private static readonly string[] TheirsOption = ["-X", "theirs"];
@@ -81,17 +82,14 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     /// <summary>The working branch's commit and the branch's tip before this run, put back by <see cref="AbortAsync"/>.</summary>
     private Before? _before;
 
-    /// <summary>What this run staged beside the merge, taken out of the index again before an abort.</summary>
-    private readonly HashSet<string> _staged = new(StringComparer.Ordinal);
-
     public IReadOnlySet<string> LeftOut { get; private set; } = new HashSet<string>();
 
     public async Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
     {
         await RefuseAMergeInProgressAsync(root, ct);
+        await RefuseAChangedTreeAsync(root, ct);
         _before = new((await runner.RunCheckedAsync("git", ["rev-parse", "HEAD"], root, ct)).Trim(), await TipAsync(root, ct));
         LeftOut = new HashSet<string>();
-        _staged.Clear();
         try
         {
             return await MergeOverAsync(root, _before.Tip, @base, next, preferTemplate, ct);
@@ -120,38 +118,37 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         return conflicts;
     }
 
-    public async Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct)
-    {
-        await _git.StageAsync(root, paths, ct);
-        _staged.UnionWith(paths);
-    }
+    public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) => _git.StageAsync(root, paths, ct);
 
     /// <summary>
-    /// The merge, then the commit that adopted the base and the move of the branch: the working branch and
-    /// <see cref="Branch"/> are as they were before the run. What this run staged is brought back to HEAD first, in
-    /// the index and on disk: a failed step may have put those files back on disk already, and git refuses to abort
-    /// over an index that differs from them. The adopting commit kept the solution's tree, so a soft reset changes no
-    /// file. What git refuses to put back is named with the commands that do it by hand.
+    /// The working branch and <see cref="Branch"/> back where they were before the run, in one step each. The tree was
+    /// clean before the run - the merge by git refuses another - so a hard reset to that commit takes back the merge,
+    /// the commit that adopted the base and every tracked file a later step changed or staged, and touches no file
+    /// git does not track. What git refuses is named with the commands that do it by hand.
     /// </summary>
     public async Task AbortAsync(string root, CancellationToken ct)
     {
-        var restored = await _git.RestoreToHeadAsync(root, _staged, ct);
-        await runner.RunAsync("git", ["merge", "--abort"], root, ct);
         if (_before is not { } before)
         {
             return;
         }
 
         string[] branch = before.Tip is null ? ["update-ref", "-d", BranchRef] : ["update-ref", BranchRef, before.Tip];
-        var reset = await runner.RunAsync("git", ["reset", "-q", "--soft", before.Head], root, ct);
+        var reset = await runner.RunAsync("git", ["reset", "-q", "--hard", before.Head], root, ct);
         var moved = await runner.RunAsync("git", branch, root, ct);
-        var failed = new[] { restored, reset, moved }.FirstOrDefault(r => r.Code != 0);
-        if (failed is not null)
+        if (new[] { reset, moved }.FirstOrDefault(r => r.Code != 0) is { } failed)
         {
-            // The tree was clean before the run, so all of it goes back to HEAD.
             throw new InvalidOperationException(
-                $"git could not put back the files, the commit and the branch of this run ({FirstLine(failed)}): run git restore --source=HEAD --staged --worktree -- ., git merge --abort, git reset --soft {before.Head} and git {string.Join(' ', branch)}.");
+                $"git could not put back the files, the commit and the branch of this run ({FirstLine(failed)}){await LockHintAsync(root, ct)}: run git reset --hard {before.Head} and git {string.Join(' ', branch)}.");
         }
+    }
+
+    /// <summary>A git the run stopped leaves its index locked, and every git command after it fails until the lock is removed.</summary>
+    private async Task<string> LockHintAsync(string root, CancellationToken ct)
+    {
+        var path = await runner.RunAsync("git", ["rev-parse", "--git-path", IndexLock], root, ct);
+        var lockFile = Path.Combine(root, path.Output.Trim());
+        return path.Code == 0 && File.Exists(lockFile) ? $"; {lockFile} is left by a git that was stopped: remove it first" : "";
     }
 
     private sealed record Before(string Head, string? Tip);
@@ -192,6 +189,21 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         if ((await runner.RunAsync("git", ["rev-parse", "-q", "--verify", "MERGE_HEAD"], root, ct)).Code == 0)
         {
             throw new InvalidOperationException("A git merge is in progress: commit it or run git merge --abort, then run the command again.");
+        }
+    }
+
+    /// <summary>
+    /// The tree was clean when the command started, but a person may have changed a file while the plan waited for a
+    /// yes. The undo of a failed run is a hard reset, which would take such a change back, so the merge does not start
+    /// over one.
+    /// </summary>
+    private async Task RefuseAChangedTreeAsync(string root, CancellationToken ct)
+    {
+        var changed = (await runner.RunCheckedAsync("git", ["status", "--porcelain"], root, ct)).Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        if (changed.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"The working tree changed after the command started ({string.Join(", ", changed.Take(3).Select(l => l.Trim()))}{(changed.Length > 3 ? ", ..." : "")}): commit or stash the change, then run the command again. Nothing is merged.");
         }
     }
 

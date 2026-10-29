@@ -49,7 +49,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         if (plan.ByGit is null)
         {
             await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
-            return new(conflicts, await RepairAsync(plan, conflicts, ct));
+            return new(conflicts, await RepairWrittenAsync(plan, conflicts, ct));
         }
         return new(conflicts, await WriteBesideTheMergeAsync(plan, transaction, conflicts, SolutionFile(plan.Root), ct));
     }
@@ -57,6 +57,24 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     /// <summary>The usings of namespaces the template gave up, repaired from the text before any build.</summary>
     private async Task<IReadOnlyList<string>> RepairAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct) =>
         plan.Types is null ? [] : await repair.BeforeBuildAsync(plan.Root, plan.Types, conflicts, ct);
+
+    /// <summary>
+    /// The repair of the merge by files, which runs once its files are written: a repair that stops, by an error or a
+    /// cancel, says that the files are written, as no undo follows it.
+    /// </summary>
+    private async Task<IReadOnlyList<string>> RepairWrittenAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct)
+    {
+        try
+        {
+            return await RepairAsync(plan, conflicts, ct);
+        }
+        catch (Exception e) when (e is OperationCanceledException or IOException or UnauthorizedAccessException or InvalidOperationException
+            or System.ComponentModel.Win32Exception)
+        {
+            var why = e is OperationCanceledException ? "it was cancelled" : e.Message.Split('\n')[0].Trim();
+            throw new InvalidOperationException($"The files are written, and the repair of usings and references stopped: {why}. git diff shows what is written.", e);
+        }
+    }
 
     /// <summary>All.sln relative to the root; a solution there already has it, a new one not yet.</summary>
     private static string SolutionFile(string root) => Path.GetRelativePath(root, Layout.SolutionFileOf(root)).Replace('\\', '/');

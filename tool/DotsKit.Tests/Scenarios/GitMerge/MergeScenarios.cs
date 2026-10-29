@@ -62,6 +62,9 @@ internal sealed class MergeScenarios
         Read(root, local).ShouldBe("the team's local secret\n");
     }
 
+    /// <summary>The .gitignore of the base, kept by the next outputs: one the template dropped would leave the secrets file untracked.</summary>
+    private static readonly (string Path, string Text) Ignore = (".gitignore", "appsettings.Secrets.json\n");
+
     [Test]
     public async Task ALineBothChanged_IsAConflictGitMarks_AndTheNextUpgradeStartsFromTheBranch()
     {
@@ -70,7 +73,7 @@ internal sealed class MergeScenarios
         await Git(root, "commit", "-q", "-am", "the team's change");
         var merge = new GitTemplateMerge(Runner, Sandbox.Self);
 
-        var conflicts = await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, "a\nb\nC by the template\nd\ne\n")), "2.0.0"), false, CancellationToken.None);
+        var conflicts = await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree(Ignore, (ProgramFile, "a\nb\nC by the template\nd\ne\n")), "2.0.0"), false, CancellationToken.None);
 
         conflicts.ShouldBe([ProgramFile]);
         Read(root, ProgramFile).ShouldContain("<<<<<<<");
@@ -78,9 +81,9 @@ internal sealed class MergeScenarios
         Read(root, ProgramFile).ShouldBe("a\nb\nC by the team\nd\ne\nteam\n");
 
         // Resolved the template's way and committed, the next version merges over 2.0.0, not over 1.0.0 again.
-        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, "a\nb\nC by the template\nd\ne\n")), "2.0.0"), true, CancellationToken.None);
+        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree(Ignore, (ProgramFile, "a\nb\nC by the template\nd\ne\n")), "2.0.0"), true, CancellationToken.None);
         await Git(root, "commit", "-q", "--no-edit");
-        var again = await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, "new in 3.0\na\nb\nC by the template\nd\ne\n")), "3.0.0"), false, CancellationToken.None);
+        var again = await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree(Ignore, (ProgramFile, "new in 3.0\na\nb\nC by the template\nd\ne\n")), "3.0.0"), false, CancellationToken.None);
 
         again.ShouldBeEmpty();
         Read(root, ProgramFile).ShouldBe("new in 3.0\na\nb\nC by the template\nd\ne\nteam\n");

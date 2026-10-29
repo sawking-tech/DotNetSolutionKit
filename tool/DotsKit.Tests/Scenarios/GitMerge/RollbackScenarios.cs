@@ -49,7 +49,41 @@ internal sealed class RollbackScenarios
     }
 
     [Test]
-    public async Task AMergeGitRefuses_PutsBackTheCommitAndTheBranchOfTheRun_AndSaysSo()
+    public async Task AnAbort_PutsBackATrackedFileALaterStepChanged_WithoutStagingIt()
+    {
+        var root = await SolutionAsync();
+        var head = await HeadAsync(root);
+        var merge = new GitTemplateMerge(Runner, Sandbox.Self);
+        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, CancellationToken.None);
+        Write(root, Solution, "All.sln a repair changed and did not stage\n");
+
+        await merge.AbortAsync(root, CancellationToken.None);
+
+        (await HeadAsync(root)).ShouldBe(head);
+        Read(root, Solution).ShouldBe("the team's own All.sln\n");
+        (await Runner.RunCheckedAsync("git", ["status", "--porcelain"], root, CancellationToken.None)).ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task AnAbortGitRefuses_NamesTheLockAGitStoppedLeft_AndTheCommandsThatPutTheRunBack()
+    {
+        var root = await SolutionAsync();
+        var head = await HeadAsync(root);
+        var merge = new GitTemplateMerge(Runner, Sandbox.Self);
+        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, CancellationToken.None);
+        var lockFile = Path.Combine(root, ".git", "index.lock");
+        await File.WriteAllTextAsync(lockFile, "");
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => merge.AbortAsync(root, CancellationToken.None));
+        File.Delete(lockFile);
+
+        refused.Message.ShouldContain("index.lock");
+        refused.Message.ShouldContain($"git reset --hard {head}");
+        refused.Message.ShouldContain("update-ref -d refs/heads/" + GitTemplateMerge.Branch);
+    }
+
+    [Test]
+    public async Task AFileTheTeamAddedAfterTheCommandStarted_StopsTheMergeBeforeIt_AndStays()
     {
         const string added = "src/new.cs";
         var root = await SolutionAsync();
@@ -60,10 +94,26 @@ internal sealed class RollbackScenarios
         var refused = await Should.ThrowAsync<InvalidOperationException>(() =>
             new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(next, "2.0.0"), false, CancellationToken.None));
 
-        refused.Message.ShouldContain("put back");
+        refused.Message.ShouldContain("changed after the command started");
         (await HeadAsync(root)).ShouldBe(head);
         (await Runner.RunAsync("git", ["rev-parse", "-q", "--verify", "refs/heads/" + GitTemplateMerge.Branch], root, CancellationToken.None)).Code.ShouldNotBe(0);
         Read(root, added).ShouldBe("the team's file, not in git yet\n");
+    }
+
+    [Test]
+    public async Task AChangeTheTeamMadeWhileThePlanWaited_StopsTheMergeBeforeIt_AndStays()
+    {
+        var root = await SolutionAsync();
+        var head = await HeadAsync(root);
+        Write(root, ProgramFile, "the team's change, saved while the plan waited for a yes\n");
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() =>
+            new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, CancellationToken.None));
+
+        refused.Message.ShouldContain($"changed after the command started (M {ProgramFile})");
+        (await HeadAsync(root)).ShouldBe(head);
+        (await Runner.RunAsync("git", ["rev-parse", "-q", "--verify", "refs/heads/" + GitTemplateMerge.Branch], root, CancellationToken.None)).Code.ShouldNotBe(0);
+        Read(root, ProgramFile).ShouldBe("the team's change, saved while the plan waited for a yes\n");
     }
 
     /// <summary>The merge by git, whose staging writes and then fails, as a git add the disk refuses.</summary>
