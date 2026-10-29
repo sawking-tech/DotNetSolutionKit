@@ -91,8 +91,12 @@ git, the same three-way merge:
 
 - the branch `dotskit/template` holds what the template gave the solution, a commit per version. git knows the
   base when the branch's last commit has the base's files and the working branch has that commit in its history;
-  otherwise, as the first time or on another branch, the base is committed there and merged into the working
-  branch with `git merge -s ours`: the solution's files stay as they are, and git knows the base from then on.
+  otherwise, as the first time or on another branch, the base is committed there and adopted by the working
+  branch the way `git merge -s ours` would: a merge commit of the branch's own tree with the base as its second
+  parent, made by `git commit-tree` and `git update-ref`. The solution's files stay as they are, and git knows the
+  base from then on. No commit hook of the team runs in a run (pre-commit, prepare-commit-msg, commit-msg,
+  pre-merge-commit, post-merge); hooks of refs and the index, as reference-transaction, run as git runs them. The
+  commits dotskit makes are not signed.
   `git merge --abort` leaves this commit, it changes no file. The merge does not start over a tree changed after
   the command started, as a file saved while the plan waited for a yes. When a later step fails, the command runs
   `git reset --hard` to the commit it started from and puts the branch back: this takes back the merge, this
@@ -143,7 +147,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git ls-remote --tags` | the releases of the template, for `init` on a solution that does not say its version |
 | writes objects only, through an index of its own | `git add -A`, `git rm --cached`, `git ls-files`, `git write-tree`, `git commit-tree` | a commit of the template's output; the solution's index and files are not touched |
 | moves the branch `dotskit/template` | `git update-ref refs/heads/dotskit/template` | the commit of the template's new output on the branch, only from the tip read before |
-| commits on the working branch, files unchanged | `git merge -s ours --no-ff` | the base adopted, the first time or on another branch |
+| commits on the working branch, files unchanged | `git commit-tree -p HEAD -p <base>`, `git update-ref HEAD` | the base adopted, the first time or on another branch, with no commit hook of the team |
 | merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge |
 | stages | `git add` | the manifest, `All.sln` and the files the repair changed join the merge |
 | undoes a run that failed | `git reset --hard`, `git update-ref` (or `-d`); `git rev-parse --git-path index.lock` when git refuses | the working branch, its tracked files and the branch `dotskit/template` back where they were before the run |
