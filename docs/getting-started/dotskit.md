@@ -47,6 +47,8 @@ The template's parameters are passed as they are, in short or long form, in any 
 
 1. Checks the folder. A new solution goes into an empty folder or next to files in a clean git working
    tree. A solution to add to needs `.dotskit/manifest.json` of the tool's version and a clean working tree.
+   One command runs in a solution at a time: a second one, started while the first works, says so and changes
+   nothing; the lock goes with the process that holds it, even a killed one.
 2. Generates in a temporary folder what the template gives for the solution before the command (the base)
    and after it.
 3. Compares the base, the new template output and the solution file by file, and shows the plan: every
