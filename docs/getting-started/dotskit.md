@@ -114,6 +114,32 @@ version, and nothing else.
 `--merge files` merges by the tool itself, as in the table above, and writes the files with no branch and no
 merge commit. `--allow-dirty` takes `--merge files`: a git merge needs a clean tree.
 
+### What dotskit runs in git
+
+Every git command the tool runs, by what it does to the solution's repository. A list of paths goes to git in
+a file (`--pathspec-from-file`), never on the command line, so a solution of any size fits.
+
+| Does to the repository | Command | What for |
+|---|---|---|
+| nothing, reads | `git status --porcelain` | a clean working tree before writing |
+| | `git rev-parse` (`HEAD`, `--absolute-git-dir`, `MERGE_HEAD`, the branch, a commit's tree) | where the solution and the branch stand |
+| | `git merge-base --is-ancestor` | whether the working branch has the branch's last commit |
+| | `git config --path --get core.attributesFile` | the user's global attributes, kept under the merge driver's |
+| | `git ls-files --others --ignored --exclude-standard` | the files the solution's git ignores, never written |
+| | `git diff --name-only --diff-filter=U` | the files left in conflict |
+| | `git diff --no-index -M` | the files the template moved, between two of its outputs outside the repository |
+| | `git merge-file -p` | a file merged by `--merge files` and by the merge driver, on copies of the three sides |
+| | `git ls-remote --tags` | the releases of the template, for `init` on a solution that does not say its version |
+| writes objects only, through an index of its own | `git add -A`, `git rm --cached`, `git ls-files`, `git write-tree`, `git commit-tree` | a commit of the template's output; the solution's index and files are not touched |
+| moves the branch `dotskit/template` | `git update-ref refs/heads/dotskit/template` | the commit of the template's new output on the branch, only from the tip read before |
+| commits on the working branch, files unchanged | `git merge -s ours --no-ff` | the base adopted, the first time or on another branch |
+| merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge |
+| stages | `git add` | the manifest, `All.sln` and the files the repair changed join the merge |
+| undoes a run that failed | `git restore --source=HEAD --staged --worktree`, `git merge --abort`, `git reset --soft`, `git update-ref` (or `-d`) | what was staged, the merge, the adopting commit and the branch, back as they were before the run |
+
+The tool never commits the merge, never pushes, and never checks out a branch: the merge is the team's to look
+at, commit or undo.
+
 ## Manifest
 
 `.dotskit/manifest.json` records what the solution was generated from: the template's version, the

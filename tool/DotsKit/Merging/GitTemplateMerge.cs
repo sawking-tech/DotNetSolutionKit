@@ -59,6 +59,8 @@ internal sealed record TemplateCommit(string Tree, string Version);
 /// A file both sides changed is merged by <see cref="StyleMergeDriver"/>, given to this one merge by <c>-c</c> and an
 /// attributes file of its own: the solution's config and files are not touched. The solution's .gitattributes wins
 /// over that file, so a file with a merge of its own, as one of Git LFS, keeps it.
+/// Every git command this class and <see cref="GitClient"/> run is listed in docs/getting-started/dotskit.md, "What
+/// dotskit runs in git", by what it does to the repository: a command added or changed here goes there too.
 /// </summary>
 /// <param name="runner">Runs git.</param>
 /// <param name="self">The command line that runs dotskit again (<see cref="SelfCommand"/>), for git to run the driver.</param>
@@ -74,8 +76,13 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     /// <summary>--force: a line both sides changed takes the template's.</summary>
     private static readonly string[] TheirsOption = ["-X", "theirs"];
 
+    private readonly GitClient _git = new(runner);
+
     /// <summary>The working branch's commit and the branch's tip before this run, put back by <see cref="AbortAsync"/>.</summary>
     private Before? _before;
+
+    /// <summary>What this run staged beside the merge, taken out of the index again before an abort.</summary>
+    private readonly HashSet<string> _staged = new(StringComparer.Ordinal);
 
     public IReadOnlySet<string> LeftOut { get; private set; } = new HashSet<string>();
 
@@ -84,6 +91,7 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         await RefuseAMergeInProgressAsync(root, ct);
         _before = new((await runner.RunCheckedAsync("git", ["rev-parse", "HEAD"], root, ct)).Trim(), await TipAsync(root, ct));
         LeftOut = new HashSet<string>();
+        _staged.Clear();
         try
         {
             return await MergeOverAsync(root, _before.Tip, @base, next, preferTemplate, ct);
@@ -112,16 +120,22 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         return conflicts;
     }
 
-    public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) =>
-        runner.RunCheckedAsync("git", ["add", "--", .. paths], root, ct);
+    public async Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct)
+    {
+        await _git.StageAsync(root, paths, ct);
+        _staged.UnionWith(paths);
+    }
 
     /// <summary>
     /// The merge, then the commit that adopted the base and the move of the branch: the working branch and
-    /// <see cref="Branch"/> are as they were before the run. The adopting commit kept the solution's tree, so a soft
-    /// reset changes no file. What git refuses to put back is named with the commands that do it by hand.
+    /// <see cref="Branch"/> are as they were before the run. What this run staged is brought back to HEAD first, in
+    /// the index and on disk: a failed step may have put those files back on disk already, and git refuses to abort
+    /// over an index that differs from them. The adopting commit kept the solution's tree, so a soft reset changes no
+    /// file. What git refuses to put back is named with the commands that do it by hand.
     /// </summary>
     public async Task AbortAsync(string root, CancellationToken ct)
     {
+        var restored = await _git.RestoreToHeadAsync(root, _staged, ct);
         await runner.RunAsync("git", ["merge", "--abort"], root, ct);
         if (_before is not { } before)
         {
@@ -131,10 +145,12 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         string[] branch = before.Tip is null ? ["update-ref", "-d", BranchRef] : ["update-ref", BranchRef, before.Tip];
         var reset = await runner.RunAsync("git", ["reset", "-q", "--soft", before.Head], root, ct);
         var moved = await runner.RunAsync("git", branch, root, ct);
-        if (reset.Code != 0 || moved.Code != 0)
+        var failed = new[] { restored, reset, moved }.FirstOrDefault(r => r.Code != 0);
+        if (failed is not null)
         {
+            // The tree was clean before the run, so all of it goes back to HEAD.
             throw new InvalidOperationException(
-                $"git could not put back the commit and the branch of this run ({FirstLine(reset.Code != 0 ? reset : moved)}): run git merge --abort, git reset --soft {before.Head} and git {string.Join(' ', branch)}.");
+                $"git could not put back the files, the commit and the branch of this run ({FirstLine(failed)}): run git restore --source=HEAD --staged --worktree -- ., git merge --abort, git reset --soft {before.Head} and git {string.Join(' ', branch)}.");
         }
     }
 
@@ -228,13 +244,7 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         await runner.RunCheckedAsync("git", ["--git-dir", gitDir, "--work-tree", folder, "add", "-A", "--", "."], folder, ct, index);
         var ignored = await PathsAsync(root, ["ls-files", "-z", "--cached", "--ignored", "--exclude-standard"], index, ct);
         var left = (await PathsAsync(root, ["ls-files", "-z"], index, ct)).Where(IsNotTheTemplates).Concat(ignored).Distinct().ToList();
-        if (left.Count > 0)
-        {
-            var list = Path.Combine(work, "left-out");
-            await File.WriteAllTextAsync(list, string.Join('\0', left), ct);
-            // -f: the index is this run's own, and git would otherwise compare it with the solution's files.
-            await runner.RunCheckedAsync("git", ["rm", "--cached", "-q", "-f", "--pathspec-from-file", list, "--pathspec-file-nul"], root, ct, index);
-        }
+        await _git.RemoveCachedAsync(root, left, index, ct);
 
         var inTree = (await PathsAsync(root, ["ls-files", "-z"], index, ct)).ToHashSet(StringComparer.Ordinal);
         var tree = (await runner.RunCheckedAsync("git", ["write-tree"], root, ct, index)).Trim();

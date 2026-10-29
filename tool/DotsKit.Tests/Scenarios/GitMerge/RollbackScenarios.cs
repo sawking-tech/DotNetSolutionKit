@@ -65,4 +65,49 @@ internal sealed class RollbackScenarios
         (await Runner.RunAsync("git", ["rev-parse", "-q", "--verify", "refs/heads/" + GitTemplateMerge.Branch], root, CancellationToken.None)).Code.ShouldNotBe(0);
         Read(root, added).ShouldBe("the team's file, not in git yet\n");
     }
+
+    /// <summary>The merge by git, whose staging writes and then fails, as a git add the disk refuses.</summary>
+    private sealed class FailingAfterStage(IGitMerge git) : IGitMerge
+    {
+        public IReadOnlySet<string> LeftOut => git.LeftOut;
+
+        public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct) =>
+            git.MergeAsync(root, @base, next, preferTemplate, ct);
+
+        public async Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct)
+        {
+            await git.StageAsync(root, paths, ct);
+            throw new IOException("the disk is full");
+        }
+
+        public Task AbortAsync(string root, CancellationToken ct) => git.AbortAsync(root, ct);
+    }
+
+    private sealed class NoBuild : Solutions.IBuilder
+    {
+        public Task<ProcessResult> BuildAsync(string root, CancellationToken ct) => Task.FromResult(new ProcessResult(0, "", ""));
+    }
+
+    [Test]
+    public async Task AStageThatFails_OverAManifestInGit_LeavesNoMergeNoCommitAndTheManifestAsItWas()
+    {
+        var root = await SolutionAsync();
+        const string described = """{ "template": "1.0.0", "solution": ["--NamespaceRoot", "Acme", "--ProductName", "Shop"], "services": [] }""";
+        Write(root, Layout.ManifestPath, described + "\n");
+        await Git(root, "add", "-A");
+        await Git(root, "commit", "-q", "-m", "described by dotskit init");
+        var head = await HeadAsync(root);
+        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"], Services = [] };
+        var plan = new Planning.Plan(root, manifest, [], new Solutions.MembershipChange([], []),
+            ByGit: (new TemplateCommit(Base(), "1.0.0"), new TemplateCommit(Tree((ProgramFile, NextProgram)), "2.0.0")));
+        var writer = new Planning.PlanWriter(new Solutions.SolutionProjects(Runner), new FailingAfterStage(new GitTemplateMerge(Runner, Sandbox.Self)),
+            new Solutions.ReferenceRepair(new Solutions.RepairWriter(Runner), new NoBuild()));
+
+        await Should.ThrowAsync<IOException>(() => writer.WriteAsync(plan, CancellationToken.None));
+
+        (await HeadAsync(root)).ShouldBe(head);
+        (await Runner.RunAsync("git", ["rev-parse", "-q", "--verify", "MERGE_HEAD"], root, CancellationToken.None)).Code.ShouldNotBe(0);
+        (await Runner.RunCheckedAsync("git", ["status", "--porcelain"], root, CancellationToken.None)).ShouldBeEmpty();
+        Read(root, Layout.ManifestPath).ShouldBe(described + "\n");
+    }
 }
