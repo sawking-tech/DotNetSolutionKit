@@ -268,13 +268,39 @@ upgraded the same way. The tools of 2.x also take 1.0.0, the only release of 1.x
 most files: a solution of v1 is brought to 2.0.0 by hand first ([upgrading](upgrading.md#a-solution-of-v1)).
 
 `--to 2.x.y` brings the solution to that release instead of the tool's version, a release newer than the
-solution and not newer than the tool. A solution far behind can go a release at a time, each step a merge of
-its own with a build after it:
+solution and not newer than the tool. A solution far behind goes to the tool's version at once or through
+releases between, as the team decides: either way the upgrade goes a part at a time, so a step is a part, not
+the whole distance. A release between is worth a stop where the team wants to build and test the solution on it:
 
 ```bash
-dotskit upgrade --to 2.0.0
-dotskit upgrade --to 2.1.0
-dotskit upgrade
+dotskit upgrade --to 2.7.0   # the parts of 2.7.0; build and test
+dotskit upgrade              # the parts of the tool's version
+```
+
+An upgrade goes one part a run, so the team resolves the conflicts of one part before the next: first the
+shared parts - the root with `deploy` and the scripts, then the files of `src/common` and each of its projects, a
+project before those that reference it, then `src/capabilities` - then a service folder at a time, in order. A
+project the template adds to `src/common` is a part of its own, after those it references; the first run takes
+the parts and the manifest keeps them. A package the template drops keeps its version until no project of the
+parts left references it. A folder of the team's own is a part too, which merges nothing. Each run is the same merge, of the template's new files
+for the parts merged so far and this one over its files for the parts before. After the merge the run repairs the
+usings and project references of the types the template moved between the parts merged so far, in every project
+of the solution, and names them by project; a type that goes to a part not yet merged waits for it, and the usings
+of its namespace stay. Then the solution builds, and its errors repair the team's files, leaving the template's
+files of a part not merged yet to that part; a service whose files of the template wait for their part may
+fail until it, and the build names it. The manifest keeps the release and the parts merged, and the next
+`dotskit upgrade` takes the next part; `--part Orders` names one, after the shared parts. A part is committed
+before the next; the last one moves the manifest to the release, and `dotskit new` waits until then. When the
+last part leaves conflicts, the upgrade stays open: once they are resolved and committed, `dotskit upgrade`
+changes no file of the template, repairs the usings of the whole upgrade, builds and moves the manifest.
+`--all-at-once` merges every part in one run. The template's output for a version is generated once and kept
+in the temp folder (`dotskit/outputs`) for two days, so a part after the first takes seconds, not the generation.
+
+```bash
+dotskit upgrade --to 2.7.0               # the shared part; resolve, commit
+dotskit upgrade                          # the next part; resolve, commit
+dotskit upgrade --part Billing           # the service named
+dotskit upgrade --to 2.7.0 --all-at-once # or every part in one merge
 ```
 
 Package versions come with an upgrade as far as the manifest lets them:
@@ -314,6 +340,8 @@ template changed - is the team's to decide, and its tests show it.
 | `--allow-dirty` | runs on a working tree with uncommitted changes |
 | `--template-version 2.x.y` | `init`: the version the solution was made by, where it does not say it |
 | `--to 2.x.y` | `upgrade`: the release to bring the solution to, not newer than the tool |
+| `--all-at-once` | `upgrade`: every part in one merge, instead of the shared files first, then a service folder at a time |
+| `--part <part>` | `upgrade`: the part this run takes, `shared`, `common/<project>`, `capabilities` or a service folder's last name |
 | `--merge files` | `new` and `upgrade`: merge by the tool and write the files, instead of a git merge of `dotskit/template` |
 
 `DOTSKIT_TRACE=1` prints every `dotnet` and `git` call of a command with its time to stderr: what a slow

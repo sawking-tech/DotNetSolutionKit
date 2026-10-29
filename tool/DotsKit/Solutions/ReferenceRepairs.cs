@@ -17,6 +17,19 @@ internal sealed record TypeMap(IReadOnlyList<TypeMove> Moves, IReadOnlySet<strin
         new([.. before.All.Select(t => (From: t, To: NextHomeOf(t, after))).Where(m => m.To is not null && m.To != m.From).Select(m => new TypeMove(m.From, m.To!))],
             after.All.Select(t => t.Namespace).ToHashSet(StringComparer.Ordinal));
 
+    /// <summary>
+    /// The moves a step of an upgrade a part at a time follows: those whose two projects are merged. A namespace a
+    /// move out of which waits for its part still counts as kept, so the usings of it stay until that part.
+    /// </summary>
+    /// <param name="merged">Whether a project, relative to the root, is in a part merged so far or in this one.</param>
+    public TypeMap Within(Func<string, bool> merged)
+    {
+        var waiting = Moves.Where(m => !merged(m.From.Project) || !merged(m.To.Project)).ToList();
+        return waiting.Count == 0
+            ? this
+            : new([.. Moves.Except(waiting)], NextNamespaces.Union(waiting.Select(m => m.From.Namespace)).ToHashSet(StringComparer.Ordinal));
+    }
+
     /// <summary>The service folder a project is in, or null for the code the services share.</summary>
     public static string? AreaOf(string project) => Layout.ServiceFolderOf(project);
 

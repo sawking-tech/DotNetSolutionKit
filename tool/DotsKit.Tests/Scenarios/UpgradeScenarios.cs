@@ -57,7 +57,7 @@ internal sealed class UpgradeScenarios
         solution.Write(Layout.ManifestPath, pinned.Serialize());
         await solution.CommitAsync("the team's line and pin");
 
-        var upgraded = await solution.DotskitAsync("upgrade", "--yes");
+        var upgraded = await solution.DotskitAsync("upgrade", "--yes", "--all-at-once");
 
         upgraded.Code.ShouldBe(0, upgraded.Output + upgraded.Error);
         upgraded.Output.ShouldContain($"{Pinned}: pinned on {PinnedVersion}");
