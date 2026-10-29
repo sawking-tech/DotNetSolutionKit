@@ -13,7 +13,7 @@ public class ServiceIdentifierDbContext(DbContextOptions<ServiceIdentifierDbCont
     : DbContextBase(options), IUnitOfWork
 {
     public static readonly string DefaultSchemaName = "servicenameorcustom";
-    
+
     // Add DbSet here
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

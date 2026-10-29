@@ -16,7 +16,7 @@ internal static class ApplicationSetup
     {
         var configuration = builder.Configuration;
         var services = builder.Services;
-        
+
 //#if (FeatureFlags)
         // Platform feature flags: the catalogue, the store, and the library that evaluates them.
         // Flags come from the shared features.json, so nothing is declared here: a service gains a
@@ -32,7 +32,7 @@ internal static class ApplicationSetup
         // Register Application Layer services. They register the domain services too:
         // the API reaches the domain only through the application layer.
         services.AddApplicationServices();
-        
+
         // Register Infrastructure Layer services
 //#if (DiffApi)
         // A schema-only run must not touch infrastructure: it registers no database, no broker and no

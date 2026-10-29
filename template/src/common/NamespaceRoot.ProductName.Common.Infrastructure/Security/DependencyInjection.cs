@@ -23,7 +23,7 @@ public static class DependencyInjection
             return JobActorContext.Actor ?? SystemUserContext.Instance;
         });
     }
-    
+
     public static IServiceCollection AddExecutionContext(this IServiceCollection services)
     {
         services.AddUserContext();
@@ -31,7 +31,7 @@ public static class DependencyInjection
         {
             var actor = sp.GetRequiredService<IUserContext>();
             var timeProvider = sp.GetRequiredService<TimeProvider>();
-            
+
             return new ApplicationExecutionContext(actor, timeProvider);
         });
 

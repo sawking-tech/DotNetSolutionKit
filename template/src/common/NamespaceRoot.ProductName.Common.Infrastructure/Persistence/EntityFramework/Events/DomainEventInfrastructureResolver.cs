@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 
 /// <summary>
-/// Provides a unified way to resolve scoped domain event infrastructure 
+/// Provides a unified way to resolve scoped domain event infrastructure
 /// from singleton interceptors within DbContextPool.
 /// </summary>
 internal static class DomainEventInfrastructureResolver

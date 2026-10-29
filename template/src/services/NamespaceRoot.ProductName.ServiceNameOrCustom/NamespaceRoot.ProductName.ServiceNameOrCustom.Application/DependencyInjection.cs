@@ -22,10 +22,10 @@ public static class DependencyInjection
         services.AddDomainServices();
 
         // Register services
-        
+
         return services;
     }
-    
+
     /// <summary>
     /// Register and validate application configuration settings.
     /// </summary>
@@ -34,12 +34,12 @@ public static class DependencyInjection
     {
         // Add configuration settings
     }
-    
+
     /// <summary>
     /// Helper method to register validated options with interface.
     /// </summary>
     private static IServiceCollection AddValidatedOptions<TInterface, TSettings>(
-        this IServiceCollection services, 
+        this IServiceCollection services,
         string sectionName)
         where TInterface : class
         where TSettings : class, TInterface, new()
@@ -48,10 +48,10 @@ public static class DependencyInjection
             .BindConfiguration(sectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
-    
-        services.AddSingleton<TInterface>(sp => 
+
+        services.AddSingleton<TInterface>(sp =>
             sp.GetRequiredService<IOptions<TSettings>>().Value);
-    
+
         return services;
     }
 }

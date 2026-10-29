@@ -20,17 +20,17 @@ public interface IPaginationResponse
     /// Gets the current page number (1-based index).
     /// </summary>
     int Page { get; }
-    
+
     /// <summary>
     /// Gets the number of items per page.
     /// </summary>
     int PageSize { get; }
-    
+
     /// <summary>
     /// Gets the total number of items across all pages.
     /// </summary>
     int TotalCount { get; }
-    
+
     /// <summary>
     /// Gets the total number of pages available.
     /// </summary>

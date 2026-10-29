@@ -1,4 +1,4 @@
-﻿using NamespaceRoot.ProductName.Common.Domain;
+using NamespaceRoot.ProductName.Common.Domain;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 using NamespaceRoot.ProductName.Common.Domain.Events;

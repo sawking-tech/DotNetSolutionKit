@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Domain.Events;
 using NamespaceRoot.ProductName.Common.Tests.Stubs;
 

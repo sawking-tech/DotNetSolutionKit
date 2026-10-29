@@ -13,7 +13,7 @@ public class RequiredPermissionsAttribute : Attribute
     public RequiredPermissionsAttribute(params string[] permissions)
     {
         Permissions = permissions ?? throw new ArgumentNullException(nameof(permissions));
-        
+
         if (Permissions.Count == 0)
             throw new ArgumentException("At least one permission must be specified", nameof(permissions));
     }

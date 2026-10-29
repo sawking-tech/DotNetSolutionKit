@@ -15,7 +15,7 @@ public static class ErrorConstants
         public const string TooManyRequests = "Too many requests. Please try again later.";
         public const string InternalServerError = "An internal server error occurred.";
         public const string ServiceUnavailable = "Service temporarily unavailable.";
-        //  Auth & API Key Specific 
+        //  Auth & API Key Specific
         public const string NoToken = "Authentication token is missing. Please provide it in the 'Authorization' header.";
         public const string ApiKeyProcessingError = "An error occurred while processing the API key.";
         public const string InvalidApiKey = "The provided API key is invalid or has been revoked.";

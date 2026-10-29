@@ -1,4 +1,4 @@
-﻿    using NamespaceRoot.ProductName.Common.Domain;
+    using NamespaceRoot.ProductName.Common.Domain;
     using NamespaceRoot.ProductName.Common.Domain.Persistence;
     using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Exceptions;
@@ -12,7 +12,7 @@ namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFram
     public abstract class DbContextBase : DbContext, IUnitOfWork
     {
         private IDbContextTransaction? _currentTransaction;
-        
+
         protected DbContextBase(DbContextOptions options)
             : base(options)
         {
@@ -53,7 +53,7 @@ namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFram
             object entity, bool isNewEntity = false)
         {
             var trackedEntry = ChangeTracker.Entries().FirstOrDefault(x => x.Entity == entity);
-            
+
             if (trackedEntry == null)
             {
                 throw new ArgumentException("Entity is not being tracked by this context", nameof(entity));
@@ -207,7 +207,7 @@ namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFram
             DisposeTransaction();
             base.Dispose();
         }
-        
+
         public new async ValueTask DisposeAsync()
         {
             await DisposeTransactionAsync();

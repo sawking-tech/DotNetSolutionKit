@@ -18,9 +18,16 @@ internal sealed class TemplateArgs
 
     private static readonly Dictionary<string, string> ShortNames = new(StringComparer.Ordinal)
     {
-        ["-N"] = "NamespaceRoot", ["-P"] = "ProductName", ["-S"] = ServiceName, ["-M"] = Minimal,
-        ["-H"] = "Hangfire", ["-I"] = "Infisical", ["-FF"] = "FeatureFlags", ["-CH"] = "ClickHouse",
-        ["-A"] = ApiGateway, ["-Ag"] = "Agent",
+        ["-N"] = "NamespaceRoot",
+        ["-P"] = "ProductName",
+        ["-S"] = ServiceName,
+        ["-M"] = Minimal,
+        ["-H"] = "Hangfire",
+        ["-I"] = "Infisical",
+        ["-FF"] = "FeatureFlags",
+        ["-CH"] = "ClickHouse",
+        ["-A"] = ApiGateway,
+        ["-Ag"] = "Agent",
     };
 
     /// <summary>The parameters of the template this version of the tool is released with.</summary>
@@ -54,8 +61,13 @@ internal sealed class TemplateArgs
     /// </summary>
     private static readonly Dictionary<string, string> Defaults = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Hangfire"] = On, [Messaging] = "none", ["Database"] = "postgres", ["Deploy"] = "compose",
-        ["TestFramework"] = "nunit", ["Agent"] = "claude", ["GitHubCiCd"] = "false",
+        ["Hangfire"] = On,
+        [Messaging] = "none",
+        ["Database"] = "postgres",
+        ["Deploy"] = "compose",
+        ["TestFramework"] = "nunit",
+        ["Agent"] = "claude",
+        ["GitHubCiCd"] = "false",
     };
 
     /// <summary>The parameters that are not bool: given without a value, they would take "true" for a name.</summary>

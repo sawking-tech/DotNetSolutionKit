@@ -10,10 +10,10 @@ public interface IDomainEventStorage
 {
     IReadOnlyCollection<IDomainEvent> GetEvents();
     void AddEvents(IEnumerable<IDomainEvent> events);
-    
+
     Exception? LastException { get; set; }
     bool IsDispatching { get; set; }
-    
+
     void Clear();
 }
 
@@ -22,7 +22,7 @@ public sealed class DomainEventStorage : IDomainEventStorage
     private readonly List<IDomainEvent> _events = new();
 
     public IReadOnlyCollection<IDomainEvent> GetEvents() => _events.AsReadOnly();
-    
+
     public void AddEvents(IEnumerable<IDomainEvent> events)
     {
         _events.AddRange(events);

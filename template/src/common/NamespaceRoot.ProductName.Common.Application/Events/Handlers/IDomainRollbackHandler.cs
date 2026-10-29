@@ -8,12 +8,12 @@ namespace NamespaceRoot.ProductName.Common.Application.Events.Handlers;
 /// </summary>
 /// <remarks><b>Lifetime:</b> Registered as <b>Scoped</b>. A new instance is created per request/scope.</remarks>
 /// <typeparam name="TEvent">Type of domain event this handler processes.</typeparam>
-public interface IDomainRollbackHandler<in TEvent> 
-    : IDomainEventHandler<TEvent> 
+public interface IDomainRollbackHandler<in TEvent>
+    : IDomainEventHandler<TEvent>
     where TEvent : IDomainEvent
 {
     /// <summary>
-    /// Handles the rollback logic. The exception may be null if the rollback 
+    /// Handles the rollback logic. The exception may be null if the rollback
     /// was triggered manually without a specific error.
     /// </summary>
     /// <param name="domainEvent">The domain event instance.</param>

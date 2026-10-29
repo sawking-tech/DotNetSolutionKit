@@ -4,7 +4,7 @@ using LinqSpecs;
 namespace NamespaceRoot.ProductName.Common.Domain.Specifications;
 
 /// <summary>
-/// Provides methods to build specifications for case-insensitive search 
+/// Provides methods to build specifications for case-insensitive search
 /// optimized for the underlying database provider (e.g., PostgreSQL ILIKE).
 /// </summary>
 public interface ICaseInsensitiveSearch

@@ -1,7 +1,7 @@
 namespace NamespaceRoot.ProductName.Common.Domain.Persistence;
 
 /// <summary>
-/// Represents the Unit of Work pattern to manage database transactions 
+/// Represents the Unit of Work pattern to manage database transactions
 /// and coordinate the saving of changes across multiple repositories.
 /// </summary>
 public interface IUnitOfWork
@@ -14,7 +14,7 @@ public interface IUnitOfWork
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Starts a new database transaction. 
+    /// Starts a new database transaction.
     /// Throws an exception if a transaction is already in progress.
     /// </summary>
     /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
@@ -60,10 +60,10 @@ public interface IUnitOfWork
     /// <param name="entity">The entity instance to inspect.</param>
     /// <param name="isNewEntity">True if the entity is being tracked as a new entry.</param>
     /// <returns>
-    /// A dictionary where keys are property names and values contain the property type, 
+    /// A dictionary where keys are property names and values contain the property type,
     /// original value, and current value.
     /// </returns>
     Dictionary<string, (Type Type, object? OriginalValue, object? CurrentValue)> GetChangesFor(
-        object entity, 
+        object entity,
         bool isNewEntity = false);
 }

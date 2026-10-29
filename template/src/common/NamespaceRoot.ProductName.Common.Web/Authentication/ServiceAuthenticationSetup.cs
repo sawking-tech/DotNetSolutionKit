@@ -144,7 +144,7 @@ public static class ServiceAuthenticationSetup
                     IssuerSigningKey = rsaProvider.ValidationKey
                 };
             });
-    
+
     }
 
     /// <summary>

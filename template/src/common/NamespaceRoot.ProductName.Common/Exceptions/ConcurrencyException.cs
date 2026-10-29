@@ -1,4 +1,4 @@
-﻿namespace NamespaceRoot.ProductName.Common.Exceptions;
+namespace NamespaceRoot.ProductName.Common.Exceptions;
 
 /// <summary>
 /// Thrown when a concurrency conflict occurs, e.g., when multiple processes attempt to modify the same entity.
@@ -10,7 +10,7 @@ public class ConcurrencyException : BusinessLogicException
     /// </summary>
     /// <param name="message">The error message describing the concurrency conflict.</param>
     /// <param name="errorCode">Optional machine-readable error code.</param>
-    public ConcurrencyException(string? message, string? errorCode = null) 
+    public ConcurrencyException(string? message, string? errorCode = null)
         : base(message, errorCode)
     {
     }
@@ -21,7 +21,7 @@ public class ConcurrencyException : BusinessLogicException
     /// <param name="message">The error message describing the concurrency conflict.</param>
     /// <param name="innerException">The exception that caused the current exception.</param>
     /// <param name="errorCode">Optional machine-readable error code.</param>
-    public ConcurrencyException(string? message, Exception innerException, string? errorCode = null) 
+    public ConcurrencyException(string? message, Exception innerException, string? errorCode = null)
         : base(message, innerException, errorCode)
     {
     }

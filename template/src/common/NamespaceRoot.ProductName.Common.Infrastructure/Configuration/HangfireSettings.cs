@@ -29,7 +29,7 @@ public interface IHangfireSettings
 public class HangfireSettings : IHangfireSettings
 {
     public const string SectionName = "HangfireSettings";
-    
+
     /// <inheritdoc />
     [Required(ErrorMessage = "Hangfire Dashboard username is required")]
     public string DashboardUser { get; set; } = "admin";
