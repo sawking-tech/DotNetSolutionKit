@@ -70,6 +70,10 @@ What happens to a file:
 | `Kept` | one side removed the file and the other changed it, or both changed a binary file | nothing: the solution's file stays |
 | `Conflict` | both changed the same lines, or lines right next to each other | the file with both versions between `<<<<<<< solution` and `>>>>>>> template` |
 
+A file of the solution its git ignores, a local `appsettings.Secrets.json` among them, is never written, in either
+merge. A new file the template adds that the solution's git would ignore, as the secrets file of a new service, is
+written by the merge by files and left out by the merge by git.
+
 `All.sln` is changed by `dotnet sln`, project by project, and never merged as text: `dotnet sln add` gives
 a project a new GUID each time. Its projects are merged the way a file's lines are: a project the template added
 joins it, one the template removed leaves it unless the team added it, and one the team took out stays out.
