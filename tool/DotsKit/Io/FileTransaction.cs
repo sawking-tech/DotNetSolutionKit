@@ -1,9 +1,10 @@
 namespace DotsKit.Io;
 
 /// <summary>
-/// Writes and deletes files all together or not at all. Every new content is first written beside its file;
-/// only then are the files swapped in, each original kept aside, and a failure anywhere - a write, a swap, or a
-/// step the caller runs inside the transaction - puts every original back. A solution is never left half written.
+/// Writes and deletes the files of a plan as one step. Every new content is first written beside its file; only then
+/// are the files swapped in, each original kept aside, and a failure of a write, a swap or a step the caller runs
+/// inside the transaction puts the originals back. A process killed in the middle leaves the files beside the
+/// solution's, *.dotskit-new and *.dotskit-old, for git status to show.
 /// </summary>
 internal sealed class FileTransaction(string root)
 {
@@ -21,7 +22,11 @@ internal sealed class FileTransaction(string root)
     /// <summary>A file a step inside the transaction changes in place (All.sln under dotnet sln): kept aside, put back on failure.</summary>
     public void Guard(string relativePath) => _guarded.Add(relativePath);
 
-    /// <summary>Writes everything, then runs <paramref name="inside"/>; any failure restores every file as it was.</summary>
+    /// <summary>
+    /// Writes everything, then runs <paramref name="inside"/>; a failure puts every file back. A file that cannot be
+    /// put back does not stop the others, and the error names it beside its original. Once written, the cleanup of
+    /// the originals and the emptied folders never fails the write: what it leaves, git status shows.
+    /// </summary>
     public async Task CommitAsync(Func<Task> inside)
     {
         var swapped = new List<(string Target, bool Existed)>();
@@ -32,19 +37,36 @@ internal sealed class FileTransaction(string root)
             KeepAside(swapped);
             await inside();
         }
-        catch
+        catch (Exception cause)
         {
-            RollBack(swapped);
-            RemoveStaged();
-            RemoveCreatedFolders();
+            var notBack = RollBack(swapped);
+            BestEffort(RemoveStaged);
+            BestEffort(RemoveCreatedFolders);
+            if (notBack.Count > 0)
+            {
+                throw new InvalidOperationException($"{cause.Message} {NotBack(notBack)}", cause);
+            }
+
             throw;
         }
         finally
         {
-            RemoveStaged();
+            BestEffort(RemoveStaged);
         }
         DropKeptOriginals(swapped);
-        RemoveEmptiedFolders();
+        BestEffort(RemoveEmptiedFolders);
+    }
+
+    /// <summary>A cleanup the disk refuses, as a file another process holds, leaves the file for git status to show.</summary>
+    private static void BestEffort(Action cleanup)
+    {
+        try
+        {
+            cleanup();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+        }
     }
 
     /// <summary>The folders a deletion left empty, up to the root, as a project the template dropped.</summary>
@@ -123,20 +145,39 @@ internal sealed class FileTransaction(string root)
         }
     }
 
-    /// <summary>In reverse order, so a file swapped twice ends as it began.</summary>
-    private static void RollBack(List<(string Target, bool Existed)> swapped)
+    /// <summary>What to do with the files the disk did not let the rollback put back: an original to move over, a new file to delete.</summary>
+    private static string NotBack(List<(string Target, bool Existed)> notBack)
     {
+        var changed = notBack.Where(f => f.Existed).Select(f => f.Target).ToList();
+        var added = notBack.Where(f => !f.Existed).Select(f => f.Target).ToList();
+        return string.Join(' ',
+            changed.Count > 0 ? $"These files could not be put back: {string.Join(", ", changed)}; each original is beside it as {OldSuffix}: move it over the file." : "",
+            added.Count > 0 ? $"These new files could not be removed: {string.Join(", ", added)}; delete them." : "").Trim();
+    }
+
+    /// <summary>In reverse order, so a file swapped twice ends as it began. Returns the files the disk refused.</summary>
+    private static List<(string Target, bool Existed)> RollBack(List<(string Target, bool Existed)> swapped)
+    {
+        var notBack = new List<(string Target, bool Existed)>();
         foreach (var (target, existed) in Enumerable.Reverse(swapped))
         {
-            if (existed && File.Exists(target + OldSuffix))
+            try
             {
-                File.Move(target + OldSuffix, target, overwrite: true);
+                if (existed && File.Exists(target + OldSuffix))
+                {
+                    File.Move(target + OldSuffix, target, overwrite: true);
+                }
+                else if (!existed && File.Exists(target))
+                {
+                    File.Delete(target);
+                }
             }
-            else if (!existed && File.Exists(target))
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
-                File.Delete(target);
+                notBack.Add((target, existed));
             }
         }
+        return notBack;
     }
 
     private void RemoveStaged()
@@ -151,7 +192,7 @@ internal sealed class FileTransaction(string root)
     {
         foreach (var (target, _) in swapped.Where(s => File.Exists(s.Target + OldSuffix)))
         {
-            File.Delete(target + OldSuffix);
+            BestEffort(() => File.Delete(target + OldSuffix));
         }
     }
 
