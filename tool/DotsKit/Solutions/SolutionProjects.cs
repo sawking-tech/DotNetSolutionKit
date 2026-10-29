@@ -13,8 +13,8 @@ internal interface ISolutionProjects
     Task<HashSet<string>> ListAsync(string solutionFile, CancellationToken ct);
     Task AddMissingAsync(string root, CancellationToken ct);
     Task RemoveMissingAsync(string root, CancellationToken ct);
-    Task AddAsync(string solutionFile, string listedProject, CancellationToken ct);
-    Task RemoveAsync(string solutionFile, string listedProject, CancellationToken ct);
+    Task AddAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct);
+    Task RemoveAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct);
 }
 
 internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProjects
@@ -23,6 +23,16 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
     private const int ProjectDepth = 1;
 
     private const string ProjectPattern = "*.csproj";
+
+    /// <summary>
+    /// The projects a generated tree has, as All.sln lists them, relative to it: the template's All.sln lists every
+    /// project under src, so the files say it without a <c>dotnet sln list</c>.
+    /// </summary>
+    public static HashSet<string> InTree(string root) =>
+        Directory.GetFiles(Path.Combine(root, "src"), ProjectPattern, SearchOption.AllDirectories)
+            .Select(p => Path.GetRelativePath(Layout.ServicesOf(root), p).Replace('\\', '/'))
+            .Where(p => !p.Split('/').Any(Layout.Ignored.Contains))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     public static string FolderOf(string serviceFolderName) => serviceFolderName[(serviceFolderName.LastIndexOf('.') + 1)..];
 
@@ -47,25 +57,31 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
     {
         var solutionFile = Layout.SolutionFileOf(root);
         var listed = await ListAsync(solutionFile, ct);
-        foreach (var project in ServiceProjects(root).Where(p => !listed.Contains(Relative(solutionFile, p))))
-            await AddAsync(solutionFile, Relative(solutionFile, project), ct);
+        await AddAsync(solutionFile, [.. ServiceProjects(root).Select(p => Relative(solutionFile, p)).Where(p => !listed.Contains(p))], ct);
     }
 
     /// <summary>Removes from All.sln every project whose file is gone, as when a service folder is generated again.</summary>
     public async Task RemoveMissingAsync(string root, CancellationToken ct)
     {
         var solutionFile = Layout.SolutionFileOf(root);
-        foreach (var project in await ListAsync(solutionFile, ct))
-            if (!File.Exists(Path.Combine(DirectoryOf(solutionFile), project)))
-                await RemoveAsync(solutionFile, project, ct);
+        var gone = (await ListAsync(solutionFile, ct)).Where(p => !File.Exists(Path.Combine(DirectoryOf(solutionFile), p))).ToList();
+        await RemoveAsync(solutionFile, gone, ct);
     }
 
-    public Task AddAsync(string solutionFile, string listedProject, CancellationToken ct) =>
-        runner.RunCheckedAsync("dotnet",
-            ["sln", solutionFile, "add", listedProject, "--solution-folder", FolderOfListed(listedProject)], DirectoryOf(solutionFile), ct);
+    /// <summary>One <c>dotnet sln add</c> per solution folder, each a process of half a second or more.</summary>
+    public async Task AddAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct)
+    {
+        foreach (var folder in listedProjects.GroupBy(FolderOfListed, StringComparer.Ordinal).OrderBy(g => g.Key, StringComparer.Ordinal))
+            await runner.RunCheckedAsync("dotnet",
+                ["sln", solutionFile, "add", .. folder.Order(StringComparer.Ordinal), "--solution-folder", folder.Key], DirectoryOf(solutionFile), ct);
+    }
 
-    public Task RemoveAsync(string solutionFile, string listedProject, CancellationToken ct) =>
-        runner.RunCheckedAsync("dotnet", ["sln", solutionFile, "remove", listedProject], DirectoryOf(solutionFile), ct);
+    /// <summary>One <c>dotnet sln remove</c> for them all; none when there is nothing to remove.</summary>
+    public async Task RemoveAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct)
+    {
+        if (listedProjects.Count > 0)
+            await runner.RunCheckedAsync("dotnet", ["sln", solutionFile, "remove", .. listedProjects.Order(StringComparer.Ordinal)], DirectoryOf(solutionFile), ct);
+    }
 
     private static IEnumerable<string> ServiceProjects(string root) =>
         Directory.GetDirectories(Layout.ServicesOf(root))
