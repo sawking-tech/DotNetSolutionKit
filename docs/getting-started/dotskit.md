@@ -72,7 +72,8 @@ What happens to a file:
 
 A file of the solution its git ignores, a local `appsettings.Secrets.json` among them, is never written, in either
 merge. A new file the template adds that the solution's git would ignore, as the secrets file of a new service, is
-written by the merge by files and left out by the merge by git.
+written by both: the merge by git, which leaves it off the branch, writes it beside the merge, and `git merge --abort`
+by hand leaves it, as git does not know it.
 
 `All.sln` is changed by `dotnet sln`, project by project, and never merged as text: `dotnet sln add` gives
 a project a new GUID each time. Its projects are merged the way a file's lines are: a project the template added

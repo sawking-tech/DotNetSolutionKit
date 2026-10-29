@@ -29,6 +29,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         if (plan.ByGit is var (@base, next))
         {
             conflicts = await git.MergeAsync(plan.Root, @base, next, plan.PreferTemplate, ct);
+            AddWhatTheBranchLeftOut(plan, transaction);
         }
         else
         {
@@ -62,23 +63,27 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
 
     /// <summary>
     /// The manifest, All.sln and the files the repair changed join git's merge, so committing it takes them and
-    /// <c>git merge --abort</c> puts them back; a failure here undoes the merge as well as the files. The manifest and
-    /// All.sln are staged as soon as they are written, so a repair that fails leaves neither on disk. The repair
+    /// <c>git merge --abort</c> puts them back; a failure here undoes the merge as well as the files. Staging and the
+    /// repair run inside the transaction, so a failure of either takes back what it wrote - the manifest, All.sln and
+    /// the files the branch left out, which git does not know - and the abort takes back the merge. The repair
     /// leaves a file in conflict alone, so staging never marks one resolved.
     /// </summary>
     private async Task<IReadOnlyList<string>> WriteBesideTheMergeAsync(Plan plan, FileTransaction transaction, IReadOnlyList<string> conflicts, string solutionFile, CancellationToken ct)
     {
         try
         {
-            await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
-            await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
-            var repaired = await RepairAsync(plan, conflicts, ct);
-            var written = repaired.Select(f => Path.GetRelativePath(plan.Root, f).Replace('\\', '/')).Distinct().ToList();
-            if (written.Count > 0)
+            IReadOnlyList<string> repaired = [];
+            await transaction.CommitAsync(async () =>
             {
-                await git.StageAsync(plan.Root, written, ct);
-            }
-
+                await ApplyMembershipAsync(plan, ct);
+                await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
+                repaired = await RepairAsync(plan, conflicts, ct);
+                var written = repaired.Select(f => Path.GetRelativePath(plan.Root, f).Replace('\\', '/')).Distinct().ToList();
+                if (written.Count > 0)
+                {
+                    await git.StageAsync(plan.Root, written, ct);
+                }
+            });
             return repaired;
         }
         catch (Exception failure)
@@ -98,6 +103,20 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         else if (change.Content is not null)
         {
             transaction.Write(change.Path, change.Content.ToBytes());
+        }
+    }
+
+    /// <summary>
+    /// A file the template adds that the merge left off the branch (<see cref="IGitMerge.LeftOut"/>): one the
+    /// solution's git ignores, as the secrets file of a new service. The merge by files writes it, so the merge by git
+    /// does too, beside the merge; a file of that name the team has already stays as it is.
+    /// </summary>
+    private void AddWhatTheBranchLeftOut(Plan plan, FileTransaction transaction)
+    {
+        foreach (var added in plan.Changes.Where(c =>
+            c.Kind == ChangeKind.Add && git.LeftOut.Contains(c.Path) && !File.Exists(Path.Combine(plan.Root, c.Path))))
+        {
+            Add(transaction, added);
         }
     }
 
