@@ -16,6 +16,12 @@ internal interface IGitMerge
 
     /// <summary>Undoes a merge this run started: a later step of the command failed.</summary>
     Task AbortAsync(string root, CancellationToken ct);
+
+    /// <summary>
+    /// The files of the next output the merge left off the branch: those the solution's git ignores, and All.sln. A
+    /// new one of them, as the secrets file of a new service, the writer adds beside the merge.
+    /// </summary>
+    IReadOnlySet<string> LeftOut { get; }
 }
 
 internal static class GitMergeExtensions
@@ -71,10 +77,13 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     /// <summary>The working branch's commit and the branch's tip before this run, put back by <see cref="AbortAsync"/>.</summary>
     private Before? _before;
 
+    public IReadOnlySet<string> LeftOut { get; private set; } = new HashSet<string>();
+
     public async Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
     {
         await RefuseAMergeInProgressAsync(root, ct);
         _before = new((await runner.RunCheckedAsync("git", ["rev-parse", "HEAD"], root, ct)).Trim(), await TipAsync(root, ct));
+        LeftOut = new HashSet<string>();
         try
         {
             return await MergeOverAsync(root, _before.Tip, @base, next, preferTemplate, ct);
@@ -176,7 +185,7 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     /// </summary>
     private async Task<string> KnownBaseAsync(string root, string? tip, TemplateCommit @base, CancellationToken ct)
     {
-        var tree = await TreeAsync(root, @base.Tree, ct);
+        var (tree, _) = await TreeAsync(root, @base.Tree, ct);
         if (tip is not null && await TreeOfAsync(root, tip, ct) == tree && await IsInHistoryAsync(root, tip, ct))
         {
             return tip;
@@ -195,17 +204,23 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         return commit;
     }
 
-    private async Task<string> CommitAsync(string root, string folder, string parent, string message, CancellationToken ct) =>
-        await CommitTreeAsync(root, await TreeAsync(root, folder, ct), parent, message, ct);
+    /// <summary>The template's output committed on <paramref name="parent"/>; what the tree left out is kept for the writer.</summary>
+    private async Task<string> CommitAsync(string root, string folder, string parent, string message, CancellationToken ct)
+    {
+        var (tree, leftOut) = await TreeAsync(root, folder, ct);
+        LeftOut = leftOut;
+        return await CommitTreeAsync(root, tree, parent, message, ct);
+    }
 
     private async Task<string> CommitTreeAsync(string root, string tree, string? parent, string message, CancellationToken ct) =>
         (await runner.RunCheckedAsync("git", ["commit-tree", tree, .. parent is null ? [] : new[] { "-p", parent }, "-m", message], root, ct)).Trim();
 
     /// <summary>
     /// The tree of a folder the template generated, written by an index of its own: the solution's own index and
-    /// files are not touched. A path the solution's git ignores, by any of its rules, and All.sln are left out.
+    /// files are not touched. A path the solution's git ignores, by any of its rules, and All.sln are left out, and
+    /// named: the files of the folder the tree does not have.
     /// </summary>
-    private async Task<string> TreeAsync(string root, string folder, CancellationToken ct)
+    private async Task<(string Tree, IReadOnlySet<string> LeftOut)> TreeAsync(string root, string folder, CancellationToken ct)
     {
         var work = Folders.NewTemp("template-tree");
         var index = new Dictionary<string, string> { [IndexVariable] = Path.Combine(work, "index") };
@@ -220,7 +235,10 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
             // -f: the index is this run's own, and git would otherwise compare it with the solution's files.
             await runner.RunCheckedAsync("git", ["rm", "--cached", "-q", "-f", "--pathspec-from-file", list, "--pathspec-file-nul"], root, ct, index);
         }
-        return (await runner.RunCheckedAsync("git", ["write-tree"], root, ct, index)).Trim();
+
+        var inTree = (await PathsAsync(root, ["ls-files", "-z"], index, ct)).ToHashSet(StringComparer.Ordinal);
+        var tree = (await runner.RunCheckedAsync("git", ["write-tree"], root, ct, index)).Trim();
+        return (tree, Folders.RelativeFiles(folder).Where(f => !inTree.Contains(f)).ToHashSet(StringComparer.Ordinal));
     }
 
     private async Task<string?> TipAsync(string root, CancellationToken ct)

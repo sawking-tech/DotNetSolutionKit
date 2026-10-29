@@ -56,6 +56,21 @@ internal sealed class TeamScenarios
     }
 
     [Test]
+    [TestCase("git")]
+    [TestCase("files")]
+    public async Task ANewService_GetsItsLocalSecretsFile_InEitherMerge(string merge)
+    {
+        var solution = await Sandbox.SolutionAsync();
+        var secrets = $"src/services/{Sandbox.Prefix}.Stock/{Sandbox.Prefix}.Stock.API/appsettings.Secrets.json";
+
+        var added = await solution.DotskitAsync("new", "-S", "Stock", "--merge", merge, "--yes", "--no-build");
+
+        added.Code.ShouldBe((int)ExitCode.Done, added.Output + added.Error);
+        File.Exists(Path.Combine(solution.Root, secrets)).ShouldBeTrue();
+        (await new ProcessRunner().RunCheckedAsync("git", ["status", "--porcelain"], solution.Root, CancellationToken.None)).ShouldNotContain("appsettings.Secrets.json");
+    }
+
+    [Test]
     public async Task ServiceLeftOutOfTheSolution_IsAddedAndNamed_When_TheTemplateAddsTheNextService()
     {
         var solution = await Sandbox.SolutionAsync();

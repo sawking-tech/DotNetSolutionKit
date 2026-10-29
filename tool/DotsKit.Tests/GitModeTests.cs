@@ -48,4 +48,42 @@ internal sealed class GitModeTests
         ignored.ShouldBe(["src/Api/appsettings.Secrets.json"]);
         outsideGit.ShouldBeEmpty();
     }
+
+    /// <summary>A merge by git that merges nothing and names the files of the next output it left off the branch.</summary>
+    private sealed class LeavingOut(params string[] leftOut) : IGitMerge
+    {
+        public IReadOnlySet<string> LeftOut { get; } = leftOut.ToHashSet();
+
+        public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct) =>
+            Task.FromResult<IReadOnlyList<string>>([]);
+
+        public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) => Task.CompletedTask;
+
+        public Task AbortAsync(string root, CancellationToken ct) => Task.CompletedTask;
+    }
+
+    private sealed class NoBuild : Solutions.IBuilder
+    {
+        public Task<ProcessResult> BuildAsync(string root, CancellationToken ct) => Task.FromResult(new ProcessResult(0, "", ""));
+    }
+
+    [Test]
+    public async Task AFileTheBranchLeftOut_IsWrittenBesideTheMerge_AndANewFileGitPutElsewhereIsNot()
+    {
+        const string secrets = "src/services/Stock/Stock.API/appsettings.Secrets.json";
+        const string moved = "src/services/Stock/Stock.API/New.cs";
+        var root = Folders.NewTemp("left-out");
+        Directory.CreateDirectory(Path.Combine(root, "src", "services"));
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "services", "Acme.Shop.All.sln"), "");
+        var manifest = new Manifest { Template = "2.9.0", Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"], Services = [] };
+        Change[] added = [new(secrets, ChangeKind.Add, Text("{}\n"), "new in the template"), new(moved, ChangeKind.Add, Text("class New;\n"), "new in the template")];
+        var plan = new Planning.Plan(root, manifest, added, new Solutions.MembershipChange([], []), ByGit: (new TemplateCommit("base", "2.8.0"), new TemplateCommit("next", "2.9.0")));
+        var writer = new Planning.PlanWriter(new Solutions.SolutionProjects(new ProcessRunner()), new LeavingOut(secrets),
+            new Solutions.ReferenceRepair(new Solutions.RepairWriter(new ProcessRunner()), new NoBuild()));
+
+        await writer.WriteAsync(plan, CancellationToken.None);
+
+        System.IO.File.Exists(Path.Combine(root, secrets)).ShouldBeTrue();
+        System.IO.File.Exists(Path.Combine(root, moved)).ShouldBeFalse();
+    }
 }
