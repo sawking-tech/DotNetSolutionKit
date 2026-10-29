@@ -48,6 +48,18 @@ internal sealed class ThreeWayMergeTests
     }
 
     [Test]
+    public async Task AMergedText_KeepsItsCharactersBeyondAscii_WhateverTheConsolesCodePage()
+    {
+        // A dash and Cyrillic: read by the console's code page they came back as "тАФ".
+        const string line = "// a dash — and Cyrillic: проверка\n";
+
+        var merged = await new GitMergeFile(new ProcessRunner()).MergeAsync(line + "team\n", line, "template\n" + line, false, CancellationToken.None);
+
+        merged.Conflicts.ShouldBe(0);
+        merged.Text.ShouldBe("template\n" + line + "team\n");
+    }
+
+    [Test]
     public async Task Should_Add_When_OnlyTheTemplateHasTheFile()
     {
         var trees = new Trees();
