@@ -1,3 +1,4 @@
+using DotsKit.Commands;
 using DotsKit.Generation;
 using DotsKit.Io;
 using DotsKit.Merging;
@@ -220,5 +221,15 @@ internal sealed class UpgradePartsTests
             "  Orders.API",
             "    Program.cs: CS0246 The type 'Foo' could not be found",
         ]);
+    }
+
+    [Test]
+    public void TheGuide_NamesTheMinorVersionsCrossed_AndTheUpgradingPageOfTheBranchTheTargetIsOn()
+    {
+        UpgradeGuide.Of("1.0.0", "2.8.0").ShouldBe(
+            "What a solution may have to change by hand, from v1.0 to v2.8: the sections for these versions of "
+            + "https://github.com/sawking-tech/DotNetSolutionKit/blob/master/docs/getting-started/upgrading.md");
+        UpgradeGuide.Of("2.8.0", "2.9.0-rc").ShouldEndWith("/blob/dev/docs/getting-started/upgrading.md");
+        UpgradeGuide.Of("2.8.0", TemplateSource.SourcesVersion).ShouldContain($"to {TemplateSource.SourcesVersion}: ");
     }
 }
