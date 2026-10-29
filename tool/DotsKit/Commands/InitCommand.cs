@@ -96,10 +96,8 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
     private async Task<Reproduction> CheckAsync(string root, Manifest manifest, CancellationToken ct)
     {
         terminal.Info($"Generating the solution again by the template {manifest.Template} to check the reading...");
-        var staged = await staging.BuildAsync(manifest, ct);
-        return Reproduction.Of(root, staged,
-            await projects.ListAsync(Layout.SolutionFileOf(root), ct),
-            await projects.ListAsync(Layout.SolutionFileOf(staged), ct));
+        var staged = await staging.BuildAsync(manifest, withSolutionFile: false, ct);
+        return Reproduction.Of(root, staged, await projects.ListAsync(Layout.SolutionFileOf(root), ct), SolutionProjects.InTree(staged));
     }
 
     private async Task<ExitCode> WriteAsync(string root, Manifest manifest, Options options, string? note)

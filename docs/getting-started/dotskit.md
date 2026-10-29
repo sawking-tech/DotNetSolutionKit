@@ -246,6 +246,9 @@ template changed - is the team's to decide, and its tests show it.
 | `--to 2.x.y` | `upgrade`: the release to bring the solution to, not newer than the tool |
 | `--merge files` | `new` and `upgrade`: merge by the tool and write the files, instead of a git merge of `dotskit/template` |
 
+`DOTSKIT_TRACE=1` prints every `dotnet` and `git` call of a command with its time to stderr: what a slow
+command spends its time on.
+
 ## Exit codes
 
 | Code | Meaning |

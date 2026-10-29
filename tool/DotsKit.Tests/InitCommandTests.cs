@@ -23,12 +23,12 @@ internal sealed class InitCommandTests
         public int Staged { get; private set; }
         public List<string> Lines { get; } = [];
 
-        public InitCommand Command() => new(new Staging(this), new Projects(), new Terminal(this), ToolVersion, OnSources);
+        public InitCommand Command() => new(new Staging(this), new Projects(this), new Terminal(this), ToolVersion, OnSources);
 
         /// <summary>What the template "gives" is the solution as it is, so the check reproduces every file.</summary>
         private sealed class Staging(Fakes fakes) : IStaging
         {
-            public Task<string> BuildAsync(Manifest manifest, CancellationToken ct)
+            public Task<string> BuildAsync(Manifest manifest, bool withSolutionFile, CancellationToken ct)
             {
                 fakes.Staged++;
                 var staged = Folders.NewTemp("init-staged");
@@ -37,13 +37,14 @@ internal sealed class InitCommandTests
             }
         }
 
-        private sealed class Projects : ISolutionProjects
+        /// <summary>The solution's All.sln lists what its files are, as a generated one does.</summary>
+        private sealed class Projects(Fakes fakes) : ISolutionProjects
         {
-            public Task<HashSet<string>> ListAsync(string solutionFile, CancellationToken ct) => Task.FromResult(new HashSet<string>());
+            public Task<HashSet<string>> ListAsync(string solutionFile, CancellationToken ct) => Task.FromResult(SolutionProjects.InTree(fakes.Root!));
             public Task AddMissingAsync(string root, CancellationToken ct) => Task.CompletedTask;
             public Task RemoveMissingAsync(string root, CancellationToken ct) => Task.CompletedTask;
-            public Task AddAsync(string solutionFile, string listedProject, CancellationToken ct) => Task.CompletedTask;
-            public Task RemoveAsync(string solutionFile, string listedProject, CancellationToken ct) => Task.CompletedTask;
+            public Task AddAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct) => Task.CompletedTask;
+            public Task RemoveAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct) => Task.CompletedTask;
         }
 
         private sealed class Terminal(Fakes fakes) : ITerminal

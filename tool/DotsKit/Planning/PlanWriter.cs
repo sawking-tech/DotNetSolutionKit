@@ -73,9 +73,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git) : IP
         if (plan.Membership.IsEmpty)
             return;
         var solutionFile = Layout.SolutionFileOf(plan.Root);
-        foreach (var project in plan.Membership.Add)
-            await projects.AddAsync(solutionFile, project, ct);
-        foreach (var project in plan.Membership.Remove)
-            await projects.RemoveAsync(solutionFile, project, ct);
+        await projects.AddAsync(solutionFile, plan.Membership.Add, ct);
+        await projects.RemoveAsync(solutionFile, plan.Membership.Remove, ct);
     }
 }
