@@ -159,6 +159,17 @@ internal static class TemplateVersions
     public static bool IsVersion(string version) =>
         version == TemplateSource.SourcesVersion || Version.TryParse(version.Split('-')[0], out _);
 
+    /// <summary>A solution says its version, DotNetSolutionKitVersion of Directory.Build.props, since 2.7.0.</summary>
+    private static readonly Version Declared = new(2, 7, 0);
+
+    /// <summary>
+    /// The releases a solution that does not say its version may be of: the last patch of each minor before
+    /// <see cref="Declared"/>: the patches of a minor differ little, and a check of each minor keeps the run short.
+    /// </summary>
+    public static IReadOnlyList<string> Undeclared(IEnumerable<string> releases) =>
+        [.. releases.Select(Version.Parse).Where(v => v < Declared)
+            .GroupBy(v => (v.Major, v.Minor)).Select(g => g.Max()!).Order().Select(v => v.ToString(3))];
+
     /// <summary>
     /// Why a solution of <paramref name="version"/> cannot be described by the tool of <paramref name="toolVersion"/>,
     /// with what to do instead; null when it can. The tool run against the template's sources takes any version.
@@ -170,7 +181,7 @@ internal static class TemplateVersions
     {
         if (version is null)
         {
-            return "The solution does not say its template version (it does since 2.7.0): name it, dotskit init --template-version 2.x.y.";
+            return $"The solution does not say its template version (it does since {Declared.ToString(3)}): name it, dotskit init --template-version 2.x.y.";
         }
 
         if (version == TemplateSource.SourcesVersion)

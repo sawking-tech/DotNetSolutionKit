@@ -9,14 +9,16 @@ namespace DotsKit.Commands;
 /// <c>dotskit init</c>: describes a solution made without dotskit in its manifest. Reads the manifest from the
 /// solution's files, generates the solution again by it with the version it names, shows how much of the
 /// template's files that reproduces, and writes <c>.dotskit/manifest.json</c> - and nothing else - after a yes.
-/// A solution with a manifest gets the services it does not list.
+/// A solution with a manifest gets the services it does not list. A solution that does not say its version is
+/// checked against each release it may be of, and the closest is named for a person to give.
 /// </summary>
 /// <param name="staging">Generates the solution again by the manifest read from its files, to show how much that reproduces.</param>
 /// <param name="projects">Reads the projects All.sln lists, to compare them with the ones of the tree generated again.</param>
+/// <param name="releases">The releases of the template, for a solution that does not say its version.</param>
 /// <param name="terminal">Shows the reproduction and asks before the manifest is written.</param>
 /// <param name="toolVersion">The version of the tool, the newest version of a solution it describes.</param>
 /// <param name="onSources">The tool runs against the template's sources: a solution of version "source" is theirs.</param>
-internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, ITerminal terminal, string toolVersion, bool onSources)
+internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, ITemplateReleases releases, ITerminal terminal, string toolVersion, bool onSources)
 {
     public async Task<ExitCode> RunAsync(Options options, string folder, CancellationToken ct)
     {
@@ -27,6 +29,11 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
         var prefix = SolutionReader.Prefix(Path.GetFileName(Layout.SolutionFileOf(root)));
         var given = Given(options);
         var current = Manifest.Load(root);
+        if (current is null && options.TemplateVersion is null && SolutionReader.Version(files) is null && files.Exists(Layout.CommonFolder))
+        {
+            return await AdviseAsync(root, files, prefix, given, ct);
+        }
+
         var next = current is null ? Described(files, prefix, options, given) : WithUnlisted(current, files, prefix, options);
         if (next is null)
         {
@@ -116,12 +123,58 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
         return ExitCode.Done;
     }
 
+    /// <summary>
+    /// A solution that does not say its version: it is generated again by each release it may be of, side by side,
+    /// and the closest is named. Nothing is written: the version is a person's to give, the table shows why. A
+    /// release that cannot be generated is listed with its reason, and the rest still decide.
+    /// </summary>
+    private async Task<ExitCode> AdviseAsync(string root, ISolutionFiles files, string prefix, TemplateArgs given, CancellationToken ct)
+    {
+        var candidates = TemplateVersions.Undeclared(await releases.ListAsync(ct));
+        if (candidates.Count == 0)
+        {
+            throw new InvalidOperationException(TemplateVersions.WhyNotDescribed(null, toolVersion, onSources));
+        }
+
+        terminal.Info($"The solution does not say its template version; checking it against {string.Join(", ", candidates)}.");
+        var listed = await projects.ListAsync(Layout.SolutionFileOf(root), ct);
+        var checks = await Task.WhenAll(candidates.Select(version => TryCheckAsync(root, listed, files, prefix, version, given, ct)));
+        foreach (var line in VersionAdvice.Lines(checks))
+        {
+            terminal.Info(line);
+        }
+
+        throw new InvalidOperationException(VersionAdvice.Closest(checks) is { } closest
+            ? $"Nothing is written: name the version, dotskit init --template-version {closest}, the closest by the files above."
+            : $"Nothing is written: no release could generate the solution again; {TemplateVersions.WhyNotDescribed(null, toolVersion, onSources)}");
+    }
+
+    /// <summary>
+    /// One release's check; a failure to read or generate by it is its line in the table, a cancel ends the run. The
+    /// line takes the last line of the failure: the reason, after the command dotnet new ran.
+    /// </summary>
+    private async Task<ReleaseCheck> TryCheckAsync(string root, IReadOnlySet<string> listed, ISolutionFiles files, string prefix, string version, TemplateArgs given,
+        CancellationToken ct)
+    {
+        try
+        {
+            return new(version, await CheckAsync(root, listed, SolutionReader.Read(files, prefix, version, given), ct));
+        }
+        catch (Exception e) when (e is InvalidOperationException or ArgumentException)
+        {
+            return new(version, null, e.Message.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[^1]);
+        }
+    }
+
     /// <summary>The solution generated again by the manifest, compared with the folder.</summary>
-    private async Task<Reproduction> CheckAsync(string root, Manifest manifest, CancellationToken ct)
+    private async Task<Reproduction> CheckAsync(string root, Manifest manifest, CancellationToken ct) =>
+        await CheckAsync(root, await projects.ListAsync(Layout.SolutionFileOf(root), ct), manifest, ct);
+
+    private async Task<Reproduction> CheckAsync(string root, IReadOnlySet<string> listed, Manifest manifest, CancellationToken ct)
     {
         terminal.Info($"Generating the solution again by the template {manifest.Template} to check the reading...");
         var staged = await staging.BuildAsync(manifest, withSolutionFile: false, ct);
-        return Reproduction.Of(root, staged, await projects.ListAsync(Layout.SolutionFileOf(root), ct), SolutionProjects.InTree(staged));
+        return Reproduction.Of(root, staged, listed, SolutionProjects.InTree(staged));
     }
 
     private async Task<ExitCode> WriteAsync(string root, Manifest manifest, Options options, string? note)

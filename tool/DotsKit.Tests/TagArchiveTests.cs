@@ -34,4 +34,16 @@ internal sealed class TagArchiveTests
 
         await Should.ThrowAsync<OperationCanceledException>(() => new TagArchive(http).FolderOfAsync("1.0.0", cancelled.Token));
     }
+
+    [Test]
+    public void TheReleases_AreTheTagsOfAVersion_AndAPreReleaseIsNone()
+    {
+        const string listed = "a1\trefs/tags/v1.0.0\r\nb2\trefs/tags/v2.0.0-preview.1\nc3\trefs/tags/v2.6.2\nd4\trefs/tags/backup\n";
+
+        GitTemplateReleases.Parse(listed).ShouldBe(["1.0.0", "2.6.2"]);
+    }
+
+    [Test]
+    public void ASolutionThatDoesNotSayItsVersion_MayBeOfTheLastPatchOfEachMinorBefore27() =>
+        TemplateVersions.Undeclared(["2.6.1", "1.0.0", "2.1.0", "2.6.2", "2.1.3", "2.7.0", "2.8.0"]).ShouldBe(["1.0.0", "2.1.3", "2.6.2"]);
 }

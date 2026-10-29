@@ -9,7 +9,8 @@ The template is versioned with git tags, by semantic versioning.
 | `v2.0.0` | The breaking changes completed and checked. |
 
 From 2.9 `dotskit upgrade` brings a solution of any release from `v1.0.0` to the current one, keeping the team's
-changes: `dotskit init --template-version` with the release the solution was made by, then `dotskit upgrade`, or
+changes: `dotskit init --template-version` with the release the solution was made by (`dotskit init` alone names
+the closest one), then `dotskit upgrade`, or
 a release at a time with `--to` ([dotskit](dotskit.md#upgrading-a-solution)). The sections below are the same
 changes by hand.
 
