@@ -25,4 +25,18 @@ internal sealed class CommandLineTests
         CommandLine.Batches(["a.csproj", "b.csproj"], ["sln", "All.sln", "add"]).Single().ShouldBe(["a.csproj", "b.csproj"]);
         CommandLine.Batches([], ["sln", "All.sln", "remove"]).ShouldBeEmpty();
     }
+
+    [Test]
+    public void APathTooLongForABatchOfItsOwn_IsRefused_BeforeTheFirstBatchOfItsList()
+    {
+        var tooLong = new string('a', 200) + ".csproj";
+
+        var paths = Enumerable.Range(0, 100).Select(n => $"project{n:D2}.csproj").Append(tooLong);
+        using var batches = CommandLine.Batches(paths, ["sln", "All.sln", "add"], maxLength: 200).GetEnumerator();
+
+        var refused = Should.Throw<InvalidOperationException>(() => batches.MoveNext());
+
+        refused.Message.ShouldContain(tooLong);
+        refused.Message.ShouldContain("a shorter path");
+    }
 }
