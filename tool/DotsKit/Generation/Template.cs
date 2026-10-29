@@ -38,12 +38,28 @@ internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> pa
 
     private readonly string _hive = Folders.NewTemp("hive");
     /// <summary>The one install of this hive: the base and the next tree of one version may ask for it at once.</summary>
+    private readonly SemaphoreSlim _generating = new(1, 1);
     private readonly object _installing = new();
     private Task? _install;
 
     public async Task GenerateAsync(TemplateArgs args, string root, CancellationToken ct)
     {
         await InstallOnceAsync(ct);
+        // One dotnet new at a time in a hive: two write its cache at once, and Windows refuses the second. Trees of
+        // two versions have two hives and still go side by side.
+        await _generating.WaitAsync(ct);
+        try
+        {
+            await RunAsync(args, root, ct);
+        }
+        finally
+        {
+            _generating.Release();
+        }
+    }
+
+    private async Task RunAsync(TemplateArgs args, string root, CancellationToken ct)
+    {
         Directory.CreateDirectory(root);
         List<string> command = ["new", ShortName, .. args.ToArgs(), "--output", root, .. ScriptsAllowed(), "--debug:custom-hive", _hive];
         var result = await runner.RunAsync("dotnet", command, root, ct);
