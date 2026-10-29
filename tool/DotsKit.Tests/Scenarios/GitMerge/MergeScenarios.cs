@@ -16,6 +16,31 @@ namespace DotsKit.Tests.Scenarios.GitMerge;
 internal sealed class MergeScenarios
 {
     [Test]
+    public async Task HooksThatRefuseEveryCommit_DoNotStopTheBaseFromBeingAdopted()
+    {
+        var root = await SolutionAsync();
+        var head = await HeadAsync(root);
+        // The repository's own hooks folder, over a global core.hooksPath that would leave these hooks unread.
+        await Git(root, "config", "core.hooksPath", ".git/hooks");
+        foreach (var hook in new[] { "commit-msg", "pre-merge-commit", "prepare-commit-msg", "post-merge" })
+        {
+            var path = Path.Combine(root, ".git", "hooks", hook);
+            await File.WriteAllTextAsync(path, "#!/bin/sh\necho refused by the team's hook >&2\nexit 1\n");
+            if (!OperatingSystem.IsWindows())
+            {
+                File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            }
+        }
+
+        var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, CancellationToken.None);
+
+        conflicts.ShouldBeEmpty();
+        Read(root, ProgramFile).ShouldBe(NextProgram + "team\n");
+        (await Runner.RunCheckedAsync("git", ["rev-parse", "HEAD^1"], root, CancellationToken.None)).Trim().ShouldBe(head);
+        (await Runner.RunCheckedAsync("git", ["log", "-1", "--format=%s"], root, CancellationToken.None)).Trim().ShouldBe("dotskit: the solution is of the template 1.0.0");
+    }
+
+    [Test]
     public async Task TheTemplatesChange_MergesWithTheTeams_AndAnIgnoredFileAndAllSlnStayAsTheyAre()
     {
         var root = await SolutionAsync();
