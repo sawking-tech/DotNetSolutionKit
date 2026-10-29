@@ -21,15 +21,6 @@ internal sealed class GitClient(IProcessRunner runner)
     }
 
     /// <summary>
-    /// Brings the paths back to HEAD, in the index and on disk; one HEAD has not got is removed. The result says
-    /// whether git could.
-    /// </summary>
-    public async Task<ProcessResult> RestoreToHeadAsync(string root, IReadOnlyCollection<string> paths, CancellationToken ct) =>
-        paths.Count == 0
-            ? new ProcessResult(0, "", "")
-            : await runner.RunAsync("git", await WithPathsAsync(["restore", "--source=HEAD", "--staged", "--worktree"], paths, ct), root, ct);
-
-    /// <summary>
     /// Takes the paths out of an index of its own (<paramref name="environment"/>), whatever the files on disk are:
     /// -f, as git would otherwise compare that index with the solution's files.
     /// </summary>

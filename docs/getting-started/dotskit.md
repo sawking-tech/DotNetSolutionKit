@@ -54,9 +54,14 @@ The template's parameters are passed as they are, in short or long form, in any 
 3. Compares the base, the new template output and the solution file by file, and shows the plan: every
    file with what happens to it and why, and the projects added to `All.sln` or removed from it.
 4. Asks before writing. `--yes` writes without asking.
-5. Writes all files or none: an error or Ctrl+C in the middle puts every file back. A process killed while
-   writing leaves `*.dotskit-new` and `*.dotskit-old` files beside the solution's; `git status` shows them,
-   and the next command refuses the unclean tree until they are cleaned up with git.
+5. Writes the files. Each new content goes beside its file first, then the files are swapped in with the
+   originals kept aside. An error or Ctrl+C before the write is done puts the originals back; a file the disk
+   refuses to put back is named in the error, with its original beside it as `*.dotskit-old`, and a new file it
+   refuses to remove is named to delete. In the merge by git, git then takes back the rest of the run,
+   [below](#merged-by-git). After a write that is done, an original the disk refuses to remove, as one another
+   process holds, stays beside its file. A process killed while writing leaves `*.dotskit-new` and
+   `*.dotskit-old` files beside the solution's. `git status` shows what is left, and the next command refuses
+   the unclean tree until it is cleaned up with git.
 6. Builds `All.sln`.
 
 What happens to a file:
@@ -87,8 +92,12 @@ In a solution there already, `dotskit new` and `dotskit upgrade` merge by git, t
   base when the branch's last commit has the base's files and the working branch has that commit in its history;
   otherwise, as the first time or on another branch, the base is committed there and merged into the working
   branch with `git merge -s ours`: the solution's files stay as they are, and git knows the base from then on.
-  `git merge --abort` leaves this commit, it changes no file. When a step of the command fails, the command takes
-  back the merge, this commit and the move of the branch itself: git is as it was before the run;
+  `git merge --abort` leaves this commit, it changes no file. The merge does not start over a tree changed after
+  the command started, as a file saved while the plan waited for a yes. When a later step fails, the command runs
+  `git reset --hard` to the commit it started from and puts the branch back: this takes back the merge, this
+  commit and every tracked file the run changed, and leaves the files git does not track. A tracked file changed
+  by hand while the merge runs is taken back with them. When git refuses, as over an `index.lock` left by a git
+  that was stopped, the error names the commands that do it by hand;
 - the command commits the template's new output there and runs `git merge --no-ff --no-commit dotskit/template`.
   git takes the template's changes and the team's, follows the files the template moved, and marks the lines
   both changed for the IDE or `git mergetool`. The merge stays uncommitted: look at it, commit it, or undo it
@@ -135,7 +144,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | commits on the working branch, files unchanged | `git merge -s ours --no-ff` | the base adopted, the first time or on another branch |
 | merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge |
 | stages | `git add` | the manifest, `All.sln` and the files the repair changed join the merge |
-| undoes a run that failed | `git restore --source=HEAD --staged --worktree`, `git merge --abort`, `git reset --soft`, `git update-ref` (or `-d`) | what was staged, the merge, the adopting commit and the branch, back as they were before the run |
+| undoes a run that failed | `git reset --hard`, `git update-ref` (or `-d`); `git rev-parse --git-path index.lock` when git refuses | the working branch, its tracked files and the branch `dotskit/template` back where they were before the run |
 
 The tool never commits the merge, never pushes, and never checks out a branch: the merge is the team's to look
 at, commit or undo.
@@ -237,7 +246,9 @@ fails:
   projects that reference it show their own errors.
 
 The report says how many references and `using` lines changed; `git diff` shows them. The repair runs after
-the merge is written: a write of it that fails stops it, and the report says why. With `--no-build` there is
+the merge is written. The one before the build is a step of the write: in the merge by git a failure or Ctrl+C
+there takes back the run; in the merge by files the files stay written, and the error says so. A write of the
+repair after a build that fails stops the repair, and the report says why. With `--no-build` there is
 no build and no repair.
 
 Which versions: one major version at a time. dotskit X.y upgrades a solution of every minor of X and of the
