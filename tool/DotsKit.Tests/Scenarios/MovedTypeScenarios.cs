@@ -6,6 +6,7 @@ namespace DotsKit.Tests.Scenarios;
 /// <summary>
 /// A type of the template moved to another project and namespace, as 3.0 moves Common's (#101), and the team's code
 /// that used it built again by the repair of dotskit upgrade (#117), with the real dotnet build.
+/// The scenarios of this folder and what each file checks: README.md beside this file.
 /// </summary>
 [TestFixture]
 [Category(Sandbox.Category)]

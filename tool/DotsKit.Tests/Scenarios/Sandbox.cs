@@ -5,6 +5,7 @@ namespace DotsKit.Tests.Scenarios;
 /// <summary>
 /// A generated solution to act on as a team would: the template from this repository's sources, the tool as
 /// the command line a person runs, git around it. Each test gets its own copy of one solution made once.
+/// The scenarios of this folder and what each file checks: README.md beside this file.
 /// </summary>
 internal sealed class Sandbox
 {

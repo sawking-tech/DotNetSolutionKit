@@ -8,6 +8,7 @@ namespace DotsKit.Tests.Scenarios;
 /// A solution of the first release, 1.0.0, with code of the team that uses the types of Common, upgraded by
 /// dotskit a release at a time to the last minor of each 2.x and then to the template's sources; every step
 /// builds (#117). The releases before 2.6.1 come from their tags on GitHub, so the chain needs the network.
+/// The scenarios of this folder and what each file checks: README.md beside this file.
 /// </summary>
 [TestFixture]
 [Category(Category)]
