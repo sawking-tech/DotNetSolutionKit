@@ -189,6 +189,19 @@ internal sealed class InitCommandTests
     }
 
     [Test]
+    public async Task ASolutionClosestTo100_IsAskedToBeBroughtTo200_NotDescribedAs100()
+    {
+        var root = Solution(version: null);
+        var fakes = new Fakes { Releases = ["1.0.0", "2.0.0", "2.1.3"], Closest = "1.0.0" };
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(root));
+
+        refused.Message.ShouldContain("dotskit init --template-version 2.0.0");
+        refused.Message.ShouldNotContain("--template-version 1.0.0");
+        HasManifest(root).ShouldBeFalse();
+    }
+
+    [Test]
     public async Task AReleaseThatCannotBeGenerated_IsItsLineInTheTable_AndTheOthersStillDecide()
     {
         var root = Solution(version: null);
@@ -221,6 +234,17 @@ internal sealed class InitCommandTests
 
         VersionAdvice.Closest([new("2.1.3", same), new("2.6.2", same), new("2.0.0", null, "failed")]).ShouldBe("2.6.2");
         VersionAdvice.Closest([new("2.0.0", null, "failed")]).ShouldBeNull();
+    }
+
+    [Test]
+    public void AClosestReleaseOf1x_IsBroughtTo200ByHandFirst_AndA2xIsNamedAsItIs()
+    {
+        var old = VersionAdvice.Advice("1.0.0");
+        old.ShouldContain("the closest by the files above is 1.0.0");
+        old.ShouldContain("dotskit init --template-version 2.0.0");
+        old.ShouldContain("A solution of v1");
+
+        VersionAdvice.Advice("2.6.2").ShouldContain("dotskit init --template-version 2.6.2,");
     }
 
     [Test]

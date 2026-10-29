@@ -145,7 +145,7 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
         }
 
         throw new InvalidOperationException(VersionAdvice.Closest(checks) is { } closest
-            ? $"Nothing is written: name the version, dotskit init --template-version {closest}, the closest by the files above."
+            ? VersionAdvice.Advice(closest)
             : $"Nothing is written: no release could generate the solution again; {TemplateVersions.WhyNotDescribed(null, toolVersion, onSources)}");
     }
 

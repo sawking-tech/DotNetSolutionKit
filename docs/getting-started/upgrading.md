@@ -8,11 +8,12 @@ The template is versioned with git tags, by semantic versioning.
 | `v2.0.0-preview.1` | The breaking changes in progress. |
 | `v2.0.0` | The breaking changes completed and checked. |
 
-From 2.9 `dotskit upgrade` brings a solution of any release from `v1.0.0` to the current one, keeping the team's
-changes: `dotskit init --template-version` with the release the solution was made by (`dotskit init` alone names
-the closest one), then `dotskit upgrade`, or
-a release at a time with `--to` ([dotskit](dotskit.md#upgrading-a-solution)). The sections below are the same
-changes by hand.
+From 2.9 `dotskit upgrade` brings a solution of a 2.x release to the current one, and git keeps the team's
+changes where they merge with the template's; the rest are conflicts to resolve. First `dotskit init
+--template-version` with the release the solution was made by (`dotskit init` alone names the closest one), then
+`dotskit upgrade`, or a release at a time with `--to` ([dotskit](dotskit.md#upgrading-a-solution)). A solution
+of v1 is brought to `v2.0.0` by hand first, [below](#a-solution-of-v1). The sections below are the same changes
+by hand.
 
 What each version brings, from `v2.1.0` on, is in [version.json](../../version.json) and on the
 [releases page](https://github.com/sawking-tech/DotNetSolutionKit/releases); the table lists only the
@@ -229,9 +230,11 @@ solution; in your scripts, `-M false` can become `--Solution`.
 
 ## A solution of v1
 
-`dotskit upgrade` brings it to `v2` and on, keeping the team's changes. `dotnet new ... --force` over it
-overwrites the files `v2` changed and leaves the rest, and the result does not build. The list below is what
-changed, for a change made by hand.
+`v1.0.0` and `v2.0.0` differ in most files, and a merge of the two leaves most of them in conflict: on one
+real solution of v1, 96 files. So the code is brought to `v2.0.0` by the list below, the solution is described
+as `2.0.0` with `dotskit init --template-version 2.0.0`, and `dotskit upgrade` takes it on from there.
+`dotskit init` names this way when the closest release is `1.0.0`. `dotnet new ... --force` over a solution of v1
+overwrites the files `v2` changed and leaves the rest, and the result does not build.
 
 ## What changed in v2
 
