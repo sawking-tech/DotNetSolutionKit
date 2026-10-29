@@ -84,7 +84,7 @@ internal sealed class MovedTypeScenarios
         var (build, repaired, stopped) = await new ReferenceRepair(new RepairWriter(Runner), builder).RunAsync(root, map, failed, CancellationToken.None);
 
         build.Code.ShouldBe(0, build.Output + build.Error);
-        repaired.ShouldBeGreaterThan(0);
+        repaired.ShouldNotBeEmpty();
         stopped.ShouldBeNull();
         File.ReadAllText(Path.Combine(root, Order)).ShouldStartWith("using Acme.Shop.Framework.Events;\n");
         File.ReadAllText(Path.Combine(root, Orders)).ShouldContain("Acme.Shop.Framework.Events.csproj");

@@ -15,5 +15,21 @@ namespace DotsKit.Planning;
 /// The two outputs git merges into the solution (<see cref="GitTemplateMerge"/>); <paramref name="Changes"/> then names the
 /// template's own changes. Null when the tool writes <paramref name="Changes"/> itself.
 /// </param>
+/// <param name="OnConflicts">
+/// The manifest written instead of <paramref name="Next"/> when the merge leaves conflicts: the last part of an upgrade a
+/// part at a time keeps the upgrade open, so the run after the resolution repairs the usings, builds and moves the version.
+/// </param>
+/// <param name="Parts">
+/// Every part of an upgrade a part at a time in its order, from the solution and the template's next output together.
+/// </param>
+/// <param name="Waiting">
+/// The template's files of the parts an upgrade a part at a time has not merged yet, relative to the root: the repair
+/// by the build's errors leaves them to their part.
+/// </param>
 internal sealed record Plan(string Root, Manifest Next, IReadOnlyList<Change> Changes, MembershipChange Membership, IReadOnlyList<string>? Packages = null,
-    TypeMap? Types = null, (TemplateCommit Base, TemplateCommit Next)? ByGit = null, bool PreferTemplate = false);
+    TypeMap? Types = null, (TemplateCommit Base, TemplateCommit Next)? ByGit = null, bool PreferTemplate = false, Manifest? OnConflicts = null,
+    IReadOnlyList<string>? Parts = null, IReadOnlySet<string>? Waiting = null)
+{
+    /// <summary>The manifest the solution has once the plan is written, by whether the merge left conflicts.</summary>
+    public Manifest Written(bool conflicts) => conflicts && OnConflicts is { } open ? open : Next;
+}

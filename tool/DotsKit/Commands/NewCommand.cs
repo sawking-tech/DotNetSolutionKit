@@ -57,6 +57,11 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
     {
         var manifest = Manifest.Load(root)
             ?? throw new InvalidOperationException($"{Layout.ManifestPath} is missing: describe the solution first, dotskit init.");
+        if (manifest.Upgrade is { } upgrade)
+        {
+            throw new InvalidOperationException($"An upgrade to {upgrade.To} goes a part at a time, {string.Join(", ", upgrade.Done)} merged: finish it, dotskit upgrade, then add.");
+        }
+
         var version = Target;
         if (manifest.Template != version)
         {
