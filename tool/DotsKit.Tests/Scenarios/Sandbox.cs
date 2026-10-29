@@ -93,11 +93,16 @@ internal sealed class Sandbox
 
     private async Task GitAsync(params string[] args) => await Runner.RunCheckedAsync("git", args, Root, CancellationToken.None);
 
+    /// <summary>The tool these scenarios run, as dotnet runs it.</summary>
+    private static string Tool => Path.Combine(AppContext.BaseDirectory, "dotskit.dll");
+
+    /// <summary>How git runs the tool again for its merge driver, as the tool says it of itself.</summary>
+    public static string Self => SelfCommand.Of("dotnet", Tool);
+
     public static Task<ProcessResult> DotskitIn(string folder, IReadOnlyList<string> args)
     {
         Environment.SetEnvironmentVariable(SourcesVariable, TemplateSources);
-        var tool = Path.Combine(AppContext.BaseDirectory, "dotskit.dll");
-        return Runner.RunAsync("dotnet", [tool, .. args], folder, CancellationToken.None);
+        return Runner.RunAsync("dotnet", [Tool, .. args], folder, CancellationToken.None);
     }
 
     private static async Task<string> MakeReferenceAsync()

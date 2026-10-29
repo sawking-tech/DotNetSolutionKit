@@ -31,13 +31,19 @@ internal sealed record TemplateCommit(string Tree, string Version);
 /// The commits are made with git's plumbing and an index of their own: nothing is checked out, no hook runs. What
 /// the solution's git ignores, a local secret among them, and All.sln, which changes by <c>dotnet sln</c>, are never
 /// in the branch.
+/// A file both sides changed is merged by <see cref="StyleMergeDriver"/>, given to this one merge by <c>-c</c> and an
+/// attributes file of its own: the solution's config and files are not touched. The solution's .gitattributes wins
+/// over that file, so a file with a merge of its own, as one of Git LFS, keeps it.
 /// </summary>
-internal sealed class GitTemplateMerge(IProcessRunner runner) : IGitMerge
+/// <param name="self">The command line that runs dotskit again (<see cref="SelfCommand"/>), for git to run the driver.</param>
+internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGitMerge
 {
     public const string Branch = "dotskit/template";
 
     private const string BranchRef = "refs/heads/" + Branch;
     private const string IndexVariable = "GIT_INDEX_FILE";
+    private const string Driver = "dotskit";
+    private const string GlobalAttributes = "git/attributes";
 
     public async Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
     {
@@ -47,7 +53,8 @@ internal sealed class GitTemplateMerge(IProcessRunner runner) : IGitMerge
         var nextCommit = await CommitAsync(root, next.Tree, baseCommit, $"dotskit: the template {next.Version}", ct);
         // Moved only from the tip read above: a commit another run put there in between is not lost (empty: no branch yet).
         await runner.RunCheckedAsync("git", ["update-ref", BranchRef, nextCommit, tip ?? ""], root, ct);
-        var merge = await runner.RunAsync("git", ["merge", "--no-ff", "--no-commit", .. preferTemplate ? new[] { "-X", "theirs" } : [], Branch], root, ct);
+        var merge = await runner.RunAsync("git",
+            [.. await DriverConfigAsync(root, preferTemplate, ct), "merge", "--no-ff", "--no-commit", .. preferTemplate ? new[] { "-X", "theirs" } : [], Branch], root, ct);
         var conflicts = await PathsAsync(root, ["diff", "--name-only", "-z", "--diff-filter=U"], null, ct);
         if (merge.Code != 0 && conflicts.Count == 0)
             throw new InvalidOperationException($"git could not merge {Branch}: {FirstLine(merge)} Nothing is merged; run git merge --abort if git started one.");
@@ -58,6 +65,33 @@ internal sealed class GitTemplateMerge(IProcessRunner runner) : IGitMerge
         runner.RunCheckedAsync("git", ["add", "--", .. paths], root, ct);
 
     public Task AbortAsync(string root, CancellationToken ct) => runner.RunAsync("git", ["merge", "--abort"], root, ct);
+
+    /// <summary>
+    /// The options that give this merge <see cref="StyleMergeDriver"/>: an attributes file with the user's global
+    /// attributes, then every path to the driver - the lowest place git reads attributes from, under the solution's
+    /// own. -X theirs does not reach a driver, so the driver is told in its own words. git quotes %O, %A, %B and %P
+    /// for the shell itself, so a path with a space comes whole and a quote around one would become part of it.
+    /// </summary>
+    private async Task<string[]> DriverConfigAsync(string root, bool preferTemplate, CancellationToken ct)
+    {
+        var attributes = Path.Combine(Folders.NewTemp("attributes"), "attributes");
+        var global = await GlobalAttributesAsync(root, ct);
+        await File.WriteAllTextAsync(attributes, (global is null ? "" : await File.ReadAllTextAsync(global, ct) + "\n") + $"* merge={Driver}\n", ct);
+        var command = $"{self} {StyleMergeDriver.Command} %O %A %B %P{(preferTemplate ? " " + StyleMergeDriver.TheirsFlag : "")}";
+        return ["-c", $"core.attributesFile={attributes.Replace('\\', '/')}", "-c", $"merge.{Driver}.name=dotskit, the three sides in the template's style",
+            "-c", $"merge.{Driver}.driver={command}"];
+    }
+
+    /// <summary>The user's global attributes file, as git finds it: core.attributesFile, else git/attributes of the XDG config.</summary>
+    private async Task<string?> GlobalAttributesAsync(string root, CancellationToken ct)
+    {
+        var configured = await runner.RunAsync("git", ["config", "--path", "--get", "core.attributesFile"], root, ct);
+        var config = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") is { Length: > 0 } xdg
+            ? xdg
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
+        var file = configured.Code == 0 ? configured.Output.Trim() : Path.Combine(config, GlobalAttributes);
+        return File.Exists(file) ? file : null;
+    }
 
     private async Task RefuseAMergeInProgressAsync(string root, CancellationToken ct)
     {

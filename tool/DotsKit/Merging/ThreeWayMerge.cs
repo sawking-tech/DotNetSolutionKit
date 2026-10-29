@@ -76,11 +76,13 @@ internal sealed class ThreeWayMerge(ITextMerger merger)
                 ? new(path, ChangeKind.Update, merge.Template, merge.Reason + "; binary, the template's taken")
                 : new(path, ChangeKind.Kept, null, merge.Reason + "; binary, kept as it is");
 
+        // The three sides in the template's style: a change of the style alone conflicts with nothing the team wrote.
+        var (solution, @base, template) = (TemplateStyle.Of(path, merge.Solution), TemplateStyle.Of(path, merge.Base), TemplateStyle.Of(path, merge.Template));
         var result = await merger.MergeAsync(
-            LineEndings.ToLf(merge.Solution.Text), LineEndings.ToLf(merge.Base.Text), LineEndings.ToLf(merge.Template.Text), preferTemplate, ct);
+            LineEndings.ToLf(solution.Text), LineEndings.ToLf(@base.Text), LineEndings.ToLf(template.Text), preferTemplate, ct);
         if (result.Failure is not null)
             throw new InvalidOperationException($"git could not merge {path}: {result.Failure}. Nothing was written.");
-        var content = merge.Solution with { Text = LineEndings.Apply(result.Text, LineEndings.Of(merge.Solution.Text)) };
+        var content = solution with { Text = LineEndings.Apply(result.Text, LineEndings.Of(solution.Text)) };
         return result.Conflicts == 0
             ? new(path, ChangeKind.Merge, content, merge.Reason)
             : new(path, ChangeKind.Conflict, content, merge.Reason + $"; {result.Conflicts} conflict(s) marked");
