@@ -71,7 +71,8 @@ What happens to a file:
 | `Conflict` | both changed the same lines, or lines right next to each other | the file with both versions between `<<<<<<< solution` and `>>>>>>> template` |
 
 `All.sln` is changed by `dotnet sln`, project by project, and never merged as text: `dotnet sln add` gives
-a project a new GUID each time.
+a project a new GUID each time. Its projects are merged the way a file's lines are: a project the template added
+joins it, one the template removed leaves it unless the team added it, and one the team took out stays out.
 
 ### Merged by git
 

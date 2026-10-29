@@ -111,4 +111,13 @@ internal sealed class ManifestTests
         change.Add.ShouldBe(["c"]);
         change.Remove.ShouldBe(["b"]);
     }
+
+    [Test]
+    public void Should_NotAddBack_AProjectTheTeamRemoved_TheTemplateStillHas()
+    {
+        HashSet<string> solution = ["a"], @base = ["a", "testing"], next = ["a", "testing", "c"], unchanged = ["a", "testing"];
+
+        MembershipChange.Of(solution, @base, next).Add.ShouldBe(["c"]);
+        MembershipChange.Of(solution, @base, unchanged).IsEmpty.ShouldBeTrue();
+    }
 }
