@@ -1,8 +1,8 @@
 # Documentation
 
-**DotNetSolutionKit (dotskit)** is a configurable `dotnet new` template and lifecycle toolkit for standardized .NET solutions.
+**DotNetSolutionKit (dotskit)** generates a .NET microservice solution to a team's needs: DDD and Clean Architecture, CI, deployment and tests, with modules and integrations with infrastructure services turned on by flags. `dotskit` adds services to the solution and flags to its services. The generated solution is an ordinary .NET solution the team owns.
 
-It provides ready-to-use architectural building blocks, modules, and integrations with infrastructure services that can be combined through flags to create different solution variants tailored to a team's needs and infrastructure. It generates microservice solutions based on DDD and Clean Architecture, with CI, deployment, and testing, adds services, connects modules to them, and upgrades solutions to new template versions while preserving the team's code. The generated solution remains an ordinary .NET project owned by the team, allowing them to focus on the architecture of the solution they are building and its business logic.
+`dotskit upgrade` brings the template's later improvements into a generated solution under the team's control and helps the team maintain its solution: a three-way merge with the team's code, where what does not merge is a conflict for the team to resolve.
 
 What the template gives a solution, at a glance:
 

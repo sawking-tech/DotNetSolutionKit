@@ -7,13 +7,9 @@ Made by Vladimir Savkin at [sawking.tech](https://sawking.tech/).
 Site: [dotskit.sawking.tech](https://dotskit.sawking.tech/). Documentation, in English and Russian:
 [dotskit.sawking.tech/docs.html](https://dotskit.sawking.tech/docs.html).
 
-A solution of an earlier 2.x version is brought to the current one by `dotskit upgrade`: git keeps the team's
-changes where they merge with the template's, and the rest are conflicts to resolve. A solution of v1 is brought
-to 2.0.0 by hand first ([upgrading](docs/getting-started/upgrading.md)).
+**DotNetSolutionKit (dotskit)** generates a .NET microservice solution to a team's needs: DDD and Clean Architecture, CI, deployment and tests, with modules and integrations with infrastructure services turned on by flags. `dotskit` adds services to the solution and flags to its services. The generated solution is an ordinary .NET solution the team owns.
 
-**DotNetSolutionKit (dotskit)** is a configurable `dotnet new` template and lifecycle toolkit for standardized .NET solutions.
-
-It provides ready-to-use architectural building blocks, modules, and integrations with infrastructure services that can be combined through flags to create different solution variants tailored to a team's needs and infrastructure. It generates microservice solutions based on DDD and Clean Architecture, with CI, deployment, and testing, adds services, connects modules to them, and upgrades solutions to new template versions while preserving the team's code. The generated solution remains an ordinary .NET project owned by the team, allowing them to focus on the architecture of the solution they are building and its business logic.
+`dotskit upgrade` brings the template's later improvements into a generated solution under the team's control and helps the team maintain its solution: a three-way merge with the team's code, where what does not merge is a conflict for the team to resolve.
 
 What it gives a solution in full - the principles, the economics, the cost:
 [what the template gives](docs/getting-started/what-it-gives.md).
@@ -35,6 +31,10 @@ dotskit init                                      # in a solution made without d
 dotskit upgrade                                   # in the solution: bring it to the tool's version of the template
 dotskit upgrade --to 2.3.0                        # in the solution: to an earlier release, a step at a time
 ```
+
+A solution of an earlier 2.x version is brought to the current one by `dotskit upgrade`: git keeps the team's
+changes where they merge with the template's, and the rest are conflicts to resolve. A solution of v1 is brought
+to 2.0.0 by hand first ([upgrading](docs/getting-started/upgrading.md)).
 
 <details>
 <summary>The template alone, by <code>dotnet new</code></summary>
