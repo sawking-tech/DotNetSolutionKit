@@ -55,13 +55,78 @@ internal sealed class GitMergeScenarios
     private static string Base() =>
         Tree((".gitignore", "appsettings.Secrets.json\n"), (Program, "a\nb\nc\nd\ne\n"), (Solution, "the template's All.sln\n"), (Secrets, "the template's secret\n"));
 
+    private static readonly byte[] Bom = [0xEF, 0xBB, 0xBF];
+
+    private static void WriteWithBom(string root, string path, string text)
+    {
+        var full = Path.Combine(root, path);
+        Directory.CreateDirectory(Path.GetDirectoryName(full)!);
+        File.WriteAllBytes(full, [.. Bom, .. System.Text.Encoding.UTF8.GetBytes(text)]);
+    }
+
+    [Test]
+    public async Task TheTemplatesStyleAlone_ConflictsWithNothingTheTeamWrote_AndTheMergedFileHasTheStyle()
+    {
+        var root = Folders.NewTemp("git-merge-style");
+        WriteWithBom(root, Program, "a  \nb\nteam\n");
+        await Git(root, "init", "-q");
+        await Git(root, "add", "-A");
+        await Git(root, "commit", "-q", "-m", "the solution");
+        var @base = Folders.NewTemp("git-merge-tree");
+        WriteWithBom(@base, Program, "a  \nb");
+
+        var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(@base, "2.8.0"), new(Tree((Program, "a\nb\n")), "2.9.0"), false,
+            CancellationToken.None);
+
+        conflicts.ShouldBeEmpty();
+        Read(root, Program).ShouldBe("a\nb\nteam\n");
+        File.ReadAllBytes(Path.Combine(root, Program)).AsSpan().StartsWith(Bom).ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task ASolutionFileBothChanged_KeepsItsByteOrderMark_EvenWithASpaceInItsPath()
+    {
+        const string solutionFile = "src/services/Acme Shop/Orders.sln";
+        var root = Folders.NewTemp("git-merge-sln");
+        WriteWithBom(root, solutionFile, "a\nb\nteam\n");
+        await Git(root, "init", "-q");
+        await Git(root, "add", "-A");
+        await Git(root, "commit", "-q", "-m", "the solution");
+        var (@base, next) = (Folders.NewTemp("git-merge-tree"), Folders.NewTemp("git-merge-tree"));
+        WriteWithBom(@base, solutionFile, "a\nb\n");
+        WriteWithBom(next, solutionFile, "template\na\nb\n");
+
+        var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(@base, "2.8.0"), new(next, "2.9.0"), false, CancellationToken.None);
+
+        conflicts.ShouldBeEmpty();
+        Read(root, solutionFile).ShouldBe("template\na\nb\nteam\n");
+        File.ReadAllBytes(Path.Combine(root, solutionFile)).AsSpan().StartsWith(Bom).ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task AFileTheTeamKeepsInCrLf_IsMergedInCrLf()
+    {
+        var root = Folders.NewTemp("git-merge-crlf");
+        await Git(root, "init", "-q");
+        await Git(root, "config", "core.autocrlf", "false");
+        Write(root, Program, "a\r\nb\r\nteam\r\n");
+        await Git(root, "add", "-A");
+        await Git(root, "commit", "-q", "-m", "the solution");
+
+        var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Tree((Program, "a  \nb\n")), "2.8.0"),
+            new(Tree((Program, "template\na\nb\n")), "2.9.0"), false, CancellationToken.None);
+
+        conflicts.ShouldBeEmpty();
+        File.ReadAllText(Path.Combine(root, Program)).ShouldBe("template\r\na\r\nb\r\nteam\r\n");
+    }
+
     [Test]
     public async Task TheTemplatesChange_MergesWithTheTeams_AndAnIgnoredFileAndAllSlnStayAsTheyAre()
     {
         var root = await SolutionAsync();
         var next = Tree((".gitignore", "appsettings.Secrets.json\n"), (Program, "template\na\nb\nc\nd\ne\n"), (Solution, "the next All.sln\n"), (Secrets, "the next secret\n"));
 
-        var conflicts = await new GitTemplateMerge(Runner).MergeAsync(root, new(Base(), "1.0.0"), new(next, "2.0.0"), false, CancellationToken.None);
+        var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(next, "2.0.0"), false, CancellationToken.None);
 
         conflicts.ShouldBeEmpty();
         Read(root, Program).ShouldBe("template\na\nb\nc\nd\ne\nteam\n");
@@ -76,7 +141,7 @@ internal sealed class GitMergeScenarios
     {
         var root = await SolutionAsync();
         await Git(root, "branch", "main-before");
-        var merge = new GitTemplateMerge(Runner);
+        var merge = new GitTemplateMerge(Runner, Sandbox.Self);
         await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Base(), "1.0.0"), false, CancellationToken.None);
         await Git(root, "commit", "-q", "--allow-empty", "-m", "adopted on this branch");
         await Git(root, "checkout", "-q", "main-before");
@@ -97,7 +162,7 @@ internal sealed class GitMergeScenarios
         await Git(root, "add", "-A");
         await Git(root, "commit", "-q", "-m", "a nested ignore");
 
-        await new GitTemplateMerge(Runner).MergeAsync(root, new(Base(), "1.0.0"), new(Tree((local, "the template's local file\n")), "2.0.0"), false, CancellationToken.None);
+        await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(Tree((local, "the template's local file\n")), "2.0.0"), false, CancellationToken.None);
 
         Read(root, local).ShouldBe("the team's local secret\n");
     }
@@ -106,7 +171,7 @@ internal sealed class GitMergeScenarios
     public async Task AMergeInProgress_IsRefused_AndAnAbortPutsBackWhatWasStagedBesideTheMerge()
     {
         var root = await SolutionAsync();
-        var merge = new GitTemplateMerge(Runner);
+        var merge = new GitTemplateMerge(Runner, Sandbox.Self);
         await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((Program, "template\na\nb\nc\nd\ne\n")), "2.0.0"), false, CancellationToken.None);
         Write(root, Solution, "All.sln with the template's projects\n");
         await merge.StageAsync(root, [Solution], CancellationToken.None);
@@ -125,7 +190,7 @@ internal sealed class GitMergeScenarios
         var root = await SolutionAsync();
         Write(root, Program, "a\nb\nC by the team\nd\ne\nteam\n");
         await Git(root, "commit", "-q", "-am", "the team's change");
-        var merge = new GitTemplateMerge(Runner);
+        var merge = new GitTemplateMerge(Runner, Sandbox.Self);
 
         var conflicts = await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((Program, "a\nb\nC by the template\nd\ne\n")), "2.0.0"), false, CancellationToken.None);
 

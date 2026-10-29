@@ -91,7 +91,14 @@ In a solution there already, `dotskit new` and `dotskit upgrade` merge by git, t
   are never in the branch; the manifest and `All.sln` the command writes join the merge, so `git merge --abort`
   puts them back too;
 - `--force` merges with `-X theirs`: a line both changed takes the template's; a file one side removed and the
-  other changed stays a conflict.
+  other changed stays a conflict;
+- a file both changed is merged by a merge driver of dotskit, given to this one merge only: the base, the team's
+  file and the template's are first brought to the template's style - no byte order mark, no spaces at the ends
+  of lines, a line end at the end - so a change of the style alone conflicts with nothing the team wrote, and the
+  merged file has the style. A solution file keeps its byte order mark, and the merged file keeps the line ends
+  of the team's. `--merge files` does the same. A line break of two spaces at the end of a Markdown line is lost
+  in a file both changed: write it as a backslash. A file with a merge of its own in `.gitattributes`, as one of
+  Git LFS, keeps it.
 
 What git then shows: `git log dotskit/template` - what each version of the template gave the solution;
 `git diff dotskit/template HEAD`, once the merge is committed - the team's own changes over the template of its
