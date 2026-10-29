@@ -9,7 +9,7 @@ public interface IUserContext
     /// User unique identifier
     /// </summary>
     Guid UserId { get; }
-    
+
     /// <summary>
     /// The tenant the user acts for; null outside any tenant, as for the platform itself
     /// </summary>

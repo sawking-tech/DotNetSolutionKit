@@ -1,4 +1,4 @@
-﻿namespace NamespaceRoot.ProductName.Common.Exceptions;
+namespace NamespaceRoot.ProductName.Common.Exceptions;
 
 /// <summary>
 /// Occurs when a conflict situation arises

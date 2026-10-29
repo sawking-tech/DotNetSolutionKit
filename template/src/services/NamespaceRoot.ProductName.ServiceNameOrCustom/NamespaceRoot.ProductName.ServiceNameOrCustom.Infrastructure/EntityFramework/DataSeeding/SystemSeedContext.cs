@@ -6,7 +6,7 @@ public class SystemSeedContext : IDomainExecutionContext
 {
     private static readonly Guid SystemUserId = Guid.Empty;
     private static readonly string SystemUserName = "SystemSeeder";
-    
+
     public IUserContext Actor { get; }
     public TimeProvider TimeProvider { get; }
 

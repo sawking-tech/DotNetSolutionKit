@@ -1,4 +1,4 @@
-﻿using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
+using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;

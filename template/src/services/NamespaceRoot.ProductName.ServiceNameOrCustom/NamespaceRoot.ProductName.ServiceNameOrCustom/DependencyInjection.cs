@@ -15,7 +15,7 @@ public static class DependencyInjection
     public static IServiceCollection AddDomainServices(this IServiceCollection services)
     {
         // Register Domain services
-        
+
         return services;
     }
 }

@@ -1,91 +1,91 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--
-    The template as a NuGet package: dotnet new install SawKing.DotNetSolutionKit.
-    Packed by .github/workflows/release.yml on a tag, with the version from version.json.
-    Pack from a clean checkout: everything under template/ that is not ignored here goes in.
-  -->
+    <!--
+        The template as a NuGet package: dotnet new install SawKing.DotNetSolutionKit.
+        Packed by .github/workflows/release.yml on a tag, with the version from version.json.
+        Pack from a clean checkout: everything under template/ that is not ignored here goes in.
+    -->
 
-  <PropertyGroup>
-    <_VersionJson>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)version.json'))</_VersionJson>
-    <Version>$([System.Text.RegularExpressions.Regex]::Match($(_VersionJson), '&quot;version&quot;\s*:\s*&quot;([^&quot;]+)&quot;').Groups[1].Value)</Version>
-
-    <PackageType>Template</PackageType>
-    <PackageId>SawKing.DotNetSolutionKit</PackageId>
-    <Title>DotNet Solution Kit</Title>
-    <Authors>Vladimir Savkin</Authors>
-    <Description>A configurable dotnet new template and lifecycle toolkit for standardized .NET 8 solutions: layered microservices on PostgreSQL or SQL Server with CI, deployment and tests. Secrets from Infisical or HashiCorp Vault, RabbitMQ with a transactional outbox, Hangfire jobs, ClickHouse, MongoDB, email, object storage and a YARP gateway come by flag. Its tool dotskit (SawKing.DotsKit.Tool) adds services and flags to a solution and upgrades it to a new version, keeping the team's code.</Description>
-    <PackageTags>dotnet-new;templates;dotskit;template;microservices;solution;clean-architecture;ddd;net8;aspnetcore;postgresql;sqlserver;efcore;vault;infisical;rabbitmq;masstransit;outbox;hangfire;clickhouse;mongodb;email;smtp;yarp</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://dotskit.sawking.tech/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/sawking-tech/DotNetSolutionKit</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <!-- the package's own README and icon (nuget/): nuget.org does not resolve the repository README's
-         relative links to docs/, so the package's README links the site -->
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageIcon>icon.png</PackageIcon>
-    <!-- the release notes of the version, from version.json: release.yml writes them with
-         scripts/release-notes.sh and passes the file as ReleaseNotesFile; a pack by hand links the release -->
-    <PackageReleaseNotes Condition="'$(ReleaseNotesFile)' != ''">$([System.IO.File]::ReadAllText('$(ReleaseNotesFile)'))</PackageReleaseNotes>
-    <PackageReleaseNotes Condition="'$(ReleaseNotesFile)' == ''">What this version brings: https://github.com/sawking-tech/DotNetSolutionKit/releases/tag/v$(Version)</PackageReleaseNotes>
-    <Copyright>Copyright (c) 2025 Vladimir Savkin</Copyright>
-
-    <TargetFramework>net8.0</TargetFramework>
-    <IncludeContentInPack>true</IncludeContentInPack>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <ContentTargetFolders>content</ContentTargetFolders>
-    <!-- The template has dot-files of its own (.github, .gitattributes, .dockerignore) that pack would skip. -->
-    <NoDefaultExcludes>true</NoDefaultExcludes>
-    <!-- NU5128: a template package has no assemblies. NU5123: the template's own paths pass 200 characters;
-         the template engine reads them from the package, and installing it on Windows was checked. -->
-    <NoWarn>$(NoWarn);NU5128;NU5123</NoWarn>
-    <EnableDefaultItems>false</EnableDefaultItems>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="template\**\*"
-             Exclude="template\**\bin\**;template\**\obj\**;template\**\.vs\**;template\**\.idea\**;template\**\*.user;template\**\TestResults\**;template\**\logs\**;template\.template.config\template.json" />
-    <None Include="nuget\README.md" Pack="true" PackagePath="\" />
-    <None Include="nuget\icon.png" Pack="true" PackagePath="\" />
-    <Compile Remove="**\*" />
-  </ItemGroup>
-
-  <!-- A solution generated from the package names the template's version (TemplateVersion in template.json,
-       which Directory.Build.props and each service's project take); the sources say "source" there, so a
-       solution generated from them does not claim a release. -->
-  <UsingTask TaskName="ReplaceInFile" TaskFactory="RoslynCodeTaskFactory"
-             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-    <ParameterGroup>
-      <Source ParameterType="System.String" Required="true" />
-      <Destination ParameterType="System.String" Required="true" />
-      <Find ParameterType="System.String" Required="true" />
-      <Replacement ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System.IO" />
-      <Code Type="Fragment" Language="cs">
-        Directory.CreateDirectory(Path.GetDirectoryName(Destination));
-        File.WriteAllText(Destination, File.ReadAllText(Source).Replace(Find, Replacement));
-      </Code>
-    </Task>
-  </UsingTask>
-
-  <Target Name="WriteTemplateVersion" BeforeTargets="_GetPackageFiles">
     <PropertyGroup>
-      <_TemplateJson>$(IntermediateOutputPath)template.json</_TemplateJson>
-      <_TemplateJsonText>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)template\.template.config\template.json'))</_TemplateJsonText>
-      <_SourceVersion>"parameters": { "value": "source" }</_SourceVersion>
-      <_PackedVersion>"parameters": { "value": "$(Version)" }</_PackedVersion>
+        <_VersionJson>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)version.json'))</_VersionJson>
+        <Version>$([System.Text.RegularExpressions.Regex]::Match($(_VersionJson), '&quot;version&quot;\s*:\s*&quot;([^&quot;]+)&quot;').Groups[1].Value)</Version>
+
+        <PackageType>Template</PackageType>
+        <PackageId>SawKing.DotNetSolutionKit</PackageId>
+        <Title>DotNet Solution Kit</Title>
+        <Authors>Vladimir Savkin</Authors>
+        <Description>A configurable dotnet new template and lifecycle toolkit for standardized .NET 8 solutions: layered microservices on PostgreSQL or SQL Server with CI, deployment and tests. Secrets from Infisical or HashiCorp Vault, RabbitMQ with a transactional outbox, Hangfire jobs, ClickHouse, MongoDB, email, object storage and a YARP gateway come by flag. Its tool dotskit (SawKing.DotsKit.Tool) adds services and flags to a solution and upgrades it to a new version, keeping the team's code.</Description>
+        <PackageTags>dotnet-new;templates;dotskit;template;microservices;solution;clean-architecture;ddd;net8;aspnetcore;postgresql;sqlserver;efcore;vault;infisical;rabbitmq;masstransit;outbox;hangfire;clickhouse;mongodb;email;smtp;yarp</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://dotskit.sawking.tech/</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/sawking-tech/DotNetSolutionKit</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <!-- the package's own README and icon (nuget/): nuget.org does not resolve the repository README's
+             relative links to docs/, so the package's README links the site -->
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
+        <!-- the release notes of the version, from version.json: release.yml writes them with
+             scripts/release-notes.sh and passes the file as ReleaseNotesFile; a pack by hand links the release -->
+        <PackageReleaseNotes Condition="'$(ReleaseNotesFile)' != ''">$([System.IO.File]::ReadAllText('$(ReleaseNotesFile)'))</PackageReleaseNotes>
+        <PackageReleaseNotes Condition="'$(ReleaseNotesFile)' == ''">What this version brings: https://github.com/sawking-tech/DotNetSolutionKit/releases/tag/v$(Version)</PackageReleaseNotes>
+        <Copyright>Copyright (c) 2025 Vladimir Savkin</Copyright>
+
+        <TargetFramework>net8.0</TargetFramework>
+        <IncludeContentInPack>true</IncludeContentInPack>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <ContentTargetFolders>content</ContentTargetFolders>
+        <!-- The template has dot-files of its own (.github, .gitattributes, .dockerignore) that pack would skip. -->
+        <NoDefaultExcludes>true</NoDefaultExcludes>
+        <!-- NU5128: a template package has no assemblies. NU5123: the template's own paths pass 200 characters;
+             the template engine reads them from the package, and installing it on Windows was checked. -->
+        <NoWarn>$(NoWarn);NU5128;NU5123</NoWarn>
+        <EnableDefaultItems>false</EnableDefaultItems>
     </PropertyGroup>
-    <Error Condition="$(_TemplateJsonText.IndexOf('$(_SourceVersion)')) == -1 OR $(_TemplateJsonText.IndexOf('$(_SourceVersion)')) != $(_TemplateJsonText.LastIndexOf('$(_SourceVersion)'))"
-           Text="template.json has no single $(_SourceVersion) of TemplateVersion to write the version into" />
-    <!-- Not WriteLinesToFile: on Linux MSBuild turns the backslashes of an item into slashes, and
-         template.json's \" and regular expressions with them would break -->
-    <ReplaceInFile Source="$(MSBuildThisFileDirectory)template\.template.config\template.json" Destination="$(_TemplateJson)"
-                   Find="$(_SourceVersion)" Replacement="$(_PackedVersion)" />
+
     <ItemGroup>
-      <Content Include="$(_TemplateJson)" Pack="true" PackagePath="content\template\.template.config\template.json" />
+        <Content Include="template\**\*"
+                 Exclude="template\**\bin\**;template\**\obj\**;template\**\.vs\**;template\**\.idea\**;template\**\*.user;template\**\TestResults\**;template\**\logs\**;template\.template.config\template.json" />
+        <None Include="nuget\README.md" Pack="true" PackagePath="\" />
+        <None Include="nuget\icon.png" Pack="true" PackagePath="\" />
+        <Compile Remove="**\*" />
     </ItemGroup>
-  </Target>
+
+    <!-- A solution generated from the package names the template's version (TemplateVersion in template.json,
+         which Directory.Build.props and each service's project take); the sources say "source" there, so a
+         solution generated from them does not claim a release. -->
+    <UsingTask TaskName="ReplaceInFile" TaskFactory="RoslynCodeTaskFactory"
+               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <Source ParameterType="System.String" Required="true" />
+            <Destination ParameterType="System.String" Required="true" />
+            <Find ParameterType="System.String" Required="true" />
+            <Replacement ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System.IO" />
+            <Code Type="Fragment" Language="cs">
+                Directory.CreateDirectory(Path.GetDirectoryName(Destination));
+                File.WriteAllText(Destination, File.ReadAllText(Source).Replace(Find, Replacement));
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <Target Name="WriteTemplateVersion" BeforeTargets="_GetPackageFiles">
+        <PropertyGroup>
+            <_TemplateJson>$(IntermediateOutputPath)template.json</_TemplateJson>
+            <_TemplateJsonText>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)template\.template.config\template.json'))</_TemplateJsonText>
+            <_SourceVersion>"parameters": { "value": "source" }</_SourceVersion>
+            <_PackedVersion>"parameters": { "value": "$(Version)" }</_PackedVersion>
+        </PropertyGroup>
+        <Error Condition="$(_TemplateJsonText.IndexOf('$(_SourceVersion)')) == -1 OR $(_TemplateJsonText.IndexOf('$(_SourceVersion)')) != $(_TemplateJsonText.LastIndexOf('$(_SourceVersion)'))"
+               Text="template.json has no single $(_SourceVersion) of TemplateVersion to write the version into" />
+        <!-- Not WriteLinesToFile: on Linux MSBuild turns the backslashes of an item into slashes, and
+             template.json's \" and regular expressions with them would break -->
+        <ReplaceInFile Source="$(MSBuildThisFileDirectory)template\.template.config\template.json" Destination="$(_TemplateJson)"
+                       Find="$(_SourceVersion)" Replacement="$(_PackedVersion)" />
+        <ItemGroup>
+            <Content Include="$(_TemplateJson)" Pack="true" PackagePath="content\template\.template.config\template.json" />
+        </ItemGroup>
+    </Target>
 
 </Project>

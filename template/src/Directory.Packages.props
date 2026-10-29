@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <!--
     Central package management: every package version in the solution is declared once, here or in
     a file of package-versions/ that this one imports, and a .csproj references a package by name
