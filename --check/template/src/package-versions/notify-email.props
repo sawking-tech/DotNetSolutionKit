@@ -1,0 +1,11 @@
+<Project>
+  <!-- The flag Notify email: SMTP through MailKit, Microsoft Graph with Azure.Identity. -->
+  <ItemGroup>
+    <PackageVersion Include="Azure.Identity" Version="1.17.1" />
+    <PackageVersion Include="MailKit" Version="4.18.1" />
+    <PackageVersion Include="Microsoft.Graph" Version="5.102.0" />
+    <!-- 8.15.0 with email, for both: the Graph SDK needs 8.x, and JwtBearer 8.0.x runs on it in production. -->
+    <PackageVersion Update="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
+    <PackageVersion Update="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+  </ItemGroup>
+</Project>

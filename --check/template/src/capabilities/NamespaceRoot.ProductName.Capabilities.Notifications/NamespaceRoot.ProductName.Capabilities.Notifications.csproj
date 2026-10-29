@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Email of the flag Notify email: the port INotificationEmailSender, its settings, and the SMTP and
+         Graph transports behind it. Depends on nothing else in Common: a service with the flag references it,
+         and only that service carries MailKit and the Graph SDK. -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Azure.Identity" />
+        <PackageReference Include="MailKit" />
+        <PackageReference Include="Microsoft.Graph" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.Capabilities.Notifications.Tests</_Parameter1>
+        </AssemblyAttribute>
+        <!-- Moq's proxies, so a test substitutes the internal factories. -->
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+</Project>

@@ -1,0 +1,71 @@
+name: Site
+
+# Publishes the site to GitHub Pages: the repository's files with index.html completed from version.json
+# (scripts/build-site.py), so a reader without JavaScript sees the release notes and their JSON-LD.
+#
+# A run on master publishes. A release moves master with GITHUB_TOKEN, whose push starts no workflow, so
+# promote.yml starts this one on master by hand; a push to master by a person starts it too. A push to dev
+# or to a tmp/site-* branch only builds and checks, the second as the rehearsal of a change to this file.
+# Publishing needs Pages switched to "GitHub Actions" in the repository's settings; until then the site is
+# served from master as it is, the mode job says so and publishing is skipped, and after the switch one
+# run on master publishes: gh workflow run site.yml --ref master. A broken version.json or a link to a
+# missing section stops the build, and the site keeps its last good version.
+
+on:
+  push:
+    branches: [master, dev, 'tmp/site-*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Links to sections
+        run: python3 scripts/check-doc-anchors.py
+
+      - name: Build
+        run: python3 scripts/build-site.py _site
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  # Pages takes a published site only once it is switched to "GitHub Actions"; read here, outside the
+  # github-pages environment, so a branch that may not deploy still runs it
+  mode:
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: read
+    outputs:
+      type: ${{ steps.pages.outputs.type }}
+    steps:
+      - id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          type=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type)
+          echo "type=$type" >> "$GITHUB_OUTPUT"
+          [ "$type" = workflow ] || echo "::notice::Pages builds from a branch ($type): switch it to GitHub Actions, then run this workflow on master to publish"
+
+  publish:
+    if: github.ref == 'refs/heads/master' && needs.mode.outputs.type == 'workflow'
+    needs: [build, mode]
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5

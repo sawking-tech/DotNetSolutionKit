@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom\NamespaceRoot.ProductName.ServiceNameOrCustom.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+      <!--#if (MongoDB) -->
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Mongo\NamespaceRoot.ProductName.Capabilities.Mongo.csproj" />
+      <!--#endif -->
+      <!--#if (NotifyEmail) -->
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Notifications\NamespaceRoot.ProductName.Capabilities.Notifications.csproj" />
+      <!--#endif -->
+      <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Application\NamespaceRoot.ProductName.ServiceNameOrCustom.Application.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.ServiceNameOrCustom.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!--#if (Hangfire) -->
+        <PackageReference Include="Hangfire.AspNetCore" />
+        <PackageReference Include="Hangfire.Console" />
+        <!--#if (Database == "mssql") -->
+        <PackageReference Include="Hangfire.SqlServer" />
+        <!--#else -->
+        <PackageReference Include="Hangfire.PostgreSql" />
+        <!--#endif -->
+        <!--#endif -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" />
+        <!--#if (Database == "mssql") -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+        <!--#else -->
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <!--#endif -->
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Migrations\" />
+    </ItemGroup>
+
+</Project>

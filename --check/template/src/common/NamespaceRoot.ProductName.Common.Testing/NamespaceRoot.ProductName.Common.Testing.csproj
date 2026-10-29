@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      What a service's tests build on, whichever test framework they use: execution contexts, the
+      PostgreSQL test databases, stubs, and the rule checks. No test framework here; a test project
+      adds its own and tells TestSkip how that framework skips a test.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>false</IsTestProject>
+        <!-- The types keep the namespaces they had in Common.Tests, so tests written against them still build. -->
+        <RootNamespace>NamespaceRoot.ProductName.Common.Tests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Moq" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Web\NamespaceRoot.ProductName.Common.Web.csproj" />
+    </ItemGroup>
+
+</Project>

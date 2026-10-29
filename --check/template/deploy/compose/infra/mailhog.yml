@@ -1,0 +1,15 @@
+# MailHog, which catches email on a local stack, with --Notify email.
+# Started by deploy/compose/compose.sh with every file in this folder and every service's
+# src/services/*/deploy/compose.yml.
+services:
+  # Catches every message on a local stack and shows it at http://127.0.0.1:8025. A server that sends
+  # for real is named by SMTP_HOST in .env instead.
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "127.0.0.1:8025:8025"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:8025/api/v2/messages?limit=1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20

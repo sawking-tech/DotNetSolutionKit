@@ -1,0 +1,255 @@
+{
+  "version": "2.9.0-rc",
+  "releaseNotes": {
+    "2.9.0-rc": {
+      "headline": "dotskit upgrades a solution of any release and keeps the team's code building.",
+      "highlights": [
+        "dotskit upgrade takes a solution of any release from 1.0.0, a release at a time with --to.",
+        "The references and usings of the types the template moved are repaired, from the text before the build and by the build after it.",
+        "The merge runs by git through the branch dotskit/template, with a conflict resolved in the IDE; --merge files keeps the tool's own merge.",
+        "A change of the template's style alone conflicts with nothing the team wrote: both merges bring the three sides of a file to the style first.",
+        "An upgrade step takes 51 s instead of 114 s.",
+        "dotskit init checks a solution that does not say its version against the last patch of each minor before 2.7 and names the closest; it writes nothing until the version is given.",
+        "dotskit upgrade names the minor versions it crosses and links upgrading.md on GitHub, whose sections for these versions say what a solution may have to change by hand.",
+        "Two dotskit commands in one solution do not run at once: the second says so and changes nothing.",
+        "A project the team took out of All.sln stays out: an upgrade adds only the projects the template added.",
+        "An upgrade by git that fails leaves no commit and no branch of its own behind.",
+        "dotskit init on a solution of 1.x names the way to 2.0.0: the code brought to it by hand, then described as 2.0.0 and upgraded by dotskit.",
+        "dotskit works on a solution of any size: paths go to git in a file and to dotnet sln in batches that fit a command line; Windows starts no process whose command line passes 32 767 characters.",
+        "A file the solution has and its git ignores, such as a local appsettings.Secrets.json, is never written, by either merge; a new one the template adds, as the secrets file of a new service, is written by both.",
+        "The template's files are UTF-8 with LF, a line end at the end and no spaces at the ends of lines, a byte order mark only in a solution file.",
+        "One code style, owned by the formatters (ADR-007): CI fails a pull request that breaks the bytes of any file or the C# style of the tool; the C# of the template follows."
+      ],
+      "ru": {
+        "headline": "dotskit обновляет решение любого выпуска так, что код команды собирается.",
+        "highlights": [
+          "dotskit upgrade берёт решение любого выпуска с 1.0.0, с --to по выпуску за раз.",
+          "Ссылки и using типов, которые шаблон перенёс, чинятся: по тексту до сборки и по ошибкам сборки после.",
+          "Слияние идёт через git, по ветке dotskit/template, конфликт разрешается в IDE; --merge files оставляет собственное слияние инструмента.",
+          "Одна смена стиля шаблона не конфликтует ни с чем, что написала команда: оба слияния сначала приводят три стороны файла к стилю.",
+          "Шаг обновления занимает 51 с вместо 114 с.",
+          "dotskit init сверяет решение, которое не называет свою версию, с последним патчем каждого минора до 2.7 и называет ближайший; пишет только после того, как версию назвали.",
+          "dotskit upgrade называет минорные версии, через которые проходит, и даёт ссылку на upgrading.md на GitHub: его разделы для этих версий говорят, что решению, возможно, придётся поменять руками.",
+          "Две команды dotskit в одном решении не идут одновременно: вторая говорит об этом и ничего не меняет.",
+          "Проект, который команда убрала из All.sln, не возвращается: обновление добавляет только проекты, которые добавил шаблон.",
+          "Обновление через git, которое упало, не оставляет своего коммита и своей ветки.",
+          "dotskit init на решении 1.x называет путь к 2.0.0: код приводится к нему руками, затем решение описывается как 2.0.0 и обновляется dotskit.",
+          "dotskit работает с решением любого размера: пути уходят в git файлом, а в dotnet sln - пачками, каждая влезает в командную строку; Windows не запускает процесс с командной строкой длиннее 32 767 символов.",
+          "Файл, который у решения есть и который игнорирует его git, например локальный appsettings.Secrets.json, не пишет ни одно из слияний; новый такой файл шаблона, как файл секретов нового сервиса, пишут оба.",
+          "Файлы шаблона в UTF-8 с LF, переводом строки в конце и без пробелов в конце строк, BOM только у файла решения.",
+          "Единый стиль кода, за который отвечают форматтеры (ADR-007): CI роняет PR, который нарушает байты любого файла или стиль C# инструмента; C# шаблона - следом."
+        ]
+      }
+    },
+    "2.8.1": {
+      "headline": "Start with dotskit: the README, the package page and the site lead with it.",
+      "highlights": [
+        "The commands of the template alone are one click further, under the dotskit ones."
+      ],
+      "ru": {
+        "headline": "Начните с dotskit: с него начинаются README, страница пакета и сайт.",
+        "highlights": [
+          "Команды одного шаблона - на клик дальше, под командами dotskit."
+        ]
+      }
+    },
+    "2.8.0": {
+      "headline": "dotskit keeps a solution up with the template, keeping the team's changes.",
+      "highlights": [
+        "A solution keeps up with the template: dotskit adds services and flags to it and upgrades it to a new version, keeping the team's changes.",
+        "A service generated into a solution adds itself to All.sln.",
+        "Email by flag, with a sandbox that keeps a test stand from mailing real people.",
+        "MongoDB by flag, beside the main database.",
+        "Containers run on a read-only filesystem.",
+        "The test servers start with one command, the same on a developer's machine as in CI.",
+        "Coverage on demand, with a report per service.",
+        "The solution is generated with --Solution; -M false still works.",
+        "The template answers to the short name dotskit too: dotnet new dotskit."
+      ],
+      "ru": {
+        "headline": "dotskit держит решение в ногу с шаблоном и сохраняет правки команды.",
+        "highlights": [
+          "Решение не отстаёт от шаблона: dotskit добавляет в него сервисы и флаги и переводит его на новую версию, сохраняя правки команды.",
+          "Сервис, сгенерированный в готовое решение, сам добавляется в All.sln.",
+          "Почта по флагу, с песочницей, которая не даёт тестовому стенду писать реальным людям.",
+          "MongoDB по флагу, рядом с основной базой.",
+          "Контейнеры работают с файловой системой только для чтения.",
+          "Тестовые серверы запускаются одной командой, одинаково на машине разработчика и в CI.",
+          "Покрытие по запросу, с отчётом по каждому сервису.",
+          "Решение генерируется с --Solution; -M false по-прежнему работает.",
+          "Шаблон отвечает и на короткое имя dotskit: dotnet new dotskit."
+        ]
+      }
+    },
+    "2.7.0": {
+      "headline": "SQL Server, HashiCorp Vault and a stronger API gateway.",
+      "highlights": [
+        "Generate a solution on SQL Server with --Database mssql.",
+        "Read secrets from HashiCorp Vault with --Vault.",
+        "Improved the API gateway and its Swagger documents.",
+        "Settings read on each use change without a redeploy.",
+        "Simplified feature flags.",
+        "Secrets live only in their store and in memory."
+      ],
+      "ru": {
+        "headline": "SQL Server, HashiCorp Vault и улучшенный API-шлюз.",
+        "highlights": [
+          "Решение на SQL Server: --Database mssql.",
+          "Секреты из HashiCorp Vault: --Vault.",
+          "Улучшили API-шлюз и его документы Swagger.",
+          "Настройки, которые читаются при каждом обращении, меняются без передеплоя.",
+          "Упростили фичефлаги.",
+          "Секреты живут только в хранилище и в памяти."
+        ]
+      }
+    },
+    "2.6.2": {
+      "headline": "Install the template from nuget.org.",
+      "highlights": [
+        "The package has its own page on nuget.org."
+      ],
+      "ru": {
+        "headline": "Шаблон ставится с nuget.org.",
+        "highlights": [
+          "У пакета своя страница на nuget.org."
+        ]
+      }
+    },
+    "2.6.1": {
+      "headline": "The first push of a generated solution passes the secret scan.",
+      "highlights": [],
+      "ru": {
+        "headline": "Первый push сгенерированного решения проходит проверку на секреты.",
+        "highlights": []
+      }
+    },
+    "2.6.0": {
+      "headline": "Write a service's tests in NUnit or xUnit.",
+      "highlights": [
+        "One shared test infrastructure for both."
+      ],
+      "ru": {
+        "headline": "Тесты сервиса на NUnit или xUnit.",
+        "highlights": [
+          "Одна общая тестовая инфраструктура для обоих."
+        ]
+      }
+    },
+    "2.5.0": {
+      "headline": "An audit journal of entity changes.",
+      "highlights": [
+        "Changes are published through the outbox in the same transaction.",
+        "Guards catch writes the journal cannot see."
+      ],
+      "ru": {
+        "headline": "Журнал аудита изменений сущностей.",
+        "highlights": [
+          "Изменения публикуются через outbox в той же транзакции.",
+          "Проверки ловят записи, которые журнал не видит."
+        ]
+      }
+    },
+    "2.4.0": {
+      "headline": "Tokens in HttpOnly cookies with CSRF protection.",
+      "highlights": [
+        "Cookie settings come from the deployment and are checked at startup."
+      ],
+      "ru": {
+        "headline": "Токены в HttpOnly-cookie с защитой от CSRF.",
+        "highlights": [
+          "Настройки cookie задаёт деплой, они проверяются при старте."
+        ]
+      }
+    },
+    "2.3.0": {
+      "headline": "Services ride out a secret store outage.",
+      "highlights": [
+        "A feature flag can be pinned in features.json."
+      ],
+      "ru": {
+        "headline": "Сервисы переживают недоступность хранилища секретов.",
+        "highlights": [
+          "Фичефлаг можно закрепить в features.json."
+        ]
+      }
+    },
+    "2.2.0": {
+      "headline": "Commands a client may repeat run once per key.",
+      "highlights": [],
+      "ru": {
+        "headline": "Команды, которые клиент может повторить, выполняются один раз на ключ.",
+        "highlights": []
+      }
+    },
+    "2.1.3": {
+      "headline": "Two solutions on one host keep their own images.",
+      "highlights": [],
+      "ru": {
+        "headline": "Два решения на одном хосте держат свои образы.",
+        "highlights": []
+      }
+    },
+    "2.1.2": {
+      "headline": "Blue-green deployment keeps serving when a deploy fails.",
+      "highlights": [],
+      "ru": {
+        "headline": "Blue-green-деплой продолжает обслуживать, если выкатка не удалась.",
+        "highlights": []
+      }
+    },
+    "2.1.1": {
+      "headline": "Services are added to All.sln in CI too.",
+      "highlights": [],
+      "ru": {
+        "headline": "Сервисы добавляются в All.sln и в CI.",
+        "highlights": []
+      }
+    },
+    "2.1.0": {
+      "headline": "Deployment, an API gateway, CI and one correlation identifier end to end.",
+      "highlights": [
+        "Docker Compose or Kubernetes files, with blue-green deployment under Compose.",
+        "A YARP API gateway that validates the token once.",
+        "GitHub Actions CI with tests on real servers and a secret scan.",
+        "S3-compatible object storage and ClickHouse by flag.",
+        "Every dependency can be switched off in configuration."
+      ],
+      "ru": {
+        "headline": "Деплой, API-шлюз, CI и сквозной идентификатор корреляции.",
+        "highlights": [
+          "Файлы Docker Compose или Kubernetes, под Compose - blue-green-деплой.",
+          "API-шлюз на YARP, который проверяет токен один раз.",
+          "CI на GitHub Actions с тестами на настоящих серверах и проверкой на секреты.",
+          "S3-совместимое хранилище и ClickHouse по флагу.",
+          "Любую зависимость можно выключить в конфигурации."
+        ]
+      }
+    },
+    "2.0.0": {
+      "headline": "A layered microservice solution with a shared web host.",
+      "highlights": [
+        "Domain events in three phases tied to the transaction.",
+        "Errors as RFC 9457 problems.",
+        "Permissions declared on actions and checked from the token.",
+        "Infrastructure by flag: Hangfire, MassTransit, Infisical, feature flags and more."
+      ],
+      "ru": {
+        "headline": "Слоистое микросервисное решение с общим веб-хостом.",
+        "highlights": [
+          "Доменные события в трёх фазах, привязанных к транзакции.",
+          "Ошибки в формате RFC 9457.",
+          "Права объявляются на действиях и проверяются по токену.",
+          "Инфраструктура по флагу: Hangfire, MassTransit, Infisical, фичефлаги и другое."
+        ]
+      }
+    },
+    "1.0.0": {
+      "headline": "The template before the breaking changes of 2026.",
+      "highlights": [],
+      "ru": {
+        "headline": "Шаблон до несовместимых изменений 2026 года.",
+        "highlights": []
+      }
+    }
+  }
+}

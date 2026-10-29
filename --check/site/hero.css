@@ -1,0 +1,197 @@
+/* ==== THE HERO OF THIS REPOSITORY ===============================================================
+   The project's own, next to the engine's site.css: the SawKing Tech mark - a disc, thin yellow line
+   work, a band with the name - in the colours of .NET: the disc in the .NET purple, the ground around
+   it in the green GitHub gives C#. */
+:root {
+  --net: #512bd4;            /* .NET */
+  --brand: #ffd600;          /* the yellow of the SawKing Tech mark: the hand, who gives */
+  --hero-from: #0f2a14;      /* a deep shade of the C# green, #178600 */
+  --hero-to: var(--ground-deep);
+  /* the disc blends three colours as a triangle - the .NET purple, with the C# purple (#9b4f96) and the Microsoft green (#7fba00) glowing in at its edges - in light tones on the dark
+     ground and deep ones on the light, so the cut-outs (the ground) read on it; the name in the band
+     is in the disc's colour */
+  --disc-a: #d9d0ff; --disc-b: #ead0ea; --disc-c: #d2f5a0; --disc-cc: #c6e8f2; --band-ink: #d9d0ff;
+}
+:root[data-theme="light"] {
+  --hero-from: #d6efd0; --hero-to: var(--l-ground); --band-ink: var(--net); --disc-a: var(--net); --disc-b: #9b4f96; --disc-c: #8cd600; --disc-cc: #2fa6c4;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="auto"] { --hero-from: #d6efd0; --hero-to: var(--l-ground); --band-ink: var(--net); --disc-a: var(--net); --disc-b: #9b4f96; --disc-c: #8cd600; --disc-cc: #2fa6c4; }
+}
+
+/* The engine sizes the hero for a field to play with; here it holds an emblem, so it takes its height
+   from what it holds. */
+body .hero.hero--kit {
+  aspect-ratio: auto; display: block; overflow: hidden; isolation: isolate;
+  padding: clamp(2rem, 6vw, 4rem) var(--gut) clamp(2rem, 5vw, 3.5rem);
+  background: radial-gradient(90% 80% at 50% 38%, var(--hero-from), var(--hero-to) 75%);
+  user-select: text; -webkit-user-select: text;
+}
+.hero--kit .hero__inner { display: grid; grid-template-rows: none; gap: clamp(1rem, 2.5vw, 1.6rem); padding: 0; pointer-events: auto; }
+/* the engine pins the mark and the line to rows of its field layout; here they simply follow in order */
+.hero--kit .logo-head, .hero--kit .hero__line { grid-row: auto; }
+
+/* no shadow: it would fall into the cut-outs and grey them, and a cut-out must show the ground as it is */
+.emblem { display: block; width: min(380px, 78vw); height: auto; margin: 0 auto; }
+.emblem circle.disc-a { fill: var(--disc-a); }
+.emblem stop.disc-b { stop-color: var(--disc-b); }
+.emblem stop.disc-c { stop-color: var(--disc-c); }
+/* green and purple are complementary: mixed straight they grey; the glow passes through a cyan on the way out
+   (green, cyan, blue, purple round the wheel), so its edge turns blue, never grey */
+.emblem stop.disc-cc { stop-color: var(--disc-cc); }
+/* The line work is cut out of the disc (the mask in index.html): drawn black in the mask, it shows the ground. */
+.emblem .ink { fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round; }
+/* The graph is a service's layers, an arrow pointing at the project referenced; its labels. */
+/* The graph's edges are dependencies, drawn as UML draws them: dashed, with an open arrowhead - sharp. */
+.emblem .dep { stroke-dasharray: 3 2.2; }
+.emblem .tip { stroke-linejoin: miter; stroke-linecap: butt; }
+.emblem .far { opacity: 0.35; }   /* half a cut: an edge behind the others */
+.emblem .label { fill: #000; stroke: none; opacity: 0.7; font: 400 10px "IBM Plex Mono", monospace; letter-spacing: 0.04em; }
+/* The band is a gap cut through the emblem (the mask in index.html): the ground shows through it and
+   the name stands in it, as the mark's yellow ground shows through its band. The name is set in the
+   mark's face where the reader has it; a longer name takes a smaller size and a narrower gap. */
+.emblem .name { fill: var(--band-ink); font: 300 25px "Segoe UI Light", "Segoe UI", "IBM Plex Sans", sans-serif; }
+
+.hero--kit .hero__line { max-width: 52ch; text-shadow: none; }
+.hero--kit .hero__line b { color: var(--focus-text); }
+/* the packages as pills, the template and its tool: where each is published, then its id; written in the
+   page, so they take their place with the first paint and nothing below them moves. On a narrow screen the
+   second goes under the first. */
+.hero__pkg { margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+.pkg { display: inline-flex; max-width: 100%; border-radius: 6px; overflow: hidden; text-decoration: none;
+  font: 500 0.85rem/1 "IBM Plex Mono", monospace; border: 1px solid var(--line); }
+.pkg__where { padding: 0.4rem 0.6rem; background: var(--net); color: #fff; }
+.pkg__id { padding: 0.4rem 0.6rem; background: var(--panel); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkg:hover .pkg__id { background: var(--panel-2); }
+.hero__cmd { margin: 0; min-width: 0; max-width: 100%; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+.hero__cmd code { display: inline-block; font: 0.95rem "IBM Plex Mono", monospace; color: var(--text);
+                  background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 0.55rem 0.9rem; white-space: nowrap;
+                  max-width: 100%; box-sizing: border-box; overflow-x: auto; }
+.hero__cmd code::before { content: "$ "; color: var(--muted); }
+/* the template alone, under the recommended way by dotskit */
+.install__alone { margin-top: 1.4rem; }
+.install__alone > summary { cursor: pointer; color: var(--muted); }
+.install__alone > summary:hover { color: var(--text); }
+
+/* On load the arm swings up from the shoulder in one movement; the graph lies on the band, tilted, and
+   is picked up on the way, without a stop, the moment the hand reaches it; from then on both turn
+   together to their place: the hand gives the technology. The frames come from one curve (anim.py);
+   the graph's tilt (8.87 degrees) is the angle at which its lowest point rests on the band's top edge. */
+@media (prefers-reduced-motion: no-preference) {
+  /* the pivot is the shoulder, off the disc to the left: the whole arm swings, not the hand at the cuff */
+  .emblem .rise { opacity: 0; transform-box: view-box; transform-origin: 90px 190px;
+                  animation-duration: 1.6s; animation-delay: 0.2s; animation-fill-mode: forwards;
+                  animation-timing-function: linear; }
+  .emblem .rise--hand { animation-name: kit-reach; }
+  .emblem .rise--graph { animation-name: kit-lift; }
+  @keyframes kit-reach {
+    0% { opacity: 0.00; transform: rotate(16.00deg); }
+    2% { opacity: 0.10; transform: rotate(15.98deg); }
+    4% { opacity: 0.20; transform: rotate(15.94deg); }
+    6% { opacity: 0.30; transform: rotate(15.86deg); }
+    8% { opacity: 0.40; transform: rotate(15.75deg); }
+    10% { opacity: 0.50; transform: rotate(15.61deg); }
+    12% { opacity: 0.60; transform: rotate(15.44deg); }
+    14% { opacity: 0.70; transform: rotate(15.24deg); }
+    16% { opacity: 0.80; transform: rotate(15.01deg); }
+    18% { opacity: 0.90; transform: rotate(14.75deg); }
+    20% { opacity: 1.00; transform: rotate(14.47deg); }
+    22% { opacity: 1.00; transform: rotate(14.16deg); }
+    24% { opacity: 1.00; transform: rotate(13.83deg); }
+    26% { opacity: 1.00; transform: rotate(13.48deg); }
+    28% { opacity: 1.00; transform: rotate(13.10deg); }
+    30% { opacity: 1.00; transform: rotate(12.70deg); }
+    32% { opacity: 1.00; transform: rotate(12.29deg); }
+    34% { opacity: 1.00; transform: rotate(11.85deg); }
+    36% { opacity: 1.00; transform: rotate(11.41deg); }
+    38% { opacity: 1.00; transform: rotate(10.94deg); }
+    40% { opacity: 1.00; transform: rotate(10.47deg); }
+    42% { opacity: 1.00; transform: rotate(9.99deg); }
+    44% { opacity: 1.00; transform: rotate(9.50deg); }
+    46% { opacity: 1.00; transform: rotate(9.00deg); }
+    48% { opacity: 1.00; transform: rotate(8.50deg); }
+    50% { opacity: 1.00; transform: rotate(8.00deg); }
+    52% { opacity: 1.00; transform: rotate(7.50deg); }
+    54% { opacity: 1.00; transform: rotate(7.00deg); }
+    56% { opacity: 1.00; transform: rotate(6.50deg); }
+    58% { opacity: 1.00; transform: rotate(6.01deg); }
+    60% { opacity: 1.00; transform: rotate(5.53deg); }
+    62% { opacity: 1.00; transform: rotate(5.06deg); }
+    64% { opacity: 1.00; transform: rotate(4.59deg); }
+    66% { opacity: 1.00; transform: rotate(4.15deg); }
+    68% { opacity: 1.00; transform: rotate(3.71deg); }
+    70% { opacity: 1.00; transform: rotate(3.30deg); }
+    72% { opacity: 1.00; transform: rotate(2.90deg); }
+    74% { opacity: 1.00; transform: rotate(2.52deg); }
+    76% { opacity: 1.00; transform: rotate(2.17deg); }
+    78% { opacity: 1.00; transform: rotate(1.84deg); }
+    80% { opacity: 1.00; transform: rotate(1.53deg); }
+    82% { opacity: 1.00; transform: rotate(1.25deg); }
+    84% { opacity: 1.00; transform: rotate(0.99deg); }
+    86% { opacity: 1.00; transform: rotate(0.76deg); }
+    88% { opacity: 1.00; transform: rotate(0.56deg); }
+    90% { opacity: 1.00; transform: rotate(0.39deg); }
+    92% { opacity: 1.00; transform: rotate(0.25deg); }
+    94% { opacity: 1.00; transform: rotate(0.14deg); }
+    96% { opacity: 1.00; transform: rotate(0.06deg); }
+    98% { opacity: 1.00; transform: rotate(0.02deg); }
+    100% { opacity: 1.00; transform: rotate(0.00deg); }
+  }
+  @keyframes kit-lift {
+    0% { opacity: 0.00; transform: rotate(8.87deg); }
+    2% { opacity: 0.10; transform: rotate(8.87deg); }
+    4% { opacity: 0.20; transform: rotate(8.87deg); }
+    6% { opacity: 0.30; transform: rotate(8.87deg); }
+    8% { opacity: 0.40; transform: rotate(8.87deg); }
+    10% { opacity: 0.50; transform: rotate(8.87deg); }
+    12% { opacity: 0.60; transform: rotate(8.87deg); }
+    14% { opacity: 0.70; transform: rotate(8.87deg); }
+    16% { opacity: 0.80; transform: rotate(8.87deg); }
+    18% { opacity: 0.90; transform: rotate(8.87deg); }
+    20% { opacity: 1.00; transform: rotate(8.87deg); }
+    22% { opacity: 1.00; transform: rotate(8.87deg); }
+    24% { opacity: 1.00; transform: rotate(8.87deg); }
+    26% { opacity: 1.00; transform: rotate(8.87deg); }
+    28% { opacity: 1.00; transform: rotate(8.87deg); }
+    30% { opacity: 1.00; transform: rotate(8.87deg); }
+    32% { opacity: 1.00; transform: rotate(8.87deg); }
+    34% { opacity: 1.00; transform: rotate(8.87deg); }
+    36% { opacity: 1.00; transform: rotate(8.87deg); }
+    38% { opacity: 1.00; transform: rotate(8.87deg); }
+    40% { opacity: 1.00; transform: rotate(8.87deg); }
+    42% { opacity: 1.00; transform: rotate(8.87deg); }
+    44% { opacity: 1.00; transform: rotate(8.87deg); }
+    46% { opacity: 1.00; transform: rotate(8.87deg); }
+    48% { opacity: 1.00; transform: rotate(8.50deg); }
+    50% { opacity: 1.00; transform: rotate(8.00deg); }
+    52% { opacity: 1.00; transform: rotate(7.50deg); }
+    54% { opacity: 1.00; transform: rotate(7.00deg); }
+    56% { opacity: 1.00; transform: rotate(6.50deg); }
+    58% { opacity: 1.00; transform: rotate(6.01deg); }
+    60% { opacity: 1.00; transform: rotate(5.53deg); }
+    62% { opacity: 1.00; transform: rotate(5.06deg); }
+    64% { opacity: 1.00; transform: rotate(4.59deg); }
+    66% { opacity: 1.00; transform: rotate(4.15deg); }
+    68% { opacity: 1.00; transform: rotate(3.71deg); }
+    70% { opacity: 1.00; transform: rotate(3.30deg); }
+    72% { opacity: 1.00; transform: rotate(2.90deg); }
+    74% { opacity: 1.00; transform: rotate(2.52deg); }
+    76% { opacity: 1.00; transform: rotate(2.17deg); }
+    78% { opacity: 1.00; transform: rotate(1.84deg); }
+    80% { opacity: 1.00; transform: rotate(1.53deg); }
+    82% { opacity: 1.00; transform: rotate(1.25deg); }
+    84% { opacity: 1.00; transform: rotate(0.99deg); }
+    86% { opacity: 1.00; transform: rotate(0.76deg); }
+    88% { opacity: 1.00; transform: rotate(0.56deg); }
+    90% { opacity: 1.00; transform: rotate(0.39deg); }
+    92% { opacity: 1.00; transform: rotate(0.25deg); }
+    94% { opacity: 1.00; transform: rotate(0.14deg); }
+    96% { opacity: 1.00; transform: rotate(0.06deg); }
+    98% { opacity: 1.00; transform: rotate(0.02deg); }
+    100% { opacity: 1.00; transform: rotate(0.00deg); }
+  }
+}
+
+@media (max-width: 520px) {
+  .hero__cmd code { font-size: 0.78rem; }
+}

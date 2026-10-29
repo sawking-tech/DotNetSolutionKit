@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <!--#if (Infisical) -->
+        <PackageReference Include="Infisical.Sdk" />
+        <!--#endif -->
+        <!--#if (Vault) -->
+        <PackageReference Include="VaultSharp" />
+        <!--#endif -->
+        <!--#if (Storage) -->
+        <PackageReference Include="AWSSDK.S3" />
+        <!--#endif -->
+        <!--#if (ClickHouse) -->
+        <PackageReference Include="ClickHouse.Client" />
+        <!--#endif -->
+        <PackageReference Include="Hangfire.Core" />
+        <PackageReference Include="MassTransit.RabbitMQ" />
+        <PackageReference Include="MassTransit.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" />
+        <!--#if (Database != "mssql") -->
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <!--#endif -->
+        <!--#if (Database == "mssql") -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+        <!--#endif -->
+        <PackageReference Include="Scrutor" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+        <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+        <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.Common.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+</Project>

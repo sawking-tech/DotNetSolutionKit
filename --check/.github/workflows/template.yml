@@ -1,0 +1,344 @@
+name: Template
+
+# Generates solutions from this commit of the template, one per combination of flags, and checks that
+# each builds and passes its tests. Each flag is on in at least one combination, so a change that breaks
+# a combination fails here instead of in a team's first generation.
+
+on:
+  pull_request:
+  push:
+    branches: [master, dev, '2.x']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: defaults
+            first: -N Acme -P Shop -S Orders --Solution
+          - name: every flag, three services
+            first: >-
+              -N Acme -P Shop -S Orders --Solution --Messaging outbox -I true --DiffApi true --FeatureFlags true
+              --HierarchyRules true --Storage true --ClickHouse true --MongoDB true --Notify email --GitHubCiCd true --Audit true
+            # Flags that change a service's code are passed again to a later service, as the docs say.
+            # The second service by the short names, so they keep working.
+            more: -N Acme -P Shop -S Billing --Messaging outbox -I true --DiffApi true -FF true --Storage true -CH true --MongoDB true --Notify email --Audit true
+            gateway: -N Acme -P Shop -S Gateway --ApiGateway true
+            integration: true
+            # ci.yml with coverage, as coverage.yml runs it; the others run it as a pull request
+            coverage: true
+            schemas: true
+            layers: Orders
+          - name: no background jobs
+            first: -N Acme -P Shop -S Orders -M false -H false  # -M false: the hidden name of --Solution in earlier versions
+            more: -N Acme -P Shop -S Billing -H false
+          - name: direct bus
+            first: -N Acme -P Shop -S Orders --Solution --Messaging direct
+          - name: vault
+            first: -N Acme -P Shop -S Orders --Solution --Vault true --GitHubCiCd true --FeatureFlags true
+            more: -N Acme -P Shop -S Billing --Vault true --FeatureFlags true
+            integration: true
+          - name: sql server
+            first: >-
+              -N Acme -P Shop -S Orders --Solution --Database mssql --Messaging outbox -I true --DiffApi true
+              --FeatureFlags true --HierarchyRules true --Audit true --GitHubCiCd true
+            more: -N Acme -P Shop -S Billing --Database mssql --Messaging outbox -I true --DiffApi true --FeatureFlags true --Audit true
+            integration: true
+            schemas: true
+          - name: xunit tests
+            first: -N Acme -P Shop -S Orders --Solution --TestFramework xunit --Messaging outbox --Audit true
+            more: -N Acme -P Shop -S Billing --TestFramework xunit
+            gateway: -N Acme -P Shop -S Gateway --ApiGateway true --TestFramework xunit
+            layers: Orders
+          - name: dotted names
+            first: -N Acme.Corp -P Retail.Shop -S Sales.Orders --Solution --Messaging outbox --DiffApi true
+            more: -N Acme.Corp -P Retail.Shop -S Sales.Billing --Messaging outbox --DiffApi true
+          - name: kubernetes files
+            first: -N Acme -P Shop -S Orders --Solution --Deploy k8s --Agent opencode
+            agent: opencode
+            more: -N Acme -P Shop -S Billing --Deploy k8s
+          - name: no deployment files
+            first: -N Acme -P Shop -S Orders --Solution --Deploy none --Agent none
+            agent: none
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('template/**/*.csproj', 'template/**/Directory.Packages.props', 'template/src/package-versions/*.props') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Install the template from this commit
+        run: dotnet new install ./template
+
+      - name: Generate
+        working-directory: ${{ runner.temp }}
+        run: |
+          mkdir solution && cd solution
+          dotnet new DotNetSolutionKit ${{ matrix.first }}
+          # A service generated into the solution adds itself to All.sln by a post-action that runs a command.
+          # The second service by the short name dotskit, the others by DotNetSolutionKit, so both keep working.
+          if [ -n "${{ matrix.more }}" ]; then dotnet new dotskit ${{ matrix.more }} --allow-scripts yes; fi
+          if [ -n "${{ matrix.gateway }}" ]; then dotnet new DotNetSolutionKit ${{ matrix.gateway }} --allow-scripts yes; fi
+          dotnet sln src/services/*.All.sln list
+
+      # Every field of a JSON file left empty on purpose says what goes there (docs/adr/006).
+      - name: JSON metadata keys
+        working-directory: ${{ runner.temp }}/solution
+        run: python3 "$GITHUB_WORKSPACE/scripts/check-json-metadata.py" .
+
+      # The files that carry the template's authorship carry it, and the solution says it comes from the sources.
+      - name: Authorship and version
+        working-directory: ${{ runner.temp }}/solution
+        run: bash "$GITHUB_WORKSPACE/scripts/check-authorship.sh" . source
+
+      # The first use case, consumer and test a team writes into a service build and pass without touching a
+      # project file: a generated service has no business code, so nothing else would notice a layer that
+      # cannot see what that code needs.
+      - name: A service's first code
+        if: matrix.layers
+        working-directory: ${{ runner.temp }}/solution
+        run: bash "$GITHUB_WORKSPACE/scripts/check-service-layers.sh" . "${{ matrix.layers }}"
+
+      # The rules and skills for an AI agent are in the format --Agent chose, and only in it.
+      - name: Agent rules and skills
+        working-directory: ${{ runner.temp }}/solution
+        run: bash "$GITHUB_WORKSPACE/scripts/check-agent-files.sh" . "${{ matrix.agent || 'claude' }}"
+
+      # The generated secret scan checks only the commits a push brings in, so the first push of a new
+      # solution scans everything: a value in the template that looks like a secret fails a team's first push.
+      - name: Secret scan of the whole solution
+        working-directory: ${{ runner.temp }}/solution
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks dir . --config "$GITHUB_WORKSPACE/template/tools/gitleaks/.gitleaks.toml" --redact --verbose
+
+      # A warning fails the build here: a team's first build of a generated solution shows none.
+      - name: Build
+        working-directory: ${{ runner.temp }}/solution
+        run: dotnet build src/services/*.All.sln --configuration Release -warnaserror
+
+      - name: Unit tests
+        working-directory: ${{ runner.temp }}/solution
+        run: dotnet test src/services/*.All.sln --configuration Release --no-build --filter "TestCategory!=Integration"
+
+      # What api-diff.yml runs on a pull request of the generated solution: a contract per service, and
+      # none for the gateway.
+      - name: API contracts
+        if: matrix.schemas
+        working-directory: ${{ runner.temp }}/solution
+        run: |
+          bash scripts/generate-api-schemas.sh
+          services=$(ls -d src/services/*/*.API | grep -vc Gateway)
+          contracts=$(ls src/services/*/*.API/api-schema/*.json | wc -l)
+          echo "$contracts contracts for $services services"
+          [ "$contracts" = "$services" ]
+
+      # The workflows the solution ships, run as they are by scripts/run-workflow.py: ci.yml with its own
+      # test servers and integration tests - with coverage and its threshold in one combination, as a pull
+      # request in the others - the secret scan of a pull request, and
+      # the API diff when there is one. Nothing is published: a team's first pull request runs these
+      # same steps. The solution is put in a repository with main and a pull request on top of it, the
+      # way GitHub checks one out.
+      - name: The shipped workflows
+        if: matrix.integration
+        working-directory: ${{ runner.temp }}/solution
+        run: |
+          commit() { git -c user.name=ci -c user.email=ci@example.com commit -q "$@"; }
+          git init -q -b main && git add -A && commit -m "the generated solution"
+          git clone -q --bare . "$RUNNER_TEMP/origin.git" && git remote add origin "$RUNNER_TEMP/origin.git" && git fetch -q origin
+          base=$(git rev-parse HEAD)
+          git switch -q -c change && echo "a change under review" > change.txt && git add change.txt && commit -m "a change"
+          head=$(git rev-parse HEAD)
+          run() { python3 "$GITHUB_WORKSPACE/scripts/run-workflow.py" . "$@"; }
+          run .github/workflows/ci.yml build-and-test inputs.coverage=${{ matrix.coverage && 'true' || 'false' }} vars.COVERAGE_MIN_BRANCH=1
+          if [ "${{ matrix.coverage }}" = true ]; then
+            # a report per service and one for Common, each held to the threshold; the gateway's transforms in it
+            for report in Common Orders Billing Gateway; do test -f "coverage/report/$report/Summary.json"; done
+            jq -e '.summary.totalbranches > 0' coverage/report/Gateway/Summary.json
+          else
+            test ! -d coverage   # a pull request measures nothing
+          fi
+          # coverage.yml is ci.yml with coverage on: a job of one uses:, which run-workflow.py does not run
+          yq -e '.jobs.coverage.uses == "./.github/workflows/ci.yml" and .jobs.coverage.with.coverage == true' .github/workflows/coverage.yml
+          run .github/workflows/secret-scan.yml scan github.event_name=pull_request             github.event.pull_request.base.sha="$base" github.event.pull_request.head.sha="$head"             github.event.before= github.sha="$head" github.event.repository.default_branch=main
+          if [ -f .github/workflows/api-diff.yml ]; then
+            run .github/workflows/api-diff.yml api-diff github.base_ref=main
+          fi
+
+  # The template as users install it once published: packed, installed from the package, generated.
+  package:
+    name: Installed from the package
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+      - name: Pack, install, generate, build
+        run: |
+          dotnet pack DotNetSolutionKit.Templates.csproj --configuration Release -o "$RUNNER_TEMP/package"
+          dotnet new install "$RUNNER_TEMP"/package/*.nupkg
+          mkdir "$RUNNER_TEMP/solution" && cd "$RUNNER_TEMP/solution"
+          dotnet new DotNetSolutionKit -N Acme -P Shop -S Orders --Solution --GitHubCiCd true
+          test -f .github/workflows/ci.yml && test -f tools/gitleaks/.gitleaks.toml
+          bash "$GITHUB_WORKSPACE/scripts/check-authorship.sh" . "$(jq -r .version "$GITHUB_WORKSPACE/version.json")"
+          bash "$GITHUB_WORKSPACE/scripts/check-agent-files.sh" . claude   # the dot folder survives packing
+          dotnet build src/services/*.All.sln --configuration Release -warnaserror
+
+      # The tool is released beside the template, of the same version: it installs from its package and says it.
+      - name: The tool installs from its package
+        run: |
+          dotnet pack tool/DotsKit --configuration Release -o "$RUNNER_TEMP/tool-package"
+          version=$(jq -r .version version.json)
+          dotnet tool install SawKing.DotsKit.Tool --version "$version" --add-source "$RUNNER_TEMP/tool-package" --tool-path "$RUNNER_TEMP/tool"
+          [ "$("$RUNNER_TEMP/tool/dotskit" --version)" = "$version" ] || { echo "::error::dotskit --version is not $version"; exit 1; }
+          "$RUNNER_TEMP/tool/dotskit" --help | grep -q "dotskit upgrade"
+
+      # A service generated by another major version than the solution's does not build, and says why.
+      - name: A service of another major version does not build
+        working-directory: ${{ runner.temp }}/solution
+        run: |
+          version=$(jq -r .version "$GITHUB_WORKSPACE/version.json")
+          other="$(( ${version%%.*} + 1 )).0.0"
+          sed -i "s|<DotNetSolutionKitServiceVersion>$version<|<DotNetSolutionKitServiceVersion>$other<|" src/services/*/*.API/*.csproj
+          if dotnet build src/services/*.All.sln --configuration Release > build.log 2>&1; then
+            echo "::error::a service generated by $other built in a solution generated by $version"
+            exit 1
+          fi
+          grep -q "generated by DotNetSolutionKit $other, the solution by $version" build.log             || { cat build.log; echo "::error::the build failed for another reason"; exit 1; }
+
+  # A service generated into a solution adds itself to All.sln by a post-action, which runs PowerShell on
+  # Windows and sh elsewhere: the generate job checks sh, this one PowerShell.
+  service-adds-itself-windows:
+    name: A service adds itself to All.sln on Windows
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+      - name: A solution, a dotted service and a gateway into it
+        shell: pwsh
+        run: |
+          dotnet new install ./template
+          New-Item -ItemType Directory "$env:RUNNER_TEMP/solution" | Out-Null
+          Set-Location "$env:RUNNER_TEMP/solution"
+          dotnet new DotNetSolutionKit -N Acme -P Shop -S Orders --Solution
+          dotnet new DotNetSolutionKit -N Acme -P Shop -S Sales.Billing --allow-scripts yes
+          dotnet new DotNetSolutionKit -N Acme -P Shop -S Gateway --ApiGateway true --allow-scripts yes
+          $listed = dotnet sln src/services/Acme.Shop.All.sln list
+          $billing = @($listed | Select-String -SimpleMatch 'Acme.Shop.Sales.Billing').Count
+          $gateway = @($listed | Select-String -SimpleMatch 'Acme.Shop.Gateway').Count
+          if ($billing -ne 5 -or $gateway -ne 2) { Write-Error "All.sln lists $billing projects of Billing and $gateway of the gateway"; exit 1 }
+          if (-not (Select-String -Path src/services/Acme.Shop.All.sln -SimpleMatch '"Billing", "Billing"' -Quiet)) { Write-Error 'All.sln has no solution folder Billing'; exit 1 }
+          dotnet build src/services/Acme.Shop.All.sln -warnaserror
+
+  # dotskit merges by git and edits All.sln by dotnet sln, whose paths, line endings and shells differ between
+  # OSes: its tests, the scenarios with the template from these sources among them, run on all three.
+  tool:
+    name: dotskit on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+      - name: Git for the scenarios
+        shell: bash
+        run: |
+          git config --global user.name "dotskit scenarios"
+          git config --global user.email "scenarios@dotskit.invalid"
+          git config --global core.longpaths true
+      - name: Build
+        run: dotnet build tool/DotsKit.Tests -warnaserror
+      # The rules of .editorconfig an SDK 8 build does not run, IDE0130 among them, and the layout; one OS is enough.
+      - name: Style
+        if: matrix.os == 'ubuntu-24.04'
+        run: |
+          dotnet format tool/DotsKit/DotsKit.csproj --verify-no-changes
+          dotnet format tool/DotsKit.Tests/DotsKit.Tests.csproj --verify-no-changes
+      - name: Test
+        run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory!=Chain"
+
+  # A solution of 1.0.0 upgraded by dotskit a release at a time to the template's sources, building after every
+  # step (#117), merged by git and by the tool's own merge in two jobs side by side; twenty minutes each, so on
+  # one OS. The releases before 2.6.1 come from their tags on GitHub.
+  chain:
+    name: dotskit upgrades from 1.0.0, merge ${{ matrix.merge }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        merge: [git, files]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+      - name: Git for the scenarios
+        run: |
+          git config --global user.name "dotskit scenarios"
+          git config --global user.email "scenarios@dotskit.invalid"
+      - name: Build
+        run: dotnet build tool/DotsKit.Tests -warnaserror
+      - name: Test
+        run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory=Chain&Name~${{ matrix.merge }}"
+
+  # A link to a section of a document names a heading of it, in the language of the linking document.
+  doc-links:
+    name: Links to sections
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: python3 scripts/check-doc-anchors.py
+
+  # Every file git tracks has the style of .editorconfig, the template's sources among them (scripts/check-style.py).
+  style:
+    name: One style
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: python3 scripts/test_check_style.py
+      - run: python3 scripts/check-style.py
+
+  # Names that must not appear in the template. The list is a repository secret, LEAK_PATTERN (an extended
+  # regular expression), so the check does not publish the names it guards. Without the secret, as in a
+  # fork, the check is skipped.
+  leaks:
+    name: Denied names
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Search
+        env:
+          LEAK_PATTERN: ${{ secrets.LEAK_PATTERN }}
+        run: |
+          if [ -z "$LEAK_PATTERN" ]; then
+            echo "::notice::LEAK_PATTERN is not set; skipped."
+            exit 0
+          fi
+          if grep -rniE --exclude-dir=.git "$LEAK_PATTERN" . > "$RUNNER_TEMP/found.txt"; then
+            echo "::error::$(wc -l < "$RUNNER_TEMP/found.txt") lines match LEAK_PATTERN; the file names follow, the lines are not printed"
+            cut -d: -f1,2 "$RUNNER_TEMP/found.txt"
+            exit 1
+          fi

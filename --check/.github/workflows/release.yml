@@ -1,0 +1,196 @@
+name: Release
+
+# Publishes a version of the template: the tag v<version>, a GitHub release with that version's notes from
+# version.json, and its package on nuget.org and in GitHub Packages. promote.yml calls it right after it
+# fast-forwards master, or 2.x for a fix of the .NET 8 line: whatever reaches them is a release. A push of a
+# tag v<version> starts it too, to publish again what a failed run left out.
+#
+# A version is published once. Its tag already on another commit means the version was not raised since,
+# and nothing goes out; on this same commit, it is a run again, and the parts already out are skipped.
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: The branch just fast-forwarded
+        type: string
+        required: true
+      publish:
+        description: false for a rehearsal on a throwaway branch - everything but the tag and the publication
+        type: boolean
+        default: true
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  actions: read
+  packages: write
+  id-token: write  # the OIDC token nuget.org trades for a short-lived key (Trusted Publishing)
+
+env:
+  # The nuget.org profile that owns the packages and the Trusted Publishing policy, not an e-mail.
+  NUGET_USER: sawking.tech
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+
+      - name: What is released
+        id: what
+        env:
+          PUBLISH_INPUT: ${{ inputs.publish }}
+          CALLED_REF: ${{ inputs.ref }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          # Called, publish is the caller's; started by a tag, it publishes.
+          PUBLISH=true
+          [ -n "$CALLED_REF" ] && [ "$PUBLISH_INPUT" = false ] && PUBLISH=false
+          if [ -n "$CALLED_REF" ]; then
+            tag="v$(jq -r .version version.json)"
+          else
+            tag="$GITHUB_REF_NAME"
+            expected="v$(jq -r .version version.json)"
+            [ "$tag" = "$expected" ] || { echo "::error::tag $tag, version.json says $expected"; exit 1; }
+          fi
+          # A labelled version, as 2.8.0-rc, is work still going on dev: it is never released, whatever tag names it.
+          case "$tag" in *-*) echo "::error::$tag is a version with a label: it is not released"; exit 1 ;; esac
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "publish=$PUBLISH" >> "$GITHUB_OUTPUT"
+          if tagged=$(git rev-parse -q --verify "refs/tags/$tag^{commit}"); then
+            if [ "$tagged" != "$sha" ]; then
+              echo "::error::$tag is already released from ${tagged:0:7}: the version was not raised since, so ${sha:0:7} publishes nothing"
+              exit 1
+            fi
+            echo "$tag is on this commit already: a run again"
+          fi
+          echo "releasing $tag from ${sha:0:7}, publish=$PUBLISH"
+
+      # 2.x carries the .NET 8 line after 3.0: only a 2.* version goes out from it, and its release does
+      # not become the repository's latest, which stays the newest major. A rehearsal is not on either.
+      - name: The commit is on master or 2.x and the template's checks passed on it
+        id: line
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.what.outputs.tag }}
+          SHA: ${{ steps.what.outputs.sha }}
+          PUBLISH: ${{ steps.what.outputs.publish }}
+          CHECKS_WAIT_MIN: 40
+        run: |
+          if [ "$PUBLISH" != true ]; then
+            echo "latest=false" >> "$GITHUB_OUTPUT"
+          elif git merge-base --is-ancestor "$SHA" origin/master; then
+            echo "latest=true" >> "$GITHUB_OUTPUT"
+          elif git rev-parse -q --verify origin/2.x >/dev/null && git merge-base --is-ancestor "$SHA" origin/2.x; then
+            case "$TAG" in
+              v2.*) echo "latest=false" >> "$GITHUB_OUTPUT" ;;
+              *) echo "::error::$TAG is on 2.x, which releases 2.* only"; exit 1 ;;
+            esac
+          else
+            echo "::error::${SHA:0:7} is neither on master nor on 2.x; a release is made from what reached them"
+            exit 1
+          fi
+          for minute in $(seq 1 "$CHECKS_WAIT_MIN"); do
+            runs=$(gh run list -R "$GITHUB_REPOSITORY" --workflow template.yml --commit "$SHA" --json status,conclusion)
+            if [ "$(jq '[.[] | select(.status == "completed" and .conclusion == "success")] | length' <<< "$runs")" -gt 0 ]; then
+              echo "template.yml passed on $SHA"
+              exit 0
+            fi
+            if [ "$(jq 'length' <<< "$runs")" -gt 0 ] && [ "$(jq '[.[] | select(.status != "completed")] | length' <<< "$runs")" -eq 0 ]; then
+              echo "::error::template.yml did not pass on $SHA: $(jq -c '[.[].conclusion]' <<< "$runs")"
+              exit 1
+            fi
+            sleep 60
+          done
+          echo "::error::no finished template.yml run on $SHA after $CHECKS_WAIT_MIN minutes"
+          exit 1
+
+      # nuget.org by Trusted Publishing: its policy for this repository and release.yml (the file, also when
+      # promote.yml calls it) trades the job's OIDC token for a key that lives an hour, so no key is stored.
+      # The key is asked for after the checks and before the tag: a policy that does not match stops the
+      # release before anything is out. Should nuget.org refuse the token of the label's run
+      # (pull_request_target), promote.yml started by hand releases the same.
+      - name: A short-lived key for nuget.org
+        id: nuget
+        if: steps.what.outputs.publish == 'true'
+        uses: NuGet/login@v1
+        with:
+          user: ${{ env.NUGET_USER }}
+
+      - name: Tag the version
+        if: steps.what.outputs.publish == 'true'
+        env:
+          TAG: ${{ steps.what.outputs.tag }}
+          SHA: ${{ steps.what.outputs.sha }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "$TAG is there already"
+            exit 0
+          fi
+          git tag "$TAG" "$SHA"
+          git push origin "refs/tags/$TAG"
+
+      - name: Publish the release
+        if: steps.what.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.what.outputs.tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "the GitHub release $TAG is out already"
+            exit 0
+          fi
+          version="${TAG#v}"
+          bash scripts/release-notes.sh "$version" > notes.md
+          headline=$(jq -r --arg v "$version" '.releaseNotes[$v].headline' version.json)
+          gh release create "$TAG" --title "$TAG: $headline" --notes-file notes.md --verify-tag \
+            --latest=${{ steps.line.outputs.latest }}
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      # The packages go on the release in any case, so a version can be installed from a file: the template and
+      # its tool, dotskit, of the same version. A rehearsal packs them too: that they build is part of what it shows.
+      - name: Pack and attach the template and the tool
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.what.outputs.tag }}
+          PUBLISH: ${{ steps.what.outputs.publish }}
+        run: |
+          bash scripts/release-notes.sh "${TAG#v}" plain > "$RUNNER_TEMP/release-notes.txt"
+          dotnet pack DotNetSolutionKit.Templates.csproj --configuration Release -o package \
+            -p:ReleaseNotesFile="$RUNNER_TEMP/release-notes.txt"
+          dotnet pack tool/DotsKit --configuration Release -o package \
+            -p:ReleaseNotesFile="$RUNNER_TEMP/release-notes.txt"
+          ls package
+          [ "$PUBLISH" = true ] || exit 0
+          gh release upload "$TAG" package/*.nupkg --clobber
+
+      # A version published on nuget.org cannot be deleted, only unlisted, so it goes out only from what passed
+      # the template checks. The tool goes first: a push that fails stops the step before the template is out,
+      # and a run again publishes both, --skip-duplicate passing over what is there.
+      - name: Publish to nuget.org
+        if: steps.what.outputs.publish == 'true'
+        env:
+          NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
+        run: |
+          for package in package/SawKing.DotsKit.Tool.*.nupkg package/SawKing.DotNetSolutionKit.*.nupkg; do
+            dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done
+
+      # The same package in the organization's GitHub Packages, which the repository page lists beside its
+      # releases. Installing is meant from nuget.org; GitHub's registry asks for a sign-in even when public.
+      - name: Publish to GitHub Packages
+        if: steps.what.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          dotnet nuget push package/*.nupkg --api-key "$GH_TOKEN" \
+            --source "https://nuget.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/index.json" --skip-duplicate

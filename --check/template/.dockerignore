@@ -1,0 +1,17 @@
+# Only sources and build props reach the build context.
+**/bin/
+**/obj/
+**/logs/
+**/.idea/
+**/.vs/
+**/*.user
+**/*.DotSettings.user
+.git/
+.github/
+deploy/
+
+# Local secrets must never end up in an image: publish would copy them next to appsettings.json.
+**/appsettings.Secrets.json
+
+# A service's build context needs nothing from its deploy files.
+src/services/*/deploy/

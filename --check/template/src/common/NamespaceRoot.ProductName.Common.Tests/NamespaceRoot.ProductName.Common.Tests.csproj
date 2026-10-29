@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit3TestAdapter" />
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Moq" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Web\NamespaceRoot.ProductName.Common.Web.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Testing\NamespaceRoot.ProductName.Common.Testing.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en" class="preload">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DotNetSolutionKit (dotskit) - a configurable dotnet new template and lifecycle toolkit for standardized .NET solutions</title>
+<meta name="description" content="A configurable dotnet new template and lifecycle toolkit for standardized .NET solutions: microservice solutions on DDD and Clean Architecture with CI, deployment and testing, built from flags, extended with services and modules, and upgraded to new versions while the team's code is kept.">
+<link rel="canonical" href="https://dotskit.sawking.tech/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DotNetSolutionKit">
+<meta property="og:url" content="https://dotskit.sawking.tech/">
+<meta property="og:title" content="DotNetSolutionKit (dotskit) - a configurable dotnet new template and lifecycle toolkit for standardized .NET solutions">
+<meta property="og:description" content="A configurable dotnet new template and lifecycle toolkit for standardized .NET solutions: microservice solutions on DDD and Clean Architecture with CI, deployment and testing, built from flags, extended with services and modules, and upgraded to new versions while the team's code is kept.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DotNetSolutionKit (dotskit) - a configurable dotnet new template and lifecycle toolkit for standardized .NET solutions">
+<meta name="twitter:description" content="Microservice solutions on .NET 8 with CI, deployment and tests, built from flags; the tool dotskit adds services and flags and upgrades a solution, keeping the team's code.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "DotNetSolutionKit",
+  "url": "https://dotskit.sawking.tech/",
+  "codeRepository": "https://github.com/sawking-tech/DotNetSolutionKit",
+  "programmingLanguage": "C#",
+  "runtimePlatform": ".NET 8",
+  "license": "https://opensource.org/licenses/MIT",
+  "author": {"@type": "Person", "name": "Vladimir Savkin", "url": "https://sawking.tech/cv"},
+  "description": "A configurable dotnet new template and lifecycle toolkit for standardized .NET solutions: microservices with CI, deployment and tests built from flags, and the tool dotskit that adds services and flags and upgrades a solution, keeping the team's code.",
+  "keywords": "dotnet new template, dotskit, microservices, .NET 8, PostgreSQL, SQL Server, clean architecture, domain events, outbox, upgrade, three-way merge"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "DotNetSolutionKit",
+  "url": "https://dotskit.sawking.tech/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "softwareVersion": "2.8.1",
+  "releaseNotes": "Start with dotskit: the README, the package page and the site lead with it. The commands of the template alone are one click further, under the dotskit ones.",
+  "downloadUrl": "https://www.nuget.org/packages/SawKing.DotNetSolutionKit/2.8.1",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site/site.css?v=141">
+<link rel="stylesheet" href="site/hero.css?v=104">
+<script src="site/config.js?v=103"></script>
+<script src="site/boot.js?v=103"></script>
+</head>
+<body>
+
+<div id="main">
+<!-- ==== HERO: the emblem of the template ==== -->
+<div id="cols">
+  <aside id="sidebar" aria-label="Sections of this page">
+    <div class="side-head">
+      <span class="side-title"><span lang="en">About</span><span lang="ru">О шаблоне</span></span>
+      <button id="side-lang" type="button" title="Читать по-русски" aria-label="Читать по-русски">RU</button>
+      <button id="side-theme" type="button" title="Theme: follows the device" aria-label="Theme">◐</button>
+      <button id="side-swap" type="button" title="Move the panel to the other side" aria-label="Move the panel to the other side">⇄</button>
+      <button id="side-close" type="button" title="Close" aria-label="Close the panel">✕</button>
+    </div>
+    <!-- The panel of the documentation page, with this page's own sections in it: the same shelf,
+         the same style, the contents of the page it stands on. -->
+    <div class="side-body"><div id="menu">
+        <h2><span lang="en">On this page</span><span lang="ru">На этой странице</span></h2>
+        <ul>
+          <li><a href="#top"><span lang="en">DotNetSolutionKit</span><span lang="ru">DotNetSolutionKit</span></a></li>
+          <li><a href="#features"><span lang="en">What you get</span><span lang="ru">Что вы получаете</span></a></li>
+          <li><a href="#install"><span lang="en">Try it</span><span lang="ru">Попробовать</span></a></li>
+          <li><a href="#whats-new"><span lang="en">What's new</span><span lang="ru">Что нового</span></a></li>
+          <li><a href="#parameters"><span lang="en">Parameters</span><span lang="ru">Параметры</span></a></li>
+          <li><a href="#documentation"><span lang="en">Documentation</span><span lang="ru">Документация</span></a></li>
+          <li><a href="#license"><span lang="en">License</span><span lang="ru">Лицензия</span></a></li>
+        </ul>
+      </div></div>
+  </aside>
+
+  <div id="below">
+    <div class="bar">
+      <div class="wrap bar-inner">
+        <button id="burger" type="button" aria-expanded="false" aria-controls="sidebar" title="Sections of this page">≡</button>
+  <a class="bar__mark" href="./">
+    <!-- the SawKing Tech mark, inline as FoQLens has its magnifier, so .bar__mark svg sizes it; ids prefixed bm- -->
+    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="236 34 328 328"> <defs> <radialGradient id="bm-disc-b" gradientUnits="userSpaceOnUse" cx="503.9" cy="138" r="180"><stop offset="0" stop-color="#9b4f96" stop-opacity="0.75"/><stop offset="1" stop-color="#9b4f96" stop-opacity="0"/></radialGradient><radialGradient id="bm-disc-c" gradientUnits="userSpaceOnUse" cx="400" cy="268" r="180"><stop offset="0" stop-color="#8cd600" stop-opacity="0.9"/><stop stop-color="#2fa6c4" offset="0.45" stop-opacity="0.45"/><stop stop-color="#2fa6c4" offset="1" stop-opacity="0"/></radialGradient> <mask id="bm-under-green" maskUnits="userSpaceOnUse" x="310" y="192" width="188" height="74"><rect x="310" y="192" width="188" height="74" fill="#fff"/><path d="M409.2 214.4C416.2 209.2 431.6 197 439.7 195.2C444.9 194 449.5 198.2 450 203.3C450.5 209.7 442.5 213.7 437.9 216.7Z"/></mask> </defs> <mask id="bm-cut" maskUnits="userSpaceOnUse" x="236" y="34" width="328" height="328"> <rect x="236" y="34" width="328" height="328" fill="#fff"/> <g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <g><g opacity="0.35"><path stroke-dasharray="3 2.2" d="M411.8 124.5Q456.7 144.7 498.1 168.4"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M493.5 168.4L499.4 169.1L495.8 164.4"/></g><path stroke-dasharray="3 2.2" d="M369.5 161.6Q379.7 144.5 396.1 128.6"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M394.8 133L397.1 127.6L391.6 129.7"/><path stroke-dasharray="3 2.2" d="M372 168.7Q389.9 174.6 403.3 175.7"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M399.2 177.7L404.8 175.8L399.5 173.1"/><path stroke-dasharray="3 2.2" d="M414.5 165.8Q409.3 147.8 405.8 130.9"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M408.9 134.4L405.5 129.4L404.4 135.3"/><path stroke-dasharray="3 2.2" d="M412.5 117.9Q434.4 109.3 450 108.8"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M446.1 111.2L451.5 108.7L445.9 106.6"/><path stroke-dasharray="3 2.2" d="M424.7 167.4Q439.9 146.9 455.9 117.1"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M456 121.7L456.6 115.8L452 119.6"/><path stroke-dasharray="3 2.2" d="M471.7 113A111.2 111.2 0 0 1 505.4 162.5"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M502 159.4L505.8 163.9L506.3 158"/><path stroke-dasharray="3 2.2" d="M430.9 177.9Q464.7 177.3 496.8 174.4"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M493.1 177.1L498.3 174.3L492.6 172.5"/><circle fill="#fff" cx="364.9" cy="167.2" r="7.2"/><circle fill="#fff" cx="417.7" cy="178.6" r="13.2"/><circle fill="#fff" cx="403.2" cy="120.1" r="9.6"/><circle fill="#fff" cx="462.6" cy="106.1" r="11.4"/><circle fill="#fff" cx="508.5" cy="173.8" r="10.2"/></g> <g><path d="M447.8 209.3C454.4 204.4 468.7 192.4 475.9 201.7C479.1 205.9 476.9 209.6 474.8 213.4" stroke-linecap="butt" mask="url(#bm-under-green)"/> <path d="M333.8 241.9C351.3 262.3 407.7 267.1 432.5 259.9C450 254.9 466.4 244.6 480.9 233.8C485.7 230.1 495.3 226.3 494.7 219C494.3 214 490 210.5 485.1 210.6C473 211.1 453.2 226 440.4 230.6" stroke-linecap="butt"/> <path d="M409.2 214.4C416 209.4 432.1 196.6 440 195.1C444.9 194.2 449.3 198.1 449.9 202.8C450.9 210.2 440.5 215 435.4 218.4" stroke-linecap="butt"/> <path d="M338 207.3C349.6 203.8 362.2 198 374.5 198.6C385.6 199.2 393.3 207.4 402.5 212.3C405.3 213.8 408.8 214.5 411.9 215.4C418.3 217.4 431.2 214.3 436.5 219.2C437.8 220.4 438.5 222.3 439.1 224L439.1 224C439.5 225.6 441 228.2 440.7 229.9C438.4 245.6 392.1 237 382.2 233.5"/> <path d="M321.9 198.1L335.9 199.7A3 3 0 0 1 338.5 203L333.1 247.1A3 3 0 0 1 329.8 249.7L315.8 248A3 3 0 0 1 313.1 244.7L318.6 200.7A3 3 0 0 1 321.9 198.1Z"/></g> </g> </mask> <g mask="url(#bm-cut)"><circle fill="#512bd4" cx="400" cy="198" r="155"/><circle cx="400" cy="198" r="155" fill="url(#bm-disc-b)"/><circle cx="400" cy="198" r="155" fill="url(#bm-disc-c)"/></g> </svg>
+    DotNetSolutionKit
+  </a>
+        <span class="spacer"></span>
+  <a href="./" aria-current="page"><span lang="en">About</span><span lang="ru">О шаблоне</span></a>
+  <a href="docs.html"><span lang="en">Docs</span><span lang="ru">Документы</span></a>
+  <a href="samples.html"><span lang="en">Samples</span><span lang="ru">Примеры</span></a>
+  <a href="https://github.com/sawking-tech/DotNetSolutionKit" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+
+    <header class="hero hero--kit wrap" id="top">
+      <div class="hero__inner">
+        <h1 class="logo-head"><svg class="emblem" viewBox="236 34 328 328" role="img" aria-label="DotNetSolutionKit">
+          <!-- The SawKing Tech mark: the hand and the graph traced from it, in its own 800x400 grid.
+               The band lies over the wrist; under it the hand is drawn whole, so a longer name
+               only narrows the band. -->
+          <defs>
+            <!-- three colours blended as a triangle: the disc in one, the C# purple glowing in from a corner,
+                 the green from behind the name, so its brightest point is hidden in the band -->
+            <radialGradient id="disc-b" gradientUnits="userSpaceOnUse" cx="503.9" cy="138" r="180"><stop class="disc-b" offset="0" stop-opacity="0.75"/><stop class="disc-b" offset="1" stop-opacity="0"/></radialGradient><radialGradient id="disc-c" gradientUnits="userSpaceOnUse" cx="400" cy="268" r="180"><stop class="disc-c" offset="0" stop-opacity="0.9"/><stop class="disc-cc" offset="0.45" stop-opacity="0.45"/><stop class="disc-cc" offset="1" stop-opacity="0"/></radialGradient>
+            <mask id="under-green" maskUnits="userSpaceOnUse" x="310" y="192" width="188" height="74"><rect x="310" y="192" width="188" height="74" fill="#fff"/><path d="M409.2 214.4C416.2 209.2 431.6 197 439.7 195.2C444.9 194 449.5 198.2 450 203.3C450.5 209.7 442.5 213.7 437.9 216.7Z"/></mask>
+          </defs>
+          <!-- Everything drawn is cut out of the disc, as in the SawKing Tech mark: the band, the hand,
+               the graph and its labels are holes through which the ground shows. In the mask black cuts,
+               white keeps the disc: the graph's circles are white, so no edge is cut through them. -->
+          <mask id="cut" maskUnits="userSpaceOnUse" x="236" y="34" width="328" height="328">
+            <rect x="236" y="34" width="328" height="328" fill="#fff"/>
+            <rect x="236" y="248.75" width="328" height="38.5" fill="#000"/>
+          <g class="ink" stroke-width="2">
+            <g class="rise rise--graph" style="--i:3"><g class="far"><path class="dep" d="M411.8 124.5Q456.7 144.7 498.1 168.4"/><path class="tip" d="M493.5 168.4L499.4 169.1L495.8 164.4"/></g><path class="dep" d="M369.5 161.6Q379.7 144.5 396.1 128.6"/><path class="tip" d="M394.8 133L397.1 127.6L391.6 129.7"/><path class="dep" d="M372 168.7Q389.9 174.6 403.3 175.7"/><path class="tip" d="M399.2 177.7L404.8 175.8L399.5 173.1"/><path class="dep" d="M414.5 165.8Q409.3 147.8 405.8 130.9"/><path class="tip" d="M408.9 134.4L405.5 129.4L404.4 135.3"/><path class="dep" d="M412.5 117.9Q434.4 109.3 450 108.8"/><path class="tip" d="M446.1 111.2L451.5 108.7L445.9 106.6"/><path class="dep" d="M424.7 167.4Q439.9 146.9 455.9 117.1"/><path class="tip" d="M456 121.7L456.6 115.8L452 119.6"/><path class="dep" d="M471.7 113A111.2 111.2 0 0 1 505.4 162.5"/><path class="tip" d="M502 159.4L505.8 163.9L506.3 158"/><path class="dep" d="M430.9 177.9Q464.7 177.3 496.8 174.4"/><path class="tip" d="M493.1 177.1L498.3 174.3L492.6 172.5"/><text class="label" x="344.7" y="170.8" text-anchor="middle">API</text><text class="label" x="381.3" y="115.8" text-anchor="middle">APP</text><text class="label" x="387" y="192.9" text-anchor="middle">INFRA</text><text class="label" x="429.4" y="103.9" text-anchor="middle">DOMAIN</text><text class="label" x="495.1" y="195.3" text-anchor="middle">COMMON</text><circle fill="#fff" cx="364.9" cy="167.2" r="7.2"/><circle fill="#fff" cx="417.7" cy="178.6" r="13.2"/><circle fill="#fff" cx="403.2" cy="120.1" r="9.6"/><circle fill="#fff" cx="462.6" cy="106.1" r="11.4"/><circle fill="#fff" cx="508.5" cy="173.8" r="10.2"/></g>
+            <g class="rise rise--hand" style="--i:0"><path d="M447.8 209.3C454.4 204.4 468.7 192.4 475.9 201.7C479.1 205.9 476.9 209.6 474.8 213.4" stroke-linecap="butt" mask="url(#under-green)"/>
+<path d="M333.8 241.9C351.3 262.3 407.7 267.1 432.5 259.9C450 254.9 466.4 244.6 480.9 233.8C485.7 230.1 495.3 226.3 494.7 219C494.3 214 490 210.5 485.1 210.6C473 211.1 453.2 226 440.4 230.6" stroke-linecap="butt"/>
+<path d="M409.2 214.4C416 209.4 432.1 196.6 440 195.1C444.9 194.2 449.3 198.1 449.9 202.8C450.9 210.2 440.5 215 435.4 218.4" stroke-linecap="butt"/>
+<path d="M338 207.3C349.6 203.8 362.2 198 374.5 198.6C385.6 199.2 393.3 207.4 402.5 212.3C405.3 213.8 408.8 214.5 411.9 215.4C418.3 217.4 431.2 214.3 436.5 219.2C437.8 220.4 438.5 222.3 439.1 224L439.1 224C439.5 225.6 441 228.2 440.7 229.9C438.4 245.6 392.1 237 382.2 233.5"/>
+<path d="M321.9 198.1L335.9 199.7A3 3 0 0 1 338.5 203L333.1 247.1A3 3 0 0 1 329.8 249.7L315.8 248A3 3 0 0 1 313.1 244.7L318.6 200.7A3 3 0 0 1 321.9 198.1Z"/></g>
+          </g>
+          </mask>
+          <g mask="url(#cut)"><circle class="disc-a" cx="400" cy="198" r="155"/><circle cx="400" cy="198" r="155" fill="url(#disc-b)"/><circle cx="400" cy="198" r="155" fill="url(#disc-c)"/></g>
+          <text class="name" x="400" y="276.7" text-anchor="middle">DOTNET SOLUTION KIT</text>
+        </svg></h1>
+        <p class="hero__line" lang="en">A configurable <code>dotnet new</code> template and lifecycle toolkit for .NET 8 solutions on PostgreSQL or SQL Server. The template generates microservices with CI, deployment and tests, wired together; flags add the rest. The tool <code>dotskit</code> adds services and flags to a solution and upgrades it to a new version, keeping the team's code.</p>
+        <p class="hero__line" lang="ru">Настраиваемый шаблон <code>dotnet new</code> и инструмент сопровождения решений на .NET 8 с PostgreSQL или SQL Server. Шаблон генерирует связанные между собой микросервисы с CI, деплоем и тестами, остальное включается флагами. Инструмент <code>dotskit</code> добавляет в решение сервисы и флаги и обновляет его до новой версии, сохраняя код команды.</p>
+        <p class="hero__pkg"><a class="pkg" href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit"><span class="pkg__where">NuGet</span><span class="pkg__id">SawKing.DotNetSolutionKit</span></a> <a class="pkg" href="https://www.nuget.org/packages/SawKing.DotsKit.Tool"><span class="pkg__where">NuGet</span><span class="pkg__id">SawKing.DotsKit.Tool</span></a></p>
+        <p class="hero__cmd"><code>dotnet tool install -g SawKing.DotsKit.Tool</code><code>dotskit new -N MyCompany -P MyProduct -S Orders</code></p>
+      </div>
+    </header>
+
+    <main>
+  <!-- ==== WHAT YOU GET ==== -->
+  <section id="features">
+    <div class="wrap">
+      <h2 lang="en">Start with the business logic</h2>
+      <h2 lang="ru">Начните сразу с бизнес-логики</h2>
+      <p class="lede" lang="en">Layers, errors, auth, logging, tests, Docker and CI are in place after the first command. The solution is an ordinary .NET project the team owns, and its first commit is about the product.</p>
+      <p class="lede" lang="ru">Слои, ошибки, авторизация, логи, тесты, Docker и CI на месте после первой команды. Решение - обычный .NET-проект, которым владеет команда, и её первый коммит уже про продукт.</p>
+      <div class="cols">
+        <p lang="en"><b>A new service in one command.</b> <code>dotskit new</code> adds it to the solution with its layers, references, tests and deployment files in place.</p>
+        <p lang="ru"><b>Новый сервис одной командой.</b> <code>dotskit new</code> добавляет его в решение сразу со слоями, ссылками, тестами и файлами деплоя.</p>
+        <p lang="en"><b>A solution that keeps up.</b> <code>dotskit</code> adds a service or a flag to an existing solution and upgrades it to a new version of the template, keeping the team's changes.</p>
+        <p lang="ru"><b>Решение не отстаёт.</b> <code>dotskit</code> добавляет в готовое решение сервис или флаг и обновляет его до новой версии шаблона, сохраняя правки команды.</p>
+        <p lang="en"><b>The boring part is done.</b> Errors in one format, validation, authorization, health checks, background jobs and one request ID that follows a call through every service and log.</p>
+        <p lang="ru"><b>Рутина уже сделана.</b> Ошибки в одном формате, валидация, авторизация, проверки здоровья, фоновые задачи и один ID запроса, который проходит через все сервисы и логи.</p>
+        <p lang="en"><b>Only what you need.</b> A message bus, secrets from Infisical or Vault, object storage, ClickHouse, MongoDB, email, an audit journal, an API gateway - each is a flag, switched on when you need it.</p>
+        <p lang="ru"><b>Только то, что нужно.</b> Шина сообщений, секреты из Infisical или Vault, объектное хранилище, ClickHouse, MongoDB, почта, журнал аудита, API-шлюз - каждое включается флагом, когда понадобится.</p>
+        <p lang="en"><b>Deployment included.</b> Docker images, compose or Kubernetes, blue-green deployment and CI on GitHub Actions with tests on a real database.</p>
+        <p lang="ru"><b>Деплой в комплекте.</b> Docker-образы, compose или Kubernetes, blue-green деплой и CI на GitHub Actions с тестами на настоящей базе.</p>
+        <p lang="en"><b>See it before you use it.</b> <a href="https://github.com/sawking-tech/DotNetSolutionKit.Samples">DotNetSolutionKit.Samples</a> holds generated solutions to read through: the full kit, a single service and a gateway with services, generated again from every release, and <code>full-dev</code>, generated from <code>dev</code>, where the next release is built. Each runs its own CI.</p>
+        <p lang="ru"><b>Посмотрите до того, как взять.</b> В <a href="https://github.com/sawking-tech/DotNetSolutionKit.Samples">DotNetSolutionKit.Samples</a> лежат сгенерированные решения: полный комплект, один сервис и шлюз с сервисами, которые пересобираются из каждого релиза, и ветка <code>full-dev</code>, собранная из <code>dev</code>, где готовится следующий релиз. В каждой работает свой CI.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== INSTALL ==== -->
+  <section id="install">
+    <div class="wrap">
+      <h2 lang="en">Try it in a minute</h2>
+      <h2 lang="ru">Попробуйте за минуту</h2>
+      <p lang="en">Install <a href="docs.html#dotskit">dotskit</a>, the template's tool, from <a href="https://www.nuget.org/packages/SawKing.DotsKit.Tool">nuget.org</a>:</p>
+      <p lang="ru">Установите <a href="docs.html#dotskit">dotskit</a>, инструмент шаблона, с <a href="https://www.nuget.org/packages/SawKing.DotsKit.Tool">nuget.org</a>:</p>
+      <p class="hero__cmd"><code>dotnet tool install -g SawKing.DotsKit.Tool</code></p>
+      <p lang="en">The shared libraries, the solution and the first service, in an empty folder:</p>
+      <p lang="ru">Общие библиотеки, решение и первый сервис, в пустой папке:</p>
+      <p class="hero__cmd"><code>dotskit new -N MyCompany -P MyProduct -S Orders</code></p>
+      <p lang="en">Every next service, and a flag for a service the solution has:</p>
+      <p lang="ru">Каждый следующий сервис и флаг для сервиса, который уже есть:</p>
+      <p class="hero__cmd"><code>dotskit new -S Billing</code><code>dotskit new -S Orders --MongoDB true</code></p>
+      <p lang="en">A new version of the template, keeping the team's changes:</p>
+      <p lang="ru">Новая версия шаблона с сохранением правок команды:</p>
+      <p class="hero__cmd"><code>dotskit upgrade</code></p>
+      <details class="install__alone">
+        <summary><span lang="en">The template alone, by <code>dotnet new</code></span><span lang="ru">Только шаблон, через <code>dotnet new</code></span></summary>
+        <p lang="en">Install the template from <a href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit">nuget.org</a>:</p>
+        <p lang="ru">Установите шаблон с <a href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit">nuget.org</a>:</p>
+        <p class="hero__cmd"><code>dotnet new install SawKing.DotNetSolutionKit</code></p>
+        <p lang="en">The shared libraries, the solution and the first service:</p>
+        <p lang="ru">Общие библиотеки, решение и первый сервис:</p>
+        <p class="hero__cmd"><code>dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution</code></p>
+        <p lang="en">Every next service, by the template's short name <code>dotskit</code>:</p>
+        <p lang="ru">Каждый следующий сервис, по короткому имени шаблона <code>dotskit</code>:</p>
+        <p class="hero__cmd"><code>dotnet new dotskit -N MyCompany -P MyProduct -S Billing</code></p>
+        <p lang="en">Such a solution is upgraded by <code>dotskit</code> after <code>dotskit init</code>.</p>
+        <p lang="ru">Такое решение обновляется через <code>dotskit</code> после <code>dotskit init</code>.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- ==== WHAT'S NEW: the release notes from version.json, written into the list on publication (scripts/build-site.py); site/releases.js draws them and moves between them ==== -->
+  <section id="whats-new">
+    <div class="wrap">
+      <div class="releases">
+        <h2 lang="en">🤗 What's new</h2>
+        <h2 lang="ru">🤗 Что нового</h2>
+        <div class="releases__find" role="group" aria-label="Version">
+          <p class="releases__hint" role="status"></p>
+          <span aria-hidden="true">v</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Major" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Minor" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Patch" disabled>
+        </div>
+        <button class="releases__up" type="button" disabled><span aria-hidden="true">▲</span><span class="releases__say"><span lang="en">Newer</span><span lang="ru">Новее</span></span></button>
+        <button class="releases__down" type="button" disabled><span aria-hidden="true">▼</span><span class="releases__say"><span lang="en">Older</span><span lang="ru">Старше</span></span></button>
+        <div class="releases__list" tabindex="0" aria-label="Versions"><div class="releases__item" data-version="2.8.1"><p class="releases__headline"><span class="releases__version">v2.8.1</span> Start with dotskit: the README, the package page and the site lead with it.</p><ul><li>The commands of the template alone are one click further, under the dotskit ones.</li></ul></div><div class="releases__item" data-version="2.8.0"><p class="releases__headline"><span class="releases__version">v2.8.0</span> dotskit keeps a solution up with the template, keeping the team&#x27;s changes.</p><ul><li>A solution keeps up with the template: dotskit adds services and flags to it and upgrades it to a new version, keeping the team&#x27;s changes.</li><li>A service generated into a solution adds itself to All.sln.</li><li>Email by flag, with a sandbox that keeps a test stand from mailing real people.</li><li>MongoDB by flag, beside the main database.</li><li>Containers run on a read-only filesystem.</li><li>The test servers start with one command, the same on a developer&#x27;s machine as in CI.</li><li>Coverage on demand, with a report per service.</li><li>The solution is generated with --Solution; -M false still works.</li><li>The template answers to the short name dotskit too: dotnet new dotskit.</li></ul></div><div class="releases__item" data-version="2.7.0"><p class="releases__headline"><span class="releases__version">v2.7.0</span> SQL Server, HashiCorp Vault and a stronger API gateway.</p><ul><li>Generate a solution on SQL Server with --Database mssql.</li><li>Read secrets from HashiCorp Vault with --Vault.</li><li>Improved the API gateway and its Swagger documents.</li><li>Settings read on each use change without a redeploy.</li><li>Simplified feature flags.</li><li>Secrets live only in their store and in memory.</li></ul></div><div class="releases__item" data-version="2.6.2"><p class="releases__headline"><span class="releases__version">v2.6.2</span> Install the template from nuget.org.</p><ul><li>The package has its own page on nuget.org.</li></ul></div><div class="releases__item" data-version="2.6.1"><p class="releases__headline"><span class="releases__version">v2.6.1</span> The first push of a generated solution passes the secret scan.</p></div><div class="releases__item" data-version="2.6.0"><p class="releases__headline"><span class="releases__version">v2.6.0</span> Write a service&#x27;s tests in NUnit or xUnit.</p><ul><li>One shared test infrastructure for both.</li></ul></div><div class="releases__item" data-version="2.5.0"><p class="releases__headline"><span class="releases__version">v2.5.0</span> An audit journal of entity changes.</p><ul><li>Changes are published through the outbox in the same transaction.</li><li>Guards catch writes the journal cannot see.</li></ul></div><div class="releases__item" data-version="2.4.0"><p class="releases__headline"><span class="releases__version">v2.4.0</span> Tokens in HttpOnly cookies with CSRF protection.</p><ul><li>Cookie settings come from the deployment and are checked at startup.</li></ul></div><div class="releases__item" data-version="2.3.0"><p class="releases__headline"><span class="releases__version">v2.3.0</span> Services ride out a secret store outage.</p><ul><li>A feature flag can be pinned in features.json.</li></ul></div><div class="releases__item" data-version="2.2.0"><p class="releases__headline"><span class="releases__version">v2.2.0</span> Commands a client may repeat run once per key.</p></div><div class="releases__item" data-version="2.1.3"><p class="releases__headline"><span class="releases__version">v2.1.3</span> Two solutions on one host keep their own images.</p></div><div class="releases__item" data-version="2.1.2"><p class="releases__headline"><span class="releases__version">v2.1.2</span> Blue-green deployment keeps serving when a deploy fails.</p></div><div class="releases__item" data-version="2.1.1"><p class="releases__headline"><span class="releases__version">v2.1.1</span> Services are added to All.sln in CI too.</p></div><div class="releases__item" data-version="2.1.0"><p class="releases__headline"><span class="releases__version">v2.1.0</span> Deployment, an API gateway, CI and one correlation identifier end to end.</p><ul><li>Docker Compose or Kubernetes files, with blue-green deployment under Compose.</li><li>A YARP API gateway that validates the token once.</li><li>GitHub Actions CI with tests on real servers and a secret scan.</li><li>S3-compatible object storage and ClickHouse by flag.</li><li>Every dependency can be switched off in configuration.</li></ul></div><div class="releases__item" data-version="2.0.0"><p class="releases__headline"><span class="releases__version">v2.0.0</span> A layered microservice solution with a shared web host.</p><ul><li>Domain events in three phases tied to the transaction.</li><li>Errors as RFC 9457 problems.</li><li>Permissions declared on actions and checked from the token.</li><li>Infrastructure by flag: Hangfire, MassTransit, Infisical, feature flags and more.</li></ul></div><div class="releases__item" data-version="1.0.0"><p class="releases__headline"><span class="releases__version">v1.0.0</span> The template before the breaking changes of 2026.</p></div></div>
+        <script type="application/json" id="release-notes">{"2.8.1": {"headline": "Start with dotskit: the README, the package page and the site lead with it.", "highlights": ["The commands of the template alone are one click further, under the dotskit ones."], "ru": {"headline": "Начните с dotskit: с него начинаются README, страница пакета и сайт.", "highlights": ["Команды одного шаблона - на клик дальше, под командами dotskit."]}}, "2.8.0": {"headline": "dotskit keeps a solution up with the template, keeping the team's changes.", "highlights": ["A solution keeps up with the template: dotskit adds services and flags to it and upgrades it to a new version, keeping the team's changes.", "A service generated into a solution adds itself to All.sln.", "Email by flag, with a sandbox that keeps a test stand from mailing real people.", "MongoDB by flag, beside the main database.", "Containers run on a read-only filesystem.", "The test servers start with one command, the same on a developer's machine as in CI.", "Coverage on demand, with a report per service.", "The solution is generated with --Solution; -M false still works.", "The template answers to the short name dotskit too: dotnet new dotskit."], "ru": {"headline": "dotskit держит решение в ногу с шаблоном и сохраняет правки команды.", "highlights": ["Решение не отстаёт от шаблона: dotskit добавляет в него сервисы и флаги и переводит его на новую версию, сохраняя правки команды.", "Сервис, сгенерированный в готовое решение, сам добавляется в All.sln.", "Почта по флагу, с песочницей, которая не даёт тестовому стенду писать реальным людям.", "MongoDB по флагу, рядом с основной базой.", "Контейнеры работают с файловой системой только для чтения.", "Тестовые серверы запускаются одной командой, одинаково на машине разработчика и в CI.", "Покрытие по запросу, с отчётом по каждому сервису.", "Решение генерируется с --Solution; -M false по-прежнему работает.", "Шаблон отвечает и на короткое имя dotskit: dotnet new dotskit."]}}, "2.7.0": {"headline": "SQL Server, HashiCorp Vault and a stronger API gateway.", "highlights": ["Generate a solution on SQL Server with --Database mssql.", "Read secrets from HashiCorp Vault with --Vault.", "Improved the API gateway and its Swagger documents.", "Settings read on each use change without a redeploy.", "Simplified feature flags.", "Secrets live only in their store and in memory."], "ru": {"headline": "SQL Server, HashiCorp Vault и улучшенный API-шлюз.", "highlights": ["Решение на SQL Server: --Database mssql.", "Секреты из HashiCorp Vault: --Vault.", "Улучшили API-шлюз и его документы Swagger.", "Настройки, которые читаются при каждом обращении, меняются без передеплоя.", "Упростили фичефлаги.", "Секреты живут только в хранилище и в памяти."]}}, "2.6.2": {"headline": "Install the template from nuget.org.", "highlights": ["The package has its own page on nuget.org."], "ru": {"headline": "Шаблон ставится с nuget.org.", "highlights": ["У пакета своя страница на nuget.org."]}}, "2.6.1": {"headline": "The first push of a generated solution passes the secret scan.", "highlights": [], "ru": {"headline": "Первый push сгенерированного решения проходит проверку на секреты.", "highlights": []}}, "2.6.0": {"headline": "Write a service's tests in NUnit or xUnit.", "highlights": ["One shared test infrastructure for both."], "ru": {"headline": "Тесты сервиса на NUnit или xUnit.", "highlights": ["Одна общая тестовая инфраструктура для обоих."]}}, "2.5.0": {"headline": "An audit journal of entity changes.", "highlights": ["Changes are published through the outbox in the same transaction.", "Guards catch writes the journal cannot see."], "ru": {"headline": "Журнал аудита изменений сущностей.", "highlights": ["Изменения публикуются через outbox в той же транзакции.", "Проверки ловят записи, которые журнал не видит."]}}, "2.4.0": {"headline": "Tokens in HttpOnly cookies with CSRF protection.", "highlights": ["Cookie settings come from the deployment and are checked at startup."], "ru": {"headline": "Токены в HttpOnly-cookie с защитой от CSRF.", "highlights": ["Настройки cookie задаёт деплой, они проверяются при старте."]}}, "2.3.0": {"headline": "Services ride out a secret store outage.", "highlights": ["A feature flag can be pinned in features.json."], "ru": {"headline": "Сервисы переживают недоступность хранилища секретов.", "highlights": ["Фичефлаг можно закрепить в features.json."]}}, "2.2.0": {"headline": "Commands a client may repeat run once per key.", "highlights": [], "ru": {"headline": "Команды, которые клиент может повторить, выполняются один раз на ключ.", "highlights": []}}, "2.1.3": {"headline": "Two solutions on one host keep their own images.", "highlights": [], "ru": {"headline": "Два решения на одном хосте держат свои образы.", "highlights": []}}, "2.1.2": {"headline": "Blue-green deployment keeps serving when a deploy fails.", "highlights": [], "ru": {"headline": "Blue-green-деплой продолжает обслуживать, если выкатка не удалась.", "highlights": []}}, "2.1.1": {"headline": "Services are added to All.sln in CI too.", "highlights": [], "ru": {"headline": "Сервисы добавляются в All.sln и в CI.", "highlights": []}}, "2.1.0": {"headline": "Deployment, an API gateway, CI and one correlation identifier end to end.", "highlights": ["Docker Compose or Kubernetes files, with blue-green deployment under Compose.", "A YARP API gateway that validates the token once.", "GitHub Actions CI with tests on real servers and a secret scan.", "S3-compatible object storage and ClickHouse by flag.", "Every dependency can be switched off in configuration."], "ru": {"headline": "Деплой, API-шлюз, CI и сквозной идентификатор корреляции.", "highlights": ["Файлы Docker Compose или Kubernetes, под Compose - blue-green-деплой.", "API-шлюз на YARP, который проверяет токен один раз.", "CI на GitHub Actions с тестами на настоящих серверах и проверкой на секреты.", "S3-совместимое хранилище и ClickHouse по флагу.", "Любую зависимость можно выключить в конфигурации."]}}, "2.0.0": {"headline": "A layered microservice solution with a shared web host.", "highlights": ["Domain events in three phases tied to the transaction.", "Errors as RFC 9457 problems.", "Permissions declared on actions and checked from the token.", "Infrastructure by flag: Hangfire, MassTransit, Infisical, feature flags and more."], "ru": {"headline": "Слоистое микросервисное решение с общим веб-хостом.", "highlights": ["Доменные события в трёх фазах, привязанных к транзакции.", "Ошибки в формате RFC 9457.", "Права объявляются на действиях и проверяются по токену.", "Инфраструктура по флагу: Hangfire, MassTransit, Infisical, фичефлаги и другое."]}}, "1.0.0": {"headline": "The template before the breaking changes of 2026.", "highlights": [], "ru": {"headline": "Шаблон до несовместимых изменений 2026 года.", "highlights": []}}}</script>
+        <p class="releases__all"><a href="https://github.com/sawking-tech/DotNetSolutionKit/releases"><span lang="en">Every release on GitHub</span><span lang="ru">Все релизы на GitHub</span></a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== README: the parameters ==== -->
+  <section id="parameters">
+    <div class="wrap">
+      <h2 lang="en">Parameters</h2>
+      <h2 lang="ru">Параметры</h2>
+      <div class="scroller">
+        <table>
+          <thead><tr><th><span lang="en">Parameter</span><span lang="ru">Параметр</span></th><th><span lang="en">What it does</span><span lang="ru">Что делает</span></th></tr></thead>
+          <tbody>
+            <tr class="top"><td><code>-N</code>, <code>--NamespaceRoot</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>MyCompany</code></span></td><td><span lang="en">Organization name, the root namespace. May be dotted.</span><span lang="ru">Название организации, корневое пространство имён. Может быть с точками.</span></td></tr>
+            <tr class="top"><td><code>-P</code>, <code>--ProductName</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>Product</code></span></td><td><span lang="en">Product name. May be dotted.</span><span lang="ru">Название продукта. Может быть с точками.</span></td></tr>
+            <tr class="top"><td><code>-S</code>, <code>--ServiceNameOrCustom</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>Service</code></span></td><td><span lang="en">Service name. May be dotted.</span><span lang="ru">Название сервиса. Может быть с точками.</span></td></tr>
+            <tr class="top"><td><code>--Database</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>postgres</code></span></td><td><span lang="en"><a href="docs.html#persistence:sql-server">Database</a>: <code>postgres</code> or <code>mssql</code> (SQL Server).</span><span lang="ru"><a href="docs.html#persistence:sql-server">СУБД</a>: <code>postgres</code> или <code>mssql</code> (SQL Server).</span></td></tr>
+            <tr><td><code>--MongoDB</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#mongodb">MongoDB</a> beside the main database: the client, the service's database, readiness.</span><span lang="ru"><a href="docs.html#mongodb">MongoDB</a> рядом с основной базой: клиент, база сервиса, готовность.</span></td></tr>
+            <tr><td><code>--ClickHouse</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#clickhouse">ClickHouse</a>: connections, schema check, readiness.</span><span lang="ru"><a href="docs.html#clickhouse">ClickHouse</a>: подключения, проверка схемы, готовность.</span></td></tr>
+            <tr><td><code>--Storage</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#storage">Object storage</a>, S3-compatible.</span><span lang="ru"><a href="docs.html#storage">Объектное хранилище</a>, совместимое с S3.</span></td></tr>
+            <tr class="top"><td><code>--Messaging</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>none</code></span></td><td><span lang="en"><a href="docs.html#messaging">Message bus</a>: <code>outbox</code> or <code>direct</code>.</span><span lang="ru"><a href="docs.html#messaging">Шина сообщений</a>: <code>outbox</code> или <code>direct</code>.</span></td></tr>
+            <tr><td><code>--ApiGateway</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en">An <a href="docs.html#gateway">API gateway</a> on YARP in place of a service, into a solution already there (without <code>--Solution</code>).</span><span lang="ru"><a href="docs.html#gateway">API-шлюз</a> на YARP вместо сервиса, в уже существующее решение (без <code>--Solution</code>).</span></td></tr>
+            <tr><td><code>--Notify</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <span lang="en">none</span><span lang="ru">нет</span></span></td><td><span lang="en">Channels of <a href="docs.html#notifications">notifications</a>: <code>email</code> - through SMTP or Graph API, with a sandbox outside Production; with <code>--Messaging</code> other services ask for it by a bus command.</span><span lang="ru">Каналы <a href="docs.html#notifications">уведомлений</a>: <code>email</code> - через SMTP или Graph API, с песочницей вне Production; с <code>--Messaging</code> другие сервисы просят письмо командой шины.</span></td></tr>
+            <tr><td><code>--Audit</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#audit">Audit journal</a> of entity changes, through the outbox; with <code>--Messaging outbox</code>.</span><span lang="ru"><a href="docs.html#audit">Журнал аудита</a> изменений сущностей, через outbox; с <code>--Messaging outbox</code>.</span></td></tr>
+            <tr class="top"><td><code>--GitHubCiCd</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#ci">CI on GitHub Actions</a>: build, tests on real servers, coverage on demand, secret scan.</span><span lang="ru"><a href="docs.html#ci">CI на GitHub Actions</a>: сборка, тесты на настоящих серверах, покрытие по запросу, поиск секретов.</span></td></tr>
+            <tr><td><code>--Deploy</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>compose</code></span></td><td><span lang="en"><a href="docs.html#deployment">Deployment files</a>: <code>compose</code>, <code>k8s</code> or <code>none</code>.</span><span lang="ru"><a href="docs.html#deployment">Файлы развёртывания</a>: <code>compose</code>, <code>k8s</code> или <code>none</code>.</span></td></tr>
+            <tr><td><code>--DiffApi</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#api-diff">API contract diff</a> on pull requests.</span><span lang="ru"><a href="docs.html#api-diff">Дифф контракта API</a> в пулл-реквестах.</span></td></tr>
+            <tr><td><code>--Agent</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>claude</code></span></td><td><span lang="en"><a href="docs.html#agents">Rules and skills for an AI agent</a>: <code>claude</code>, <code>opencode</code> or <code>none</code>; with <code>--Solution</code>.</span><span lang="ru"><a href="docs.html#agents">Правила и скиллы для ИИ-агента</a>: <code>claude</code>, <code>opencode</code> или <code>none</code>; с <code>--Solution</code>.</span></td></tr>
+            <tr><td><code>--Vault</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#secrets:hashicorp-vault">Secrets and settings from HashiCorp Vault</a>.</span><span lang="ru"><a href="docs.html#secrets:hashicorp-vault">Секреты и настройки из HashiCorp Vault</a>.</span></td></tr>
+            <tr><td><code>-I</code>, <code>--Infisical</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#secrets">Secrets and settings from Infisical</a>.</span><span lang="ru"><a href="docs.html#secrets">Секреты и настройки из Infisical</a>.</span></td></tr>
+            <tr><td><code>-H</code>, <code>--Hangfire</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>true</code></span></td><td><span lang="en"><a href="docs.html#jobs">Background jobs</a> on Hangfire.</span><span lang="ru"><a href="docs.html#jobs">Фоновые задачи</a> на Hangfire.</span></td></tr>
+            <tr><td><code>--FeatureFlags</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#feature-flags">Feature flags</a>.</span><span lang="ru"><a href="docs.html#feature-flags">Фича-флаги</a>.</span></td></tr>
+            <tr><td><code>--HierarchyRules</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en"><a href="docs.html#hierarchy-rules">Access rules over a tenant tree</a>.</span><span lang="ru"><a href="docs.html#hierarchy-rules">Правила доступа по дереву тенантов</a>.</span></td></tr>
+            <tr><td><code>--TestFramework</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>nunit</code></span></td><td><span lang="en">Test framework of the service's tests: <code>nunit</code> or <code>xunit</code> (v3).</span><span lang="ru">Тестовый фреймворк тестов сервиса: <code>nunit</code> или <code>xunit</code> (v3).</span></td></tr>
+            <tr><td><code>--HttpPort</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <span lang="en">free port</span><span lang="ru">свободный порт</span></span></td><td><span lang="en">Port in <code>launchSettings.json</code> and on the host under compose.</span><span lang="ru">Порт в <code>launchSettings.json</code> и на хосте под compose.</span></td></tr>
+            <tr><td><code>--Solution</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>false</code></span></td><td><span lang="en">Generates the solution: <code>Common</code>, <code>All.sln</code> and the root files, with the first service. Without it, only the service folder, into a solution already there.</span><span lang="ru">Генерирует решение: <code>Common</code>, <code>All.sln</code> и корневые файлы вместе с первым сервисом. Без него - только папка сервиса, в уже существующее решение.</span></td></tr>
+            <tr><td><code>-M</code><span class="default"><span lang="en">default</span><span lang="ru">по умолчанию</span> <code>true</code></span></td><td><span class="tag tag--legacy">legacy</span> <span lang="en">Kept for the commands of earlier versions: <code>-M false</code> means <code>--Solution</code>. Removed in 3.0.</span><span lang="ru">Оставлен для команд прежних версий: <code>-M false</code> означает <code>--Solution</code>. Уходит в 3.0.</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="params__switch">
+        <input type="checkbox" id="params-all" class="params__all">
+        <label for="params-all" class="params__more"><span aria-hidden="true">▼</span><span class="params__show"><span lang="en">Show all parameters</span><span lang="ru">Показать все параметры</span></span><span class="params__hide"><span lang="en">Show fewer</span><span lang="ru">Свернуть</span></span></label>
+      </div>
+      <p lang="en">Details, dotted names and running locally: <a href="docs.html#generating">generating a solution</a>.</p>
+      <p lang="ru">Подробности, имена с точками и локальный запуск: <a href="docs.html#generating">генерация решения</a>.</p>
+    </div>
+  </section>
+
+  <!-- ==== README: documentation ==== -->
+  <section id="documentation">
+    <div class="wrap">
+      <h2 lang="en">Documentation</h2>
+      <h2 lang="ru">Документация</h2>
+      <p lang="en">Everything else is in the <a href="docs.html">docs</a>: the architecture, each feature, operations, the decisions behind the parts that depart from common practice, and the <a href="docs.html#roadmap">roadmap</a>.</p>
+      <p lang="ru">Всё остальное - в <a href="docs.html">документации</a>: архитектура, каждая возможность, эксплуатация, решения по тем частям, что отходят от общепринятой практики, и <a href="docs.html#roadmap">дорожная карта</a>.</p>
+      <p lang="en">A solution of an earlier 2.x version is brought to the current one by <code>dotskit upgrade</code>: git keeps the team's changes where they merge with the template's, and the rest are conflicts to resolve. A solution of v1 is brought to 2.0.0 by hand first: <a href="docs.html#upgrading">upgrading</a>.</p>
+      <p lang="ru">Решение более ранней версии 2.x приводится к текущей через <code>dotskit upgrade</code>: git сохраняет правки команды там, где они сливаются с правками шаблона, остальное - конфликты, которые разрешает команда. Решение v1 сначала руками приводится к 2.0.0: <a href="docs.html#upgrading">обновление</a>.</p>
+      <p lang="en">What each version brings: <a href="https://github.com/sawking-tech/DotNetSolutionKit/blob/master/version.json">version.json</a> and the <a href="https://github.com/sawking-tech/DotNetSolutionKit/releases">releases</a>. How versions are made: <a href="https://github.com/sawking-tech/DotNetSolutionKit/blob/master/CONTRIBUTING.md">contributing</a>.</p>
+      <p lang="ru">Что приносит каждая версия: <a href="https://github.com/sawking-tech/DotNetSolutionKit/blob/master/version.json">version.json</a> и <a href="https://github.com/sawking-tech/DotNetSolutionKit/releases">релизы</a>. Как выпускаются версии: <a href="https://github.com/sawking-tech/DotNetSolutionKit/blob/master/CONTRIBUTING.md">contributing</a>.</p>
+    </div>
+  </section>
+
+  <!-- ==== README: license ==== -->
+  <section id="license">
+    <div class="wrap">
+      <h2 lang="en">License</h2>
+      <h2 lang="ru">Лицензия</h2>
+      <p lang="en">This project is licensed under the MIT License. See the <a href="https://github.com/sawking-tech/DotNetSolutionKit/blob/master/LICENSE">LICENSE</a> file for details.</p>
+      <p lang="ru">Проект распространяется по лицензии MIT. Подробности - в файле <a href="https://github.com/sawking-tech/DotNetSolutionKit/blob/master/LICENSE">LICENSE</a>.</p>
+    </div>
+  </section>
+
+    </main>
+
+<footer>
+  <div class="wrap">
+    <p lang="en">Made by <a href="https://sawking.tech/cv">Vladimir Savkin</a>, systems architect, at <a href="https://sawking.tech">sawking.tech</a>.</p>
+    <p lang="ru">Сделал <a href="https://sawking.tech/cv">Владимир Савкин</a>, системный архитектор, <a href="https://sawking.tech">sawking.tech</a>.</p>
+    <p><span lang="en">Source on</span><span lang="ru">Исходники на</span> <a href="https://github.com/sawking-tech/DotNetSolutionKit">GitHub</a>
+      · <span lang="en">package on</span><span lang="ru">пакет на</span> <a href="https://www.nuget.org/packages/SawKing.DotNetSolutionKit">nuget.org</a>
+      · <a href="samples.html"><span lang="en">generated samples</span><span lang="ru">сгенерированные примеры</span></a></p>
+  </div>
+</footer>
+  </div>
+</div>
+</div>
+
+<script src="site/panel.js?v=103"></script>
+<script src="site/sections.js?v=103"></script>
+<script src="site/jump.js?v=138"></script>
+<script src="site/releases.js?v=142"></script>
+<script src="site/params.js?v=2"></script>
+<script>
+/* Transitions come back only once the panel and the sheet stand where storage says - two frames
+   later, so the browser has laid the page out and painted it at rest. This lives in the page, next
+   to the class it removes: from a cached script it might never run, and the page would keep every
+   animation switched off. */
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove("preload")));
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="236 34 328 328" width="64" height="64">
+<title>DotNetSolutionKit</title>
+<defs>
+<radialGradient id="disc-b" gradientUnits="userSpaceOnUse" cx="503.9" cy="138" r="180"><stop offset="0" stop-color="#9b4f96" stop-opacity="0.75"/><stop offset="1" stop-color="#9b4f96" stop-opacity="0"/></radialGradient><radialGradient id="disc-c" gradientUnits="userSpaceOnUse" cx="400" cy="268" r="180"><stop offset="0" stop-color="#8cd600" stop-opacity="0.9"/><stop stop-color="#2fa6c4" offset="0.45" stop-opacity="0.45"/><stop stop-color="#2fa6c4" offset="1" stop-opacity="0"/></radialGradient>
+<mask id="under-green" maskUnits="userSpaceOnUse" x="310" y="192" width="188" height="74"><rect x="310" y="192" width="188" height="74" fill="#fff"/><path d="M409.2 214.4C416.2 209.2 431.6 197 439.7 195.2C444.9 194 449.5 198.2 450 203.3C450.5 209.7 442.5 213.7 437.9 216.7Z"/></mask>
+</defs>
+<mask id="cut" maskUnits="userSpaceOnUse" x="236" y="34" width="328" height="328">
+<rect x="236" y="34" width="328" height="328" fill="#fff"/>
+<g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<g><g opacity="0.35"><path stroke-dasharray="3 2.2" d="M411.8 124.5Q456.7 144.7 498.1 168.4"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M493.5 168.4L499.4 169.1L495.8 164.4"/></g><path stroke-dasharray="3 2.2" d="M369.5 161.6Q379.7 144.5 396.1 128.6"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M394.8 133L397.1 127.6L391.6 129.7"/><path stroke-dasharray="3 2.2" d="M372 168.7Q389.9 174.6 403.3 175.7"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M399.2 177.7L404.8 175.8L399.5 173.1"/><path stroke-dasharray="3 2.2" d="M414.5 165.8Q409.3 147.8 405.8 130.9"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M408.9 134.4L405.5 129.4L404.4 135.3"/><path stroke-dasharray="3 2.2" d="M412.5 117.9Q434.4 109.3 450 108.8"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M446.1 111.2L451.5 108.7L445.9 106.6"/><path stroke-dasharray="3 2.2" d="M424.7 167.4Q439.9 146.9 455.9 117.1"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M456 121.7L456.6 115.8L452 119.6"/><path stroke-dasharray="3 2.2" d="M471.7 113A111.2 111.2 0 0 1 505.4 162.5"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M502 159.4L505.8 163.9L506.3 158"/><path stroke-dasharray="3 2.2" d="M430.9 177.9Q464.7 177.3 496.8 174.4"/><path stroke-linejoin="miter" stroke-linecap="butt" d="M493.1 177.1L498.3 174.3L492.6 172.5"/><circle fill="#fff" cx="364.9" cy="167.2" r="7.2"/><circle fill="#fff" cx="417.7" cy="178.6" r="13.2"/><circle fill="#fff" cx="403.2" cy="120.1" r="9.6"/><circle fill="#fff" cx="462.6" cy="106.1" r="11.4"/><circle fill="#fff" cx="508.5" cy="173.8" r="10.2"/></g>
+<g><path d="M447.8 209.3C454.4 204.4 468.7 192.4 475.9 201.7C479.1 205.9 476.9 209.6 474.8 213.4" stroke-linecap="butt" mask="url(#under-green)"/>
+<path d="M333.8 241.9C351.3 262.3 407.7 267.1 432.5 259.9C450 254.9 466.4 244.6 480.9 233.8C485.7 230.1 495.3 226.3 494.7 219C494.3 214 490 210.5 485.1 210.6C473 211.1 453.2 226 440.4 230.6" stroke-linecap="butt"/>
+<path d="M409.2 214.4C416 209.4 432.1 196.6 440 195.1C444.9 194.2 449.3 198.1 449.9 202.8C450.9 210.2 440.5 215 435.4 218.4" stroke-linecap="butt"/>
+<path d="M338 207.3C349.6 203.8 362.2 198 374.5 198.6C385.6 199.2 393.3 207.4 402.5 212.3C405.3 213.8 408.8 214.5 411.9 215.4C418.3 217.4 431.2 214.3 436.5 219.2C437.8 220.4 438.5 222.3 439.1 224L439.1 224C439.5 225.6 441 228.2 440.7 229.9C438.4 245.6 392.1 237 382.2 233.5"/>
+<path d="M321.9 198.1L335.9 199.7A3 3 0 0 1 338.5 203L333.1 247.1A3 3 0 0 1 329.8 249.7L315.8 248A3 3 0 0 1 313.1 244.7L318.6 200.7A3 3 0 0 1 321.9 198.1Z"/></g>
+</g>
+</mask>
+<g mask="url(#cut)"><circle fill="#512bd4" cx="400" cy="198" r="155"/><circle cx="400" cy="198" r="155" fill="url(#disc-b)"/><circle cx="400" cy="198" r="155" fill="url(#disc-c)"/></g>
+</svg>

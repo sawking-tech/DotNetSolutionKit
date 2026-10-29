@@ -1,0 +1,802 @@
+/* ==== THE SAMPLES PAGE =========================================================================
+   Shows a repository of generated samples, one branch per sample: an explorer of the open sample's
+   files in the panel, and on the sheet how its CI ran, day by day and release by release, or one file.
+
+   Everything is read from raw.githubusercontent.com: the list of samples (SITE.samples.variants on the
+   home branch), each branch's reports/<branch>/index.json and the reports it lists, and the files. The GitHub API
+   would allow a visitor 60 requests an hour; raw files have no such limit.
+
+   The address names what is open: #<branch> is a sample's overview, #<branch>/<path> one of its files,
+   so either can be shared as a link.
+
+   The page is one module: its names cannot meet those of panel.js, which shares the window. The blocks
+   below go from the data to what draws it: settings, constants, strings, state, data, the copy in the
+   browser, the panel, the grid of days, the card of a day, the overview, a file, the code theme,
+   routing, the start. */
+
+/* ==== SETTINGS AND HELPERS ==== */
+const S_CFG = window.SITE.samples;
+const SAMPLES_GH = `https://github.com/${S_CFG.repo}`;
+const TEMPLATE_GH = window.SITE.repo.split("/blob/")[0];
+const raw = (branch, path) =>
+  `https://raw.githubusercontent.com/${S_CFG.repo}/${encodeURIComponent(branch)}/${path.split("/").map(encodeURIComponent).join("/")}`;
+
+/* ==== CONSTANTS ====
+   Every number the page decides by. Sizes and timings the stylesheet sets are read from it (cssMs), so
+   the two cannot drift apart. */
+const DAY_MS = 86400000, WEEK = 7, YEAR_DAYS = 365;
+const ISO_DAY = "YYYY-MM-DD".length;
+const GRID = {
+  fadeDays: 30,        // a pass turns to ice, a failure to dark red, over this many days without a run
+  passStepDays: 2,     // a pass turns a step bluer every this many days, so the steps are told apart
+  pastWeeks: 52,       // a year back
+  futureWeeks: 8,      // the weeks after today that fade out
+  aheadInView: 6,      // weeks after today in view when the grid opens on a narrow screen
+};
+const CARD = {
+  gap: 10,             // px between a day and its card
+  margin: 8,           // px the card keeps from the edges of the window
+  waitMs: 400,         // a hover card waits this long after the pointer leaves before it fades
+};
+// The samples change at most once a day, when they are regenerated; a copy younger than this is drawn without
+// asking the network, an older one is drawn and checked behind it.
+const CACHE_FRESH_MS = 60 * 60 * 1000;
+const HIGHLIGHT_MAX_CHARS = 300000;   // a larger file is shown plain: highlighting it holds up a phone
+const HLJS = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0";
+const SPARK = { w: 100, h: 24, pad: 2 };
+// the strokes of the frame, each the size of the value that will take its place
+const FRAME = {
+  about: "85%", origin: "3.5rem", runHead: "15rem", meter: "4.5rem",
+  summary: ["9rem", "11rem", "7rem"],
+  row: ["3rem", "3.5rem", "4.5rem", "3rem", "3rem", "1rem", "5.5rem"],
+};
+
+const el = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+// Days are the reader's own, as on a GitHub profile: a run at 22:53 UTC is the next day in Omsk.
+const pad2 = (n) => String(n).padStart(2, "0");
+const localDay = (date) => `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+// the local day of a timestamp; a day key is already one
+const day = (iso) => (iso.length === ISO_DAY ? iso : localDay(new Date(iso)));
+const keyDate = (key) => { const [y, m, d] = key.split("-").map(Number); return new Date(y, m - 1, d); };
+const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / DAY_MS);
+const mondayIndex = (date) => (date.getDay() + WEEK - 1) % WEEK;   // Monday 0 ... Sunday 6
+// a duration the stylesheet sets, in milliseconds
+const cssMs = (node, prop) => parseFloat(getComputedStyle(node)[prop]) * 1000 || 0;
+
+/* ==== STRINGS ====
+   Both languages go into the node and the stylesheet shows one, as on the other pages. */
+const T = (en, ru) => `<span lang="en">${en}</span><span lang="ru">${ru}</span>`;
+
+// Russian picks one of three forms by the number: 1 день, 2 дня, 5 дней.
+function plural(n, one, few, many) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+}
+const days = (n) => T(n === 1 ? "day" : "days", plural(n, "день", "дня", "дней"));
+
+const STR = {
+  failed: T("The samples did not load. They are on GitHub:", "Примеры не загрузились. Они есть на GitHub:"),
+  fileFailed: T("This file did not load. Open it on GitHub:", "Файл не загрузился. Откройте его на GitHub:"),
+  title: T("Generated samples", "Сгенерированные примеры"),
+  intro: T(
+    `Solutions generated by the template, one per combination of flags, from <a href="${SAMPLES_GH}">${S_CFG.repo.split("/")[1]}</a>. Their files are in the panel.`,
+    `Решения, созданные шаблоном, по одному на сочетание флагов, из <a href="${SAMPLES_GH}">${S_CFG.repo.split("/")[1]}</a>. Их файлы - в панели.`),
+  days: T("CI of the branch by day", "CI ветки по дням"),
+  streak: (n) => `${T("green for", "зелёная")} ${n} ${days(n)} ${T("in a row", "подряд")}`,
+  sinceRun: (n) => n === 0 ? T("last run today", "последний прогон сегодня")
+    : `${T("last run", "последний прогон")} ${n} ${days(n)} ${T("ago", "назад")}`,
+  runsYear: (n) => `${n} ${T(n === 1 ? "run" : "runs", plural(n, "прогон", "прогона", "прогонов"))} ${T("in a year", "за год")}`,
+  unchanged: (n) => n === 0 ? T("regenerated that day", "пересобрана в этот день")
+    : `${n} ${days(n)} ${T("without changes", "без изменений")}`,
+  noRunThatDay: T("no run that day", "в этот день прогона не было"),
+  newRelease: T("regenerated from a new version", "пересобрана из новой версии"),
+  run: T("run in Actions", "прогон в Actions"),
+  passed: T("passed", "прошёл"),
+  failedRun: T("failed", "упал"),
+  from: T("generated from", "собрана из"),
+  lastRun: T("Last run", "Последний прогон"),
+  testsTitle: T("Tests", "Тесты"),
+  linesTitle: T("Line coverage", "Покрытие строк"),
+  branchesTitle: T("Branch coverage", "Покрытие ветвей"),
+  of: T("of", "из"),
+  failedTests: (n) => `${n} ${T("failed", plural(n, "упал", "упали", "упали"))}`,
+  sincePrevious: "since the previous release / к прошлому релизу",
+  releases: T("By release", "По релизам"),
+  release: T("Generated from", "Собрана из"),
+  runs: T("Runs", "Прогонов"),
+  result: T("Result", "Итог"),
+  tests: T("Tests", "Тесты"),
+  lines: T("Lines", "Строки"),
+  branches: T("Branches", "Ветви"),
+  date: T("Last run", "Последний прогон"),
+  noReports: T("No CI reports in this branch yet.", "В этой ветке ещё нет отчётов CI."),
+  onGitHub: T("on GitHub", "на GitHub"),
+  rawFile: T("raw", "исходный текст"),
+  back: T("Back to the branch", "К ветке"),
+  up: T("up", "выше"),
+};
+
+/* ==== FORMATS AND SMALL MARKUP ====
+   Numbers, dates and durations are written in each language's own way: 63.6% and 63,6 %. */
+const fmtPct = (v) => (v == null ? "-" : T(`${v}%`, `${String(v).replace(".", ",")} %`));
+const fmtDelta = (d) => {
+  const n = Math.round(d * 10) / 10;
+  const sign = n > 0 ? "+" : n < 0 ? "−" : "±";
+  const abs = Math.abs(n);
+  return T(`${sign}${abs}`, `${sign}${String(abs).replace(".", ",")}`);
+};
+const fmtDate = (iso) => {
+  const d = iso.length === ISO_DAY ? keyDate(iso) : new Date(iso);
+  const o = { day: "numeric", month: "short", year: "numeric" };
+  return T(d.toLocaleDateString("en-GB", o), d.toLocaleDateString("ru-RU", o).replace(" г.", ""));
+};
+const fmtDuration = (s) => {
+  const m = Math.floor(s / 60), r = s % 60;
+  return m ? T(`${m} min ${r} s`, `${m} мин ${r} с`) : T(`${r} s`, `${r} с`);
+};
+
+// a release links to its page, a commit of the template's master to the commit
+const versionLink = (version) => /^v\d/.test(version)
+  ? `<a href="${TEMPLATE_GH}/releases/tag/${esc(version)}">${esc(version)}</a>`
+  : `<a href="${TEMPLATE_GH}/commit/${esc(version)}">${esc(version.slice(0, 7))}</a>`;
+const result = (run) => `<span class="result ${run.conclusion === "success" ? "ok" : "bad"}">${run.conclusion === "success" ? STR.passed : STR.failedRun}</span>`;
+// a stroke the size of a value that is not here yet, inside the element that will hold it
+const ph = (w) => `<i class="sk sk-t" style="width:${w}"></i>`;
+
+/* ==== STATE ====
+   What the page knows and what it shows: the samples, the loaded branches by name, the open branch, the
+   folder in the explorer, the open file, and the cells of the grid on the sheet. */
+const state = { variants: [], data: new Map(), branch: null, dir: "", file: null, days: [], filled: new Set() };
+
+/* ==== DATA ====
+   The list of samples first, then the open branch, then the others: the sheet needs one branch, the
+   panel's dots need all of them. A branch asked for before it is here waits for its own load only. */
+async function getJson(url) {
+  // revalidated every time: a branch changes on GitHub without this page changing
+  const response = await fetch(url, { cache: "no-cache" });
+  if (!response.ok) throw new Error(`${response.status} ${url}`);
+  return response.json();
+}
+
+const lastRun = (report) => report.runs[report.runs.length - 1];
+
+async function loadBranch(variant) {
+  const out = { variant, reports: [], files: [] };
+  try {
+    // each branch keeps its reports in a folder of its own name, so merged branches keep both
+    const dir = `reports/${variant.branch}`;
+    const index = await getJson(raw(variant.branch, `${dir}/index.json`));
+    out.reports = (await Promise.all(index.map((entry) =>
+      getJson(raw(variant.branch, `${dir}/${entry.file}`)).catch(() => null)))).filter(Boolean);
+    // the newest report lists the files the branch has now
+    out.reports.sort((a, b) => lastRun(b).started.localeCompare(lastRun(a).started));
+    out.files = out.reports[0]?.files ?? [];
+  } catch { /* a branch without reports yet still shows in the list */ }
+  return out;
+}
+
+const loading = new Map();
+function ensureBranch(name) {
+  if (!loading.has(name)) {
+    const variant = state.variants.find((v) => v.branch === name);
+    loading.set(name, loadBranch(variant).then((branch) => { state.data.set(name, branch); return branch; }));
+  }
+  return loading.get(name);
+}
+
+async function loadVariants() {
+  state.variants = await getJson(raw(S_CFG.home, S_CFG.variants));
+}
+
+/* ==== THE COPY IN THE BROWSER ====
+   The samples and their reports as last loaded, under the site's own key. Storage can be missing or
+   refused (a private window, blocked site data); then the page simply loads as it would the first time. */
+const CACHE_KEY = `${(window.SITE && SITE.key) || "site"}.samples`;
+
+function readCache() {
+  try {
+    const copy = JSON.parse(localStorage.getItem(CACHE_KEY));
+    return copy && Array.isArray(copy.variants) && copy.branches ? copy : null;
+  } catch { return null; }
+}
+
+function writeCache(copy) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(copy)); } catch { /* full or refused */ }
+}
+// the copy of what is on the page now
+function currentCopy() {
+  return { at: Date.now(), variants: state.variants, branches: Object.fromEntries([...state.data].map(([name, b]) => [name, b.reports])) };
+}
+
+// The copy becomes the page's state; its days are marked filled, so a refresh draws them without the wave.
+function useCache(copy) {
+  state.variants = copy.variants;
+  for (const variant of copy.variants) {
+    const reports = copy.branches[variant.branch];
+    if (!reports) continue;
+    state.data.set(variant.branch, { variant, reports, files: reports[0]?.files ?? [] });
+    loading.set(variant.branch, Promise.resolve(state.data.get(variant.branch)));
+    state.filled.add(variant.branch);
+  }
+}
+
+// What the network has now, as a copy of the same shape, with the time it was taken.
+async function fetchCopy() {
+  const variants = await getJson(raw(S_CFG.home, S_CFG.variants));
+  const loaded = await Promise.all(variants.map(loadBranch));
+  return { at: Date.now(), variants, branches: Object.fromEntries(loaded.map((b) => [b.variant.branch, b.reports])) };
+}
+const sameData = (a, b) => JSON.stringify([a.variants, a.branches]) === JSON.stringify([b.variants, b.branches]);
+
+/* How far a day has gone from its result, 0 to 1, by the days since the run. A pass goes in steps, a
+   step bluer every two days and ice by day 30, so a branch a week without a run looks unlike one run
+   yesterday; a failure rots evenly. The same rule as ci-svg.py of the samples repository. */
+function fadeOf(ok, age) {
+  const days = ok ? Math.floor(age / GRID.passStepDays) * GRID.passStepDays : age;
+  return Math.min(days / GRID.fadeDays, 1);
+}
+
+// The dot has the colour today's cell of the sample's grid has: its last result, faded by the days since.
+function resultDot(run) {
+  const ok = run.conclusion === "success";
+  const fade = fadeOf(ok, daysBetween(day(run.started), localDay(new Date())));
+  return `<i class="dot ${ok ? "ok" : "bad"}" style="--fade:${(fade * 100).toFixed(0)}%"></i>`;
+}
+
+/* ==== THE PANEL: SAMPLES ====
+   The list of samples, each with the result of its last run as a dot, or a turning ring while it loads. */
+function renderBranches() {
+  el("branches").innerHTML = state.variants.map(({ branch }) => {
+    const last = state.data.get(branch)?.reports[0];
+    const run = last && lastRun(last);
+    // a sample still loading shows a ring of the same size, so the names do not move when it comes
+    const mark = !state.data.has(branch) ? `<i class="dot wait"></i>` : run ? resultDot(run) : `<i class="dot none"></i>`;
+    const current = branch === state.branch ? ' aria-current="page"' : "";
+    return `<li><a href="#${esc(branch)}"${current}>${mark}${esc(branch)}</a></li>`;
+  }).join("");
+}
+
+/* ==== THE PANEL: THE EXPLORER ====
+   One folder at a time, as a file manager on a phone shows it: the path on top, then its folders and
+   files. Folders change only the panel; a file is a page with an address. */
+
+// the entries of one folder: its folders first, then its files, each sorted by name
+function entriesOf(files, dir) {
+  const prefix = dir ? dir + "/" : "";
+  const folders = new Set(), names = [];
+  for (const path of files) {
+    if (!path.startsWith(prefix)) continue;
+    const rest = path.slice(prefix.length);
+    const slash = rest.indexOf("/");
+    if (slash >= 0) folders.add(rest.slice(0, slash));
+    else names.push(rest);
+  }
+  const byName = (a, b) => a.localeCompare(b, "en", { sensitivity: "base" });
+  return { folders: [...folders].sort(byName), files: names.sort(byName) };
+}
+
+// In the path, a folder named after the one it sits in plus a suffix, as projects in a .NET solution are
+// (Shop.Orders / Shop.Orders.Tests), is shown as "…" and the suffix; the full name stays in the title.
+// The list of a folder keeps full names: there the suffixes alone would all read the same.
+function shortName(name, parent) {
+  return parent && name.startsWith(parent + ".") && name.length > parent.length + 1 ? "…" + name.slice(parent.length) : name;
+}
+
+// the path in one line, scrolled to its end, the folder itself; the start is a swipe away
+function renderCrumbs(parts) {
+  const crumbs = el("crumbs");
+  const crumb = (label, dir, cls = "", full = label) =>
+    `<button type="button" class="${cls}" data-dir="${esc(dir)}" title="${esc(full)}">${esc(label)}</button>`;
+  const items = [crumb(state.branch, "", "root")].concat(parts.map((part, i) =>
+    crumb(shortName(part, parts[i - 1]), parts.slice(0, i + 1).join("/"), i === parts.length - 1 ? "here" : "", part)));
+  crumbs.innerHTML = items.join('<span class="sep">/</span>');
+  crumbs.scrollLeft = crumbs.scrollWidth;
+  crumbs.classList.toggle("cut", crumbs.scrollWidth > crumbs.clientWidth);
+}
+
+function renderExplorer() {
+  const branch = state.data.get(state.branch);
+  const list = el("files");
+  if (!branch || !branch.files.length) {
+    el("crumbs").innerHTML = "";
+    list.innerHTML = branch ? `<li class="state">${STR.noReports}</li>` : "";
+    return;
+  }
+  const parts = state.dir ? state.dir.split("/") : [];
+  renderCrumbs(parts);
+  const { folders, files } = entriesOf(branch.files, state.dir);
+  const prefix = state.dir ? state.dir + "/" : "";
+  const up = state.dir
+    ? [`<li><button type="button" class="dir up" data-dir="${esc(parts.slice(0, -1).join("/"))}">..<span class="hint">${STR.up}</span></button></li>`]
+    : [];
+  list.innerHTML = up.concat(
+    folders.map((name) => `<li><button type="button" class="dir" data-dir="${esc(prefix + name)}">${esc(name)}/</button></li>`),
+    files.map((name) => {
+      const path = prefix + name;
+      const current = path === state.file ? ' aria-current="page"' : "";
+      return `<li><a class="file" href="#${esc(state.branch)}/${esc(path)}"${current}>${esc(name)}</a></li>`;
+    }),
+  ).join("");
+}
+
+el("explorer").addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-dir]");
+  if (!button) return;
+  state.dir = button.dataset.dir;
+  renderExplorer();
+  el("files").querySelector("button, a")?.focus();
+});
+
+/* ==== THE GRID OF DAYS: THE MODEL ====
+   The year of the open branch, a column per week, like the contribution grid of a GitHub profile,
+   running on past today into weeks that fade out. A day keeps the branch's last result: a pass turns to
+   ice a step every two days and a failure rots to dark red, over 30 days without a run (fadeOf), so a
+   branch nobody regenerates, or one left broken, shows as one. This block only counts; the next one
+   draws. */
+function dayCells(branch) {
+  const runs = [];
+  for (const report of branch?.reports ?? []) for (const run of report.runs) runs.push({ ...run, version: report.version });
+  runs.sort((a, b) => a.started.localeCompare(b.started));
+  // the day a version first ran is the day the branch was regenerated from it
+  const since = new Map();
+  for (const run of runs) if (!since.has(run.version)) since.set(run.version, day(run.started));
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const todayKey = localDay(today);
+  const start = new Date(today); start.setDate(start.getDate() - WEEK * GRID.pastWeeks - mondayIndex(today));
+  const end = new Date(today); end.setDate(end.getDate() + WEEK * GRID.futureWeeks + (WEEK - 1 - mondayIndex(today)));
+  const cells = [];
+  let last = null, i = 0, n = 0;
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1), n++) {
+    const key = localDay(d);
+    const cell = { key, week: Math.floor(n / WEEK), weekday: n % WEEK };
+    if (key > todayKey) { cells.push({ ...cell, future: daysBetween(todayKey, key) }); continue; }
+    const ran = [];
+    while (i < runs.length && day(runs[i].started) <= key) {
+      last = runs[i];
+      if (day(runs[i].started) === key) ran.push(runs[i]);
+      i++;
+    }
+    if (!last) { cells.push({ ...cell, empty: true }); continue; }
+    cells.push({
+      ...cell, run: last, ran, today: key === todayKey,
+      ok: last.conclusion === "success",
+      age: daysBetween(day(last.started), key),
+      unchanged: daysBetween(since.get(last.version), key),
+      release: since.get(last.version) === key,
+    });
+  }
+  return { cells, runs, todayKey };
+}
+
+// over the grid: how long the branch has been green, when it last ran, how often
+function daysSummary({ cells, runs, todayKey }) {
+  const past = cells.filter((c) => !c.future && !c.empty);
+  let streak = 0;
+  for (let k = past.length - 1; k >= 0 && past[k].ok; k--) streak++;
+  const yearAgo = keyDate(todayKey); yearAgo.setDate(yearAgo.getDate() - YEAR_DAYS);
+  const yearAgoKey = localDay(yearAgo);
+  const inYear = runs.filter((r) => day(r.started) >= yearAgoKey).length;
+  const lastAge = past.length ? past[past.length - 1].age : 0;
+  return [streak ? STR.streak(streak) : "", STR.sinceRun(lastAge), STR.runsYear(inYear)].filter(Boolean);
+}
+
+/* ==== THE GRID OF DAYS: THE MARKUP ====
+   Row 1 holds the months, column 1 the weekdays. A day with a run behind it is a button: hovering shows
+   its card, a click or a tap pins it. Without data every past day is empty, so the grid stands at once. */
+const MONTHS = [["Jan", "янв"], ["Feb", "фев"], ["Mar", "мар"], ["Apr", "апр"], ["May", "май"], ["Jun", "июн"],
+  ["Jul", "июл"], ["Aug", "авг"], ["Sep", "сен"], ["Oct", "окт"], ["Nov", "ноя"], ["Dec", "дек"]];
+const WEEKDAYS = [["Mon", "пн"], null, ["Wed", "ср"], null, ["Fri", "пт"], null, ["Sun", "вс"]];
+
+function gridLabels(cells) {
+  const labels = [];
+  let month = -1;
+  // a month is named over its first whole week
+  for (const c of cells) {
+    if (c.weekday !== 0) continue;
+    const m = Number(c.key.slice(5, 7)) - 1;
+    if (m !== month) { labels.push(`<span class="m" style="grid-column:${c.week + 2}">${T(...MONTHS[m])}</span>`); month = m; }
+  }
+  WEEKDAYS.forEach((name, w) => { if (name) labels.push(`<span class="w" style="grid-row:${w + 2}">${T(...name)}</span>`); });
+  return labels.join("");
+}
+
+function dayCell(c, idx) {
+  const place = `grid-column:${c.week + 2};grid-row:${c.weekday + 2};--n:${c.week}`;
+  if (c.future) return `<i class="day future" style="${place};--far:${Math.min(c.future / (WEEK * GRID.futureWeeks), 1).toFixed(2)}"></i>`;
+  if (c.empty) return `<i class="day empty" style="${place}"></i>`;
+  const fade = fadeOf(c.ok, c.age);
+  const cls = ["day", c.ok ? "ok" : "bad", c.ran.length ? "ran" : "", c.today ? "today" : ""].filter(Boolean).join(" ");
+  return `<button type="button" class="${cls}" style="${place};--fade:${(fade * 100).toFixed(0)}%" data-i="${idx}" aria-label="${c.key}"></button>`;
+}
+
+// The colours of a sample's days come in as a wave the first time its data is drawn; the cells keep their
+// size and place, only their colour changes. Drawn again, the grid stands still.
+function renderDays(branch) {
+  const grid = dayCells(branch);
+  state.days = grid.cells;
+  const name = branch?.variant.branch;
+  const fill = name && grid.runs.length && !state.filled.has(name);
+  if (fill) state.filled.add(name);
+  const summary = grid.runs.length ? daysSummary(grid) : FRAME.summary.map(ph);
+  const weeks = grid.cells[grid.cells.length - 1].week + 1;
+  return `<h3>${STR.days}</h3>
+    <p class="days-summary">${summary.map((s) => `<span>${s}</span>`).join("")}</p>
+    <div class="days-scroll"><div class="days-wrap">
+      <div class="days${fill ? " fill" : ""}" style="--weeks:${weeks}">${gridLabels(grid.cells)}${grid.cells.map(dayCell).join("")}</div>
+    </div></div>`;
+}
+
+// The grid opens with today in view and a few weeks ahead, when it is wider than the screen; a week's
+// width is the cell and the gap the stylesheet gives the grid.
+function scrollDaysToToday(root) {
+  const box = root.querySelector(".days-scroll"), today = root.querySelector(".day.today");
+  if (!box || !today) return;
+  const week = today.offsetWidth + parseFloat(getComputedStyle(today.parentElement).columnGap);
+  box.scrollLeft = Math.max(0, today.offsetLeft - box.clientWidth + GRID.aheadInView * week);
+}
+
+/* ==== THE CARD OF A DAY ====
+   What ran that day, or the run the day still shows, with how long the branch has stood on its version
+   and since its last run. The card lives over the whole page, not inside the grid's scrolling box, which
+   would clip it. Hovering shows it; a card shown by hovering waits a moment after the pointer leaves and
+   then fades, so the pointer can reach it; reaching it, clicking or tapping a day pins it. */
+function dayCard(c) {
+  const r = c.run;
+  const head = c.ran.length
+    ? `<b class="result ${c.ok ? "ok" : "bad"}">${c.ok ? STR.passed : STR.failedRun}</b>`
+    : `<b class="quiet">${STR.noRunThatDay}</b>`;
+  return `<div class="dc-date">${fmtDate(c.key)}</div>
+    <div class="dc-head">${head}</div>
+    <dl>
+      <dt>${STR.from}</dt><dd>${versionLink(r.version)}${c.release ? ` <span class="dc-new">${STR.newRelease}</span>` : ""}</dd>
+      <dt>${STR.testsTitle}</dt><dd>${r.tests.passed} ${STR.of} ${r.tests.total}</dd>
+      <dt>${STR.linesTitle}</dt><dd>${fmtPct(r.coverage?.line)}</dd>
+      <dt>${STR.branchesTitle}</dt><dd>${fmtPct(r.coverage?.branch)}</dd>
+    </dl>
+    <div class="dc-ages"><span>${STR.unchanged(c.unchanged)}</span><span>${STR.sinceRun(c.age)}</span></div>
+    <a class="dc-run" href="${esc(r.url)}">${STR.run} · ${fmtDate(r.started)} · ${fmtDuration(r.seconds)}</a>`;
+}
+
+const card = document.createElement("div");
+card.className = "day-card";
+card.hidden = true;
+document.body.append(card);
+
+let pinned = null, leaving = 0;
+
+// over the day, kept inside the window; under the day when there is no room above
+function placeCard(button) {
+  const at = button.getBoundingClientRect(), w = card.offsetWidth, h = card.offsetHeight;
+  const vw = document.documentElement.clientWidth, vh = innerHeight;
+  const above = at.top - h - CARD.gap;
+  card.style.left = Math.max(CARD.margin, Math.min(at.left + at.width / 2 - w / 2, vw - w - CARD.margin)) + "px";
+  card.style.top = (above >= CARD.margin ? above : Math.min(at.bottom + CARD.gap, vh - h - CARD.margin)) + "px";
+}
+
+function showCard(button, pin) {
+  keepCard();
+  const c = state.days[Number(button.dataset.i)];
+  card.innerHTML = dayCard(c);
+  card.hidden = false;
+  card.classList.toggle("pinned", pin);
+  for (const b of document.querySelectorAll(".day.on")) b.classList.remove("on");
+  button.classList.add("on");
+  placeCard(button);
+  if (pin) {
+    pinned = button;
+    if (c.release) markRelease(c.run.version);
+  }
+}
+
+function hideCard() {
+  clearTimeout(leaving);
+  card.classList.remove("fading");
+  card.hidden = true;
+  pinned = null;
+  for (const b of document.querySelectorAll(".day.on")) b.classList.remove("on");
+}
+
+function keepCard() {
+  clearTimeout(leaving);
+  card.classList.remove("fading");
+}
+
+function leaveCard() {
+  if (pinned) return;
+  clearTimeout(leaving);
+  leaving = setTimeout(() => {
+    card.classList.add("fading");
+    leaving = setTimeout(hideCard, cssMs(card, "transitionDuration"));
+  }, CARD.waitMs);
+}
+
+// a day the branch was regenerated on lights its row in the table of releases
+function markRelease(version) {
+  const row = document.querySelector(`#doc tr[data-version="${CSS.escape(version)}"]`);
+  if (!row) return;
+  row.classList.remove("lit"); void row.offsetWidth; row.classList.add("lit");
+  row.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+
+const HOVER = matchMedia("(hover: hover)");
+const dayOf = (event) => event.target.closest?.(".days button.day");
+// reaching the card pins it: selecting and copying from it must not close it
+card.addEventListener("pointerenter", () => {
+  keepCard();
+  if (!pinned) { pinned = document.querySelector(".days .day.on"); card.classList.add("pinned"); }
+});
+card.addEventListener("pointerleave", leaveCard);
+el("doc").addEventListener("pointerover", (event) => {
+  const button = dayOf(event);
+  if (button && HOVER.matches && !pinned) showCard(button, false);
+});
+el("doc").addEventListener("pointerout", (event) => {
+  const button = dayOf(event);
+  if (button && !pinned && !button.contains(event.relatedTarget) && !card.contains(event.relatedTarget)) leaveCard();
+});
+document.addEventListener("click", (event) => {
+  const button = dayOf(event);
+  if (button) { if (pinned === button) hideCard(); else showCard(button, true); return; }
+  if (pinned && !card.contains(event.target)) hideCard();
+});
+addEventListener("keydown", (event) => { if (event.key === "Escape") hideCard(); });
+// a pinned card follows its day as the page or the grid scrolls; a hover card just goes
+addEventListener("scroll", () => { if (pinned) placeCard(pinned); else if (!card.hidden) hideCard(); }, { capture: true, passive: true });
+addEventListener("resize", () => { if (pinned) placeCard(pinned); });
+
+/* ==== THE OVERVIEW: THE FRAME ====
+   The overview of a sample before its data: its own headings, the empty grid, the measures with their
+   titles and the table with its head. The values are strokes until they come, so nothing moves when
+   they do. */
+const tableHead = () => `<thead><tr><th>${STR.release}</th><th>${STR.result}</th><th>${STR.tests}</th><th>${STR.lines}</th><th>${STR.branches}</th><th>${STR.runs}</th><th>${STR.date}</th></tr></thead>`;
+
+function renderFrame(name) {
+  const meterFrame = (title) => `<div class="meter"><div class="meter-title">${title}</div>
+    <div class="meter-value">${ph(FRAME.meter)}</div><div class="meter-bar"></div></div>`;
+  const about = state.variants.find((v) => v.branch === name)?.about;
+  return `<h2 id="branch">${esc(name)}</h2><p>${about ? esc(about) : ph(FRAME.about)}</p>
+    <p class="origin">${STR.from} ${ph(FRAME.origin)}</p>
+    ${renderDays(null)}
+    <h3>${STR.lastRun}</h3>
+    <div class="run-head">${ph(FRAME.runHead)}</div>
+    <div class="meters">${meterFrame(STR.testsTitle)}${meterFrame(STR.linesTitle)}${meterFrame(STR.branchesTitle)}</div>
+    <h3>${STR.releases}</h3>
+    <div class="table-scroll"><table>${tableHead()}<tbody><tr>${FRAME.row.map((w) => `<td>${ph(w)}</td>`).join("")}</tr></tbody></table></div>`;
+}
+
+/* ==== THE OVERVIEW: THE MEASURES ====
+   One measure of the last run: its title over the value, a bar, the change since the previous release
+   and, once there are two releases, a line of the value across them. */
+function sparkline(values) {
+  const v = values.filter((x) => x != null);
+  if (v.length < 2) return "";
+  const lo = Math.min(...v), hi = Math.max(...v), span = hi - lo || 1;
+  const top = SPARK.pad, bottom = SPARK.h - SPARK.pad;
+  const pts = v.map((x, k) => `${(k / (v.length - 1) * SPARK.w).toFixed(1)},${(bottom - (x - lo) / span * (bottom - top)).toFixed(1)}`).join(" ");
+  return `<svg class="spark" viewBox="0 0 ${SPARK.w} ${SPARK.h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}"/></svg>`;
+}
+
+function meter(title, value, share, delta, history, failed = 0) {
+  const bar = failed
+    ? `<i class="ok" style="width:${(share * 100).toFixed(1)}%"></i><i class="bad" style="width:${(failed * 100).toFixed(1)}%"></i>`
+    : `<i class="fill" style="width:${(share * 100).toFixed(1)}%"></i>`;
+  const change = delta == null ? "" : `<span class="delta ${delta > 0 ? "up" : delta < 0 ? "down" : ""}" title="${STR.sincePrevious}">${fmtDelta(delta)}</span>`;
+  return `<div class="meter"><div class="meter-title">${title}</div>
+    <div class="meter-value">${value}${change}</div>
+    <div class="meter-bar">${bar}</div>${sparkline(history)}</div>`;
+}
+
+function renderMeters(reports) {
+  const run = lastRun(reports[0]), before = reports[1] && lastRun(reports[1]);
+  const history = [...reports].reverse().map(lastRun);
+  const delta = (pick) => (before && pick(run) != null && pick(before) != null ? pick(run) - pick(before) : null);
+  const t = run.tests;
+  const tests = `${t.passed} <small>${STR.of} ${t.total}</small>${t.failed ? ` <small class="bad">${STR.failedTests(t.failed)}</small>` : ""}`;
+  return `<div class="meters">
+      ${meter(STR.testsTitle, tests, t.total ? t.passed / t.total : 0, null, [], t.total ? t.failed / t.total : 0)}
+      ${meter(STR.linesTitle, fmtPct(run.coverage?.line), (run.coverage?.line ?? 0) / 100, delta((r) => r.coverage?.line), history.map((r) => r.coverage?.line))}
+      ${meter(STR.branchesTitle, fmtPct(run.coverage?.branch), (run.coverage?.branch ?? 0) / 100, delta((r) => r.coverage?.branch), history.map((r) => r.coverage?.branch))}
+    </div>`;
+}
+
+/* ==== THE OVERVIEW: THE SHEET ====
+   A sample with its data: the description, the grid, the last run and its measures, the table of
+   releases. The same elements as the frame, in the same order. */
+function renderReleases(reports) {
+  return `<div class="table-scroll"><table>${tableHead()}
+      <tbody>${reports.map((report) => {
+        const r = lastRun(report);
+        return `<tr data-version="${esc(report.version)}"><td>${versionLink(report.version)}</td><td>${result(r)}</td><td>${r.tests.passed} / ${r.tests.total}</td>
+          <td>${fmtPct(r.coverage?.line)}</td><td>${fmtPct(r.coverage?.branch)}</td><td>${report.runs.length}</td>
+          <td><a href="${esc(r.url)}">${fmtDate(r.started)}</a></td></tr>`;
+      }).join("")}</tbody>
+    </table></div>`;
+}
+
+function renderBranch(branch) {
+  const { variant, reports } = branch;
+  const head = `<h2 id="branch">${esc(variant.branch)}</h2><p>${esc(variant.about)}
+    <a href="${SAMPLES_GH}/tree/${esc(variant.branch)}">${STR.onGitHub}</a></p>`;
+  if (!reports.length) return head + `<p class="state">${STR.noReports}</p>`;
+  const run = lastRun(reports[0]);
+  return `${head}<p class="origin">${STR.from} ${versionLink(reports[0].version)}</p>
+    ${renderDays(branch)}
+    <h3>${STR.lastRun}</h3>
+    <div class="run-head">${result(run)}<span>${fmtDate(run.started)}</span><span>${fmtDuration(run.seconds)}</span>
+      <a href="${esc(run.url)}">${STR.run}</a></div>
+    ${renderMeters(reports)}
+    <h3>${STR.releases}</h3>
+    ${renderReleases(reports)}`;
+}
+
+function renderOverview() {
+  const doc = el("doc"), branch = state.data.get(state.branch);
+  doc.classList.remove("busy");
+  hideCard();
+  doc.innerHTML = `<h1>${STR.title}</h1><p>${STR.intro}</p>${branch ? renderBranch(branch) : renderFrame(state.branch)}`;
+  scrollDaysToToday(doc);
+  document.title = `${state.branch} - samples - ${window.SITE.name}`;
+}
+
+/* ==== A FILE ====
+   Highlighted by highlight.js, the language picked from the file's name. The file opens on the sheet on
+   every screen, as a document does on the documentation page; its code scrolls sideways in its box. */
+const LANG_BY_EXT = {
+  cs: "csharp", csproj: "xml", props: "xml", targets: "xml", xml: "xml", config: "xml", slnx: "xml", html: "xml",
+  json: "json", yml: "yaml", yaml: "yaml", sh: "bash", md: "markdown", toml: "ini", editorconfig: "ini",
+  sql: "sql", ps1: "powershell", js: "javascript", ts: "typescript", css: "css", http: "http",
+};
+
+function languageOf(path) {
+  const name = path.split("/").pop();
+  if (/^Dockerfile/i.test(name)) return "dockerfile";
+  const ext = name.includes(".") ? name.split(".").pop().toLowerCase() : "";
+  const lang = LANG_BY_EXT[ext];
+  return lang && window.hljs?.getLanguage(lang) ? lang : "plaintext";
+}
+
+// highlight.js and its Dockerfile grammar, fetched the first time a file is opened
+let highlighter = null;
+function loadHighlighter() {
+  const script = (src) => new Promise((done) => {
+    const tag = document.createElement("script");
+    tag.src = src; tag.onload = done; tag.onerror = done;
+    document.head.append(tag);
+  });
+  highlighter ??= script(`${HLJS}/highlight.min.js`).then(() => script(`${HLJS}/languages/dockerfile.min.js`));
+  return highlighter;
+}
+
+function highlight(code, text, path) {
+  code.textContent = text;
+  code.className = `language-${languageOf(path)}`;
+  if (window.hljs && text.length < HIGHLIGHT_MAX_CHARS) hljs.highlightElement(code);
+}
+
+async function showFile() {
+  const doc = el("doc"), path = state.file, branch = state.branch;
+  const github = `${SAMPLES_GH}/blob/${encodeURIComponent(branch)}/${path}`;
+  // The sheet keeps what it shows until the file is here, dimmed: replacing it with one line would
+  // collapse the page for a moment and jump it back.
+  doc.classList.add("busy");
+  let text;
+  try {
+    const [response] = await Promise.all([fetch(raw(branch, path), { cache: "no-cache" }), loadHighlighter()]);
+    if (!response.ok) throw new Error(String(response.status));
+    text = await response.text();
+  } catch {
+    doc.classList.remove("busy");
+    doc.innerHTML = `<p class="state">${STR.fileFailed} <a href="${github}">${esc(path)}</a></p>`;
+    return;
+  }
+  if (state.file !== path || state.branch !== branch) return;   // the reader moved on while it loaded
+  doc.classList.remove("busy");
+  doc.innerHTML = `<p class="meta"><a href="#${esc(branch)}">← ${STR.back}</a>
+      <span>${esc(branch)}/${esc(path)}</span>
+      <a href="${github}">${STR.onGitHub}</a> <a href="${raw(branch, path)}">${STR.rawFile}</a></p>
+    <pre class="code"><code></code></pre>`;
+  highlight(doc.querySelector("pre.code code"), text, path);
+  document.title = `${path.split("/").pop()} - ${branch} - ${window.SITE.name}`;
+}
+
+/* ==== THE CODE THEME ====
+   The highlighting follows the page's theme: the light or the dark stylesheet is switched on with it. */
+function syncCodeTheme() {
+  const theme = document.documentElement.getAttribute("data-theme");
+  const dark = theme === "dark" || (theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+  el("hl-light").disabled = dark;
+  el("hl-dark").disabled = !dark;
+}
+new MutationObserver(syncCodeTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncCodeTheme);
+syncCodeTheme();
+
+/* ==== ROUTING ====
+   The address decides the sample, the folder and the file; a sample not loaded yet gets its frame and
+   is drawn again when it comes. */
+function readAddress() {
+  const hash = decodeURIComponent(location.hash.slice(1));
+  const slash = hash.indexOf("/");
+  const name = slash >= 0 ? hash.slice(0, slash) : hash;
+  const known = state.variants.some((v) => v.branch === name);
+  return { branch: known ? name : S_CFG.home, path: known && slash >= 0 ? hash.slice(slash + 1) : null };
+}
+
+function route() {
+  const { branch, path } = readAddress();
+  state.branch = branch;
+  const data = state.data.get(branch);
+  if (!data) {
+    renderBranches();
+    renderExplorer();
+    renderOverview();
+    const asked = location.hash;
+    ensureBranch(branch).then(() => { if (location.hash === asked) route(); });
+    return;
+  }
+  state.file = path && data.files.includes(path) ? path : null;
+  if (state.file) state.dir = state.file.split("/").slice(0, -1).join("/");
+  else if (!path) state.dir = state.dir && data.files.some((f) => f.startsWith(state.dir + "/")) ? state.dir : "";
+  renderBranches();
+  renderExplorer();
+  if (state.file) showFile();
+  else renderOverview();
+}
+
+/* ==== NEWER DATA ====
+   Data that came behind a copy already on the page does not redraw it under the reader's hand: a veil
+   and a note say it is here, and OK draws it. */
+function offerUpdate(fresh) {
+  const note = el("update");
+  note.querySelector("button").onclick = () => {
+    note.close();
+    state.data.clear(); loading.clear(); state.filled.clear();
+    useCache(fresh);
+    route();
+  };
+  note.showModal();
+}
+
+/* ==== THE START ====
+   With a copy in the browser the page is drawn from it at once, and checked behind it when the copy is
+   old. Without one, the frame of the sample the address names is on the sheet before anything is
+   fetched; the list of samples, the first and smallest file, writes its description into the paragraph
+   that waits for it; the sample's own data fills the rest; the other samples follow for the dots in the
+   panel, and everything is kept for the next visit. */
+async function start() {
+  addEventListener("hashchange", route);
+  const copy = readCache();
+  if (copy) {
+    useCache(copy);
+    route();
+    if (Date.now() - copy.at < CACHE_FRESH_MS) return;
+    try {
+      const fresh = await fetchCopy();
+      writeCache(fresh);
+      if (!sameData(fresh, copy)) offerUpdate(fresh);
+    } catch { /* offline: the copy stays on the page */ }
+    return;
+  }
+  const first = decodeURIComponent(location.hash.slice(1)).split("/")[0] || S_CFG.home;
+  el("doc").innerHTML = `<h1>${STR.title}</h1><p>${STR.intro}</p>${renderFrame(first)}`;
+  try {
+    await loadVariants();
+  } catch {
+    el("doc").insertAdjacentHTML("afterbegin", `<p class="state">${STR.failed} <a href="${SAMPLES_GH}">${S_CFG.repo}</a></p>`);
+    return;
+  }
+  const open = readAddress().branch;
+  const about = state.variants.find((v) => v.branch === open)?.about;
+  if (open === first && about) el("branch").nextElementSibling.textContent = about;
+  else el("doc").innerHTML = `<h1>${STR.title}</h1><p>${STR.intro}</p>${renderFrame(open)}`;
+  await ensureBranch(open);
+  route();
+  await Promise.all(state.variants.map((v) => ensureBranch(v.branch)));
+  renderBranches();
+  writeCache(currentCopy());
+}
+start();

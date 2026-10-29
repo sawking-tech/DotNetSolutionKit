@@ -1,0 +1,6 @@
+<Project>
+  <!-- The flag MongoDB. -->
+  <ItemGroup>
+    <PackageVersion Include="MongoDB.Driver" Version="3.12.0" />
+  </ItemGroup>
+</Project>

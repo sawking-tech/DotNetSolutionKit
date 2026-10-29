@@ -1,0 +1,95 @@
+# The gateway on Kubernetes; applied by deploy/k8s/apply.sh, which fills in __REGISTRY__ and __TAG__.
+# Settings come from the Secret named below as environment variables (Jwt__Issuer, Jwt__Audience,
+# InternalApi__ApiKey, ReverseProxy__...); the token public key from the Secret service-name-kebab-jwt,
+# key jwt-public.pem.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-name-kebab
+  labels:
+    app: service-name-kebab
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: service-name-kebab
+  template:
+    metadata:
+      labels:
+        app: service-name-kebab
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: service-name-kebab
+          image: __REGISTRY__/productnamelower-servicenameorcustom:__TAG__
+          # The root filesystem is read-only: the running container is changed only by a new image, which
+          # passes review and CI, so features.json and the code cannot be edited in place. /tmp stays
+          # writable for what .NET and ASP.NET Core keep there: the diagnostics socket, large request bodies.
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: Jwt__PublicKeyPath
+              value: /app/keys/jwt-public.pem
+          envFrom:
+            - secretRef:
+                name: service-name-kebab
+                optional: true
+          volumeMounts:
+            - name: jwt
+              mountPath: /app/keys
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: jwt
+          secret:
+            secretName: service-name-kebab-jwt
+            optional: true
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-name-kebab
+  labels:
+    app: service-name-kebab
+spec:
+  selector:
+    app: service-name-kebab
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

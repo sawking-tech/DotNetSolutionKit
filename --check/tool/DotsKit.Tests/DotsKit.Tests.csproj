@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <!-- The same versions as the template's tests, in template/src/Directory.Packages.props. -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+        <PackageReference Include="NUnit" Version="5.0.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="6.3.0" />
+        <PackageReference Include="Shouldly" Version="4.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\DotsKit\DotsKit.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework" />
+        <Using Include="Shouldly" />
+    </ItemGroup>
+</Project>

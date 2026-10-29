@@ -1,0 +1,20 @@
+# Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
+
+name: Coverage
+
+# Coverage of the branch chosen when it is started: ci.yml with coverage on - the same build, the same test
+# servers and tests, a report per service and one for Common, held to COVERAGE_MIN_BRANCH when it is set.
+# Started by hand, to see the coverage of a branch before its pull request. Pull requests do not measure it
+# (ci.yml says why).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    uses: ./.github/workflows/ci.yml
+    with:
+      coverage: true

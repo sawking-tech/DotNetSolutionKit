@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <!-- The template version this service was generated from; Directory.Build.props checks its major -->
+        <DotNetSolutionKitServiceVersion>DOTNETSOLUTIONKIT_TEMPLATE_VERSION</DotNetSolutionKitServiceVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentValidation" />
+        <!--#if (Hangfire) -->
+        <PackageReference Include="AspNetCore.HealthChecks.Hangfire" />
+        <PackageReference Include="Hangfire.AspNetCore" />
+        <!--#endif -->
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Swashbuckle.AspNetCore" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Web\NamespaceRoot.ProductName.Common.Web.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Application\NamespaceRoot.ProductName.ServiceNameOrCustom.Application.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure\NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.csproj" />
+    </ItemGroup>
+</Project>

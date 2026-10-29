@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Linq.Dynamic.Core" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+        <!-- IHostEnvironment, to resolve a flag against the environment the service is running as. -->
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+        <!-- IFeatureManager, [FeatureGate] and the snapshots are already written and tested; what we add
+             is the schema, the shared file and the source reporting, not another evaluation engine. -->
+        <!--#if (FeatureFlags) -->
+        <PackageReference Include="Microsoft.FeatureManagement" />
+        <!--#endif -->
+    </ItemGroup>
+
+</Project>

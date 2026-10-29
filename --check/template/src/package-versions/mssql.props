@@ -1,0 +1,7 @@
+<Project>
+  <!-- The flag Database mssql. -->
+  <ItemGroup>
+    <PackageVersion Include="Hangfire.SqlServer" Version="1.8.25" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.31" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,2 @@
+# Shell scripts run under bash, which fails on a carriage return at the end of a line.
+*.sh text eol=lf

@@ -1,0 +1,208 @@
+name: Promote
+
+# Releases dev: fast-forwards master to it and publishes what master then carries (release.yml). Whatever
+# reaches master is a release, so nothing reaches it any other way. Started by hand, or by the label
+# "release" on a pull request from dev into master, whose page then holds the release's review.
+#
+# Before master moves, the three conditions of a release (CONTRIBUTING.md) are checked on the head of dev:
+# template.yml passed on it, the full-dev sample is generated from it and its CI passed, and version.json
+# names a version above the last release, with no label. A fast-forward keeps one history: master is dev at
+# that commit.
+#
+# The publication runs in this workflow: a push made with GITHUB_TOKEN starts no other workflow, so
+# release.yml would never see the push that moves master.
+# For the same reason the site is published from here: site.yml is started on the target by hand, which
+# GITHUB_TOKEN may do; on master it publishes, on any other target it only builds.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: Branch to release
+        required: true
+        default: dev
+      target:
+        description: Branch to fast-forward - master, 2.x, or a throwaway branch for a rehearsal that publishes nothing
+        required: true
+        default: master
+      reconcile:
+        description: Merge the target into the source first when they have diverged (after a patch on master)
+        type: boolean
+        default: false
+  # A rehearsal of this workflow on temporary branches calls it, before a change to it is merged.
+  workflow_call:
+    inputs:
+      source: { type: string, required: true }
+      target: { type: string, required: true }
+      reconcile: { type: boolean, default: false }
+  pull_request_target:
+    types: [labeled]
+    branches: [master, '2.x']
+
+permissions:
+  contents: write
+  actions: read
+  packages: write
+  pull-requests: write
+
+concurrency:
+  group: promote-${{ inputs.target || github.event.pull_request.base.ref }}
+  cancel-in-progress: false
+
+env:
+  SAMPLES_REPO: sawking-tech/DotNetSolutionKit.Samples
+
+jobs:
+  promote:
+    name: Check and fast-forward
+    runs-on: ubuntu-24.04
+    if: >-
+      github.event_name != 'pull_request_target' ||
+      (github.event.label.name == 'release' && github.event.pull_request.head.repo.full_name == github.repository)
+    env:
+      SOURCE: ${{ inputs.source || github.event.pull_request.head.ref }}
+      TARGET: ${{ inputs.target || github.event.pull_request.base.ref }}
+      RECONCILE: ${{ inputs.reconcile || false }}
+      PR_NUMBER: ${{ github.event.pull_request.number || '' }}
+      GH_TOKEN: ${{ github.token }}
+    outputs:
+      target: ${{ steps.move.outputs.target }}
+      moved: ${{ steps.move.outputs.moved }}
+      publish: ${{ steps.move.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: The conditions of a release, on the head of the source
+        run: |
+          set -euo pipefail
+          git check-ref-format --branch "$SOURCE" >/dev/null
+          git check-ref-format --branch "$TARGET" >/dev/null
+          [ "$SOURCE" != "$TARGET" ] || { echo "::error::the source and the target are the same branch"; exit 1; }
+          git fetch -q --tags origin "+refs/heads/$SOURCE:refs/remotes/origin/$SOURCE"
+          sha=$(git rev-parse "origin/$SOURCE")
+          echo "source $SOURCE at ${sha:0:7}"
+
+          # 1. version.json names a version above the last release of the line, without the label -rc that the
+          # source carries while work goes on (CONTRIBUTING.md): the label comes off on the source first.
+          version=$(git show "origin/$SOURCE:version.json" | jq -r .version)
+          case "$version" in *-*)
+            echo "::error::version.json on $SOURCE says $version, a version with a label: take it off on $SOURCE first (${version%%-*}), with its notes"
+            exit 1 ;;
+          esac
+          # Its notes are there, in both languages: a release without them tags the version and then fails
+          # to publish it, or publishes empty notes nuget.org keeps for good.
+          git show "origin/$SOURCE:version.json" | jq -e --arg v "$version" '
+              .releaseNotes[$v] as $n
+              | $n != null and ($n.headline | length > 0) and ($n.ru.headline | length > 0)
+                and ($n.ru.highlights | length) == ($n.highlights | length)' >/dev/null             || { echo "::error::version.json on $SOURCE has no notes for $version in English and Russian: write them first"; exit 1; }
+          case "$TARGET" in 2.x) pattern='v2.*' ;; *) pattern='v*' ;; esac
+          last=$(git tag -l "$pattern" --sort=-v:refname | grep -v -- - | head -1 || true)
+          echo "version $version, last release ${last:-none}"
+          if [ -n "$last" ]; then
+            higher=$(printf '%s\n%s\n' "${last#v}" "$version" | sort -V | tail -1)
+            if [ "$version" = "${last#v}" ] || [ "$higher" != "$version" ]; then
+              echo "::error::version.json on $SOURCE says $version, not above the last release $last: raise it on $SOURCE first, with its notes"
+              exit 1
+            fi
+          fi
+
+          # 2. template.yml passed on the commit, waiting for a run still going.
+          for minute in $(seq 1 40); do
+            runs=$(gh run list -R "$GITHUB_REPOSITORY" --workflow template.yml --commit "$sha" --json status,conclusion)
+            if [ "$(jq '[.[] | select(.status == "completed" and .conclusion == "success")] | length' <<< "$runs")" -gt 0 ]; then
+              echo "template.yml passed on ${sha:0:7}"; break
+            fi
+            if [ "$(jq 'length' <<< "$runs")" -gt 0 ] && [ "$(jq '[.[] | select(.status != "completed")] | length' <<< "$runs")" -eq 0 ]; then
+              echo "::error::template.yml did not pass on ${sha:0:7}: $(jq -c '[.[].conclusion]' <<< "$runs")"; exit 1
+            fi
+            [ "$minute" -lt 40 ] || { echo "::error::no finished template.yml run on ${sha:0:7}"; exit 1; }
+            sleep 60
+          done
+
+          # 3. The full-dev sample is generated from this commit, and its CI passed. It is regenerated by the
+          # samples' own schedule, or at once with: gh workflow run regenerate.yml -R $SAMPLES_REPO --ref full
+          # The CI runs on the generated commit; the report it leaves on top ([skip ci]) has none of its own.
+          if [ "$SOURCE" = dev ]; then
+            run=$(gh run list -R "$SAMPLES_REPO" --workflow ci.yml --branch full-dev --limit 1 --json headSha,status,conclusion)
+            ran_on=$(jq -r '.[0].headSha // empty' <<< "$run")
+            ci=$(jq -r '.[0] | "\(.status) \(.conclusion)"' <<< "$run")
+            [ -n "$ran_on" ] || { echo "::error::full-dev has no CI run"; exit 1; }
+            from=$(gh api "repos/$SAMPLES_REPO/contents/template-version?ref=$ran_on" -q .content | base64 -d | tr -d '\r\n')
+            [ "$from" = "$sha" ] || { echo "::error::the last CI of full-dev ran on a sample of ${from:0:7}, not of ${sha:0:7}: regenerate full-dev first"; exit 1; }
+            [ "$ci" = "completed success" ] || { echo "::error::the CI of full-dev on ${ran_on:0:7} is '$ci', not a success"; exit 1; }
+            echo "full-dev from ${sha:0:7}: its CI on ${ran_on:0:7} passed"
+          else
+            echo "::notice::$SOURCE is not dev: the full-dev sample does not show it, and is not checked"
+          fi
+
+      - name: Fast-forward the target
+        id: move
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin "+refs/heads/$TARGET:refs/remotes/origin/$TARGET"
+          before=$(git rev-parse "origin/$TARGET")
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          case "$TARGET" in master|2.x) echo "publish=true" >> "$GITHUB_OUTPUT" ;; *) echo "publish=false" >> "$GITHUB_OUTPUT" ;; esac
+
+          src="origin/$SOURCE"
+          if ! git merge-base --is-ancestor "origin/$TARGET" "$src"; then
+            if [ "$RECONCILE" != true ]; then
+              echo "::error::$TARGET is not an ancestor of $SOURCE, so it cannot be fast-forwarded; merge $TARGET into $SOURCE, or run again with reconcile"
+              git log --oneline --left-right --cherry-pick --max-count=30 "origin/$TARGET...origin/$SOURCE"
+              exit 1
+            fi
+            # The merge is a new commit on the source, which the conditions above did not see: its checks
+            # run on the push, and the release waits for them in release.yml.
+            echo "::notice::merging $TARGET into $SOURCE first"
+            git checkout -q -B "$SOURCE" "origin/$SOURCE"
+            git merge --no-edit "origin/$TARGET"
+            git push origin "HEAD:refs/heads/$SOURCE"
+            src=$(git rev-parse HEAD)
+          fi
+
+          git checkout -q -B "$TARGET" "origin/$TARGET"
+          git merge --ff-only "$src"
+          git push origin "HEAD:refs/heads/$TARGET"
+          if [ "$(git rev-parse HEAD)" != "$before" ]; then
+            echo "moved=true" >> "$GITHUB_OUTPUT"
+            echo "$TARGET: ${before:0:7} -> $(git rev-parse --short HEAD)"
+          else
+            echo "moved=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$TARGET already matched $SOURCE"
+          fi
+
+      - name: Comment on the pull request
+        if: env.PR_NUMBER != ''
+        run: gh pr comment "$PR_NUMBER" --body "Fast-forwarded \`$TARGET\` to \`$SOURCE\`; the release follows in this run."
+
+  # after the release: the site names the version, which the package and the tag must then already have
+  site:
+    name: Site
+    needs: [promote, release]
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET: ${{ needs.promote.outputs.target }}
+    steps:
+      - run: gh workflow run site.yml -R "$GITHUB_REPOSITORY" --ref "$TARGET"
+
+  # A run again on a target already moved still publishes what a failed run left out.
+  # A called workflow gets no more than its caller grants: id-token is for the nuget.org key.
+  release:
+    name: Publish
+    needs: promote
+    permissions:
+      contents: write
+      actions: read
+      packages: write
+      id-token: write
+    uses: ./.github/workflows/release.yml
+    with:
+      ref: ${{ needs.promote.outputs.target }}
+      publish: ${{ needs.promote.outputs.publish == 'true' }}

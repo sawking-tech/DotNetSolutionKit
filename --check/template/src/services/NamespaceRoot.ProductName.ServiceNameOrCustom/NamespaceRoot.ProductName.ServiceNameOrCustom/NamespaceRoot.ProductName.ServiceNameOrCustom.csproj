@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Domain\Entities\" />
+      <Folder Include="Domain\Models\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.ServiceNameOrCustom.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+    </ItemGroup>
+</Project>

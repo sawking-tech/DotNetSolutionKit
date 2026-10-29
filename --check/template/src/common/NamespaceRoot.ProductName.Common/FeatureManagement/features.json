@@ -1,0 +1,19 @@
+{
+  "//": "Platform feature flags. One file, shipped from Common and read by every service, so a flag means the same thing everywhere. Adding a flag here needs no code; a flag that switches behaviour also needs the branch it switches, and a constant in FeatureKeys beside it.",
+
+  "Features": {
+    "sample.feature": {
+      "enabled": false,
+      "pinned": false,
+      "effect": "enables",
+      "environments": {
+        "Development": true
+      },
+      "tags": ["sample"],
+      "description": "Example entry showing every field. Delete it once the solution has real flags.",
+      "owner": "unassigned",
+      "expiresAt": "2099-12-31",
+      "ticket": "n/a"
+    }
+  }
+}

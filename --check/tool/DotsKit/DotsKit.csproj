@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- dotskit: makes a solution with DotNetSolutionKit, adds services and flags to it, describes a solution made
+         without it and upgrades a solution to a newer version of the template, by a three-way merge that keeps the
+         solution's own changes. Released with the template, under the same tag and version from version.json:
+         dotskit X.Y.Z generates with the template X.Y.Z. Packed by release.yml beside the template's package. -->
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>DotsKit</RootNamespace>
+        <AssemblyName>dotskit</AssemblyName>
+
+        <_VersionJson>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../../version.json'))</_VersionJson>
+        <Version>$([System.Text.RegularExpressions.Regex]::Match($(_VersionJson), '&quot;version&quot;\s*:\s*&quot;([^&quot;]+)&quot;').Groups[1].Value)</Version>
+
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>dotskit</ToolCommandName>
+        <PackageId>SawKing.DotsKit.Tool</PackageId>
+        <Title>dotskit</Title>
+        <Authors>Vladimir Savkin</Authors>
+        <Description>The command-line tool of DotNetSolutionKit: makes a solution, adds services and flags to it, describes a solution made with the template alone, and upgrades a solution to a newer version of the template, keeping your changes by a three-way merge.</Description>
+        <PackageTags>dotnet-tool;dotnet-new;templates;microservices;solution;scaffolding;upgrade;three-way-merge</PackageTags>
+        <PackageProjectUrl>https://dotskit.sawking.tech/</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/sawking-tech/DotNetSolutionKit</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Copyright>Copyright (c) 2025 Vladimir Savkin</Copyright>
+        <!-- The package's own README (tool/README.md) and the template's icon (nuget/). -->
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
+        <!-- The release notes of the version, as the template's package has them: release.yml passes ReleaseNotesFile. -->
+        <PackageReleaseNotes Condition="'$(ReleaseNotesFile)' != ''">$([System.IO.File]::ReadAllText('$(ReleaseNotesFile)'))</PackageReleaseNotes>
+        <PackageReleaseNotes Condition="'$(ReleaseNotesFile)' == ''">What this version brings: https://github.com/sawking-tech/DotNetSolutionKit/releases/tag/v$(Version)</PackageReleaseNotes>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+        <None Include="..\..\nuget\icon.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="DotsKit.Tests" />
+    </ItemGroup>
+</Project>

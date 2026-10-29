@@ -1,0 +1,7 @@
+<Project>
+  <!-- The flag Database postgres. -->
+  <ItemGroup>
+    <PackageVersion Include="Hangfire.PostgreSql" Version="1.21.1" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+  </ItemGroup>
+</Project>

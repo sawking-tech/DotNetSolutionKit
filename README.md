@@ -7,8 +7,9 @@ Made by Vladimir Savkin at [sawking.tech](https://sawking.tech/).
 Site: [dotskit.sawking.tech](https://dotskit.sawking.tech/). Documentation, in English and Russian:
 [dotskit.sawking.tech/docs.html](https://dotskit.sawking.tech/docs.html).
 
-A solution of an earlier version, v1 included, is brought to the current one by `dotskit upgrade`, keeping
-the team's changes ([upgrading](docs/getting-started/upgrading.md)).
+A solution of an earlier 2.x version is brought to the current one by `dotskit upgrade`: git keeps the team's
+changes where they merge with the template's, and the rest are conflicts to resolve. A solution of v1 is brought
+to 2.0.0 by hand first ([upgrading](docs/getting-started/upgrading.md)).
 
 **DotNetSolutionKit (dotskit)** is a configurable `dotnet new` template and lifecycle toolkit for standardized .NET solutions.
 

@@ -1,0 +1,6 @@
+<Project>
+  <!-- The flag Storage: S3-compatible object storage. -->
+  <ItemGroup>
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.1" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,91 @@
+# This service on Kubernetes; applied by deploy/k8s/apply.sh, which fills in __REGISTRY__ and __TAG__.
+# The database, the broker and the secret store live outside the cluster's manifests: their addresses and
+# credentials come from the Secret named below, created by whoever runs the cluster.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-name-kebab
+  labels:
+    app: service-name-kebab
+spec:
+  replicas: 2
+  # A new pod takes traffic only once it is ready, and an old one leaves only after that: no gap.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: service-name-kebab
+  template:
+    metadata:
+      labels:
+        app: service-name-kebab
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: service-name-kebab
+          image: __REGISTRY__/productnamelower-servicenameorcustom:__TAG__
+          # The root filesystem is read-only: the running container is changed only by a new image, which
+          # passes review and CI, so features.json and the code cannot be edited in place. /tmp stays
+          # writable for what .NET and ASP.NET Core keep there: the diagnostics socket, large request bodies.
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+          # ConnectionStrings__DefaultConnection, InternalApi__ApiKey and the other settings, as
+          # environment variables. Optional, so the pod starts and reports what is missing.
+          envFrom:
+            - secretRef:
+                name: service-name-kebab
+                optional: true
+          # Ready: the database and the broker answer; traffic waits for it.
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          # Alive: the process answers; a database outage must not restart it.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-name-kebab
+  labels:
+    app: service-name-kebab
+spec:
+  selector:
+    app: service-name-kebab
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

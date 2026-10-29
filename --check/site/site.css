@@ -1,0 +1,537 @@
+/* The frame of every page: tokens, base, the bar, the sheet and the panel, the hero.
+   One file so the pages cannot drift apart - that is what happened when each had its own copy. */
+/* ==== TOKENS ==== */
+:root {
+  /* the ladder: a colour and a pixel size per rung, as in docs/visual-metaphor.md */
+  --rung-2: #3d5a80;
+  --rung-4: #5e8ca8;
+  --rung-6: #9fd3c7;
+  --rung-8: #f2c14e;
+  --refuted: #e08d79;   /* the one colour outside the ladder: a verdict that did not hold */
+  /* the status of a roadmap item, from the ladder: done mint, now blue, waiting amber */
+  --done: var(--rung-6);
+  --now: var(--rung-4);
+  --wait: var(--rung-8);
+
+  --ground: #0e1526;
+  --ground-deep: #090e1a;
+  --panel: #141d33;
+  --line: #24314f;
+  --text: #e6ecf5;
+  --muted: #93a2bc;
+  --focus: var(--rung-8);
+  /* the accent as text: amber holds up on a dark ground, but on white it needs to go gold to stay
+     readable - same hue, enough contrast to read at body size */
+  --focus-text: var(--rung-8);
+
+  /* The light palette, named once and assigned below: the page has two themes, and a second copy of
+     these values would drift from the first. Only the assignment repeats, not the colours. */
+  --l-ground: #f4f6fb;
+  --l-ground-deep: #e8ecf6;
+  --l-panel: #ffffff;
+  --l-panel-2: #eef2fa;
+  --l-line: #ccd6e8;
+  --l-text: #14203a;
+  --l-muted: #5a6a8a;
+  --l-focus: var(--rung-8);        /* the same amber in both themes - the accent belongs to the ladder */
+  --l-focus-text: #9a6c0c;         /* gold: the amber of the ladder, deep enough to read on white */
+  --l-sheen-1: #16233f; --l-sheen-2: #24645a; --l-sheen-3: #d9a11f;
+  /* the statuses as text on white: the mint and the amber of the ladder go deep enough to read */
+  --l-done: #1f7a63; --l-now: var(--rung-2); --l-wait: var(--l-focus-text);
+
+  /* the sheen of the wordmark: light letters at night, dark ones by day - on a near-white field the
+     pale gradient was invisible */
+  --sheen-1: #e6ecf5; --sheen-2: #9fd3c7; --sheen-3: #f2c14e;
+
+  --measure: 68ch;
+  --gap: 1.5rem;
+  --radius: 10px;
+
+  /* the sheet-and-panel layout: its own set of names, kept apart from the page palette */
+  --app-bg: var(--ground);
+  --panel-2: #1b2540;
+  --ink: var(--text);
+  --barh: 53px;
+  --panelw: 272px;
+  --maxw: 920px;   /* narrow enough that an open panel still leaves the sheet a margin */
+  --gut: 20px;
+}
+
+/* The theme: "auto" follows the device, "light" and "dark" are the reader's own choice. The
+   attribute is set on <html> before the first paint, so the page never flashes the wrong palette.
+   One block of assignments, used by both the explicit choice and the device's. */
+:root[data-theme="light"] {
+  --ground: var(--l-ground); --ground-deep: var(--l-ground-deep);
+  --panel: var(--l-panel); --panel-2: var(--l-panel-2);
+  --line: var(--l-line); --text: var(--l-text); --muted: var(--l-muted); --focus: var(--l-focus); --focus-text: var(--l-focus-text); --done: var(--l-done); --now: var(--l-now); --wait: var(--l-wait);
+  --sheen-1: var(--l-sheen-1); --sheen-2: var(--l-sheen-2); --sheen-3: var(--l-sheen-3);
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="auto"] {
+    --ground: var(--l-ground); --ground-deep: var(--l-ground-deep);
+    --panel: var(--l-panel); --panel-2: var(--l-panel-2);
+    --line: var(--l-line); --text: var(--l-text); --muted: var(--l-muted); --focus: var(--l-focus); --focus-text: var(--l-focus-text); --done: var(--l-done); --now: var(--l-now); --wait: var(--l-wait);
+    --sheen-1: var(--l-sheen-1); --sheen-2: var(--l-sheen-2); --sheen-3: var(--l-sheen-3);
+  }
+}
+
+/* ==== LANGUAGE ==== */
+/* The page carries both languages and shows one. English is what a reader without the attribute
+   gets - a crawler with no scripts, the first paint before the switch runs - and the Russian text
+   is in the document either way. Why it is done here and not by a script: the site is static, so
+   text a script would insert would not exist for anyone who reads the page without running it
+   (panel.js, LANGUAGE). */
+:root:not([data-lang="ru"]) [lang="ru"] { display: none; }
+:root[data-lang="ru"] [lang="en"] { display: none; }
+
+/* ==== BASE ==== */
+* { box-sizing: border-box; }
+/* No clipping here, however tempting: overflow on <html> makes it the scroll container and the
+   sticky panel stops sticking. A page wider than the window is fixed where it is made - the panel
+   hides under the sheet instead of being parked past its edge (panel.js, applyShift). */
+/* The scrollbar is always there, so the width of the window is the same for a long page and a short one,
+   and for a page whose content is still coming: a scrollbar that appears moves the panel and the sheet.
+   Both overflows sit on <html>, which hands them to the window; on <body> overflow-x would make the body
+   a scroll container of its own, and the sticky bar and panel would stop sticking. No smooth scrolling
+   here: a link to a place on the page jumps there (site/jump.js) instead of crawling the page through. */
+html { overflow-x: hidden; overflow-y: scroll; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--text);
+  font: 400 17px/1.6 "IBM Plex Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The browser breaks the lines, and left alone it leaves a word hanging at the end of one - the
+   footer read "Code," and then a new line. Headings are balanced across their lines, prose is
+   broken so that no last line is left with a single short word. */
+h1, h2, h3 { font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 0.6em;
+             text-wrap: balance; }
+p, li, td, th, figcaption { text-wrap: pretty; }
+h2 { font-size: clamp(1.4rem, 1rem + 1.4vw, 2rem); }
+h3 { font-size: 1.05rem; }
+p { margin: 0 0 1em; max-width: var(--measure); }
+a { color: var(--text); text-decoration-color: var(--line); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--focus); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+code, .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.92em; }
+
+/* The measure of the content and the gutter it keeps from the edge - the padding is what stops
+   the text touching the border when an open panel narrows the sheet. */
+/* The content column is drawn: a rule down each side, running the height of the page. Sections
+   sit one under another, so their sides join into two unbroken lines. */
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut);
+        border-inline: 1px solid var(--line); }
+/* Separators run at the width of the content, never across the whole sheet: a full-width rule
+   reaches under the panel standing beside it and cuts the page in two. */
+/* The air between sections belongs inside the column, not around it: the rule down each side is
+   drawn on .wrap, so padding on the section itself would fall outside it and break the line. */
+section { padding-block: 0; }
+section > .wrap { padding-block: clamp(1.6rem, 3.4vw, 2.7rem); }
+section + section > .wrap { border-top: 1px solid var(--line); }
+
+/* ==== TOP BAR ==== */
+/* The bar and the panel's head are one line across the page: same height, same ground, same rule
+   under them. The height belongs to --barh and nothing else may add to it - the padding lives on
+   .bar-inner, so that a stray padding here cannot push the two out of step. */
+.bar { font-size: 0.95rem; }
+.bar__mark { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; }
+.bar__mark svg { width: 22px; height: 22px; flex: none; }
+/* The bar is navigation, not a caption: its links carry the text colour and a little weight, so
+   they read as places to go. Muted grey made them look disabled, on the light theme especially. */
+.bar a { text-decoration: none; color: var(--text); font-weight: 500; padding: 0.3rem 0.55rem; border-radius: 6px; }
+.bar a:hover { color: var(--text); background: var(--panel); }
+.bar a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--focus); border-radius: 0; }
+.bar__mark, .bar__mark:hover { color: var(--text); background: none; }
+
+/* ==== LAYOUT: the sheet and the panel ========================================================
+   A push panel, by the rules of the site layout spec: it slides out and moves the whole frame -
+   header included - because moving only the middle would let the panel lie over the header, leaving
+   the page both shifted and covered at once. The page yields the panel's width minus the free
+   gutter, never less than zero; on a wide screen it yields nothing, there being nothing to yield.
+
+   Layer order: the sheet sits above the panel, so the panel comes out from under its edge; the bar
+   runs at the sheet's width and sits higher still; the footer is above the panel as well, or the
+   panel would land on top of it.
+
+   #below is the sheet - opaque, above the panel, so a closed panel hides exactly under its edge.
+   #sidebar is the panel: a sticky column the browser keeps in place by itself, with no recomputing
+   on scroll. Wide window (body.wide): the side gutter is wider than the panel, so the panel simply
+   stands in it and the sheet never moves. Narrow: the panel sits under the sheet with a negative
+   margin, taking no space, and opening slides the two apart to meet.
+
+   The panel pushes the content, it never covers it - no scrim, no click trap, closed by the button
+   that opened it. */
+/* Nothing moves while the page is laying itself out. The panel's place comes from storage and is
+   applied by a script, so without this the sheet and the panel slid apart on every refresh - the
+   opening animation played for a state that was never closed. The class comes off after the first
+   frames, once everything stands where it belongs. */
+.preload *, .preload *::before, .preload *::after { transition: none !important; animation: none !important; }
+/* The page is shown once the panel stands where storage says and the fonts are in, so its first frame
+   is its last: no sheet sliding aside, no letters changing size. boot.js caps the wait. */
+.unlaid #main { visibility: hidden; }
+
+#main{position:relative;z-index:10}
+  #cols{display:flex;align-items:flex-start}
+  /* The sheet is the page: capped at --maxw and centred, so the rules down the sides of the content
+     are the edges of the sheet itself. Left to fill the window it grew two blank margins with no
+     edge to them, and the panel's zone showed as a third. */
+  #below{position:relative;z-index:2;width:100%;max-width:var(--maxw);margin:0 auto;min-height:100vh;
+    background:var(--app-bg);
+    transform:translateX(var(--shift,0px));transition:transform .25s}
+  /* The panel is glass: what is behind it shows through, softened. It keeps its place in the layer
+     order - under the sheet, sliding out from its edge - so it is the panel that takes the clicks
+     landing on it. */
+  #sidebar{position:sticky;top:0;height:100vh;width:var(--panelw);flex:none;order:2;z-index:1;
+    display:flex;flex-direction:column;border-left:1px solid var(--line);
+    background:color-mix(in srgb,var(--panel) 72%,transparent);backdrop-filter:blur(16px);
+    margin-left:calc(-1 * var(--panelw));
+    transform:translateX(var(--panel-shift,0px));transition:transform .25s}
+  body.side-left #sidebar{order:0;margin-left:0;margin-right:calc(-1 * var(--panelw));
+    border-left:0;border-right:1px solid var(--line)}
+  body.no-anim #sidebar,body.no-anim #below{transition:none}
+  body.wide #sidebar{margin-left:0;margin-right:0}
+  body.wide.side-left #sidebar{margin-left:var(--gapend,0px);margin-right:0}
+  /* the button lives on the side the panel comes from, so the hand goes where the panel will be */
+  /* the bar is the flex row the ordering depends on: without it `order` does nothing at all */
+  .bar{position:sticky;top:0;z-index:30;min-height:var(--barh);box-sizing:border-box;
+    background:color-mix(in srgb,var(--ground-deep) 82%,transparent);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar-inner{display:flex;align-items:center;gap:10px;padding-top:9px;padding-bottom:9px;flex-wrap:nowrap}
+  #burger{order:9}
+  body.side-left #burger{order:-1}
+  body.wide #below{flex:0 0 auto;width:var(--bw);max-width:none;margin:0;transform:none}
+  body.wide .wrap{width:var(--maxw);max-width:none;margin-left:var(--cl,0px);margin-right:0}
+  body.wide .bar .wrap,body.wide .doc{padding-inline:var(--gut)}
+  body.wide .ribbon .wrap{margin-left:var(--gutter,0px)}
+  body.wide .bar{width:var(--maxw);margin-left:var(--cl,0px)}
+  body.wide .bar .wrap{width:100%;margin-left:0}
+  body.wide #burger{display:none}
+  .spacer{flex:1}
+  /* the head of the panel: the title takes the room, the two buttons sit against the far edge */
+  .side-head{flex:none;display:flex;align-items:center;gap:6px;padding:10px 12px;
+    min-height:var(--barh);box-sizing:border-box;
+    background:color-mix(in srgb,var(--ground-deep) 82%,transparent);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line)}
+  .side-head #side-swap{margin-left:auto}
+  #burger,#side-lang,#side-theme,#side-swap,#side-close{flex:none;width:34px;height:34px;font-size:16px;line-height:1;
+    background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:8px;
+    cursor:pointer;font-family:inherit}
+  #burger:hover,#side-lang:hover,#side-theme:hover,#side-swap:hover,#side-close:hover{background:var(--panel-2)}
+  #side-lang,#side-theme,#side-swap,#side-close{width:28px;height:28px;font-size:13px}
+  /* two letters where the others carry one glyph: the box keeps its height and takes the width it needs */
+  #side-lang{width:auto;min-width:28px;padding:0 6px;font-size:11px;font-weight:600;letter-spacing:.03em}
+  .side-head #side-lang{margin-left:auto}
+  body.wide #side-close{display:none}
+  .side-title{flex:1;min-width:0;font-weight:600;font-size:15px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  /* The bar never wraps. What gives way on a narrow screen is, in order: the word beside the mark -
+     the magnifier still says whose site this is - then the gutter, then the link to the repository,
+     which the footer carries anyway. The links that move around the site itself always stay. */
+  @media (max-width: 560px) {
+    :root{--gut:12px}
+    .bar__mark{font-size:0;gap:0}
+    .bar a[href^="https://github.com"]{display:none}
+    /* then the room around the links, so that four of them in Russian still fit beside the burger;
+       the mark keeps its size */
+    .bar-inner{gap:2px}
+    .bar a:not(.bar__mark){padding:0.3rem 0.35rem;font-size:0.9rem}
+  }
+  @media (max-width: 380px) {
+    .bar a:not(.bar__mark){padding:0.3rem 0.2rem;font-size:0.8rem;white-space:nowrap}
+  }
+  @media (max-width: 340px) {
+    .bar a:not(.bar__mark){padding:0.3rem 0.15rem;font-size:0.74rem}
+  }
+  .side-body{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 16px}
+  .side-body > .side-h:first-child{margin-top:2px}
+  /* The shelf of documents inside the panel. It lives here rather than with the documentation page,
+     because both pages carry the same panel and a second copy of these rules would drift. */
+  .side-body h2 { font-size: 0.8rem; font-weight: 500; color: var(--muted); margin: 1.6rem 0 0.5rem; }
+  .side-body h2:first-of-type { margin-top: 0; }
+  .side-body ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
+  .side-body a { display: block; padding: 0.32rem 0.6rem; border-radius: 6px; text-decoration: none; font-size: 0.95rem; color: var(--muted); }
+  .side-body a:hover { background: var(--panel); color: var(--text); }
+  .side-body a[aria-current="page"] { background: var(--panel); color: var(--text); box-shadow: inset 2px 0 0 var(--focus); }
+
+/* ==== HERO: the filter itself ==== */
+/* The field is an upright sheet, 9:16, the same shape on every screen: on a phone it takes the
+   width of the column, on a monitor it stands in the middle of it at the height of the screen.
+   One ratio everywhere - two of them made the map a strip on one device and a tower on the other.
+   It is inside the content column like every other block: run to the edges of the sheet it lay
+   over the panel standing beside the page.
+
+   Two rows over the map: what stands at the head of the field takes its own height, the mark is
+   centred in what is left - so a plate and a mark never sit on top of each other. */
+.hero { position: relative; aspect-ratio: 9 / 16; padding-inline: 0;
+        width: 100%;
+        display: grid; grid-template-rows: auto 1fr; }
+/* From a tablet up the field is a 16:9 band across the whole window - the side zones as well as the
+   column, so the map runs under the panel standing in the gutter. The breakout is the gutter itself
+   (panel.js publishes it), never 50vw: the sheet slides sideways when the panel opens, and a vw
+   breakout would slide with it and leave a gap. */
+/* From a tablet up the field is a 16:9 band. It stays inside the centre column like every other
+   block: spread into the side zones it ran under the panel, and since the sheet sits above the
+   panel the map took the clicks meant for it - the panel read as click-through glass. */
+@media (min-width: 760px) { body .hero { aspect-ratio: 1 / 1; } }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+/* The veil only has to keep the text over the map readable. Centred at 35% of the height it was
+   built for a wide band; on a square field that put its dark end over the bottom third of the map
+   and read as an empty patch. Centred and wider, it darkens the corners and leaves the map. */
+.hero__veil {
+  position: absolute; inset: 0;
+  background: radial-gradient(135% 110% at 50% 50%, transparent 55%, var(--ground-deep) 100%);
+  pointer-events: none;
+}
+/* A hero with an interactive field behind it is a control surface: dragging over it must not select
+   the name under the cursor. A hero that is only a picture switches selection back on (hero.css). */
+.hero { user-select: none; -webkit-user-select: none; }
+/* The mark is centred in what the controls leave of the hero, a shade above the middle - dead
+   centre read as low, the way a title block always does. The rows do the balancing: a padding in
+   per cent would measure itself against the width. */
+.hero__inner {
+  position: relative; z-index: 1; grid-row: 2; min-height: 0;
+  display: grid; grid-template-rows: 1fr auto auto 1.3fr; justify-items: center;
+  gap: clamp(0.8rem, 2vw, 1.4rem);
+  padding: clamp(1rem, 3vw, 2rem) 1.25rem;
+  text-align: center;
+  pointer-events: none;
+}
+.hero__inner > * { pointer-events: auto; }
+.logo-head { margin: 0; grid-row: 2; }
+.logo { display: block; width: min(440px, 80vw); height: auto;
+        filter: drop-shadow(0 2px 10px var(--ground)) drop-shadow(0 0 18px var(--ground)); }
+.hero__line { grid-row: 3; max-width: 46ch; margin: 0; font-size: clamp(1rem, 0.9rem + 0.4vw, 1.2rem); color: var(--text);
+             text-shadow: 0 0 6px var(--ground), 0 0 16px var(--ground), 0 1px 3px var(--ground); }
+.hero__line b { font-weight: 600; color: var(--focus-text); }
+
+/* ==== CONTENT ==== */
+.lede { font-size: clamp(1.05rem, 1rem + 0.5vw, 1.3rem); }
+/* Two balanced columns of running text: the browser fills them to the same height by itself, which
+   a grid of two boxes cannot do - there one side always ends short. One column below 640px. */
+.cols { columns: 2; column-gap: var(--gap); }
+/* A paragraph may run over the fold between the columns: forbidding it leaves whole paragraphs to
+   be shuffled about, and one side always ends short of the other. */
+.cols > p { margin-top: 0; }
+@media (max-width: 640px) { .cols { columns: 1; } }
+/* A table inside a cell: the numbers that prove the line stand right under it, so it is set
+   smaller and without a ground of its own - it is part of the sentence, not a second table. */
+.mini { width: auto; margin: 0.6rem 0 0.8rem; border-collapse: collapse; font-size: 0.88em; }
+.mini th, .mini td { padding: 0.25rem 0.9rem 0.25rem 0; text-align: left; white-space: nowrap; }
+.mini th { font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--line); }
+.mini td.num, .mini th:not(:first-child) { text-align: right; }
+
+/* ==== TABS ==== */
+/* Two panels, one shown. The switch is a radio button, so it works without scripts and takes the
+   keyboard for free; the panel is chosen by which button is checked. */
+.tabs { margin: 1.2rem 0 1.6rem; }
+.tabs > input { position: absolute; opacity: 0; pointer-events: none; }
+.tabs > label { display: inline-block; padding: 0.35rem 0.9rem; margin-right: 0.4rem; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 999px; font-size: 0.92rem; color: var(--muted); }
+.tabs > label:hover { color: var(--text); }
+.tabs > input:checked + label { color: var(--text); border-color: var(--focus); }
+.tabs > input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 3px; }
+.tab-panel { display: none; padding-top: 1rem; }
+.tabs:has(#variant-b:checked) .panel-b, .tabs:has(#variant-a:checked) .panel-a { display: block; }
+
+.rules { font-family: "IBM Plex Mono", monospace; font-size: 0.86rem; line-height: 1.75; margin: 0; padding: 1.2rem 1.3rem; overflow-x: auto; background: var(--ground-deep); border: 1px solid var(--line); border-radius: var(--radius); color: var(--muted); }
+.rules b { color: var(--text); font-weight: 500; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+th, td { text-align: left; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th:first-child, td:first-child { padding-left: 0; }
+/* A rule between the columns, so a long line on the left and its proof on the right do not run
+   into one another; a small table inside a cell keeps its own spacing. */
+th + th, td + td { border-left: 1px solid var(--line); }
+.mini th + th, .mini td + td { border-left: 0; }
+th { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
+/* A table is a block of its own: without the air under it the next paragraph reads as its caption. */
+.scroller { overflow-x: auto; margin-bottom: 1.4rem; }
+.scroller + p, .scroller + ul { margin-top: 0; }
+.tag { display: inline-block; font-size: 0.78rem; padding: 0.1rem 0.5rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.tag--open { color: var(--rung-6); }
+.tag--yes { color: var(--rung-8); }
+.tag--no { color: var(--refuted); }
+.tag--legacy { color: var(--muted); }
+.tag--done { color: var(--done); }
+.tag--now { color: var(--now); }
+.tag--wait { color: var(--wait); }
+/* when a roadmap item started and ended, under its status: a line of its own, so the table keeps three columns on a phone */
+/* a parameter's default, under its name: the description keeps the width, on a phone too */
+/* the columns keep their width when the rest of the parameters open, so the rows already seen do not move */
+#parameters table { table-layout: fixed; }
+#parameters th:first-child { width: 16.5rem; }
+#parameters td:first-child code { white-space: nowrap; }
+.default { display: block; margin-top: 0.3rem; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+/* The parameters go by what they shape, the databases together, the secrets together; closed, the table
+   shows only what a team sets first - the names, the database, the bus and CI. One switch opens the rest,
+   without a script for the table itself */
+#parameters:not(:has(.params__all:checked)) tbody tr:not(.top) { display: none; }
+#parameters { overflow-anchor: none; }
+/* the switch is the releases' older-button: a pill as tall as theirs, full width on a phone; the checkbox
+   stands right under it, so focusing it on a click scrolls nothing */
+.params__switch { position: relative; display: flex; justify-content: center; margin: -0.6rem 0 1.4rem; }
+.params__all { position: absolute; inset: 0; margin: 0; opacity: 0; pointer-events: none; }
+.params__more { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  height: 2.4rem; padding: 0 0.85rem; box-sizing: border-box; cursor: pointer; font-size: 0.86rem; color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px; }
+.params__more:hover { color: var(--text); border-color: var(--focus); }
+.params__all:focus-visible + .params__more { outline: 2px solid var(--focus); outline-offset: 2px; }
+.params__hide, .params__all:checked + .params__more .params__show { display: none; }
+.params__all:checked + .params__more .params__hide { display: inline; }
+.params__all:checked + .params__more > [aria-hidden] { transform: rotate(180deg); }
+@media (max-width: 480px) { .params__more { flex: 1; height: 2rem; } }
+/* on a phone a parameter's description goes under its name, at the full width */
+@media (max-width: 560px) {
+  #parameters thead { display: none; }
+  #parameters tr { display: block; padding: 0.7rem 0; border-bottom: 1px solid var(--line); }
+  #parameters td { display: block; padding: 0; border: 0; }
+  #parameters td + td { margin-top: 0.4rem; }
+}
+.when { display: block; margin-top: 0.25rem; font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+
+/* The rule above the footer runs at the width of the content, not of the window: a line across
+   the whole page would cut the sheet off from the panel standing beside it. */
+footer { padding-block: 0 4rem; color: var(--muted); font-size: 0.9rem; }
+footer .wrap { border-top: 1px solid var(--line); padding-top: 2.5rem; }
+footer p { max-width: var(--measure); }
+
+@media (max-width: 700px) {
+  body { font-size: 16px; }
+  .logo { width: min(230px, 56vw); }
+  .hero__line { font-size: 0.92rem; max-width: 30ch; }
+  /* The mark stays in the middle of the field on every screen: it is the centre of the picture,
+     and parking it at the top edge on a phone read as a header that had slipped. */
+  .hero__inner { padding: 1.25rem; gap: 0.6rem; }
+  .control input[type="range"] { height: 2rem; }   /* a thumb needs a taller track than a mouse */
+  .cols { gap: 0.5rem; }
+  .rules { font-size: 0.76rem; padding: 1rem 0.9rem; }
+  th, td { padding-right: 0.6rem; }
+}
+/* A big screen widens the sheet itself, not just .wrap inside it: the sheet is capped by --maxw and
+   in the wide layout .wrap is set back to --maxw, so widening only .wrap left a 2K monitor with a
+   narrower column than a laptop. */
+@media (min-width: 1600px) {
+  :root { --maxw: 1240px; }
+  body { font-size: 18px; }
+}
+@media (pointer: coarse) {
+  .hero__inner { padding-bottom: 2rem; }
+}
+
+/* ==== WHAT'S NEW ============================================================================
+   Every version as a digest of plain paragraphs - number and headline, its points under it - in a
+   window of fixed height (site/releases.js), so filling it moves nothing and a short note leaves no
+   hole. The newest are set larger, near the size of a heading, and the type settles to body size by
+   the fourth: the eye starts where the news is. The heading shares its line with the field, a pill
+   like .tabs that takes a version part by part between fixed dots and moves the window to it, and
+   with the buttons that step the window one version. On a phone the older-button sits under the
+   window, where reading ends and the thumb lies; on a touch screen only the buttons move the window -
+   it takes no swipe, so a finger on it scrolls the page and the page never gets stuck in the list.
+   Without scripts, or when the file does not come, only the link to the releases stays. */
+.releases {
+  /* the field and the buttons are as tall as the heading's line, so the line reads as one; the hit area is wider than the look */
+  --control: 2.4rem;
+  /* the section is as wide as the text, the site's measure: the wheel moves the list only over its text,
+     and the field and the buttons stand at the text's right edge */
+  max-width: var(--measure);
+  position: relative; display: grid; align-items: center; column-gap: 0.5rem;
+  grid-template-columns: 1fr auto auto auto;
+  grid-template-areas: "title find up down" "list list list list" "all all all all";
+}
+.releases > h2 { grid-area: title; margin: 0; }
+.releases__find { grid-area: find; z-index: 3; } /* above the window, whose mask makes a layer of its own: the hint under the field lies over the text */
+.releases__up { grid-area: up; }
+.releases__down { grid-area: down; }
+.releases__list { grid-area: list; }
+.releases__all { grid-area: all; }
+
+.releases__find {
+  position: relative; display: inline-flex; align-items: center; height: var(--control); padding: 0 0.85rem; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--panel);
+  font-family: "IBM Plex Mono", monospace; font-size: 0.9rem; color: var(--muted);
+}
+.releases__find:focus-within { border-color: var(--focus); }
+.releases__find input {
+  width: 3ch; padding: 0; text-align: center; font: inherit; color: var(--text);
+  background: none; border: 0; border-bottom: 1px dashed var(--line); outline: none;
+}
+.releases__find input:focus { border-bottom-color: var(--focus); }
+.releases__find input::placeholder { color: var(--muted); opacity: 0.6; }
+.releases__find:has(input:disabled) { visibility: hidden; }
+/* a digit refused: the field shakes and shows under it the versions that can go there, over the window, moving nothing */
+.releases__hint {
+  display: none; position: absolute; top: calc(100% + 0.4rem); right: 0; z-index: 3; margin: 0; padding: 0.35rem 0.75rem;
+  width: max-content; max-width: calc(100vw - 2rem); box-sizing: border-box; font-size: 0.82rem; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+}
+.releases--refused .releases__hint { display: block; }
+.releases--refused { border-color: var(--wait); animation: releases-shake 0.25s; }
+@keyframes releases-shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+@media (prefers-reduced-motion: reduce) { .releases--refused { animation: none; } }
+
+.releases__up, .releases__down {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  min-width: var(--control); height: var(--control); padding: 0 0.85rem; box-sizing: border-box;
+  cursor: pointer; font: inherit; font-size: 0.86rem; color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+}
+.releases__up:hover:not(:disabled), .releases__down:hover:not(:disabled) { color: var(--text); border-color: var(--focus); }
+.releases__up:disabled, .releases__down:disabled { opacity: 0.4; cursor: default; }
+.releases__up::after, .releases__down::after { content: ""; position: absolute; inset: -0.4rem -0.15rem; }
+
+.releases__list {
+  height: 26rem; margin: 1.4rem 0 0.8rem; padding-bottom: 2rem; box-sizing: border-box; overflow-y: auto; overscroll-behavior: contain;
+  /* where a version found or counted as the top one stands: under the top fade, not in it (site/releases.js reads it) */
+  scroll-padding-top: 1.4rem;
+  /* no scrollbar: the fade and the buttons say there is more, and the list stays a part of the page */
+  scrollbar-width: none;
+  /* the text fades out at an edge with more behind it, so the cut reads as "more", with no frame */
+  --fade-top: 0rem; --fade-bottom: 3rem;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent);
+}
+.releases__list::-webkit-scrollbar { display: none; }
+.releases__list.releases--scrolled { --fade-top: 1.2rem; }
+.releases__list.releases--end { --fade-bottom: 0rem; }
+.releases__item { margin: 0 0 1.9rem; }
+.releases__headline { margin: 0; line-height: 1.35; font-weight: 600; }
+.releases__version { margin-right: 0.45em; color: var(--muted); font-weight: 500; }
+.releases__item ul { margin: 1rem 0 0; color: var(--muted); }
+.releases__item li + li { margin-top: 0.35rem; }
+/* the digest's scale: the newest near a heading, then down to body size */
+.releases__item:nth-child(1) { margin-bottom: 2.4rem; }
+.releases__item:nth-child(1) .releases__headline { font-size: 1.45rem; }
+.releases__item:nth-child(1) ul { font-size: 1.08rem; color: var(--text); }
+.releases__item:nth-child(2) .releases__headline { font-size: 1.25rem; }
+.releases__item:nth-child(2) ul { font-size: 1.02rem; }
+.releases__item:nth-child(3) .releases__headline { font-size: 1.1rem; }
+.releases__item:nth-child(n+4) .releases__headline { font-weight: 500; }
+.releases--found .releases__version { color: var(--focus); }
+.releases--failed .releases__find, .releases--failed .releases__up, .releases--failed .releases__down, .releases--failed .releases__list { display: none; }
+@media (pointer: coarse) {
+  /* the window takes no swipe: the page scrolls under the finger, the buttons move the window; nothing
+     holds the swipe back from the page */
+  .releases__list { overflow-y: hidden; overscroll-behavior: auto; touch-action: pan-y; }
+}
+@media (max-width: 480px) {
+  /* the heading, the field and the newer-button stay on one line; the older-button goes under the window */
+  .releases { grid-template-columns: 1fr auto auto; grid-template-areas: "title find up" "list list list" "down down down" "all all all"; }
+  .releases { --control: 2rem; }
+  .releases__find { padding-inline: 0.65rem; font-size: 0.85rem; }
+  .releases__up { padding: 0; }
+  .releases__up .releases__say { display: none; }
+  .releases__list { height: 30rem; margin-bottom: 0.6rem; }
+  .releases__down { margin-bottom: 0.8rem; }
+  .releases__item:nth-child(1) .releases__headline { font-size: 1.25rem; }
+  .releases__item:nth-child(2) .releases__headline { font-size: 1.12rem; }
+  .releases__item:nth-child(3) .releases__headline { font-size: 1.04rem; }
+}
+
+/* The veil of a jump (site/jump.js): a layer over what is seen of the scroller, under the bar, that blurs
+   what is behind it and turns it toward the page's ground; the script masks it to the band in motion and
+   thickens it toward the cut. */
+.jump-blur { display: none; position: fixed; z-index: 25; pointer-events: none; }
+/* a section a link jumped to takes the focus only so the next Tab goes on from there; it draws no frame */
+[tabindex="-1"]:focus { outline: none; }

@@ -1,0 +1,20 @@
+# SQL Server, the database with --Database mssql.
+# Started by deploy/compose/compose.sh with every file in this folder and every service's
+# src/services/*/deploy/compose.yml.
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: ${MSSQL_PID:-Developer}
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in deploy/compose/.env}
+    volumes:
+      - sqlserver:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q 'SELECT 1' -b"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  sqlserver:

@@ -1,0 +1,35 @@
+# The gateway under docker compose; started by deploy/compose/compose.sh with the services.
+# Paths are relative to the solution root.
+services:
+  servicenameorcustom:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: NamespaceRoot.ProductName.ServiceNameOrCustom
+        GIT_SHA: ${GIT_SHA:-local}
+    image: ${REGISTRY:-local}/productnamelower-servicenameorcustom:${TAG:-latest}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      Jwt__Issuer: ${JWT_ISSUER:?Set JWT_ISSUER in deploy/compose/.env}
+      Jwt__Audience: ${JWT_AUDIENCE:?Set JWT_AUDIENCE in deploy/compose/.env}
+      Jwt__PublicKeyPath: /app/keys/jwt-public.pem
+      InternalApi__ApiKey: ${INTERNAL_API_KEY:-}
+    # The root filesystem is read-only: the running container is changed only by a new image, which passes
+    # review and CI, so features.json and the code cannot be edited in place. /tmp stays writable for what
+    # .NET and ASP.NET Core keep there: the diagnostics socket, large request bodies.
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      # The public key the tokens are signed for, from deploy/compose/keys/ next to the .env file.
+      - ./deploy/compose/keys/jwt-public.pem:/app/keys/jwt-public.pem:ro
+    # The entry point; a TLS terminating proxy in front publishes it further.
+    ports:
+      - "127.0.0.1:5054:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/ready"]
+      interval: 10s
+      timeout: 3s
+      start_period: 20s
+      retries: 12

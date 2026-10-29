@@ -1,0 +1,165 @@
+# Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
+
+name: CI
+
+# Every pull request and every push to the main branch: the solution builds and the tests pass on real
+# servers. A run on the main branch checks what merged on its own, rather than on the strength of the pull
+# request it came from.
+#
+# Coverage only when asked for (coverage: true): measuring every branch of thousands of tests on each pull
+# request costs more than it tells, and what a pull request needs is tests of the code it changes. It is
+# asked for by hand, on any branch, through coverage.yml; another workflow, a release, can call this one
+# with coverage on.
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      coverage:
+        description: Measure coverage, a report per service and one for Common
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      coverage:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-24.04
+    env:
+      # empty on a pull request or a push, where there is no input
+      COVERAGE: ${{ inputs.coverage }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props', '**/package-versions/*.props', '**/Directory.Build.props') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      # Generating a service adds its projects to All.sln. A project added by hand and forgotten there
+      # drops out of this build and its tests without anything failing.
+      - name: Every service project is in All.sln
+        run: |
+          solution=$(ls src/services/*.All.sln)
+          listed=$(dotnet sln "$solution" list | tr '\\' '/')
+          missing=0
+          for project in $(find src/services -mindepth 3 -maxdepth 3 -name '*.csproj'); do
+            relative=${project#src/services/}
+            if ! grep -qF "$relative" <<< "$listed"; then
+              echo "::error file=$project::not in $solution; add it with dotnet sln add"
+              missing=1
+            fi
+          done
+          exit $missing
+
+      # Every test server of the solution - a script per part in tests/servers/; a flag added later brings
+      # its own - started now, so they come up while the solution builds and the unit tests run.
+      - name: Start the test servers
+        run: bash tests/servers/up.sh start
+
+      - name: Restore
+        run: dotnet restore src/services/*.All.sln
+
+      - name: Build
+        run: dotnet build src/services/*.All.sln --configuration Release --no-restore
+
+      # Split from the integration tests so a failure says which kind broke. Selected as "not
+      # Integration": only tests that need a server carry a category.
+      - name: Unit tests
+        run: |
+          collect=()
+          [ "$COVERAGE" = true ] && collect=(--collect:"XPlat Code Coverage" --results-directory coverage/unit)
+          dotnet test src/services/*.All.sln --configuration Release --no-build \
+            --filter "TestCategory!=Integration" "${collect[@]}"
+
+      - name: Wait for the test servers
+        run: bash tests/servers/up.sh wait
+
+      # The TEST_* variables come from the test servers' scripts, through $GITHUB_ENV.
+      - name: Integration tests
+        run: |
+          collect=()
+          [ "$COVERAGE" = true ] && collect=(--collect:"XPlat Code Coverage" --results-directory coverage/integration)
+          dotnet test src/services/*.All.sln --configuration Release --no-build \
+            --filter "TestCategory=Integration" "${collect[@]}"
+
+      # A report per service and one for Common, over the unit and integration runs together: a service's
+      # owner sees the coverage of their service. The threshold is on branch coverage, which counts whether
+      # each branch of a condition ran; line coverage counts a line with an untested branch as covered.
+      # Left out is wiring with no logic of its own: EF migrations and model configuration, DI composition
+      # and its extensions, host setup, seeding, controllers - a controller holds no logic, so there is
+      # nothing in it to measure - and the security handlers and filters, which the integration tests cover.
+      # The gateway keeps its API.Setup: what it does, its transforms, lives there. A report also leaves out
+      # the services whose names continue its own (Orders.Archive is not part of Orders). Run even when a
+      # test failed, so the coverage of what ran is still there to read.
+      - name: Coverage report
+        if: always()
+        run: |
+          [ "$COVERAGE" = true ] || exit 0
+          dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.4.*
+          wiring="-*.Migrations.*;-*EntityConfiguration*;-*.Designer;-*Program;-*Startup;-*DependencyInjection*;-*ServiceCollectionExtensions;-*.Controllers.*;-*Controller;-*.DataSeeding.*;-*Seeder;-*MigrationRunner;-*DbContextFactory;-*.Security.Handlers.*;-*.Security.Filters.*"
+          report() {
+            reportgenerator \
+              -reports:"coverage/**/coverage.cobertura.xml" \
+              -targetdir:"coverage/report/$1" \
+              -reporttypes:"Html;JsonSummary;MarkdownSummaryGithub;Badges" \
+              -assemblyfilters:"$2;-*.Tests;-*.Testing" \
+              -classfilters:"$3"
+            { echo "## $1"; cat "coverage/report/$1/SummaryGithub.md"; } >> "$GITHUB_STEP_SUMMARY"
+          }
+          report Common "+NamespaceRoot.ProductName.Common;+NamespaceRoot.ProductName.Common.*" "$wiring;-*.API.Setup.*"
+          for path in src/services/NamespaceRoot.ProductName.*/; do
+            folder=$(basename "$path")
+            assemblies="+$folder;+$folder.*"
+            for other in src/services/"$folder".*/; do
+              [ -d "$other" ] && assemblies="$assemblies;-$(basename "$other");-$(basename "$other").*"
+            done
+            classes="$wiring;-*.API.Setup.*"
+            grep -qs "Yarp.ReverseProxy" "$path"*.API/*.API.csproj && classes="$wiring"
+            report "${folder#NamespaceRoot.ProductName.}" "$assemblies" "$classes"
+          done
+
+      # The threshold is a repository variable, so a team raises it as the tests grow instead of editing
+      # this file. Not set, the reports are shown and nothing fails on them. Every report is held to it, but
+      # one with no branches at all - a new service with nothing yet to decide - has nothing to hold.
+      - name: Branch coverage threshold
+        if: inputs.coverage == true
+        env:
+          MIN: ${{ vars.COVERAGE_MIN_BRANCH }}
+        run: |
+          [ -n "$MIN" ] || { echo "COVERAGE_MIN_BRANCH is not set: nothing is held to a threshold"; exit 0; }
+          failed=0
+          for summary in coverage/report/*/Summary.json; do
+            name=$(basename "$(dirname "$summary")")
+            if [ "$(jq '.summary.totalbranches // 0' "$summary")" = 0 ]; then
+              echo "$name: no branches, nothing to hold"
+              continue
+            fi
+            actual=$(jq '.summary.branchcoverage // 0' "$summary")
+            echo "$name: branch coverage ${actual}%, required ${MIN}%"
+            awk -v a="$actual" -v m="$MIN" 'BEGIN { exit (a + 0 < m + 0) }' || failed=1
+          done
+          exit $failed
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage
+          path: coverage/report/
+          if-no-files-found: ignore
+          retention-days: 30

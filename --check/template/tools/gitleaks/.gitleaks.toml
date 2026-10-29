@@ -1,0 +1,57 @@
+# Secret scanning rules: the rule set shipped with gitleaks, plus the shapes this solution's own
+# configuration uses - connection strings, broker URIs and signing keys - which the vendor rules miss.
+title = "secret scanning"
+minVersion = "v8.25.0"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "connection-string-password"
+description = "Password inside an ADO.NET style connection string"
+regex = '''(?i)(?:password|pwd)[ \t]*=[ \t]*([^\s;"'<>{}]{6,})'''
+secretGroup = 1
+keywords = ["password", "pwd"]
+
+[[rules.allowlists]]
+description = "Local stacks, test servers and obvious placeholders"
+regexTarget = "match"
+regexes = [
+  '''(?i)(?:password|pwd)[ \t]*=[ \t]*(?:postgres|guest|root|admin|changeme|example|placeholder|your[-_]?password|\$\{[^}]+\}|<[^>]+>)\b''',
+  '''(?i)(?:password|pwd)[ \t]*=[ \t]*[^\s;"']*do-not-use''',
+]
+
+[[rules.allowlists]]
+description = "Source files: a connection string lives in configuration. What this rule finds in code is a name containing the word - hashing a password, reading one from settings - and a gate that cries wolf on ordinary code gets passed with a flag."
+paths = ['''\.(?:cs|ts|js|py)$''']
+
+[[rules]]
+id = "credentialed-uri"
+description = "Service URI carrying inline credentials"
+regex = '''(?i)\b(?:amqps?|postgres(?:ql)?|redis|mongodb(?:\+srv)?|clickhouse|https?)://([^\s:@/]+):([^\s:@/]{4,})@'''
+secretGroup = 2
+keywords = ["amqp", "postgres", "redis", "mongodb", "clickhouse", "://"]
+
+[[rules.allowlists]]
+description = "Local stacks and obvious placeholders"
+regexTarget = "match"
+regexes = [
+  '''://(?:postgres:postgres|guest:guest|root:root|admin:admin|user:password)@''',
+  '''://[^\s:@/]+:(?:\$\{[^}]+\}|<[^>]+>)@''',
+  '''(?i)://[^\s:@/]+:[^\s:@/]*do-not-use@''',
+]
+
+[[rules]]
+id = "signing-or-shared-secret"
+description = "Signing key or shared secret in a configuration section"
+regex = '''(?i)"(?:[a-z]*(?:signing|secret|apikey|api_key|accesskey|access_key|token)[a-z]*)"\s*:\s*"([^"\s]{12,})"'''
+secretGroup = 1
+keywords = ["signing", "secret", "apikey", "api_key", "accesskey", "access_key", "token"]
+
+[[rules.allowlists]]
+description = "Environment indirection and values marked as non-production"
+regexTarget = "match"
+regexes = [
+  '''"\s*:\s*"(?:\$\{[^}]+\}|<[^>]+>)"''',
+  '''(?i)"\s*:\s*"[^"]*(?:placeholder|do-not-use|donotuse|changeme|example|dummy|sample|not-a-real)[^"]*"''',
+]

@@ -1,0 +1,836 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Vladimir Savkin",
+  "classifications": ["Web", "WebAPI", "Microservice", "Solution"],
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "identity": "SawKing.DotNetSolutionKit",
+  "name": "DotNet Solution Kit",
+  "description": "Microservices on .NET 8 and PostgreSQL: shared Common libraries and services split into domain, application, infrastructure and API projects; the message bus, secrets, feature flags, object storage, ClickHouse, MongoDB, email, a gateway, deployment files and CI by flags. Documentation: https://dotskit.sawking.tech/",
+  "shortName": ["DotNetSolutionKit", "dotskit"],
+  "preferNameDirectory": false,
+
+  "symbols": {
+    "NamespaceRoot": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "MyCompany",
+      "replaces": "NamespaceRoot",
+      "fileRename": "NamespaceRoot",
+      "description": "Root namespace token, usually the organization name"
+    },
+    "ProductName": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "Product",
+      "fileRename": "ProductName",
+      "replaces": "ProductName",
+      "description": "Product name"
+    },
+    "ProductNameLowerDotted": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "ProductName",
+        "toLower": true
+      }
+    },
+    "ProductNameLower": {
+      "type": "generated",
+      "generator": "regex",
+      "parameters": {
+        "source": "ProductNameLowerDotted",
+        "steps": [ { "regex": "\\.", "replacement": "_" } ]
+      },
+      "replaces": "productnamelower",
+      "description": "Lower-case product name with underscores for dots (Retail.Shop -> retail_shop), for image names, which two solutions on one host must not share"
+    },
+    "ServiceNameOrCustom": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "Service",
+      "replaces": "ServiceNameOrCustom",
+      "fileRename": "ServiceNameOrCustom",
+      "description": "Service name or custom (e.g. Domain.Service)"
+    },
+    "ServiceIdentifier": {
+      "type": "generated",
+      "generator": "regex",
+      "parameters": {
+        "source": "ServiceNameOrCustom",
+        "steps": [ { "regex": "\\.", "replacement": "" } ]
+      },
+      "replaces": "ServiceIdentifier",
+      "fileRename": "ServiceIdentifier",
+      "description": "Service name without dots, for C# identifiers such as the DbContext class (Sales.Orders -> SalesOrders)"
+    },
+    "ServiceNameLowerDotted": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "ServiceNameOrCustom",
+        "toLower": true
+      }
+    },
+    "ServiceNameLower": {
+      "type": "generated",
+      "generator": "regex",
+      "parameters": {
+        "source": "ServiceNameLowerDotted",
+        "steps": [ { "regex": "\\.", "replacement": "_" } ]
+      },
+      "replaces": "servicenameorcustom",
+      "description": "Lower-case service name with underscores for dots (Sales.Orders -> sales_orders), for the database schema, the Infisical folder and queue names"
+    },
+    "ServiceNameKebab": {
+      "type": "generated",
+      "generator": "regex",
+      "parameters": {
+        "source": "ServiceNameLowerDotted",
+        "steps": [ { "regex": "\\.", "replacement": "-" } ]
+      },
+      "replaces": "service-name-kebab",
+      "description": "Lower-case service name with hyphens for dots (Sales.Orders -> sales-orders), for Kubernetes resource names, which allow no underscore"
+    },
+    "Hangfire": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Background jobs on Hangfire, stored in PostgreSQL in the service's own schema, with the dashboard"
+    },
+    "Messaging": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "none",
+      "choices": [
+        { "choice": "none", "description": "No message bus" },
+        { "choice": "outbox", "description": "MassTransit on RabbitMQ; messages go through a transactional outbox in the service's database" },
+        { "choice": "direct", "description": "MassTransit on RabbitMQ; messages go straight to the broker and are lost if it is down" }
+      ],
+      "description": "Message bus for the service"
+    },
+    "ApiGateway": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Generate an API gateway on YARP instead of a service; without --Solution, into a solution already there"
+    },
+    "Storage": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "S3-compatible object storage (AWS S3, MinIO) in Common, registered in the service"
+    },
+    "ClickHouse": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "ClickHouse connections, schema check and readiness in Common, registered in the service"
+    },
+    "MongoDB": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "MongoDB beside the main database: Capabilities.Mongo - the client, the service's database, readiness - referenced by the service"
+    },
+    "Notify": {
+      "type": "parameter",
+      "datatype": "choice",
+      "allowMultipleValues": true,
+      "enableQuotelessLiterals": true,
+      "defaultValue": "",
+      "choices": [
+        { "choice": "email", "description": "Email through SMTP or Graph API, with a sandbox outside Production; with Messaging, other services ask for it by a bus command" }
+      ],
+      "description": "Notifications and their channels, each a project of src/capabilities the service references; more than one channel may be given"
+    },
+    "NotifyEmail": {
+      "type": "computed",
+      "value": "(Notify == email)"
+    },
+    "Audit": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "An audit journal of entity changes, published through the outbox; takes effect only with --Messaging outbox"
+    },
+    "TestFramework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "nunit",
+      "choices": [
+        { "choice": "nunit", "description": "NUnit" },
+        { "choice": "xunit", "description": "xUnit v3" }
+      ],
+      "description": "Test framework of the service's tests; Common's own tests stay on NUnit"
+    },
+    "AuditEnabled": {
+      "type": "computed",
+      "value": "(Audit && Messaging == \"outbox\")"
+    },
+    "Agent": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "claude",
+      "choices": [
+        { "choice": "claude", "description": "Claude Code: CLAUDE.md and .claude/skills" },
+        { "choice": "opencode", "description": "OpenCode: AGENTS.md and .opencode/skills" },
+        { "choice": "none", "description": "No rules or skills for an AI agent" }
+      ],
+      "description": "The format of the rules and skills for an AI agent; with --Solution"
+    },
+    "AgentFolder": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": ".claude/",
+      "parameters": {
+        "evaluator": "C++",
+        "datatype": "string",
+        "cases": [
+          { "condition": "(Agent == \"opencode\")", "value": ".opencode/" },
+          { "condition": "", "value": ".claude/" }
+        ]
+      },
+      "description": "The agent's folder in the texts of the rules and skills"
+    },
+    "AgentRules": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "CLAUDE.md",
+      "parameters": {
+        "evaluator": "C++",
+        "datatype": "string",
+        "cases": [
+          { "condition": "(Agent == \"opencode\")", "value": "AGENTS.md" },
+          { "condition": "", "value": "CLAUDE.md" }
+        ]
+      },
+      "description": "The agent's rules file in the texts of the rules and skills"
+    },
+    "Deploy": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "compose",
+      "choices": [
+        { "choice": "compose", "description": "docker compose: the infrastructure and a compose file per service" },
+        { "choice": "k8s", "description": "Kubernetes: a Deployment and a Service per service" },
+        { "choice": "none", "description": "No deployment files; the Dockerfile only" }
+      ],
+      "description": "How the services are deployed"
+    },
+    "Infisical": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Read secrets from Infisical: the shared folder and the service's folder overlay configuration"
+    },
+    "Database": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "postgres",
+      "choices": [
+        { "choice": "postgres", "description": "PostgreSQL" },
+        { "choice": "mssql", "description": "SQL Server" }
+      ],
+      "description": "The database of the services: postgres or mssql"
+    },
+    "Vault": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Read secrets from HashiCorp Vault (KV version 2): the shared secret and the service's secret overlay configuration"
+    },
+    "SecretStore": {
+      "type": "computed",
+      "value": "(Infisical || Vault)"
+    },
+    "HttpPort": {
+      "type": "parameter",
+      "datatype": "integer",
+      "description": "Port of the service in launchSettings.json; a free port from 5000-5999 when not given"
+    },
+    "HttpPortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "low": 5000,
+        "high": 5999,
+        "fallback": 5054
+      }
+    },
+    "HttpPortReplacer": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "HttpPort",
+        "fallbackVariableName": "HttpPortGenerated"
+      },
+      "replaces": "5054"
+    },
+    "DiffApi": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Generate the OpenAPI contract of each service without its infrastructure (--schema-only --dump-schema), and diff it on pull requests"
+    },
+    "GitHubCiCd": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "GitHub Actions workflows: build, unit and integration tests on real servers, coverage on demand, and a secret scan of incoming commits"
+    },
+    "FeatureFlags": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Add platform feature flags: a shared features.json, the catalogue, and GET /api/v1/features"
+    },
+    "HierarchyRules": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Add access rules over a tenant tree stored as materialized paths (IHierarchicalEntity, HierarchyRules)"
+    },
+    "TemplateVersion": {
+      "type": "generated",
+      "generator": "constant",
+      "parameters": { "value": "source" },
+      "replaces": "DOTNETSOLUTIONKIT_TEMPLATE_VERSION",
+      "description": "The template's version, written into the packed copy of this file by DotNetSolutionKit.Templates.csproj; source when the template is installed from its sources"
+    },
+    "Solution": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Generate the solution: Common, All.sln and the root files, with this service as its first. Without it, only the service folder, into a solution already there"
+    },
+    "Minimal": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Kept for the commands of earlier versions: -M false is --Solution. Hidden; removed in 3.0"
+    },
+    "IsSolution": {
+      "type": "computed",
+      "value": "(Solution || !Minimal)"
+    },
+    "HostOS": {
+      "type": "bind",
+      "binding": "env:OS",
+      "defaultValue": "",
+      "description": "Windows_NT on Windows, empty elsewhere: which shell adds a service's projects to All.sln"
+    },
+    "OnWindows": {
+      "type": "computed",
+      "value": "(HostOS == \"Windows_NT\")"
+    }
+  },
+
+  "SpecialCustomOperations": {
+    "**/*.sln": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "if": [ "#if" ],
+            "else": [ "#else" ],
+            "elseif": [ "#elseif" ],
+            "endif": [ "#endif" ],
+            "trim": true,
+            "wholeLine": true
+          }
+        }
+      ]
+    },
+    "**/.env.example": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "if": [ "#if" ],
+            "else": [ "#else" ],
+            "elseif": [ "#elseif" ],
+            "endif": [ "#endif" ],
+            "trim": true,
+            "wholeLine": true
+          }
+        }
+      ]
+    }
+  },
+
+  "sources": [
+    {
+      "source": ".",
+      "target": ".",
+      "modifiers": [
+        {
+          "condition": "(!IsSolution)",
+          "exclude": ["**/*"]
+        },
+        {
+          "rename": {
+            ".gitignore.template": ".gitignore"
+          }
+        },
+        {
+          "condition": "(Agent == \"none\")",
+          "exclude": [".claude/**", "CLAUDE.md"]
+        },
+        {
+          "condition": "(Agent == \"opencode\")",
+          "rename": {
+            "CLAUDE.md": "AGENTS.md",
+            ".claude/": ".opencode/"
+          }
+        },
+        {
+          "condition": "(!Hangfire)",
+          "exclude": [
+            "**/Setup/BackgroundJobsSetup.cs",
+            "**/Security/Filters/HangfireAdminAuthorizationFilter.cs",
+            "**/DependencyInjection.BackgroundJobs.cs"
+          ]
+        },
+        {
+          "condition": "(!AuditEnabled)",
+          "exclude": [
+            "**/Tests/AuditGuardTests.cs"
+          ]
+        },
+        {
+          "condition": "(!NotifyEmail)",
+          "exclude": [
+            "**/Messaging/Notifications/SendEmailCommandV1.cs"
+          ]
+        },
+        {
+          "condition": "(!NotifyEmail || Messaging == \"none\")",
+          "exclude": [
+            "**/Messaging/Consumers/SendEmailCommandV1Consumer.cs",
+            "**/Tests/SendEmailCommandV1ConsumerTests.cs"
+          ]
+        },
+        {
+          "condition": "(Deploy != \"compose\")",
+          "exclude": [
+            "deploy/compose/**",
+            "**/deploy/compose.yml"
+          ]
+        },
+        {
+          "condition": "(Deploy != \"k8s\")",
+          "exclude": [
+            "deploy/k8s/**",
+            "**/deploy/k8s.yaml"
+          ]
+        },
+        {
+          "condition": "(Deploy == \"none\")",
+          "exclude": [
+            "deploy/**",
+            "**/deploy/**"
+          ]
+        },
+        {
+          "condition": "(!ClickHouse)",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/ClickHouse/**",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Tests/ClickHouse/**",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/ClickHouse*.cs"
+          ]
+        },
+        {
+          "condition": "(!MongoDB)",
+          "exclude": [
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Mongo/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Mongo.Tests/**"
+          ]
+        },
+        {
+          "condition": "(!NotifyEmail)",
+          "exclude": [
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Notifications/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Notifications.Tests/**"
+          ]
+        },
+        {
+          "condition": "(!AuditEnabled)",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common/Attributes/Audit*.cs",
+            "src/common/NamespaceRoot.ProductName.Common/Attributes/SetBasedWriteAttribute.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Contracts/Messaging/Audit/**",
+            "src/common/NamespaceRoot.ProductName.Common.Application/Auditing/**",
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Persistence/EntityFramework/Audit/**",
+            "src/common/NamespaceRoot.ProductName.Common.Testing/Audit/**",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Tests/Audit/**",
+            "src/common/NamespaceRoot.ProductName.Common.Testing/Stubs/NoOpAuditCapture.cs"
+          ]
+        },
+        {
+          "condition": "(!Storage)",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Storage/**",
+            "src/common/NamespaceRoot.ProductName.Common/Exceptions/StorageException.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/S3ObjectStorageTests.cs"
+          ]
+        },
+        {
+          "condition": "(Database != \"mssql\")",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Persistence/SqlServer/**",
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Persistence/EntityFramework/Specifications/SqlServerCaseInsensitiveSearch.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Diagnostics/SqlServerOutboxStatsDialect.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Testing/Stubs/InMemorySqlServerCaseInsensitiveSearch.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Testing/Integration/SqlServer.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/SqlServerPersistenceTests.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Testing/SqlServerDbTestExecutionContext.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/SqlServerIntegrationTestBaseTests.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/SqlServerDomainEventPhasesTests.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/IdempotentExecutorOnSqlServerTests.cs",
+            "**/Integration/SqlServerDbTestExecutionContext.cs"
+          ]
+        },
+        {
+          "condition": "(Database == \"mssql\")",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/IdempotentExecutorOnPostgresTests.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Persistence/Postgres/**",
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Persistence/EntityFramework/Specifications/PostgresCaseInsensitiveSearch.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Diagnostics/PostgresOutboxStatsDialect.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Testing/Stubs/InMemoryCaseInsensitiveSearch.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Testing/Integration/Postgres.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Testing/PostgresDbTestExecutionContext.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/PostgresIntegrationTestBaseTests.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/PostgresDomainEventPhasesTests.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/PostgresShortIdGeneratorTests.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Tests/Specifications/CaseInsensitiveSearchTests.cs",
+            "**/Integration/PostgresDbTestExecutionContext.cs"
+          ]
+        },
+        {
+          "condition": "(!SecretStore)",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Configuration/Secrets/**",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Secrets/**"
+          ]
+        },
+        {
+          "condition": "(!Infisical)",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Configuration/Secrets/Infisical*.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Secrets/SecretsConfigurationTests.cs"
+          ]
+        },
+        {
+          "condition": "(!Vault)",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Configuration/Secrets/Vault*.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Secrets/VaultConfigurationTests.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/VaultSecretStoreTests.cs"
+          ]
+        },
+        {
+          "condition": "(!DiffApi)",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common.Web/Setup/SchemaOnlyMode.cs",
+            "src/common/NamespaceRoot.ProductName.Common.Web/Setup/SchemaDump.cs",
+            "scripts/generate-api-schemas.sh",
+            "scripts/normalise_api_schema.py",
+            ".github/workflows/api-diff.yml"
+          ]
+        },
+        {
+          "condition": "(!GitHubCiCd)",
+          "exclude": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/coverage.yml",
+            ".github/workflows/secret-scan.yml",
+            "tools/gitleaks/**"
+          ]
+        },
+        {
+          "condition": "(!FeatureFlags)",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common/FeatureManagement/**",
+            "src/common/NamespaceRoot.ProductName.Common.Application/FeatureManagement/**",
+            "src/common/NamespaceRoot.ProductName.Common.Web/FeatureManagement/**",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/FeatureManagement/**",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Secrets/FeatureFlagsStoreOutageTests.cs"
+          ]
+        },
+        {
+          "condition": "(!NotifyEmail)",
+          "exclude": ["src/package-versions/notify-email.props"]
+        },
+        {
+          "condition": "(!ClickHouse)",
+          "exclude": ["src/package-versions/clickhouse.props"]
+        },
+        {
+          "condition": "(!Storage)",
+          "exclude": ["src/package-versions/storage.props"]
+        },
+        {
+          "condition": "(!Infisical)",
+          "exclude": ["src/package-versions/infisical.props"]
+        },
+        {
+          "condition": "(!Vault)",
+          "exclude": ["src/package-versions/vault.props"]
+        },
+        {
+          "condition": "(!FeatureFlags)",
+          "exclude": ["src/package-versions/feature-flags.props"]
+        },
+        {
+          "condition": "(!MongoDB)",
+          "exclude": ["src/package-versions/mongodb.props"]
+        },
+        {
+          "condition": "(Database == \"mssql\")",
+          "exclude": ["src/package-versions/postgres.props"]
+        },
+        {
+          "condition": "(Database != \"mssql\")",
+          "exclude": ["src/package-versions/mssql.props"]
+        },
+        {
+          "condition": "(Database == \"mssql\")",
+          "exclude": ["deploy/compose/infra/postgres.yml"]
+        },
+        {
+          "condition": "(Database != \"mssql\")",
+          "exclude": ["deploy/compose/infra/sqlserver.yml"]
+        },
+        {
+          "condition": "(Messaging == \"none\")",
+          "exclude": ["deploy/compose/infra/rabbitmq.yml"]
+        },
+        {
+          "condition": "(!ClickHouse)",
+          "exclude": ["deploy/compose/infra/clickhouse.yml"]
+        },
+        {
+          "condition": "(!NotifyEmail)",
+          "exclude": ["deploy/compose/infra/mailhog.yml"]
+        },
+        {
+          "condition": "(!MongoDB)",
+          "exclude": ["deploy/compose/infra/mongo.yml"]
+        },
+        {
+          "condition": "(!Storage)",
+          "exclude": ["deploy/compose/infra/s3.yml"]
+        },
+        {
+          "condition": "(Database == \"mssql\")",
+          "exclude": ["tests/servers/postgres.sh"]
+        },
+        {
+          "condition": "(Database != \"mssql\")",
+          "exclude": ["tests/servers/sqlserver.sh"]
+        },
+        {
+          "condition": "(!ClickHouse)",
+          "exclude": ["tests/servers/clickhouse.sh"]
+        },
+        {
+          "condition": "(!NotifyEmail)",
+          "exclude": ["tests/servers/mailhog.sh"]
+        },
+        {
+          "condition": "(!MongoDB)",
+          "exclude": ["tests/servers/mongo.sh"]
+        },
+        {
+          "condition": "(!Storage)",
+          "exclude": ["tests/servers/s3.sh"]
+        },
+        {
+          "condition": "(!Vault)",
+          "exclude": ["tests/servers/vault.sh"]
+        },
+        {
+          "condition": "(!HierarchyRules)",
+          "exclude": [
+            "src/common/NamespaceRoot.ProductName.Common/Domain/IHierarchicalEntity.cs",
+            "src/common/NamespaceRoot.ProductName.Common/Domain/Policy/**",
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Tests/Domain/Policy/**"
+          ]
+        },
+        {
+          "exclude": [
+            ".git/**",
+            "**/.idea/**",
+            "**/.vs/**",
+            "**/[Bb]in/**",
+            "**/[Oo]bj/**",
+            "**/logs/**",
+            "**/*.user",
+            "**/*.DotSettings.user",
+            ".template.config/**",
+            "gateway/**"
+          ]
+        }
+      ]
+    },
+    {
+      "source": "src/services",
+      "target": "src/services",
+      "modifiers": [
+        {
+          "condition": "(Database == \"mssql\")",
+          "exclude": [ "**/Integration/PostgresDbTestExecutionContext.cs" ]
+        },
+        {
+          "condition": "(Database != \"mssql\")",
+          "exclude": [ "**/Integration/SqlServerDbTestExecutionContext.cs" ]
+        },
+        {
+          "condition": "(ApiGateway)",
+          "exclude": [
+            "NamespaceRoot.ProductName.ServiceNameOrCustom/**"
+          ]
+        },
+        {
+          "condition": "IsSolution",
+          "exclude": ["**/*"]
+        },
+        {
+          "condition": "(!Hangfire)",
+          "exclude": [
+            "**/Setup/BackgroundJobsSetup.cs",
+            "**/Security/Filters/HangfireAdminAuthorizationFilter.cs",
+            "**/DependencyInjection.BackgroundJobs.cs"
+          ]
+        },
+        {
+          "condition": "(!AuditEnabled)",
+          "exclude": [
+            "**/Tests/AuditGuardTests.cs"
+          ]
+        },
+        {
+          "condition": "(!NotifyEmail || Messaging == \"none\")",
+          "exclude": [
+            "**/Messaging/Consumers/SendEmailCommandV1Consumer.cs",
+            "**/Tests/SendEmailCommandV1ConsumerTests.cs"
+          ]
+        },
+        {
+          "condition": "(Deploy != \"compose\")",
+          "exclude": [
+            "deploy/compose/**",
+            "**/deploy/compose.yml"
+          ]
+        },
+        {
+          "condition": "(Deploy != \"k8s\")",
+          "exclude": [
+            "deploy/k8s/**",
+            "**/deploy/k8s.yaml"
+          ]
+        },
+        {
+          "condition": "(Deploy == \"none\")",
+          "exclude": [
+            "deploy/**",
+            "**/deploy/**"
+          ]
+        },
+        {
+          "exclude": [
+            "**/.idea/**",
+            "**/.vs/**",
+            "**/[Bb]in/**",
+            "**/[Oo]bj/**",
+            "**/logs/**",
+            "**/*.user",
+            "**/*.DotSettings.user",
+            "NamespaceRoot.ProductName.All.sln"
+          ]
+        }
+      ]
+    },
+    {
+      "source": "gateway",
+      "target": "src/services",
+      "condition": "(ApiGateway && !IsSolution)",
+      "modifiers": [
+        {
+          "condition": "(Deploy != \"compose\")",
+          "exclude": [ "**/deploy/compose.yml" ]
+        },
+        {
+          "condition": "(Deploy != \"k8s\")",
+          "exclude": [ "**/deploy/k8s.yaml" ]
+        },
+        {
+          "condition": "(Deploy == \"none\")",
+          "exclude": [ "**/deploy/**" ]
+        },
+        {
+          "exclude": [ "**/[Bb]in/**", "**/[Oo]bj/**", "**/logs/**", "**/*.user" ]
+        }
+      ]
+    }
+  ],
+
+  "postActions": [
+    {
+      "condition": "(!IsSolution && OnWindows)",
+      "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+      "continueOnError": true,
+      "description": "Add the service's projects to All.sln, each service in a solution folder named after the last segment of its name",
+      "args": {
+        "executable": "powershell",
+        "args": "-NoProfile -Command \"$s = (Get-ChildItem src/services/*.All.sln)[0].FullName; $l = dotnet sln $s list; Get-ChildItem src/services/*/*/*.csproj | Where-Object { $l -notcontains $_.FullName.Substring((Split-Path $s).Length + 1) } | ForEach-Object { dotnet sln $s add $_.FullName --solution-folder ($_.Directory.Parent.Name -replace '.*\\.', '') }\"",
+        "redirectStandardOutput": false
+      },
+      "manualInstructions": [ { "text": "Add the service's projects to src/services/*.All.sln: dotnet sln <All.sln> add <project> --solution-folder <service>" } ]
+    },
+    {
+      "condition": "(!IsSolution && !OnWindows)",
+      "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+      "continueOnError": true,
+      "description": "Add the service's projects to All.sln, each service in a solution folder named after the last segment of its name",
+      "args": {
+        "executable": "sh",
+        "args": "-c \"d=$(ls src/services | tr A-Z a-z | sort | uniq -d); if [ -n \\\"$d\\\" ]; then echo \\\"A service named $d is there already, in another case: remove the new folder and name the service as it is named.\\\" >&2; exit 1; fi; s=$(ls src/services/*.All.sln); l=$(dotnet sln $s list); for p in src/services/*/*/*.csproj; do echo \\\"$l\\\" | grep -qxF ${p#src/services/} && continue; d=$(basename $(dirname $(dirname $p))); dotnet sln $s add $p --solution-folder ${d##*.}; done\"",
+        "redirectStandardOutput": false
+      },
+      "manualInstructions": [ { "text": "Add the service's projects to src/services/*.All.sln: dotnet sln <All.sln> add <project> --solution-folder <service>" } ]
+    },
+    {
+      "condition": "(!IsSolution && (Infisical || Vault || DiffApi || FeatureFlags || HierarchyRules || Storage || ClickHouse || MongoDB || NotifyEmail || Audit))",
+      "actionId": "00000000-0000-0000-0000-000000000001",
+      "continueOnError": true,
+      "description": "Common was left as it is: pass only the flags whose part Common already has",
+      "manualInstructions": [
+        { "text": "dotnet new leaves the files already in the solution as they are, so Common gets nothing for a flag of this service it does not have yet: a service takes only the flags whose part Common already has." }
+      ]
+    },
+    {
+      "condition": "(Audit && Messaging != \"outbox\")",
+      "actionId": "00000000-0000-0000-0000-000000000001",
+      "continueOnError": true,
+      "description": "--Audit was not applied: it needs --Messaging outbox",
+      "manualInstructions": [
+        { "text": "--Audit was not applied: an audit entry has to commit with the change it describes, and only --Messaging outbox writes it in the same transaction. Generate again with --Audit true --Messaging outbox." }
+      ]
+    },
+    {
+      "condition": "(ApiGateway && IsSolution)",
+      "actionId": "00000000-0000-0000-0000-000000000001",
+      "continueOnError": true,
+      "description": "--ApiGateway was not applied: the gateway is added to a solution already there, without --Solution",
+      "manualInstructions": [
+        { "text": "--ApiGateway was not applied: --Solution generates the solution with a service, and the gateway is added to that solution without --Solution. Generate the gateway again without it." }
+      ]
+    }
+
+  ]
+}

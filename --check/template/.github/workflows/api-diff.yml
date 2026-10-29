@@ -1,0 +1,190 @@
+# Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
+
+name: API diff
+
+# Answers one question for a pull request: what changes in the API a caller can see?
+#
+# The contract is generated from the code on BOTH sides - this branch and the base - and the two are
+# diffed. Nothing is stored in the tree: a committed snapshot only repeats what the source already
+# says, goes stale, and then fails pull requests over that rather than over compatibility.
+#
+# The report is an artifact of the run. The job fails on a breaking change that is not declared in
+# .github/api-diff-ignore/<service>.txt.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  api-diff:
+    name: Diff the public API
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The base ref has to be reachable locally: its contract is generated from a worktree.
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Generate the contract on this branch
+        # Schema-only mode: no database, no broker, no background jobs. See scripts/generate-api-schemas.sh.
+        run: |
+          bash scripts/generate-api-schemas.sh
+          mkdir -p /tmp/api-head
+          for file in src/services/*/*.API/api-schema/*.json; do
+            cp "$file" "/tmp/api-head/$(basename "$file")"
+          done
+          ls /tmp/api-head
+
+      - name: Generate the contract on the base branch
+        run: |
+          mkdir -p /tmp/api-baseline
+          git worktree add /tmp/base-tree "origin/${{ github.base_ref }}"
+
+          # A base branch older than the contract itself cannot produce one: the script that
+          # generates it is not there yet. That is not a failure - every contract here is new.
+          if [ ! -f /tmp/base-tree/scripts/generate-api-schemas.sh ]; then
+            echo "::notice::The base branch predates generated contracts - everything here is new."
+            exit 0
+          fi
+
+          ( cd /tmp/base-tree && bash scripts/generate-api-schemas.sh )
+
+          for head in /tmp/api-head/*.json; do
+            service=$(basename "$head" .json)
+            base=$(ls /tmp/base-tree/src/services/*/*.API/api-schema/"$service".json 2>/dev/null | head -1)
+            if [ -n "$base" ]; then
+              cp "$base" "/tmp/api-baseline/$service.json"
+              echo "baseline: $service"
+            else
+              # A service that does not exist on the base branch has nothing to compare against.
+              echo "::notice::No baseline for $service - treated as a new contract."
+            fi
+          done
+
+      - name: Diff each service
+        run: |
+          mkdir -p /tmp/api-diff
+          changed=0
+          report=/tmp/api-diff/changelog.md
+          : > "$report"
+
+          for file in /tmp/api-head/*.json; do
+            service=$(basename "$file" .json)
+            baseline="/tmp/api-baseline/$service.json"
+            [ -f "$baseline" ] || continue
+
+            # oasdiff runs from its own image, so the runner needs nothing installed. It opens the
+            # report with its own H1; keep the body from "## API Changes" onward, one level lower.
+            changelog=$(docker run --rm \
+              -v "$baseline:/base.json:ro" -v "$file:/head.json:ro" \
+              tufin/oasdiff changelog /base.json /head.json -f markdown 2>/dev/null \
+              | sed -n '/^## API Changes/,$p' | tail -n +2 | sed 's/^###/####/; s/^##/###/' || true)
+
+            if [ -n "$(echo "$changelog" | tr -d '[:space:]')" ]; then
+              changed=1
+              {
+                echo "## $service"
+                echo
+                echo "$changelog"
+                echo
+              } >> "$report"
+            fi
+          done
+
+          if [ "$changed" = "0" ]; then
+            echo "_No changes to the public API._" >> "$report"
+          fi
+          cat "$report"
+
+      - name: Check for breaking changes
+        run: |
+          failed=0
+          version=$(jq -r .version version.json)
+
+          for file in /tmp/api-head/*.json; do
+            service=$(basename "$file" .json)
+            baseline="/tmp/api-baseline/$service.json"
+            [ -f "$baseline" ] || continue
+
+            # oasdiff sees two documents and nothing else, so intent that lives outside them - a path
+            # leaving the document while its route keeps answering, a schema catching up with
+            # behaviour the service already enforced - is declared in
+            # .github/api-diff-ignore/<service>.txt. Anything not declared there still fails.
+            #
+            # One line per exception, reason above it:
+            #
+            #     <version> <method> <path> [check-id]
+            #     1.2.3 PUT /api/v1/orders/{id}/status request-property-became-enum
+            #     1.2.3 GET /api/v1/orders/legacy
+            #
+            # Method, path and check-id are all printed by this job, so an entry is copied from the
+            # log rather than reconstructed. Method and path accept "*". The check id is optional:
+            # leaving it out covers every finding on that method and path, which is what a removed
+            # path or a wholesale reshape of one needs - naming it keeps the exception to the single
+            # finding it was written for, so an unrelated break on the same path still fails.
+            #
+            # The version is what keeps the file from silting up: an entry answers one diff against
+            # one baseline, and once the change is merged the baseline carries it and the entry
+            # protects nothing - while still being able to hide a later regression on the same path.
+            # It applies only while version.json still reads that version, so the next bump retires
+            # it on its own.
+            ignore=".github/api-diff-ignore/$service.txt"
+            rules="/tmp/api-diff/$service.rules"
+            : > "$rules"
+            if [ -f "$ignore" ]; then
+              while read -r ver method path id rest; do
+                [ -z "$ver" ] && continue
+                case "$ver" in \#*) continue ;; esac
+                if [ "$ver" != "$version" ]; then
+                  echo "$service: skipping expired exception ($ver, now $version): $method $path $id"
+                  continue
+                fi
+                printf '%s\t%s\t%s\n' "$method" "$path" "${id:-*}" >> "$rules"
+              done < "$ignore"
+              echo "$service: applying $(wc -l < "$rules") declared exception(s)."
+            fi
+
+            docker run --rm \
+              -v "$baseline:/base.json:ro" -v "$file:/head.json:ro" \
+              tufin/oasdiff breaking /base.json /head.json -f json > "/tmp/api-diff/$service.errors" || true
+
+            # Keep the errors no rule covers; a rule matches on check id, method and path, with "*"
+            # standing for any. Everything else about an error - its wording, the media type it names
+            # - is the same finding reported once per representation, so matching on the identity of
+            # the finding suppresses it once rather than three times.
+            remaining=$(jq --rawfile rules "$rules" '
+              ($rules | split("\n") | map(select(length > 0) | split("\t"))) as $r
+              | map(select(.level >= 3))
+              | map(select(
+                  . as $e
+                  | ($r | any(
+                      .[0] as $m | .[1] as $p | .[2] as $id
+                      | ($id == "*" or $id == $e.id)
+                        and ($m == "*" or ($m | ascii_upcase) == ($e.operation | ascii_upcase))
+                        and ($p == "*" or $p == $e.path))) | not))
+            ' "/tmp/api-diff/$service.errors")
+
+            count=$(echo "$remaining" | jq 'length')
+            if [ "$count" -gt 0 ]; then
+              echo "$remaining" | jq -r '.[] | "  [\(.id)] \(.operation) \(.path)\n    \(.text)"'
+              echo "::error::Breaking API changes in $service ($count)."
+              failed=1
+            else
+              echo "$service: no breaking changes."
+            fi
+          done
+          exit $failed
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: api-changelog
+          path: /tmp/api-diff/changelog.md
+          if-no-files-found: warn

@@ -1,0 +1,99 @@
+# This service under docker compose; started by deploy/compose/compose.sh with the infrastructure.
+# Paths are relative to the solution root.
+services:
+  servicenameorcustom:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: NamespaceRoot.ProductName.ServiceNameOrCustom
+        GIT_SHA: ${GIT_SHA:-local}
+    image: ${REGISTRY:-local}/productnamelower-servicenameorcustom:${TAG:-latest}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+#if (Database == "mssql")
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=${MSSQL_DB:-app};User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in deploy/compose/.env};TrustServerCertificate=true
+#else
+      ConnectionStrings__DefaultConnection: Host=postgres;Database=${POSTGRES_DB:-app};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/compose/.env}
+#endif
+      InternalApi__ApiKey: ${INTERNAL_API_KEY:-}
+#if (Hangfire)
+      HangfireSettings__DashboardPassword: ${HANGFIRE_DASHBOARD_PASSWORD:?Set HANGFIRE_DASHBOARD_PASSWORD in deploy/compose/.env}
+#endif
+#if (Messaging != "none")
+      RabbitMq__Host: rabbitmq
+      RabbitMq__UserName: ${RABBITMQ_USER:-guest}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
+#endif
+#if (ClickHouse)
+      ClickHouse__ConnectionString: Host=clickhouse;Port=8123;Username=${CLICKHOUSE_USER:-app};Password=${CLICKHOUSE_PASSWORD:-};Database=${CLICKHOUSE_DB:-app}
+#endif
+#if (NotifyEmail)
+      Email__Smtp__Host: ${SMTP_HOST:-mailhog}
+      Email__Smtp__Port: ${SMTP_PORT:-1025}
+      Email__Smtp__From: ${EMAIL_FROM:-noreply@localhost}
+      Email__Smtp__Secure: ${SMTP_SECURE:-false}
+      Email__Sandbox__Enabled: ${EMAIL_SANDBOX_ENABLED:-true}
+      Email__Sandbox__ReceiverAddress: ${EMAIL_SANDBOX:-sandbox@localhost}
+#endif
+#if (MongoDB)
+      MongoDB__ConnectionString: mongodb://${MONGO_USER:-app}:${MONGO_PASSWORD:?Set MONGO_PASSWORD in deploy/compose/.env}@mongo:27017/?authSource=admin
+#endif
+#if (Storage)
+      S3__ServiceUrl: http://s3:8333
+      S3__BucketName: ${S3_BUCKET:-app}
+      S3__AccessKey: ${S3_ACCESS_KEY:-app}
+      S3__SecretKey: ${S3_SECRET_KEY:-}
+#endif
+#if (Infisical)
+      Infisical__Enabled: ${INFISICAL_ENABLED:-true}
+      Infisical__ClientId: ${INFISICAL_CLIENT_ID:-}
+      Infisical__ClientSecret: ${INFISICAL_CLIENT_SECRET:-}
+#endif
+#if (Vault)
+      Vault__Enabled: ${VAULT_ENABLED:-true}
+      Vault__Address: ${VAULT_ADDR:-}
+      Vault__Token: ${VAULT_TOKEN:-}
+      Vault__RoleId: ${VAULT_ROLE_ID:-}
+      Vault__SecretId: ${VAULT_SECRET_ID:-}
+#endif
+    # The root filesystem is read-only: the running container is changed only by a new image, which passes
+    # review and CI, so features.json and the code cannot be edited in place. /tmp stays writable for what
+    # .NET and ASP.NET Core keep there: the diagnostics socket, large request bodies.
+    read_only: true
+    tmpfs:
+      - /tmp
+    # Only on the host's loopback: a reverse proxy or a gateway in front publishes it.
+    ports:
+      - "127.0.0.1:5054:8080"
+    # Ready, not merely alive: whatever depends on this service starts once its database is reachable.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/ready"]
+      interval: 10s
+      timeout: 3s
+      start_period: 30s
+      retries: 12
+    depends_on:
+#if (Database == "mssql")
+      sqlserver:
+        condition: service_healthy
+#else
+      postgres:
+        condition: service_healthy
+#endif
+#if (Messaging != "none")
+      rabbitmq:
+        condition: service_healthy
+#endif
+#if (ClickHouse)
+      clickhouse:
+        condition: service_healthy
+#endif
+#if (MongoDB)
+      mongo:
+        condition: service_healthy
+#endif
+#if (Storage)
+      s3-bucket:
+        condition: service_completed_successfully
+#endif

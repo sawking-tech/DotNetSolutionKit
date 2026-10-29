@@ -1,0 +1,22 @@
+# RabbitMQ, the broker of the bus a service uses with --Messaging.
+# Started by deploy/compose/compose.sh with every file in this folder and every service's
+# src/services/*/deploy/compose.yml.
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      # Passed rather than read from a file: on Docker Desktop for Windows the broker cannot set the
+      # permissions it requires on a generated cookie file and stops.
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:?Set RABBITMQ_ERLANG_COOKIE in deploy/compose/.env}
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  rabbitmq:

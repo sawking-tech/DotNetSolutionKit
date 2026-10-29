@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <!--#if (TestFramework == "xunit") -->
+        <!-- Run through VSTest, like the other test projects: xunit.v3 marks itself a Microsoft.Testing.Platform
+             app, which a .NET 10 SDK then refuses to run under dotnet test's VSTest target. -->
+        <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+        <!--#endif -->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!--#if (TestFramework == "xunit") -->
+        <PackageReference Include="xunit.v3" />
+        <PackageReference Include="xunit.runner.visualstudio" />
+        <!--#else -->
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit3TestAdapter" />
+        <!--#endif -->
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="Moq" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Web\NamespaceRoot.ProductName.Common.Web.csproj" />
+      <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.API\NamespaceRoot.ProductName.ServiceNameOrCustom.API.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Testing\NamespaceRoot.ProductName.Common.Testing.csproj" />
+      <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+    </ItemGroup>
+
+</Project>

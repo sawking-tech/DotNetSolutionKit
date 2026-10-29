@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- MongoDB of the flag MongoDB, beside the main database: the store, its options and its health check.
+         A service with the flag references it, so only that service carries the MongoDB driver. -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="MongoDB.Driver" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.Capabilities.Mongo.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+</Project>

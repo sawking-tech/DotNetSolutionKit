@@ -1,0 +1,72 @@
+<Project>
+  <!--
+    Central package management: every package version in the solution is declared once, here or in
+    a file of package-versions/ that this one imports, and a .csproj references a package by name
+    only. A service added later to an existing solution picks up the versions from them.
+
+    Every version is the latest that runs on .NET 8. Microsoft.*, Npgsql and Serilog number their
+    releases after the framework, so their 9.x and 10.x are for .NET 9 and 10. A package held below
+    its latest for another reason says why next to it.
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="coverlet.collector" Version="10.1.0" />
+    <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageVersion Include="AspNetCore.HealthChecks.Hangfire" Version="9.0.0" />
+    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.25" />
+    <PackageVersion Include="Hangfire.Core" Version="1.8.25" />
+    <PackageVersion Include="Hangfire.Console" Version="1.4.3" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" />
+    <PackageVersion Include="LinqSpecs" Version="3.2.0" />
+    <!-- Held on 8: version 9 is under a commercial licence (massient.com/license), 8 is Apache 2.0. -->
+    <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="8.4.1" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.4.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.31" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.31" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.31" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.31" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="8.0.31" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.31" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.31" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.31" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
+    <!-- Held on 7.7.3, here and for System.IdentityModel.Tokens.Jwt: the version JwtBearer 8.0.x depends on.
+         Email raises both to 8.15.0 in package-versions/notify-email.props. -->
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="7.7.3" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageVersion Include="Moq" Version="4.21.0" />
+    <PackageVersion Include="NUnit" Version="5.0.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.3.0" />
+    <PackageVersion Include="xunit.v3" Version="4.0.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <!-- Held on 6: version 7 pulls Microsoft.Extensions.* 10.0.0 into a .NET 8 application. -->
+    <PackageVersion Include="Scrutor" Version="6.1.0" />
+    <PackageVersion Include="Serilog" Version="4.4.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageVersion Include="Serilog.Enrichers.Span" Version="3.1.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.4" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
+    <PackageVersion Include="SharpGrip.FluentValidation.AutoValidation.Mvc" Version="2.0.0" />
+    <!-- Held on 9: version 10 moves to Microsoft.OpenApi 2, whose types (OpenApiDocument, OpenApiOperation,
+         the Models and Writers namespaces) the Swagger filters in Common.Web are written against. -->
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="7.7.3" />
+    <PackageVersion Include="System.Linq.Dynamic.Core" Version="1.7.4" />
+    <PackageVersion Include="Yarp.ReverseProxy" Version="2.3.0" />
+  </ItemGroup>
+
+  <!-- The versions a flag brings live in a file of its own, one per flag, so a flag added to a solution later
+       adds a file and changes nothing here. -->
+  <Import Project="package-versions/*.props" />
+</Project>

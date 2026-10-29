@@ -1,0 +1,6 @@
+<Project>
+  <!-- The flag -I (Infisical). -->
+  <ItemGroup>
+    <PackageVersion Include="Infisical.Sdk" Version="3.0.4" />
+  </ItemGroup>
+</Project>
