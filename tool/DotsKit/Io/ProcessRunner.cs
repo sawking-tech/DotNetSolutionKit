@@ -34,6 +34,11 @@ internal sealed class ProcessRunner : IProcessRunner
     /// <summary>dotnet prints in the language of the machine; the tool keeps the messages it passes on in English.</summary>
     private const string UiLanguage = "en";
 
+    private const string TraceVariable = "DOTSKIT_TRACE";
+
+    /// <summary>The first arguments say which call it is; the rest is lists of paths.</summary>
+    private const int TracedArgs = 4;
+
     private static readonly System.Text.Encoding Utf8 = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
     public async Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
@@ -60,6 +65,7 @@ internal sealed class ProcessRunner : IProcessRunner
         foreach (var (name, value) in environment ?? new Dictionary<string, string>())
             start.Environment[name] = value;
 
+        var clock = Stopwatch.StartNew();
         using var process = Process.Start(start) ?? throw new InvalidOperationException($"Could not start {program}");
         var output = process.StandardOutput.ReadToEndAsync(ct);
         var error = process.StandardError.ReadToEndAsync(ct);
@@ -73,6 +79,18 @@ internal sealed class ProcessRunner : IProcessRunner
             process.Kill(entireProcessTree: true);
             throw;
         }
-        return new(process.ExitCode, await output, await error);
+        var result = new ProcessResult(process.ExitCode, await output, await error);
+        Trace(program, args, clock.Elapsed);
+        return result;
+    }
+
+    /// <summary>
+    /// With DOTSKIT_TRACE set, every process and its time go to stderr: what a slow command spends its time on.
+    /// </summary>
+    private static void Trace(string program, IReadOnlyList<string> args, TimeSpan took)
+    {
+        if (Environment.GetEnvironmentVariable(TraceVariable) is { Length: > 0 })
+            Console.Error.WriteLine(string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                $"dotskit trace {took.TotalSeconds,6:F1}s {program} {string.Join(' ', args.Take(TracedArgs))}"));
     }
 }

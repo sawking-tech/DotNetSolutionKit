@@ -13,12 +13,16 @@ namespace DotsKit.Generation;
 internal interface IStaging
 {
     /// <summary>A folder with what the template gives for <paramref name="manifest"/>.</summary>
-    Task<string> BuildAsync(Manifest manifest, CancellationToken ct);
+    /// <param name="withSolutionFile">
+    /// All.sln is made right too, for a new solution that takes it as it is; a solution there already changes its
+    /// own by the projects of the two trees (<see cref="SolutionProjects.InTree"/>), and the work is saved.
+    /// </param>
+    Task<string> BuildAsync(Manifest manifest, bool withSolutionFile, CancellationToken ct);
 }
 
 internal sealed class Staging(ITemplateSource templates, ISolutionProjects projects) : IStaging
 {
-    public async Task<string> BuildAsync(Manifest manifest, CancellationToken ct)
+    public async Task<string> BuildAsync(Manifest manifest, bool withSolutionFile, CancellationToken ct)
     {
         var template = templates.Of(manifest.Template);
         var root = Path.Combine(Folders.NewTemp("staging"), "solution");
@@ -26,13 +30,14 @@ internal sealed class Staging(ITemplateSource templates, ISolutionProjects proje
         await template.GenerateAsync(TemplateArgs.ForSolution(manifest.SolutionArgs, services[0], manifest.Template).ForVersion(manifest.Template), root, ct);
         RemoveServiceFolders(root);
         // The solution's command listed its first service as a regular one; a gateway in its place has fewer projects.
-        await projects.RemoveMissingAsync(root, ct);
+        if (withSolutionFile)
+            await projects.RemoveMissingAsync(root, ct);
         foreach (var service in services)
         {
             await template.GenerateAsync(TemplateArgs.ForService(manifest.SolutionArgs, service).ForVersion(manifest.Template), root, ct);
             // Before 2.8 the template left this to manual-add-projects.sh. Goes in 3.0
             // (TemplateVersions.AddsServiceToSolution).
-            if (!TemplateVersions.AddsServiceToSolution(manifest.Template))
+            if (withSolutionFile && !TemplateVersions.AddsServiceToSolution(manifest.Template))
                 await projects.AddMissingAsync(root, ct);
         }
         return root;
