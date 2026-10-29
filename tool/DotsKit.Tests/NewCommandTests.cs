@@ -15,6 +15,9 @@ internal sealed class NewCommandTests
     private sealed class Fakes
     {
         public bool Clean { get; init; } = true;
+
+        public string Prefix { get; init; } = "";
+
         public bool Answer { get; init; }
         public int Planned { get; private set; }
         public int Written { get; private set; }
@@ -44,6 +47,8 @@ internal sealed class NewCommandTests
         private sealed class Git(Fakes fakes) : IGit
         {
             public Task<bool> IsCleanAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Clean);
+
+            public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
         }
 
         private sealed class Builder : IBuilder
@@ -95,6 +100,17 @@ internal sealed class NewCommandTests
         var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Args("-S", "Billing"), Solution(null), CancellationToken.None));
 
         refused.Message.ShouldContain(Layout.ManifestPath);
+        fakes.Planned.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task AServiceAddedToASolutionInAFolderOfItsRepository_IsRefusedTheMergeByGit_BeforeAPlan()
+    {
+        var fakes = new Fakes { Prefix = "backend/" };
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Args("-S", "Billing"), Solution(ThisVersion), CancellationToken.None));
+
+        refused.Message.ShouldContain("--merge files");
         fakes.Planned.ShouldBe(0);
     }
 

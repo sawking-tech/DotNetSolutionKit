@@ -81,7 +81,8 @@ joins it, one the template removed leaves it unless the team added it, and one t
 
 ### Merged by git
 
-In a solution there already, `dotskit new` and `dotskit upgrade` merge by git, the same three-way merge:
+In a solution there already, at the root of its git repository, `dotskit new` and `dotskit upgrade` merge by
+git, the same three-way merge:
 
 - the branch `dotskit/template` holds what the template gave the solution, a commit per version. git knows the
   base when the branch's last commit has the base's files and the working branch has that commit in its history;
@@ -122,6 +123,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | Does to the repository | Command | What for |
 |---|---|---|
 | nothing, reads | `git status --porcelain` | a clean working tree before writing |
+| | `git rev-parse --show-prefix` | whether the solution is at the root of its repository, for the merge by git |
 | | `git rev-parse` (`HEAD`, `--absolute-git-dir`, `MERGE_HEAD`, the branch, a commit's tree) | where the solution and the branch stand |
 | | `git merge-base --is-ancestor` | whether the working branch has the branch's last commit |
 | | `git config --path --get core.attributesFile` | the user's global attributes, kept under the merge driver's |
@@ -312,3 +314,6 @@ command spends its time on.
 - `dotskit new` works in a solution with a manifest: made by `dotskit`, or described by `dotskit init`.
 - `dotskit new` needs a manifest of the tool's version: a solution of an earlier version is brought to it by
   `dotskit upgrade` first.
+- The merge by git needs the solution at the root of its git repository. A solution in a folder of a larger
+  repository is refused it before the plan and takes `--merge files`. The clean working tree is checked over
+  the whole repository.
