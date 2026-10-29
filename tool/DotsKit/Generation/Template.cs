@@ -17,16 +17,24 @@ internal interface ITemplateSource
 
 /// <summary>
 /// The template installed in a hive of the tool's own, so the templates the user installed stay as they are.
-/// The package comes from nuget.org by version; a folder of the template's sources stands in for it when the
-/// tool runs against the template being developed (<see cref="TemplateSource.SourcesFolder"/>).
+/// The package comes from nuget.org by version; a release before it was there, from its tag on GitHub
+/// (<see cref="TagArchive"/>); a folder of the template's sources stands in for it when the tool runs against the
+/// template being developed (<see cref="TemplateSource.SourcesFolder"/>).
 /// </summary>
 /// <param name="runsScripts">
 /// The version has the post-action that adds a service to All.sln by a command, and takes --allow-scripts for it;
 /// a version without one refuses the option (<see cref="TemplateVersions.AddsServiceToSolution"/>).
 /// </param>
-internal sealed class DotnetNewTemplate(string package, bool runsScripts, IProcessRunner runner) : ITemplate
+/// <param name="package">What <c>dotnet new install</c> takes: a package and its version, or a folder; found once, on the first use.</param>
+internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> package, bool runsScripts, IProcessRunner runner) : ITemplate
 {
     private const string ShortName = "DotNetSolutionKit";
+
+    /// <summary>
+    /// dotnet new's code for a post-action it does not run: a version before 2.8 names manual-add-projects.sh in
+    /// one, and the tool adds the service to All.sln itself (<see cref="Staging"/>).
+    /// </summary>
+    private const int ManualPostAction = 105;
 
     private readonly string _hive = Folders.NewTemp("hive");
     private bool _installed;
@@ -36,7 +44,9 @@ internal sealed class DotnetNewTemplate(string package, bool runsScripts, IProce
         await InstallOnceAsync(ct);
         Directory.CreateDirectory(root);
         List<string> command = ["new", ShortName, .. args.ToArgs(), "--output", root, .. ScriptsAllowed(), "--debug:custom-hive", _hive];
-        await runner.RunCheckedAsync("dotnet", command, root, ct);
+        var result = await runner.RunAsync("dotnet", command, root, ct);
+        if (result.Code != 0 && !(result.Code == ManualPostAction && !runsScripts))
+            throw new InvalidOperationException($"dotnet {string.Join(' ', command)} exited with {result.Code}:\n{(string.IsNullOrWhiteSpace(result.Error) ? result.Output : result.Error).Trim()}");
     }
 
     private string[] ScriptsAllowed() => runsScripts ? ["--allow-scripts", "yes"] : [];
@@ -45,12 +55,12 @@ internal sealed class DotnetNewTemplate(string package, bool runsScripts, IProce
     {
         if (_installed)
             return;
-        await runner.RunCheckedAsync("dotnet", ["new", "install", package, "--force", "--debug:custom-hive", _hive], Path.GetTempPath(), ct);
+        await runner.RunCheckedAsync("dotnet", ["new", "install", await package(ct), "--force", "--debug:custom-hive", _hive], Path.GetTempPath(), ct);
         _installed = true;
     }
 }
 
-internal sealed class TemplateSource(IProcessRunner runner) : ITemplateSource
+internal sealed class TemplateSource(IProcessRunner runner, ITagArchive tags) : ITemplateSource
 {
     private const string PackageId = "SawKing.DotNetSolutionKit";
     private const string SourcesVariable = "DOTSKIT_TEMPLATE_SOURCE";
@@ -66,12 +76,14 @@ internal sealed class TemplateSource(IProcessRunner runner) : ITemplateSource
     public ITemplate Of(string version)
     {
         if (!_templates.TryGetValue(version, out var template))
-            _templates[version] = template = new DotnetNewTemplate(PackageOf(version), TemplateVersions.AddsServiceToSolution(version), runner);
+            _templates[version] = template = new DotnetNewTemplate(ct => PackageOfAsync(version, ct), TemplateVersions.AddsServiceToSolution(version), runner);
         return template;
     }
 
-    private static string PackageOf(string version) =>
-        version == SourcesVersion
-            ? SourcesFolder ?? throw new InvalidOperationException($"The solution was generated from the template's sources: set {SourcesVariable} to their folder.")
-            : $"{PackageId}::{version}";
+    private Task<string> PackageOfAsync(string version, CancellationToken ct)
+    {
+        if (version == SourcesVersion)
+            return Task.FromResult(SourcesFolder ?? throw new InvalidOperationException($"The solution was generated from the template's sources: set {SourcesVariable} to their folder."));
+        return TemplateVersions.IsPublished(version) ? Task.FromResult($"{PackageId}::{version}") : tags.FolderOfAsync(version, ct);
+    }
 }

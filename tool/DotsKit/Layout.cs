@@ -18,6 +18,16 @@ internal static class Layout
 
     public static string ServicesOf(string root) => Path.Combine(root, ServicesFolder);
 
+    /// <summary>The service folder a path relative to the root is in, src/services/&lt;service&gt;; null outside the services.</summary>
+    public static string? ServiceFolderOf(string path)
+    {
+        var prefix = ServicesFolder + "/";
+        if (!path.StartsWith(prefix, StringComparison.Ordinal))
+            return null;
+        var end = path.IndexOf('/', prefix.Length);
+        return end < 0 ? null : path[..end];
+    }
+
     public static string SolutionFileOf(string root) => Directory.GetFiles(ServicesOf(root), SolutionPattern).Single();
 }
 
