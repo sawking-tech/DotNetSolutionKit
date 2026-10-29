@@ -143,7 +143,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git ls-files --others --ignored --exclude-standard` | the files the solution's git ignores, never written |
 | | `git diff --name-only --diff-filter=U` | the files left in conflict |
 | | `git diff --no-index -M` | the files the template moved, between two of its outputs outside the repository |
-| | `git merge-file -p` | a file merged by `--merge files` and by the merge driver, on copies of the three sides |
+| | `git merge-file -p`, again with `--theirs` under `--force` | a file merged by `--merge files` and by the merge driver, on copies of the three sides; the first run counts the conflicts `--force` decides |
 | | `git ls-remote --tags` | the releases of the template, for `init` on a solution that does not say its version |
 | writes objects only, through an index of its own | `git add -A`, `git rm --cached`, `git ls-files`, `git write-tree`, `git commit-tree` | a commit of the template's output; the solution's index and files are not touched |
 | moves the branch `dotskit/template` | `git update-ref refs/heads/dotskit/template` | the commit of the template's new output on the branch, only from the tip read before |
@@ -307,7 +307,7 @@ template changed - is the team's to decide, and its tests show it.
 | Option | What it does |
 |---|---|
 | `--yes` | writes without asking, for CI |
-| `--force` | resolves a conflict with the template's lines; the team's lines stay in git history |
+| `--force` | resolves a conflict with the template's lines; with `--merge files` the plan names each file it did that in; the team's lines stay in git history, so it needs a clean tree and refuses `--allow-dirty` |
 | `--no-build` | does not build the solution after writing |
 | `--allow-dirty` | runs on a working tree with uncommitted changes |
 | `--template-version 2.x.y` | `init`: the version the solution was made by, where it does not say it |

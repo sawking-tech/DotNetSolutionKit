@@ -150,6 +150,7 @@ internal sealed class ThreeWayMergeTests
         var change = await t.MergeAsync(force: true);
 
         change!.Content!.Text.ShouldBe("1\ntemplate\n3\n");
+        change.Reason.ShouldEndWith("1 conflict(s) take the template's lines, by --force");
     }
 
     [Test]
