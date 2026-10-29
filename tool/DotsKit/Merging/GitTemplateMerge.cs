@@ -49,11 +49,11 @@ internal sealed record TemplateCommit(string Tree, string Version);
 /// <summary>
 /// The branch dotskit/template holds what the template gave the solution, a commit per output. Every run goes the
 /// same way: git knows the base when the branch's tip has the base's tree and the working branch has the tip in its
-/// history; otherwise the base is committed - the branch's first commit has no parent - and merged with
-/// <c>-s ours</c>, which keeps the solution's files and tells git the base. Then the next output is committed on top
-/// and merged with <c>--no-commit</c>: git keeps the team's changes, follows the files the template moved, marks a
+/// history; otherwise the base is committed - the branch's first commit has no parent - and adopted the way
+/// <c>git merge -s ours</c> would, by plumbing, which keeps the solution's files and tells git the base. Then the
+/// next output is committed on top and merged with <c>--no-commit</c>: git keeps the team's changes, follows the files the template moved, marks a
 /// conflict for the IDE, and <c>git merge --abort</c> undoes it.
-/// The commits are made with git's plumbing and an index of their own: nothing is checked out, no hook runs. What
+/// The commits are made with git's plumbing and an index of their own: nothing is checked out, no commit hook runs. What
 /// the solution's git ignores, a local secret among them, and All.sln, which changes by <c>dotnet sln</c>, are never
 /// in the branch.
 /// A file both sides changed is merged by <see cref="StyleMergeDriver"/>, given to this one merge by <c>-c</c> and an
@@ -94,7 +94,7 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         _staged.Clear();
         try
         {
-            return await MergeOverAsync(root, _before.Tip, @base, next, preferTemplate, ct);
+            return await MergeOverAsync(root, _before.Head, _before.Tip, @base, next, preferTemplate, ct);
         }
         catch (Exception failure)
         {
@@ -103,9 +103,9 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         }
     }
 
-    private async Task<IReadOnlyList<string>> MergeOverAsync(string root, string? tip, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
+    private async Task<IReadOnlyList<string>> MergeOverAsync(string root, string head, string? tip, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
     {
-        var baseCommit = await KnownBaseAsync(root, tip, @base, ct);
+        var baseCommit = await KnownBaseAsync(root, head, tip, @base, ct);
         var nextCommit = await CommitAsync(root, next.Tree, baseCommit, $"dotskit: the template {next.Version}", ct);
         // Moved only from the tip read above: a commit another run put there in between is not lost (empty: no branch yet).
         await runner.RunCheckedAsync("git", ["update-ref", BranchRef, nextCommit, tip ?? ""], root, ct);
@@ -199,7 +199,7 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     /// The commit git merges over: the branch's tip when it is the base and the working branch has it; otherwise the
     /// base, committed on the tip (or as the first commit) and merged keeping the solution's files.
     /// </summary>
-    private async Task<string> KnownBaseAsync(string root, string? tip, TemplateCommit @base, CancellationToken ct)
+    private async Task<string> KnownBaseAsync(string root, string head, string? tip, TemplateCommit @base, CancellationToken ct)
     {
         var (tree, _) = await TreeAsync(root, @base.Tree, ct);
         if (tip is not null && await TreeOfAsync(root, tip, ct) == tree && await IsInHistoryAsync(root, tip, ct))
@@ -208,16 +208,22 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         }
 
         var commit = await CommitTreeAsync(root, tree, tip, $"dotskit: the template {@base.Version}, the base of the solution", ct);
-        await runner.RunCheckedAsync("git", ["merge",
-            "-s",
-            "ours",
-            "--no-ff",
-            "--allow-unrelated-histories",
-            "--no-edit",
-            "-m",
-            $"dotskit: the solution is of the template {@base.Version}",
-            commit], root, ct);
+        await AdoptAsync(root, head, commit, $"dotskit: the solution is of the template {@base.Version}", ct);
         return commit;
+    }
+
+    /// <summary>
+    /// What <c>git merge -s ours</c> makes, made by plumbing: a commit of the working branch's own tree with
+    /// <paramref name="commit"/> as its second parent, and the branch moved to it from <paramref name="head"/>, the
+    /// commit the run started from, so a commit made in between is refused, not taken back by an undo. No file and no
+    /// index entry changes, and no commit hook of the team runs: a commit-msg hook that refuses dotskit's message would
+    /// otherwise stop every first run. The commit is not signed, as the commits of the branch are not.
+    /// </summary>
+    private async Task AdoptAsync(string root, string head, string commit, string message, CancellationToken ct)
+    {
+        var tree = (await runner.RunCheckedAsync("git", ["rev-parse", head + "^{tree}"], root, ct)).Trim();
+        var merge = (await runner.RunCheckedAsync("git", ["commit-tree", tree, "-p", head, "-p", commit, "-m", message], root, ct)).Trim();
+        await runner.RunCheckedAsync("git", ["update-ref", "-m", message, "HEAD", merge, head], root, ct);
     }
 
     /// <summary>The template's output committed on <paramref name="parent"/>; what the tree left out is kept for the writer.</summary>

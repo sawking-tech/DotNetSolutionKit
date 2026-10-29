@@ -85,8 +85,12 @@ In a solution there already, `dotskit new` and `dotskit upgrade` merge by git, t
 
 - the branch `dotskit/template` holds what the template gave the solution, a commit per version. git knows the
   base when the branch's last commit has the base's files and the working branch has that commit in its history;
-  otherwise, as the first time or on another branch, the base is committed there and merged into the working
-  branch with `git merge -s ours`: the solution's files stay as they are, and git knows the base from then on.
+  otherwise, as the first time or on another branch, the base is committed there and adopted by the working
+  branch the way `git merge -s ours` would: a merge commit of the branch's own tree with the base as its second
+  parent, made by `git commit-tree` and `git update-ref`. The solution's files stay as they are, and git knows the
+  base from then on. No commit hook of the team runs in a run (pre-commit, prepare-commit-msg, commit-msg,
+  pre-merge-commit, post-merge); hooks of refs and the index, as reference-transaction, run as git runs them. The
+  commits dotskit makes are not signed.
   `git merge --abort` leaves this commit, it changes no file. When a step of the command fails, the command takes
   back the merge, this commit and the move of the branch itself: git is as it was before the run;
 - the command commits the template's new output there and runs `git merge --no-ff --no-commit dotskit/template`.
@@ -132,7 +136,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git ls-remote --tags` | the releases of the template, for `init` on a solution that does not say its version |
 | writes objects only, through an index of its own | `git add -A`, `git rm --cached`, `git ls-files`, `git write-tree`, `git commit-tree` | a commit of the template's output; the solution's index and files are not touched |
 | moves the branch `dotskit/template` | `git update-ref refs/heads/dotskit/template` | the commit of the template's new output on the branch, only from the tip read before |
-| commits on the working branch, files unchanged | `git merge -s ours --no-ff` | the base adopted, the first time or on another branch |
+| commits on the working branch, files unchanged | `git commit-tree -p HEAD -p <base>`, `git update-ref HEAD` | the base adopted, the first time or on another branch, with no commit hook of the team |
 | merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge |
 | stages | `git add` | the manifest, `All.sln` and the files the repair changed join the merge |
 | undoes a run that failed | `git restore --source=HEAD --staged --worktree`, `git merge --abort`, `git reset --soft`, `git update-ref` (or `-d`) | what was staged, the merge, the adopting commit and the branch, back as they were before the run |
