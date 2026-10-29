@@ -71,6 +71,7 @@ mindmap
 - [Settings](architecture/settings.md): their sources, and what changes while a service runs
 - [Domain events](architecture/domain-events.md)
 - [Testing](architecture/testing.md)
+- [Code style](architecture/code-style.md): the rules of every file and how CI holds them
 
 ## Features
 
@@ -107,6 +108,7 @@ Where the template departs from a common practice, and why.
 - [ADR-004: The product version is set by hand](adr/004-product-version-by-hand.md)
 - [ADR-005: How a service is tested](adr/005-testing-a-service.md)
 - [ADR-006: JSON metadata keys](adr/006-json-metadata-key-convention.md)
+- [ADR-007: One code style, owned by the formatters](adr/007-code-style.md)
 
 ## [Roadmap](roadmap.md)
 

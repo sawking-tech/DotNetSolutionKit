@@ -1,32 +1,46 @@
-# The style of every file of the repository, the template's sources among them. It sits outside template/, so
-# the package and a generated solution do not carry it; the job One style of template.yml holds a pull request
-# to its bytes with scripts/check-style.py.
+# The style of every file of the repository, the template's sources among them; ADR-007 says why it belongs to the
+# formatters, docs/architecture/code-style.md gives each rule with its reason. It sits outside template/, so the
+# package and a generated solution do not carry it; the job One style of template.yml holds the bytes of every file
+# to it, and the job of dotskit the C# of tool/.
+#
+# The groups go from the basic rules to those of taste, in the order of the document: the bytes; the layout of C#;
+# usings and namespaces; blank lines; the language; names; taste; quality rules; the template's sources. A new rule
+# is best put into its group, with a comment; that is a wish, not a rule. A rule a formatter applies is at warning;
+# one it cannot apply is at most a suggestion. Severities use dotnet_diagnostic: .NET 8 ignores option:severity on
+# build.
 root = true
 
+# 1. The bytes of every file.
 [*]
+# One encoding for every file.
 charset = utf-8
+# LF in every checkout; .gitattributes makes git write it so.
 end_of_line = lf
+# A file ends with a line end.
 insert_final_newline = true
+# No space or tab at the end of a line.
 trim_trailing_whitespace = true
+# Spaces, 2 by default: the size most files of the repository had.
 indent_style = space
 indent_size = 2
 
+# 4 spaces in C#, its projects, shell and Python: the size these files had.
 [*.{cs,csproj,sh,py}]
 indent_size = 4
 
-# Visual Studio writes a solution file with a byte order mark and tabs.
+# Visual Studio writes a solution file with a byte order mark and indents it with tabs.
 [*.sln]
 charset = utf-8-bom
 indent_style = tab
 
-# C#: the rules of tool/ and, in CI, of a solution generated from the template, where CI copies this file.
 [*.cs]
-# Every analyzer rule that is on by default reports as a warning; -warnaserror in CI makes it an error.
-# The exemptions follow, each with its reason. Severities use dotnet_diagnostic: .NET 8 ignores
-# option:severity on build.
+# Every analyzer rule that is on by default reports as a warning; -warnaserror in CI makes it an error. The
+# groups below lower what a formatter cannot apply.
 dotnet_analyzer_diagnostic.severity = warning
 
-# Formatting (IDE0055): Allman braces and the default spacing.
+# 2. The layout of C# (IDE0055, applied by dotnet format).
+dotnet_diagnostic.IDE0055.severity = warning
+# Braces on a line of their own for every construct, and else, catch and finally on a new line (Allman).
 csharp_new_line_before_open_brace = all
 csharp_new_line_before_else = true
 csharp_new_line_before_catch = true
@@ -36,12 +50,18 @@ csharp_new_line_before_finally = true
 csharp_new_line_before_members_in_object_initializers = false
 csharp_new_line_before_members_in_anonymous_types = true
 csharp_new_line_between_query_expression_clauses = true
+# A block may stay on one line; two statements may not share one.
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = false
+# Indents: the contents of a block and of a case, the labels of a switch; a label one level out.
 csharp_indent_block_contents = true
 csharp_indent_braces = false
 csharp_indent_case_contents = true
 csharp_indent_case_contents_when_block = true
 csharp_indent_switch_labels = true
 csharp_indent_labels = one_less_than_current
+# Spaces: after a comma, a keyword of control flow and the colon of a base list, around a binary operator; none
+# inside parentheses or brackets, around a dot, or after a cast.
 csharp_space_after_cast = false
 csharp_space_after_colon_in_inheritance_clause = true
 csharp_space_after_comma = true
@@ -64,112 +84,71 @@ csharp_space_between_method_declaration_name_and_open_parenthesis = false
 csharp_space_between_method_declaration_parameter_list_parentheses = false
 csharp_space_between_parentheses = false
 csharp_space_between_square_brackets = false
-csharp_preserve_single_line_blocks = true
-csharp_preserve_single_line_statements = false
+
+# 3. Usings and namespaces.
+# The usings sorted with System first and no blank line between groups, as Microsoft's sources sort them.
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = false
-dotnet_diagnostic.IDE0055.severity = warning
-
-# using directives outside the namespace; an unused one is an error (IDE0005 needs GenerateDocumentationFile).
+# Usings outside the namespace (the C# coding conventions).
 csharp_using_directive_placement = outside_namespace
+# An unused using is removed (IDE0005); a build reports it only with GenerateDocumentationFile on.
 dotnet_diagnostic.IDE0005.severity = warning
-
-# File-scoped namespaces that match the folder. IDE0130 runs in dotnet format; an SDK 8 build skips it.
+# File-scoped namespaces: the scope is the file, seen at once.
 csharp_style_namespace_declarations = file_scoped
-# A using block over using var x = ...;: where a resource is released is seen by its brace, as the scope of every
-# body is (csharp_prefer_braces). No rule requires the block; this one only stops the IDE offering the short form.
+dotnet_diagnostic.IDE0160.severity = none
+dotnet_diagnostic.IDE0161.severity = warning
+# A namespace matches its folder (IDE0130); dotnet format reports it, an SDK 8 build does not.
+dotnet_style_namespace_match_folder = true
+dotnet_diagnostic.IDE0130.severity = warning
+
+# 4. Blank lines (experimental rules of .NET).
+# At most one blank line in a row (IDE2000).
+dotnet_style_allow_multiple_blank_lines_experimental = false
+dotnet_diagnostic.IDE2000.severity = warning
+# One statement on a line (IDE2001).
+csharp_style_allow_embedded_statements_on_same_line_experimental = false
+dotnet_diagnostic.IDE2001.severity = warning
+# No blank line between two closing braces (IDE2002).
+csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
+dotnet_diagnostic.IDE2002.severity = warning
+# No blank line after the colon of a constructor initializer (IDE2004) or a token of ?: (IDE2005).
+csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = false
+dotnet_diagnostic.IDE2004.severity = warning
+csharp_style_allow_blank_line_after_token_in_conditional_expression_experimental = false
+dotnet_diagnostic.IDE2005.severity = warning
+# A statement may follow a block with no blank line (IDE2003 off).
+dotnet_style_allow_statement_immediately_after_block_experimental = true
+dotnet_diagnostic.IDE2003.severity = none
+# => stays at the end of its line; false would move it to the start of the next one (IDE2006 off).
+csharp_style_allow_blank_line_after_token_in_arrow_expression_clause_experimental = true
+dotnet_diagnostic.IDE2006.severity = none
+
+# 5. The language.
+# Braces around the body of every if, else, for, foreach, while, using and lock, one line or many: the scope of a
+# body is always seen at a glance, never inferred from the indent.
+csharp_prefer_braces = true
+dotnet_diagnostic.IDE0011.severity = warning
+# No this. before a member.
+dotnet_style_qualification_for_field = false
+dotnet_style_qualification_for_property = false
+dotnet_style_qualification_for_method = false
+dotnet_style_qualification_for_event = false
+# The language's keywords over the names of the framework's types: int, not Int32.
+dotnet_style_predefined_type_for_locals_parameters_members = true
+dotnet_style_predefined_type_for_member_access = true
+# The accessibility of a member is always written, but on an interface's.
+dotnet_style_require_accessibility_modifiers = for_non_interface_members
+# The IDE does not offer to turn a using block into a using declaration, whose end no line shows. No rule requires
+# the block, and no formatter turns a declaration back, so the code keeps the declarations it has.
 csharp_prefer_simple_using_statement = false
 dotnet_diagnostic.IDE0063.severity = none
 # A primary or an explicit constructor is the author's: the code has primary ones, and moving them would change
 # the template's files a team edits most.
 dotnet_diagnostic.IDE0290.severity = none
-dotnet_diagnostic.IDE0160.severity = none
-dotnet_diagnostic.IDE0161.severity = warning
-dotnet_style_namespace_match_folder = true
-dotnet_diagnostic.IDE0130.severity = warning
 
-# No this., language keywords over framework type names, accessibility always written.
-dotnet_style_qualification_for_field = false
-dotnet_style_qualification_for_property = false
-dotnet_style_qualification_for_method = false
-dotnet_style_qualification_for_event = false
-dotnet_style_predefined_type_for_locals_parameters_members = true
-dotnet_style_predefined_type_for_member_access = true
-dotnet_style_require_accessibility_modifiers = for_non_interface_members
-
-# var is permitted and not enforced either way; the options only steer what the IDE generates.
-csharp_style_var_for_built_in_types = true
-csharp_style_var_when_type_is_apparent = true
-csharp_style_var_elsewhere = true
-dotnet_diagnostic.IDE0007.severity = none
-dotnet_diagnostic.IDE0008.severity = none
-
-# Braces around the body of every if, else, for, foreach, while, using and lock, one line or many: the scope of a
-# body is always seen at a glance, never inferred from the indent.
-csharp_prefer_braces = true
-dotnet_diagnostic.IDE0011.severity = warning
-
-# Expression body or block body is the author's choice.
-dotnet_diagnostic.IDE0021.severity = none
-dotnet_diagnostic.IDE0022.severity = none
-dotnet_diagnostic.IDE0023.severity = none
-dotnet_diagnostic.IDE0024.severity = none
-dotnet_diagnostic.IDE0025.severity = none
-dotnet_diagnostic.IDE0026.severity = none
-dotnet_diagnostic.IDE0027.severity = none
-dotnet_diagnostic.IDE0053.severity = none
-dotnet_diagnostic.IDE0061.severity = none
-
-# Rewrites to ?: and adding every switch case are offered, not required.
-dotnet_diagnostic.IDE0045.severity = suggestion
-dotnet_diagnostic.IDE0046.severity = suggestion
-dotnet_diagnostic.IDE0072.severity = suggestion
-
-# A discarded return value need not be written as _ =.
-dotnet_diagnostic.IDE0058.severity = none
-
-# Collection expressions ([..] over new List, ToList, ToArray): the formatter does not apply them, so they are offered,
-# not required. IDE0305 comes with SDK 10 only, and at warning it would fail a build on one SDK and not another.
-dotnet_diagnostic.IDE0300.severity = suggestion
-dotnet_diagnostic.IDE0301.severity = suggestion
-dotnet_diagnostic.IDE0302.severity = suggestion
-dotnet_diagnostic.IDE0303.severity = suggestion
-dotnet_diagnostic.IDE0304.severity = suggestion
-dotnet_diagnostic.IDE0305.severity = suggestion
-dotnet_diagnostic.IDE0306.severity = suggestion
-
-# Collection expressions ([..] over new List, ToList, ToArray): offered, not required. Not chosen as a rule, and
-# IDE0305 comes with SDK 10 only; at the bulk warning it would fail a build on one SDK and not on another.
-dotnet_diagnostic.IDE0300.severity = suggestion
-dotnet_diagnostic.IDE0301.severity = suggestion
-dotnet_diagnostic.IDE0302.severity = suggestion
-dotnet_diagnostic.IDE0303.severity = suggestion
-dotnet_diagnostic.IDE0304.severity = suggestion
-dotnet_diagnostic.IDE0305.severity = suggestion
-dotnet_diagnostic.IDE0306.severity = suggestion
-
-# Blank lines (experimental rules): at most one in a row, none between consecutive braces, one statement
-# per line, none after a constructor initializer colon or a ?: token.
-dotnet_style_allow_multiple_blank_lines_experimental = false
-csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
-csharp_style_allow_embedded_statements_on_same_line_experimental = false
-csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = false
-csharp_style_allow_blank_line_after_token_in_conditional_expression_experimental = false
-dotnet_diagnostic.IDE2000.severity = warning
-dotnet_diagnostic.IDE2001.severity = warning
-dotnet_diagnostic.IDE2002.severity = warning
-dotnet_diagnostic.IDE2004.severity = warning
-dotnet_diagnostic.IDE2005.severity = warning
-# => stays at the end of its line; false would move it to the start of the next one.
-csharp_style_allow_blank_line_after_token_in_arrow_expression_clause_experimental = true
-dotnet_diagnostic.IDE2006.severity = none
-# A statement may follow a block without a blank line.
-dotnet_style_allow_statement_immediately_after_block_experimental = true
-dotnet_diagnostic.IDE2003.severity = none
-
-# Naming: constants PascalCase; private static readonly fields PascalCase (StyleCop SA1311, the JetBrains
-# defaults); every other private field _camelCase. The s_ prefix of Microsoft's own code is not taken.
-# A name the formatter does not change: the rules are offered in the IDE, never fail a build.
+# 6. Names (IDE1006): offered, since no formatter renames.
+# Constants PascalCase; private static readonly fields PascalCase (StyleCop SA1311, the JetBrains defaults);
+# every other private field _camelCase. The s_ prefix of Microsoft's own code is not taken.
 dotnet_diagnostic.IDE1006.severity = suggestion
 dotnet_naming_rule.constants_are_pascal_case.severity = suggestion
 dotnet_naming_rule.constants_are_pascal_case.symbols = constants
@@ -191,16 +170,49 @@ dotnet_naming_style.pascal_case.capitalization = pascal_case
 dotnet_naming_style.underscore_camel_case.capitalization = camel_case
 dotnet_naming_style.underscore_camel_case.required_prefix = _
 
-# Globalization: the tool reads and writes files and git output, not localized text for people.
+# 7. Taste: the author's, never a build's.
+# var is neither required nor refused; the options only steer what the IDE generates.
+csharp_style_var_for_built_in_types = true
+csharp_style_var_when_type_is_apparent = true
+csharp_style_var_elsewhere = true
+dotnet_diagnostic.IDE0007.severity = none
+dotnet_diagnostic.IDE0008.severity = none
+# An expression body or a block body is the author's choice.
+dotnet_diagnostic.IDE0021.severity = none
+dotnet_diagnostic.IDE0022.severity = none
+dotnet_diagnostic.IDE0023.severity = none
+dotnet_diagnostic.IDE0024.severity = none
+dotnet_diagnostic.IDE0025.severity = none
+dotnet_diagnostic.IDE0026.severity = none
+dotnet_diagnostic.IDE0027.severity = none
+dotnet_diagnostic.IDE0053.severity = none
+dotnet_diagnostic.IDE0061.severity = none
+# A rewrite to ?: and adding every case of a switch are offered, not required.
+dotnet_diagnostic.IDE0045.severity = suggestion
+dotnet_diagnostic.IDE0046.severity = suggestion
+dotnet_diagnostic.IDE0072.severity = suggestion
+# A discarded return value need not be written as _ =.
+dotnet_diagnostic.IDE0058.severity = none
+# Collection expressions ([..] over new List, ToList, ToArray) are offered: no formatter applies them, and IDE0305
+# comes with SDK 10 only, so at warning it would fail a build on one SDK and not another.
+dotnet_diagnostic.IDE0300.severity = suggestion
+dotnet_diagnostic.IDE0301.severity = suggestion
+dotnet_diagnostic.IDE0302.severity = suggestion
+dotnet_diagnostic.IDE0303.severity = suggestion
+dotnet_diagnostic.IDE0304.severity = suggestion
+dotnet_diagnostic.IDE0305.severity = suggestion
+dotnet_diagnostic.IDE0306.severity = suggestion
+
+# 8. Quality rules: the exemptions from the warning above.
+# Globalization: the tool reads and writes files and the output of git, not text for people.
 dotnet_analyzer_diagnostic.category-Globalization.severity = suggestion
 # Caching a CompositeFormat pays off on a hot path; the tool has none.
 dotnet_diagnostic.CA1863.severity = suggestion
 # A JSON string of a test is the data of the file it is written to, not code to mark with /*lang=json*/.
 dotnet_diagnostic.JSON002.severity = none
 
-# The template's sources hold //#if at column 0 and placeholder names, and no project of the repository
-# compiles them (DotNetSolutionKit.Templates.csproj removes every Compile item). The section keeps an IDE
-# quiet on them; a generated solution is checked instead.
+# 9. The template's sources: they hold //#if at column 0 and placeholder names, and no project of the repository
+# compiles them; this keeps an IDE quiet on them. Their C# is checked on a generated solution instead.
 [template/**.cs]
 generated_code = true
 dotnet_analyzer_diagnostic.severity = none
