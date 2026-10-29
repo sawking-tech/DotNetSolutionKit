@@ -1,0 +1,12 @@
+<Project>
+    <!-- The style of tool/: .editorconfig at the root sets the rules and their levels, these turn them on for a build. -->
+    <PropertyGroup>
+        <!-- The IDE rules run on build; the ones at warning fail CI through -warnaserror. -->
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <!-- The XML docs are checked (CS1573), and IDE0005, an unused using, is reported on build only with them on. -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <!-- No AnalysisMode: with it, the build ignores dotnet_analyzer_diagnostic.severity of .editorconfig. -->
+        <!-- The quality rules of .NET 8 on every SDK: a newer SDK adds none of its own. -->
+        <AnalysisLevel>8.0</AnalysisLevel>
+    </PropertyGroup>
+</Project>

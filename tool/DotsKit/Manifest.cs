@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DotsKit.PackageUpdates;
@@ -24,23 +25,27 @@ internal sealed record Manifest
     // Each field is explained in place by a _comment_<field> key, the notation of the template's appsettings.json:
     // written on every write, skipped on reading, since they have no setter.
 
+    [SuppressMessage(Suppressions.Performance, "CA1822", Justification = Suppressions.JsonMetadataKey)]
     [JsonPropertyName("_comment_template")]
     public string TemplateComment => "The version of DotNetSolutionKit the solution is generated with; dotskit upgrade moves it to the tool's";
 
     public required string Template { get; init; }
 
+    [SuppressMessage(Suppressions.Performance, "CA1822", Justification = Suppressions.JsonMetadataKey)]
     [JsonPropertyName("_comment_solution")]
     public string SolutionComment => "The template's arguments of Common and the root: the names, the database, the deployment, the flags the services share";
 
     /// <summary>The arguments Common and the root files are generated with, without a service's name.</summary>
     public required List<string> Solution { get; init; }
 
+    [SuppressMessage(Suppressions.Performance, "CA1822", Justification = Suppressions.JsonMetadataKey)]
     [JsonPropertyName("_comment_services")]
     public string ServicesComment => "Each service by its own arguments; dotskit new adds one or joins flags to one";
 
     /// <summary>Each service by its arguments, its name (-S) among them.</summary>
     public required List<List<string>> Services { get; init; }
 
+    [SuppressMessage(Suppressions.Performance, "CA1822", Justification = Suppressions.JsonMetadataKey)]
     [JsonPropertyName("_comment_packages")]
     public string PackagesComment => "How much of the template's package versions an upgrade brings";
 
@@ -95,7 +100,10 @@ internal sealed record Manifest
         var merged = existing is null ? service : existing.JoinedWith(service).With(TemplateArgs.ServiceName, existing.Service);
         var services = ServiceArgs.Select(s => IsNamed(s, service.Service) ? merged : s).ToList();
         if (existing is null)
+        {
             services.Add(merged);
+        }
+
         return this with
         {
             Solution = SolutionArgs.WidenBy(merged).InTemplateOrder().ToArgs(),

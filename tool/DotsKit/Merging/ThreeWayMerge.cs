@@ -9,15 +9,20 @@ namespace DotsKit.Merging;
 /// </summary>
 internal sealed class ThreeWayMerge(ITextMerger merger)
 {
+    /// <param name="solution">The solution's root, whose files are the team's side.</param>
     /// <param name="baseDir">What the template gave before; null when the solution is new.</param>
+    /// <param name="newDir">What the template gives now.</param>
     /// <param name="preferTemplate">--force: in a conflict take the template's side; the solution's lines stay in git history.</param>
     /// <param name="renames">The files the template moved, new path to old (<see cref="IRenames"/>); none for a new solution.</param>
+    /// <param name="ct">Cancels the merge before anything is written.</param>
     public async Task<List<Change>> ComputeAsync(string solution, string? baseDir, string newDir, bool preferTemplate,
         IReadOnlyDictionary<string, string>? renames, CancellationToken ct)
     {
         var paths = new SortedSet<string>(Folders.RelativeFiles(newDir), StringComparer.Ordinal);
         if (baseDir is not null)
+        {
             paths.UnionWith(Folders.RelativeFiles(baseDir));
+        }
 
         var changes = new List<Change>();
         foreach (var (to, from) in Moves(solution, renames))
@@ -36,7 +41,9 @@ internal sealed class ThreeWayMerge(ITextMerger merger)
                 _ => throw new InvalidOperationException($"Unknown decision for {path}"),
             };
             if (change is not null)
+            {
                 changes.Add(change);
+            }
         }
         return changes;
     }
@@ -53,7 +60,7 @@ internal sealed class ThreeWayMerge(ITextMerger merger)
     /// </summary>
     private async Task<IEnumerable<Change>> MoveAsync(string solution, string baseDir, string newDir, string from, string to, bool preferTemplate, CancellationToken ct)
     {
-        var own = FileText.Read(solution, from)!;
+        var own = FileText.Read(solution, from);
         var moved = $"moved from {from} by the template";
         var decision = MergeRule.Decide(to, FileText.Read(baseDir, from), FileText.Read(newDir, to), own);
         var change = decision switch
@@ -72,16 +79,21 @@ internal sealed class ThreeWayMerge(ITextMerger merger)
     private async Task<Change> MergeAsync(string path, MergeRule.NeedsMerge merge, bool preferTemplate, CancellationToken ct)
     {
         if (merge.Solution.IsBinary || merge.Template.IsBinary)
+        {
             return preferTemplate
                 ? new(path, ChangeKind.Update, merge.Template, merge.Reason + "; binary, the template's taken")
                 : new(path, ChangeKind.Kept, null, merge.Reason + "; binary, kept as it is");
+        }
 
         // The three sides in the template's style: a change of the style alone conflicts with nothing the team wrote.
         var (solution, @base, template) = (TemplateStyle.Of(path, merge.Solution), TemplateStyle.Of(path, merge.Base), TemplateStyle.Of(path, merge.Template));
         var result = await merger.MergeAsync(
             LineEndings.ToLf(solution.Text), LineEndings.ToLf(@base.Text), LineEndings.ToLf(template.Text), preferTemplate, ct);
         if (result.Failure is not null)
+        {
             throw new InvalidOperationException($"git could not merge {path}: {result.Failure}. Nothing was written.");
+        }
+
         var content = solution with { Text = LineEndings.Apply(result.Text, LineEndings.Of(solution.Text)) };
         return result.Conflicts == 0
             ? new(path, ChangeKind.Merge, content, merge.Reason)

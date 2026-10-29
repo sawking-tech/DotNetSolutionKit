@@ -22,7 +22,10 @@ internal sealed class GitMergeScenarios
     {
         var root = Folders.NewTemp("git-merge-tree");
         foreach (var (path, text) in files)
+        {
             Write(root, path, text);
+        }
+
         return root;
     }
 

@@ -24,7 +24,10 @@ internal static class Layout
     {
         var prefix = ServicesFolder + "/";
         if (!path.StartsWith(prefix, StringComparison.Ordinal))
+        {
             return null;
+        }
+
         var end = path.IndexOf('/', prefix.Length);
         return end < 0 ? null : path[..end];
     }

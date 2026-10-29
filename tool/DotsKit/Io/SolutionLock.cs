@@ -35,7 +35,10 @@ internal static class SolutionLock
     {
         var path = Folders.RealPath(root).TrimEnd('/', '\\');
         if (OperatingSystem.IsWindows())
+        {
             path = path.ToUpperInvariant();
+        }
+
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(path)))[..KeyLength];
     }
 }

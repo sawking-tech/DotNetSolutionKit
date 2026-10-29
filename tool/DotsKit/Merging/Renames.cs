@@ -25,7 +25,10 @@ internal sealed class GitRenames(IProcessRunner runner) : IRenames
     {
         var result = await runner.RunAsync("git", ["diff", "--no-index", "-M", "--name-status", "-z", baseDir, newDir], Path.GetTempPath(), ct);
         if (result.Code is not (0 or Differ))
+        {
             throw new InvalidOperationException($"git could not compare the template's two outputs: {result.Error.Trim()}");
+        }
+
         return WithinServices(Parse(result.Output, baseDir, newDir), path => File.Exists(Path.Combine(newDir, path)));
     }
 
@@ -34,6 +37,7 @@ internal sealed class GitRenames(IProcessRunner runner) : IRenames
     /// the same file and both move it, git may pair one service's old path with the other's new one. Such a pair
     /// is taken to the same move inside the old path's own service, or dropped when that service has no such file.
     /// </summary>
+    /// <param name="renames">The moves git found between the two trees, new path to old.</param>
     /// <param name="existsInNew">Whether a path, relative to the trees, is a file of the template's new output.</param>
     public static IReadOnlyDictionary<string, string> WithinServices(IReadOnlyDictionary<string, string> renames, Func<string, bool> existsInNew)
     {
@@ -44,7 +48,9 @@ internal sealed class GitRenames(IProcessRunner runner) : IRenames
             var (to, from) = (Layout.ServiceFolderOf(moved)!, Layout.ServiceFolderOf(old)!);
             var own = from + moved[to.Length..].Replace(NameOf(to), NameOf(from), StringComparison.Ordinal);
             if (existsInNew(own) && !kept.ContainsKey(own))
+            {
                 kept[own] = old;
+            }
         }
         return kept;
     }

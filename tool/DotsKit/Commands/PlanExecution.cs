@@ -20,7 +20,10 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         }
         var written = await writer.WriteAsync(plan, ct);
         if (written.Repaired.Count > 0)
+        {
             terminal.Info($"Written; {written.Repaired.Count} usings and references changed for the namespaces the template gave up, before the build.");
+        }
+
         return written.Conflicts.Count > 0 ? Conflicts(plan, written.Conflicts) : await BuildAsync(plan, options, ct);
     }
 
@@ -33,7 +36,10 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         }
         terminal.Info($"Merged by git, not committed; {conflicts.Count} file(s) in conflict:");
         foreach (var path in conflicts)
+        {
             terminal.Info($"  {path}");
+        }
+
         terminal.Info("Resolve them in the IDE or with git mergetool, then git commit and dotnet build; git merge --abort undoes the merge.");
         return ExitCode.Conflicts;
     }
@@ -41,7 +47,10 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
     private async Task<ExitCode> BuildAsync(Plan plan, Options options, CancellationToken ct)
     {
         if (options.NoBuild)
+        {
             return ExitCode.Done;
+        }
+
         RepairResult result;
         try
         {
@@ -56,9 +65,15 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
             return ExitCode.Failed;
         }
         if (result.Changed > 0)
+        {
             terminal.Info($"Written; {result.Changed} references and usings changed for the types the template moved: git diff shows them.");
+        }
+
         if (result.Stopped is { } why)
+        {
             terminal.Info($"Written; the repair of references stopped: {why}");
+        }
+
         var build = result.Build;
         if (build.Code == 0)
         {
@@ -67,7 +82,10 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         }
         terminal.Info("Written; the build fails, by project:");
         foreach (var line in BuildErrors.ByProject(build.Output))
+        {
             terminal.Info(line);
+        }
+
         return ExitCode.Failed;
     }
 }

@@ -11,13 +11,21 @@ namespace DotsKit.Commands;
 /// and by the tool's, or the release --to names, as the target; the files the template moved take the team's
 /// changes with them, and the package versions follow the manifest's policy.
 /// </summary>
+/// <param name="planner">Builds the plan: the trees of the template, their merge with the solution and the report.</param>
+/// <param name="execution">Shows the plan, asks, writes it and builds.</param>
+/// <param name="git">Tells whether the solution's working tree is clean before anything is written.</param>
+/// <param name="terminal">Says where the solution goes from and to, or that it is there already.</param>
+/// <param name="toolVersion">The version of the tool, where an upgrade goes when --to names no release.</param>
 /// <param name="onSources">The tool runs against the template's sources: it upgrades any release to them.</param>
 internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, IGit git, ITerminal terminal, string toolVersion, bool onSources)
 {
     public async Task<ExitCode> RunAsync(Options options, string folder, CancellationToken ct)
     {
         if (options.TemplateArgs.Count > 0)
+        {
             throw new ArgumentException($"dotskit upgrade takes no parameter of the template; leave out {string.Join(' ', options.TemplateArgs)}: dotskit new adds a service or a flag.");
+        }
+
         var root = SolutionRoot.Find(folder)
             ?? throw new InvalidOperationException($"No solution here: dotskit upgrade runs in a solution, a folder with {Layout.ServicesFolder}/{Layout.SolutionPattern} or below it.");
         var current = Manifest.Load(root)
@@ -29,13 +37,25 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
             return ExitCode.Done;
         }
         if (TemplateVersions.WhyNotUpgraded(current.Template, toolVersion, onSources) is { } why)
+        {
             throw new InvalidOperationException(why);
+        }
+
         if (options.To is not null && TemplateVersions.WhyNotTarget(current.Template, options.To, toolVersion, onSources) is { } whyNotTo)
+        {
             throw new InvalidOperationException(whyNotTo);
+        }
+
         if (!options.AllowDirty && !await git.IsCleanAsync(root, ct))
+        {
             throw new InvalidOperationException("The git working tree has uncommitted changes: commit or stash them, so what dotskit writes can be seen and undone (--allow-dirty to go on).");
+        }
+
         if (options.AllowDirty && options.ByGit)
+        {
             throw new ArgumentException("--allow-dirty needs --merge files: a git merge runs on a clean tree.");
+        }
+
         terminal.Info($"Upgrading the solution from the template {current.Template} to {target}.");
         var plan = await planner.BuildAsync(root, current, current.WithTemplate(target), new Merging.MergeMode(options.ByGit, options.Force), ct);
         return await execution.RunAsync(plan, options, ct);

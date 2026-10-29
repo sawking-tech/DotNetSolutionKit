@@ -16,17 +16,35 @@ internal static class MergeRule
     public static Decision Decide(string path, FileText? @base, FileText? template, FileText? solution)
     {
         if (template is not null && solution is not null && template.SameTextAs(solution))
+        {
             return new Final(null);
+        }
+
         if (@base is null)
+        {
             return Added(path, template, solution);
+        }
+
         if (template is null)
+        {
             return Removed(path, @base, solution);
+        }
+
         if (template.SameTextAs(@base))
+        {
             return new Final(null);
+        }
+
         if (solution is null)
+        {
             return new Final(new(path, ChangeKind.Kept, null, "changed in the template, removed from the solution: left removed"));
+        }
+
         if (solution.SameTextAs(@base))
+        {
             return new Final(new(path, ChangeKind.Update, KeepEndings(template, solution), "changed in the template only"));
+        }
+
         return new NeedsMerge(solution, @base, template, "changed in the solution and in the template");
     }
 
@@ -36,7 +54,7 @@ internal static class MergeRule
         // Both added a file by this path: with no common base, the empty file stands for it.
         : new NeedsMerge(solution, new FileText("", solution.Bom), template, "added by the solution and by the template");
 
-    private static Decision Removed(string path, FileText @base, FileText? solution) =>
+    private static Final Removed(string path, FileText @base, FileText? solution) =>
         solution is null ? new Final(null)
         : solution.SameTextAs(@base) ? new Final(new(path, ChangeKind.Delete, null, "removed from the template"))
         : new Final(new(path, ChangeKind.Kept, null, "removed from the template, changed in the solution: kept"));

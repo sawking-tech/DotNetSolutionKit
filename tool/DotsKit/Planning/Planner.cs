@@ -1,5 +1,4 @@
 using DotsKit.Generation;
-using DotsKit.Io;
 using DotsKit.Merging;
 using DotsKit.PackageUpdates;
 using DotsKit.Solutions;
@@ -18,7 +17,11 @@ internal interface IPlanner
 
 internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionProjects projects, IRenames renames) : IPlanner
 {
+    /// <param name="root">The solution's root, or the folder a new solution is made in.</param>
     /// <param name="current">The solution's manifest; null when there is no solution yet, and the base is empty.</param>
+    /// <param name="next">The manifest the solution will have.</param>
+    /// <param name="mode">How the files are merged: by git or by the tool, and whether a conflict takes the template's side.</param>
+    /// <param name="ct">Cancels the plan.</param>
     public async Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, MergeMode mode, CancellationToken ct)
     {
         // The two trees do not depend on each other: generated side by side.
@@ -30,7 +33,10 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
         var byGit = mode.ByGit && current is not null;
         var changes = byGit ? TemplateDiff.Of(baseDir!, nextDir) : await MergeAsync(root, baseDir, nextDir, mode, ct);
         if (current is null)
+        {
             return new Plan(root, next, changes, new MembershipChange([], []), packages);
+        }
+
         var membership = await MembershipAsync(root, baseDir!, nextDir, ct);
         var types = TypeMap.Between(TypeIndex.Read(baseDir!), TypeIndex.Read(nextDir));
         return new Plan(root, next, [.. changes.Where(c => !IsSolutionFile(c.Path))], membership, packages, types,

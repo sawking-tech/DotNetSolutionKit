@@ -21,8 +21,11 @@ internal sealed class DiskSolutionFiles(string root) : ISolutionFiles
     {
         var full = Full(path);
         if (!full.EndsWith(Any))
+        {
             return File.Exists(full) || Directory.Exists(full);
-        var folder = Path.GetDirectoryName(full)!;
+        }
+
+        var folder = Path.GetDirectoryName(full);
         return Directory.Exists(folder) && Directory.EnumerateFileSystemEntries(folder, Path.GetFileName(full)).Any();
     }
 

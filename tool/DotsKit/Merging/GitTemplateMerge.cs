@@ -35,6 +35,7 @@ internal sealed record TemplateCommit(string Tree, string Version);
 /// attributes file of its own: the solution's config and files are not touched. The solution's .gitattributes wins
 /// over that file, so a file with a merge of its own, as one of Git LFS, keeps it.
 /// </summary>
+/// <param name="runner">Runs git.</param>
 /// <param name="self">The command line that runs dotskit again (<see cref="SelfCommand"/>), for git to run the driver.</param>
 internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGitMerge
 {
@@ -45,6 +46,9 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     private const string Driver = "dotskit";
     private const string GlobalAttributes = "git/attributes";
 
+    /// <summary>--force: a line both sides changed takes the template's.</summary>
+    private static readonly string[] TheirsOption = ["-X", "theirs"];
+
     public async Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
     {
         await RefuseAMergeInProgressAsync(root, ct);
@@ -54,10 +58,13 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         // Moved only from the tip read above: a commit another run put there in between is not lost (empty: no branch yet).
         await runner.RunCheckedAsync("git", ["update-ref", BranchRef, nextCommit, tip ?? ""], root, ct);
         var merge = await runner.RunAsync("git",
-            [.. await DriverConfigAsync(root, preferTemplate, ct), "merge", "--no-ff", "--no-commit", .. preferTemplate ? new[] { "-X", "theirs" } : [], Branch], root, ct);
+            [.. await DriverConfigAsync(root, preferTemplate, ct), "merge", "--no-ff", "--no-commit", .. preferTemplate ? TheirsOption : [], Branch], root, ct);
         var conflicts = await PathsAsync(root, ["diff", "--name-only", "-z", "--diff-filter=U"], null, ct);
         if (merge.Code != 0 && conflicts.Count == 0)
+        {
             throw new InvalidOperationException($"git could not merge {Branch}: {FirstLine(merge)} Nothing is merged; run git merge --abort if git started one.");
+        }
+
         return conflicts;
     }
 
@@ -78,8 +85,12 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         var global = await GlobalAttributesAsync(root, ct);
         await File.WriteAllTextAsync(attributes, (global is null ? "" : await File.ReadAllTextAsync(global, ct) + "\n") + $"* merge={Driver}\n", ct);
         var command = $"{self} {StyleMergeDriver.Command} %O %A %B %P{(preferTemplate ? " " + StyleMergeDriver.TheirsFlag : "")}";
-        return ["-c", $"core.attributesFile={attributes.Replace('\\', '/')}", "-c", $"merge.{Driver}.name=dotskit, the three sides in the template's style",
-            "-c", $"merge.{Driver}.driver={command}"];
+        return ["-c",
+            $"core.attributesFile={attributes.Replace('\\', '/')}",
+            "-c",
+            $"merge.{Driver}.name=dotskit, the three sides in the template's style",
+            "-c",
+            $"merge.{Driver}.driver={command}"];
     }
 
     /// <summary>The user's global attributes file, as git finds it: core.attributesFile, else git/attributes of the XDG config.</summary>
@@ -96,7 +107,9 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     private async Task RefuseAMergeInProgressAsync(string root, CancellationToken ct)
     {
         if ((await runner.RunAsync("git", ["rev-parse", "-q", "--verify", "MERGE_HEAD"], root, ct)).Code == 0)
+        {
             throw new InvalidOperationException("A git merge is in progress: commit it or run git merge --abort, then run the command again.");
+        }
     }
 
     /// <summary>
@@ -107,10 +120,20 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     {
         var tree = await TreeAsync(root, @base.Tree, ct);
         if (tip is not null && await TreeOfAsync(root, tip, ct) == tree && await IsInHistoryAsync(root, tip, ct))
+        {
             return tip;
+        }
+
         var commit = await CommitTreeAsync(root, tree, tip, $"dotskit: the template {@base.Version}, the base of the solution", ct);
-        await runner.RunCheckedAsync("git", ["merge", "-s", "ours", "--no-ff", "--allow-unrelated-histories", "--no-edit",
-            "-m", $"dotskit: the solution is of the template {@base.Version}", commit], root, ct);
+        await runner.RunCheckedAsync("git", ["merge",
+            "-s",
+            "ours",
+            "--no-ff",
+            "--allow-unrelated-histories",
+            "--no-edit",
+            "-m",
+            $"dotskit: the solution is of the template {@base.Version}",
+            commit], root, ct);
         return commit;
     }
 

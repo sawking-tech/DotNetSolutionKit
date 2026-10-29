@@ -21,20 +21,30 @@ internal sealed class StyleMergeDriver(ITextMerger merger)
     private const int Conflicted = 1;
 
     /// <param name="args">The base, the solution's and the template's file, the path in the solution, maybe <see cref="TheirsFlag"/>.</param>
+    /// <param name="ct">Cancels the merge.</param>
     public async Task<int> RunAsync(IReadOnlyList<string> args, CancellationToken ct)
     {
         if (args.Count is < 4 or > 5)
+        {
             throw new ArgumentException($"dotskit {Command} is run by git as {Command} %O %A %B %P [{TheirsFlag}]; it is not a command to run by hand.");
+        }
+
         var (path, preferTemplate) = (args[3], args.Count == 5 && args[4] == TheirsFlag);
         var (@base, solution, template) = (Read(args[0]), Read(args[1]), Read(args[2]));
         // A binary side is not text to merge: git keeps the solution's side and lists the file as unmerged.
         if (@base.IsBinary || solution.IsBinary || template.IsBinary)
+        {
             return Conflicted;
+        }
+
         (@base, solution, template) = (TemplateStyle.Of(path, @base), TemplateStyle.Of(path, solution), TemplateStyle.Of(path, template));
         var result = await merger.MergeAsync(LineEndings.ToLf(solution.Text), LineEndings.ToLf(@base.Text), LineEndings.ToLf(template.Text), preferTemplate, ct);
         if (result.Failure is not null)
+        {
             throw new InvalidOperationException(
                 $"git could not merge {path}: {result.Failure}. The file holds the solution's side: take the template's with git checkout --theirs -- {path}, or merge it by hand.");
+        }
+
         // The merged text in the line ends of the solution's side, as the merge by files writes it.
         await File.WriteAllBytesAsync(args[1], (solution with { Text = LineEndings.Apply(result.Text, LineEndings.Of(solution.Text)) }).ToBytes(), ct);
         return result.Conflicts == 0 ? Merged : Conflicted;

@@ -47,11 +47,20 @@ internal sealed class Options
     {
         var options = Parse(args);
         if (options.TemplateVersion is not null && command != "init")
+        {
             throw new ArgumentException($"{TemplateVersionOption} is an option of dotskit init.");
+        }
+
         if (options.To is not null && command != "upgrade")
+        {
             throw new ArgumentException($"{ToOption} is an option of dotskit upgrade.");
+        }
+
         if (command == "init" && args.Any(a => Is(a, MergeOption)))
+        {
             throw new ArgumentException($"{MergeOption} is an option of dotskit new and dotskit upgrade: init merges nothing.");
+        }
+
         return options;
     }
 
@@ -62,7 +71,10 @@ internal sealed class Options
         var (to, afterTo) = Valued(afterVersion, ToOption);
         var (merge, rest) = Valued(afterTo, MergeOption);
         if (merge is not null and not (Merging.MergeMode.Git or Merging.MergeMode.Files))
+        {
             throw new ArgumentException($"{MergeOption} {merge}: name {Merging.MergeMode.Git} or {Merging.MergeMode.Files}.");
+        }
+
         return new Options
         {
             Yes = rest.Any(a => Is(a, YesOption)),
@@ -81,9 +93,15 @@ internal sealed class Options
     {
         var at = args.ToList().FindIndex(a => Is(a, option));
         if (at < 0)
+        {
             return (null, args);
+        }
+
         if (at + 1 >= args.Count)
+        {
             throw new ArgumentException($"{option} needs a value: {option} {(option == MergeOption ? Merging.MergeMode.Files : "2.7.0")}.");
+        }
+
         return (args[at + 1], [.. args.Take(at), .. args.Skip(at + 2)]);
     }
 

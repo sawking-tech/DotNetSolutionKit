@@ -1,5 +1,4 @@
 using DotsKit.Commands;
-using DotsKit.Generation;
 using DotsKit.Io;
 using DotsKit.Planning;
 using DotsKit.Solutions;
@@ -22,7 +21,7 @@ internal sealed class NewCommandTests
         public List<string> Lines { get; } = [];
 
         public NewCommand Command() =>
-            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(), new ReferenceRepair(new RepairWriter(new Io.ProcessRunner()), new Builder()), new Terminal(this)), new Git(this), ToolVersion, onSources: false);
+            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(), new ReferenceRepair(new RepairWriter(new ProcessRunner()), new Builder()), new Terminal(this)), new Git(this), ToolVersion, onSources: false);
 
         private sealed class Planner(Fakes fakes) : IPlanner
         {
@@ -71,7 +70,10 @@ internal sealed class NewCommandTests
         Directory.CreateDirectory(Layout.ServicesOf(root));
         File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "Acme.Shop" + Layout.SolutionSuffix), "");
         if (template is null)
+        {
             return root;
+        }
+
         var manifest = new Manifest
         {
             Template = template,

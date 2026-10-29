@@ -32,7 +32,10 @@ internal static partial class UsingLines
         var newline = LineEndings.Of(text);
         var lines = LineEndings.ToLf(text).Split('\n').ToList();
         if (Uses(lines, ns))
+        {
             return text;
+        }
+
         var last = lines.FindLastIndex(l => AnyUsing().IsMatch(l));
         lines.Insert(last + 1, $"using {ns};");
         return LineEndings.Apply(string.Join('\n', lines), newline);
@@ -44,11 +47,19 @@ internal static partial class UsingLines
         var lines = LineEndings.ToLf(text).Split('\n').ToList();
         var at = lines.FindIndex(l => NamespaceOf(l) == old);
         if (at < 0)
+        {
             return Add(text, ns);
+        }
+
         if (Uses(lines, ns))
+        {
             lines.RemoveAt(at);
+        }
         else
+        {
             lines[at] = lines[at].Replace(old, ns, StringComparison.Ordinal);
+        }
+
         return LineEndings.Apply(string.Join('\n', lines), newline);
     }
 

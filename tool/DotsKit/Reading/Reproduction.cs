@@ -38,8 +38,13 @@ internal sealed record Reproduction(int Total, IReadOnlyList<string> Differ)
     {
         yield return $"{Reproduced} of {Total} files of the template reproduced" + (IsWhole ? "." : "; these differ:");
         foreach (var path in Differ.Take(Listed))
+        {
             yield return "  " + path;
+        }
+
         if (Differ.Count > Listed)
+        {
             yield return $"  and {Differ.Count - Listed} more";
+        }
     }
 }

@@ -1,7 +1,7 @@
+using DotsKit.Generation;
 using DotsKit.Io;
 using DotsKit.Merging;
 using DotsKit.PackageUpdates;
-using DotsKit.Generation;
 using DotsKit.Solutions;
 
 namespace DotsKit.Tests;

@@ -25,7 +25,9 @@ internal sealed class RepairWriter(IProcessRunner runner) : IRepairWriter
                 _ => (false, ""),
             };
             if (did)
+            {
                 changed.Add(file);
+            }
         }
         return [.. changed.Distinct()];
     }
@@ -34,7 +36,10 @@ internal sealed class RepairWriter(IProcessRunner runner) : IRepairWriter
     private async Task<bool> ReferenceAsync(AddReference r, CancellationToken ct)
     {
         if (!File.Exists(r.Project) || !File.Exists(r.Referenced))
+        {
             return false;
+        }
+
         var before = await File.ReadAllTextAsync(r.Project, ct);
         await runner.RunCheckedAsync("dotnet", ["add", r.Project, "reference", r.Referenced], Path.GetDirectoryName(r.Project)!, ct);
         return await File.ReadAllTextAsync(r.Project, ct) != before;
@@ -44,10 +49,16 @@ internal sealed class RepairWriter(IProcessRunner runner) : IRepairWriter
     {
         var text = FileText.Read(Path.GetDirectoryName(file), Path.GetFileName(file));
         if (text is null || text.IsBinary)
+        {
             return false;
+        }
+
         var edited = edit(text.Text);
         if (edited == text.Text)
+        {
             return false;
+        }
+
         await File.WriteAllBytesAsync(file, (text with { Text = edited }).ToBytes(), ct);
         return true;
     }
@@ -75,7 +86,10 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
         {
             var repairs = ReferenceRepairs.Decide(BuildErrors.Parse(build.Output), map, root, UsingsOf).Where(r => !made.Contains(r)).ToList();
             if (repairs.Count == 0)
+            {
                 break;
+            }
+
             try
             {
                 changed += (await writer.ApplyAsync(repairs, ct)).Count;
@@ -98,7 +112,10 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
     /// find, often nothing. A file left in conflict, or of a project left in conflict, waits for its resolution and
     /// the build. Returns the files changed.
     /// </summary>
+    /// <param name="root">The solution's root.</param>
+    /// <param name="map">The types the template moved between the solution's version and the next.</param>
     /// <param name="conflicts">The files left in conflict, relative to the root.</param>
+    /// <param name="ct">Cancels the repair; what is written stays for git to show.</param>
     public async Task<IReadOnlyList<string>> BeforeBuildAsync(string root, TypeMap map, IReadOnlyList<string> conflicts, CancellationToken ct)
     {
         var left = conflicts.Select(c => Path.GetFullPath(Path.Combine(root, c))).ToHashSet(PathComparer);
@@ -116,7 +133,10 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
     {
         var src = Path.Combine(root, Layout.SourceFolder);
         if (!Directory.Exists(src))
+        {
             yield break;
+        }
+
         var projects = Directory.GetFiles(src, "*" + Layout.ProjectExtension, SearchOption.AllDirectories)
             .GroupBy(p => Path.GetDirectoryName(p)!, StringComparer.OrdinalIgnoreCase)
             .Where(g => g.Count() == 1)
@@ -124,7 +144,10 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
         foreach (var file in Directory.EnumerateFiles(src, "*.cs", SearchOption.AllDirectories))
         {
             if (Path.GetRelativePath(src, file).Replace('\\', '/').Split('/').Any(Layout.Ignored.Contains) || ProjectOf(file, projects) is not { } project)
+            {
                 continue;
+            }
+
             var text = File.ReadAllText(file);
             yield return new SourceFile(Path.GetFullPath(file), project, UsingLines.Of(text), UsingLines.Declared(text));
         }
@@ -133,8 +156,13 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
     private static string? ProjectOf(string file, Dictionary<string, string> projects)
     {
         for (var dir = Path.GetDirectoryName(file); dir is not null; dir = Path.GetDirectoryName(dir))
+        {
             if (projects.TryGetValue(dir, out var project))
+            {
                 return project;
+            }
+        }
+
         return null;
     }
 }

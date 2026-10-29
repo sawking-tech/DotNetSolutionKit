@@ -11,7 +11,10 @@ internal sealed class PlanReport(ITerminal terminal)
         ShowFiles(plan.Changes);
         ShowMembership(plan);
         foreach (var line in plan.Packages ?? [])
+        {
             terminal.Info($"  package   {line}");
+        }
+
         terminal.Info($"  manifest  {Layout.ManifestPath}");
         ShowCounts(plan.Changes);
     }
@@ -20,7 +23,9 @@ internal sealed class PlanReport(ITerminal terminal)
     private void ShowFiles(IReadOnlyList<Change> changes)
     {
         foreach (var change in changes.OrderBy(c => c.Kind).ThenBy(c => c.Path, StringComparer.Ordinal))
+        {
             terminal.Info($"  {change.Kind,-8}  {change.Path}: {change.Reason}");
+        }
     }
 
     private void ShowCounts(IReadOnlyList<Change> changes)
@@ -32,8 +37,13 @@ internal sealed class PlanReport(ITerminal terminal)
     private void ShowMembership(Plan plan)
     {
         foreach (var project in plan.Membership.Add)
+        {
             terminal.Info($"  All.sln   + {project}");
+        }
+
         foreach (var project in plan.Membership.Remove)
+        {
             terminal.Info($"  All.sln   - {project}");
+        }
     }
 }

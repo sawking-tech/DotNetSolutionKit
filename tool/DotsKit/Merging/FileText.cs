@@ -13,13 +13,22 @@ internal sealed record FileText(string Text, bool Bom, byte[]? Raw = null)
     public static FileText? Read(string? root, string relativePath)
     {
         if (root is null)
+        {
             return null;
+        }
+
         var full = Path.Combine(root, relativePath);
         if (!File.Exists(full))
+        {
             return null;
+        }
+
         var bytes = File.ReadAllBytes(full);
         if (bytes.AsSpan().Contains((byte)0))
+        {
             return new(string.Empty, false, bytes);
+        }
+
         var bom = bytes.AsSpan().StartsWith(Utf8Mark);
         return new(Encoding.UTF8.GetString(bom ? bytes[Utf8Mark.Length..] : bytes), bom);
     }

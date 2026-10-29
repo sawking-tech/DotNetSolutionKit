@@ -27,16 +27,24 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         var transaction = new FileTransaction(plan.Root);
         IReadOnlyList<string> conflicts;
         if (plan.ByGit is var (@base, next))
+        {
             conflicts = await git.MergeAsync(plan.Root, @base, next, plan.PreferTemplate, ct);
+        }
         else
         {
             foreach (var change in plan.Changes)
+            {
                 Add(transaction, change);
+            }
+
             conflicts = [.. plan.Changes.Where(c => c.Kind == ChangeKind.Conflict).Select(c => c.Path)];
         }
         transaction.Write(Layout.ManifestPath, System.Text.Encoding.UTF8.GetBytes(plan.Next.Serialize()));
         if (!plan.Membership.IsEmpty)
+        {
             transaction.Guard(SolutionFile(plan.Root));
+        }
+
         if (plan.ByGit is null)
         {
             await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
@@ -78,15 +86,22 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     private static void Add(FileTransaction transaction, Change change)
     {
         if (change.Kind == ChangeKind.Delete)
+        {
             transaction.Delete(change.Path);
+        }
         else if (change.Content is not null)
+        {
             transaction.Write(change.Path, change.Content.ToBytes());
+        }
     }
 
     private async Task ApplyMembershipAsync(Plan plan, CancellationToken ct)
     {
         if (plan.Membership.IsEmpty)
+        {
             return;
+        }
+
         var solutionFile = Layout.SolutionFileOf(plan.Root);
         await projects.AddAsync(solutionFile, plan.Membership.Add, ct);
         await projects.RemoveAsync(solutionFile, plan.Membership.Remove, ct);

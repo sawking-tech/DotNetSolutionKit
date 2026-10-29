@@ -7,6 +7,7 @@ namespace DotsKit.Planning;
 /// <param name="Root">The solution's root, where the changes go.</param>
 /// <param name="Next">The manifest the solution will have.</param>
 /// <param name="Changes">The files, All.sln aside: it changes by its projects, in <paramref name="Membership"/>.</param>
+/// <param name="Membership">The projects All.sln gains and loses.</param>
 /// <param name="Packages">What changes in the package versions and what the solution's policy holds, a line each.</param>
 /// <param name="Types">Where the types of the template live in the next version and where the ones it moved went; null for a new solution.</param>
 /// <param name="PreferTemplate">--force: git takes the template's side in a conflict.</param>

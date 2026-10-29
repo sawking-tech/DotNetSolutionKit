@@ -51,8 +51,12 @@ internal sealed class FileTransaction(string root)
     private void RemoveEmptiedFolders()
     {
         foreach (var path in _pending.Where(p => p.Value is null).Select(p => Full(p.Key)))
+        {
             for (var folder = Path.GetDirectoryName(path); IsBelowRoot(folder) && !Directory.EnumerateFileSystemEntries(folder!).Any(); folder = Path.GetDirectoryName(folder))
+            {
                 Directory.Delete(folder!);
+            }
+        }
     }
 
     private bool IsBelowRoot(string? folder) =>
@@ -74,7 +78,10 @@ internal sealed class FileTransaction(string root)
     {
         var missing = new Stack<string>();
         for (var folder = Path.GetDirectoryName(target); folder is not null && !Directory.Exists(folder); folder = Path.GetDirectoryName(folder))
+        {
             missing.Push(folder);
+        }
+
         _createdFolders.AddRange(missing);
         Directory.CreateDirectory(Path.GetDirectoryName(target)!);
     }
@@ -83,7 +90,9 @@ internal sealed class FileTransaction(string root)
     private void RemoveCreatedFolders()
     {
         foreach (var folder in Enumerable.Reverse(_createdFolders).Where(f => Directory.Exists(f) && !Directory.EnumerateFileSystemEntries(f).Any()))
+        {
             Directory.Delete(folder);
+        }
     }
 
     private void SwapIn(List<(string Target, bool Existed)> swapped)
@@ -93,10 +102,15 @@ internal sealed class FileTransaction(string root)
             var target = Full(path);
             var existed = File.Exists(target);
             if (existed)
+            {
                 File.Move(target, target + OldSuffix, overwrite: true);
+            }
+
             swapped.Add((target, existed));
             if (content is not null)
+            {
                 File.Move(target + NewSuffix, target);
+            }
         }
     }
 
@@ -115,22 +129,30 @@ internal sealed class FileTransaction(string root)
         foreach (var (target, existed) in Enumerable.Reverse(swapped))
         {
             if (existed && File.Exists(target + OldSuffix))
+            {
                 File.Move(target + OldSuffix, target, overwrite: true);
+            }
             else if (!existed && File.Exists(target))
+            {
                 File.Delete(target);
+            }
         }
     }
 
     private void RemoveStaged()
     {
         foreach (var path in _pending.Keys.Select(Full).Where(p => File.Exists(p + NewSuffix)))
+        {
             File.Delete(path + NewSuffix);
+        }
     }
 
     private static void DropKeptOriginals(List<(string Target, bool Existed)> swapped)
     {
         foreach (var (target, _) in swapped.Where(s => File.Exists(s.Target + OldSuffix)))
+        {
             File.Delete(target + OldSuffix);
+        }
     }
 
     private string Full(string relativePath) => Path.Combine(root, relativePath);

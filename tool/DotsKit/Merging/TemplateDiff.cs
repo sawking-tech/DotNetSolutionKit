@@ -9,10 +9,9 @@ namespace DotsKit.Merging;
 internal static class TemplateDiff
 {
     public static List<Change> Of(string baseDir, string nextDir) =>
-        new SortedSet<string>(Folders.RelativeFiles(baseDir).Concat(Folders.RelativeFiles(nextDir)), StringComparer.Ordinal)
+        [.. new SortedSet<string>(Folders.RelativeFiles(baseDir).Concat(Folders.RelativeFiles(nextDir)), StringComparer.Ordinal)
             .Select(path => Decide(path, FileText.Read(baseDir, path), FileText.Read(nextDir, path)))
-            .OfType<Change>()
-            .ToList();
+            .OfType<Change>()];
 
     /// <summary>Pure: a file of the two outputs, or nothing when the template left it as it was.</summary>
     public static Change? Decide(string path, FileText? @base, FileText? next) =>

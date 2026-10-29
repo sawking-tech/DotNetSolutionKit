@@ -7,6 +7,10 @@ internal sealed record ProcessResult(int Code, string Output, string Error);
 /// <summary>Runs a program; the one door to the outside processes the tool calls - dotnet and git.</summary>
 internal interface IProcessRunner
 {
+    /// <param name="program">The program on PATH: dotnet or git.</param>
+    /// <param name="args">Its arguments, each passed as it is, with no shell between.</param>
+    /// <param name="workingDirectory">The folder the program runs in.</param>
+    /// <param name="ct">Cancels the run and ends the process.</param>
     /// <param name="environment">Variables set for this run only, such as git's GIT_INDEX_FILE.</param>
     Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
         IReadOnlyDictionary<string, string>? environment = null);
@@ -20,7 +24,10 @@ internal static class ProcessRunnerExtensions
     {
         var result = await runner.RunAsync(program, args, workingDirectory, ct, environment);
         if (result.Code != 0)
+        {
             throw new InvalidOperationException($"{program} {string.Join(' ', args)} exited with {result.Code}:\n{Why(result)}");
+        }
+
         return result.Output;
     }
 
@@ -56,14 +63,19 @@ internal sealed class ProcessRunner : IProcessRunner
             UseShellExecute = false,
         };
         foreach (var arg in args)
+        {
             start.ArgumentList.Add(arg);
+        }
+
         start.Environment["DOTNET_CLI_UI_LANGUAGE"] = UiLanguage;
         // MSBuild nodes and the build server kept alive for reuse hold the redirected output open, and reading it
         // to its end would never finish.
         start.Environment["MSBUILDDISABLENODEREUSE"] = "1";
         start.Environment["DOTNET_CLI_USE_MSBUILD_SERVER"] = "0";
         foreach (var (name, value) in environment ?? new Dictionary<string, string>())
+        {
             start.Environment[name] = value;
+        }
 
         var clock = Stopwatch.StartNew();
         using var process = Process.Start(start) ?? throw new InvalidOperationException($"Could not start {program}");
@@ -90,7 +102,9 @@ internal sealed class ProcessRunner : IProcessRunner
     private static void Trace(string program, IReadOnlyList<string> args, TimeSpan took)
     {
         if (Environment.GetEnvironmentVariable(TraceVariable) is { Length: > 0 })
+        {
             Console.Error.WriteLine(string.Create(System.Globalization.CultureInfo.InvariantCulture,
                 $"dotskit trace {took.TotalSeconds,6:F1}s {program} {string.Join(' ', args.Take(TracedArgs))}"));
+        }
     }
 }

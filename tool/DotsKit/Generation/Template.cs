@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using DotsKit.Io;
 
 namespace DotsKit.Generation;
@@ -25,7 +26,9 @@ internal interface ITemplateSource
 /// The version has the post-action that adds a service to All.sln by a command, and takes --allow-scripts for it;
 /// a version without one refuses the option (<see cref="TemplateVersions.AddsServiceToSolution"/>).
 /// </param>
+/// <param name="runner">Runs dotnet new install and dotnet new.</param>
 /// <param name="package">What <c>dotnet new install</c> takes: a package and its version, or a folder; found once, on the first use.</param>
+[SuppressMessage(Suppressions.Design, "CA1001", Justification = Suppressions.NothingToRelease)]
 internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> package, bool runsScripts, IProcessRunner runner) : ITemplate
 {
     private const string ShortName = "DotNetSolutionKit";
@@ -37,8 +40,9 @@ internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> pa
     private const int ManualPostAction = 105;
 
     private readonly string _hive = Folders.NewTemp("hive");
-    /// <summary>The one install of this hive: the base and the next tree of one version may ask for it at once.</summary>
+    /// <summary>One dotnet new at a time in this hive.</summary>
     private readonly SemaphoreSlim _generating = new(1, 1);
+    /// <summary>The one install of this hive: the base and the next tree of one version may ask for it at once.</summary>
     private readonly object _installing = new();
     private Task? _install;
 
@@ -64,7 +68,9 @@ internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> pa
         List<string> command = ["new", ShortName, .. args.ToArgs(), "--output", root, .. ScriptsAllowed(), "--debug:custom-hive", _hive];
         var result = await runner.RunAsync("dotnet", command, root, ct);
         if (result.Code != 0 && !(result.Code == ManualPostAction && !runsScripts))
+        {
             throw new InvalidOperationException($"dotnet {string.Join(' ', command)} exited with {result.Code}:\n{(string.IsNullOrWhiteSpace(result.Error) ? result.Output : result.Error).Trim()}");
+        }
     }
 
     private string[] ScriptsAllowed() => runsScripts ? ["--allow-scripts", "yes"] : [];
@@ -72,7 +78,10 @@ internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> pa
     private Task InstallOnceAsync(CancellationToken ct)
     {
         lock (_installing)
+        {
             _install ??= InstallAsync();
+        }
+
         return _install.WaitAsync(ct);
     }
 
@@ -98,20 +107,28 @@ internal sealed class TemplateSource(IProcessRunner runner, ITagArchive tags) : 
     {
         // The base and the next tree are generated side by side and may ask for one version at once.
         lock (_templates)
+        {
             return OfLocked(version);
+        }
     }
 
     private ITemplate OfLocked(string version)
     {
         if (!_templates.TryGetValue(version, out var template))
+        {
             _templates[version] = template = new DotnetNewTemplate(ct => PackageOfAsync(version, ct), TemplateVersions.AddsServiceToSolution(version), runner);
+        }
+
         return template;
     }
 
     private Task<string> PackageOfAsync(string version, CancellationToken ct)
     {
         if (version == SourcesVersion)
+        {
             return Task.FromResult(SourcesFolder ?? throw new InvalidOperationException($"The solution was generated from the template's sources: set {SourcesVariable} to their folder."));
+        }
+
         return TemplateVersions.IsPublished(version) ? Task.FromResult($"{PackageId}::{version}") : tags.FolderOfAsync(version, ct);
     }
 }

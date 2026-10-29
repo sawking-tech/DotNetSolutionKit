@@ -7,15 +7,23 @@ internal static class SolutionRoot
     public static string? Find(string start)
     {
         for (var folder = new DirectoryInfo(start); folder is not null; folder = folder.Parent)
+        {
             if (HasSolution(folder.FullName))
+            {
                 return folder.FullName;
+            }
+        }
+
         return null;
     }
 
     public static bool HasSolution(string folder)
     {
         if (!Directory.Exists(Layout.ServicesOf(folder)))
+        {
             return false;
+        }
+
         var solutions = Directory.GetFiles(Layout.ServicesOf(folder), Layout.SolutionPattern);
         return solutions.Length switch
         {
