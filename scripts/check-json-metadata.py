@@ -3,9 +3,9 @@
 
     scripts/check-json-metadata.py <solution>
 
-A key that starts with `_` is metadata: `_<kind>_<Name>` belongs to the field or the topic `<Name>` of its
-object, `_<kind>` to the object. A field left empty on purpose - "" or [] - must say what goes there, with
-`_comment_<Key>`. Exits 1 with a line per finding.
+A key that starts with `_` is metadata: `_comment_<Name>` belongs to the field `<Name>` of its object, which
+must be there, `_note_<Name>` to a topic of the object, `_<kind>` to the object. A field left empty on
+purpose - "" or [] - must say what goes there, with `_comment_<Key>`. Exits 1 with a line per finding.
 """
 
 import json
@@ -31,6 +31,8 @@ def is_empty(value):
 
 def check_object(obj, where, findings):
     for key, value in obj.items():
+        if key.startswith(COMMENT) and key[len(COMMENT):] not in obj:
+            findings.append(f"{where}: {key} has no field {key[len(COMMENT):]}; a note on a topic is _note_{key[len(COMMENT):]}")
         if key.startswith(METADATA):
             continue
         if is_empty(value) and COMMENT + key not in obj:
