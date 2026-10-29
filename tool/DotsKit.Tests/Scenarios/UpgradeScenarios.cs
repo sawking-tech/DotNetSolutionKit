@@ -5,6 +5,7 @@ namespace DotsKit.Tests.Scenarios;
 /// <summary>
 /// A solution of an earlier release brought to the template's sources by dotskit upgrade, with the team's changes
 /// and its package pins kept, and then added to.
+/// The scenarios of this folder and what each file checks: README.md beside this file.
 /// </summary>
 [TestFixture]
 [Category(Sandbox.Category)]

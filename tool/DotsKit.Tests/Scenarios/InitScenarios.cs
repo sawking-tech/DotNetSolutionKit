@@ -3,6 +3,7 @@ namespace DotsKit.Tests.Scenarios;
 /// <summary>
 /// A solution made with the template alone, as before dotskit: init describes it, the template generates it
 /// again by that description and reproduces every file, and dotskit then adds to it.
+/// The scenarios of this folder and what each file checks: README.md beside this file.
 /// </summary>
 [TestFixture]
 [Category(Sandbox.Category)]
