@@ -14,8 +14,8 @@ internal interface IPlanWriter
     Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct);
 }
 
-/// <summary>The files left in conflict, and the files the repair before the build changed.</summary>
-internal sealed record WriteResult(IReadOnlyList<string> Conflicts, IReadOnlyList<string> Repaired)
+/// <summary>The files left in conflict, and the repairs before the build that changed a file.</summary>
+internal sealed record WriteResult(IReadOnlyList<string> Conflicts, IReadOnlyList<Repair> Repaired)
 {
     public static readonly WriteResult Nothing = new([], []);
 }
@@ -40,7 +40,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
 
             conflicts = [.. plan.Changes.Where(c => c.Kind == ChangeKind.Conflict).Select(c => c.Path)];
         }
-        transaction.Write(Layout.ManifestPath, System.Text.Encoding.UTF8.GetBytes(plan.Next.Serialize()));
+        transaction.Write(Layout.ManifestPath, System.Text.Encoding.UTF8.GetBytes(plan.Written(conflicts.Count > 0).Serialize()));
         if (!plan.Membership.IsEmpty)
         {
             transaction.Guard(SolutionFile(plan.Root));
@@ -54,15 +54,18 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         return new(conflicts, await WriteBesideTheMergeAsync(plan, transaction, conflicts, SolutionFile(plan.Root), ct));
     }
 
-    /// <summary>The usings of namespaces the template gave up, repaired from the text before any build.</summary>
-    private async Task<IReadOnlyList<string>> RepairAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct) =>
+    /// <summary>
+    /// The usings of namespaces the template gave up, repaired from the text before any build, in every project of
+    /// the solution; a part of an upgrade a part at a time repairs by the moves of the parts merged so far.
+    /// </summary>
+    private async Task<IReadOnlyList<Repair>> RepairAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct) =>
         plan.Types is null ? [] : await repair.BeforeBuildAsync(plan.Root, plan.Types, conflicts, ct);
 
     /// <summary>
     /// The repair of the merge by files, which runs once its files are written: a repair that stops, by an error or a
     /// cancel, says that the files are written, as no undo follows it.
     /// </summary>
-    private async Task<IReadOnlyList<string>> RepairWrittenAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct)
+    private async Task<IReadOnlyList<Repair>> RepairWrittenAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct)
     {
         try
         {
@@ -86,17 +89,17 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     /// the files the branch left out, which git does not know - and the abort takes back the merge. The repair
     /// leaves a file in conflict alone, so staging never marks one resolved.
     /// </summary>
-    private async Task<IReadOnlyList<string>> WriteBesideTheMergeAsync(Plan plan, FileTransaction transaction, IReadOnlyList<string> conflicts, string solutionFile, CancellationToken ct)
+    private async Task<IReadOnlyList<Repair>> WriteBesideTheMergeAsync(Plan plan, FileTransaction transaction, IReadOnlyList<string> conflicts, string solutionFile, CancellationToken ct)
     {
         try
         {
-            IReadOnlyList<string> repaired = [];
+            IReadOnlyList<Repair> repaired = [];
             await transaction.CommitAsync(async () =>
             {
                 await ApplyMembershipAsync(plan, ct);
                 await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
                 repaired = await RepairAsync(plan, conflicts, ct);
-                var written = repaired.Select(f => Path.GetRelativePath(plan.Root, f).Replace('\\', '/')).Distinct().ToList();
+                var written = repaired.Select(r => Path.GetRelativePath(plan.Root, RepairReport.FileOf(r)).Replace('\\', '/')).Distinct().ToList();
                 if (written.Count > 0)
                 {
                     await git.StageAsync(plan.Root, written, ct);

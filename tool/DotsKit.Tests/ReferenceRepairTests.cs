@@ -148,10 +148,10 @@ internal sealed class ReferenceRepairTests
     {
         public List<Repair> Repairs { get; } = [];
 
-        public Task<IReadOnlyList<string>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct)
+        public Task<IReadOnlyList<Repair>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct)
         {
             Repairs.AddRange(repairs);
-            return Task.FromResult<IReadOnlyList<string>>([]);
+            return Task.FromResult<IReadOnlyList<Repair>>([]);
         }
     }
 
@@ -223,13 +223,40 @@ internal sealed class ReferenceRepairTests
 
     private sealed class FailingWriter : IRepairWriter
     {
-        public Task<IReadOnlyList<string>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct) =>
+        public Task<IReadOnlyList<Repair>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct) =>
             throw new IOException("The file Order.cs is locked by another process.");
     }
 
     private sealed class NoBuilder : IBuilder
     {
         public Task<Io.ProcessResult> BuildAsync(string root, CancellationToken ct) => throw new InvalidOperationException("No build after a failed write.");
+    }
+
+    private sealed class Builds : IBuilder
+    {
+        public Task<Io.ProcessResult> BuildAsync(string root, CancellationToken ct) => Task.FromResult(new Io.ProcessResult(0, "", ""));
+    }
+
+    [Test]
+    public async Task TheTemplatesFilesOfAPartNotMergedYet_AreLeftByTheRepairOfTheBuild_TheTeamsAreRepaired()
+    {
+        var root = Io.Folders.NewTemp("repair-waiting");
+        var templates = Path.Combine(root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs");
+        var teams = Path.Combine(root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Refund.cs");
+        Directory.CreateDirectory(Path.GetDirectoryName(templates)!);
+        File.WriteAllText(templates, "using Acme.Shop.Common.Events;\n");
+        File.WriteAllText(teams, "using Acme.Shop.Common.Events;\n");
+        var project = Path.Combine(root, Orders[3..]);
+        var failed = new Io.ProcessResult(1,
+            $"{templates}(1,7): error CS0246: The type or namespace name 'DomainEvent' could not be found [{project}]\n"
+            + $"{teams}(1,7): error CS0246: The type or namespace name 'DomainEvent' could not be found [{project}]\n", "");
+        var writer = new RecordingWriter();
+
+        await new ReferenceRepair(writer, new Builds()).RunAsync(root, TypeMap.Between(Before, After), failed, CancellationToken.None,
+            new HashSet<string> { "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs", Orders[3..] });
+
+        writer.Repairs.ShouldNotBeEmpty();
+        writer.Repairs.Select(RepairReport.FileOf).ShouldAllBe(f => f == teams);
     }
 
     [Test]
@@ -244,7 +271,9 @@ internal sealed class ReferenceRepairTests
 
         var result = await new ReferenceRepair(new FailingWriter(), new NoBuilder()).RunAsync(root, TypeMap.Between(Before, After), failed, CancellationToken.None);
 
-        result.ShouldBe(new RepairResult(failed, 0, "The file Order.cs is locked by another process."));
+        result.Build.ShouldBe(failed);
+        result.Applied.ShouldBeEmpty();
+        result.Stopped.ShouldBe("The file Order.cs is locked by another process.");
     }
 
     [Test]

@@ -68,11 +68,11 @@ internal sealed class ChainScenarios
 
         foreach (var release in Releases)
         {
-            var step = await solution.DotskitAsync("upgrade", "--to", release, "--yes", "--merge", merge);
+            var step = await solution.DotskitAsync("upgrade", "--to", release, "--yes", "--all-at-once", "--merge", merge);
             step.Code.ShouldBe(0, $"{First} -> {release}:\n{step.Output}{step.Error}");
             await solution.CommitAsync($"upgraded to {release}");
         }
-        var last = await solution.DotskitAsync("upgrade", "--yes", "--merge", merge);
+        var last = await solution.DotskitAsync("upgrade", "--yes", "--all-at-once", "--merge", merge);
 
         last.Code.ShouldBe(0, last.Output + last.Error);
         solution.Read(TeamFile).ShouldContain("public sealed class OrderAudit");

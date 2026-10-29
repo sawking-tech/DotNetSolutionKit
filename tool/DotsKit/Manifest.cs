@@ -52,6 +52,11 @@ internal sealed record Manifest
     /// <summary>How much of the template's package versions the solution takes; the template's default when the manifest has none.</summary>
     public PackagePolicy Packages { get; init; } = new();
 
+    [JsonPropertyName("_comment_upgrade")]
+    public string? UpgradeComment => Upgrade is null ? null : "An upgrade made a part at a time (dotskit upgrade, unless --all-at-once): the release it goes to and the parts merged so far; the next dotskit upgrade takes the next part, and the last one moves template to that release";
+
+    public UpgradeInProgress? Upgrade { get; init; }
+
     public static Manifest? Load(string root)
     {
         var path = Path.Combine(root, Layout.ManifestPath);
@@ -120,10 +125,41 @@ internal sealed record Manifest
     public Manifest WithTemplate(string version) => this with { Template = version };
 
     /// <summary>
+    /// The upgrade a part at a time this solution is in, with <paramref name="part"/> merged; the last part ends it.
+    /// <paramref name="parts"/> are the parts of the upgrade in their order, kept from its first run.
+    /// </summary>
+    public Manifest WithPartMerged(string to, string part, bool last, IReadOnlyList<string> parts) =>
+        last
+            ? this with { Template = to, Upgrade = null }
+            : this with { Upgrade = new UpgradeInProgress { To = to, Parts = [.. parts], Done = [.. (Upgrade?.Done ?? []).Append(part).Distinct(StringComparer.Ordinal)] } };
+
+    /// <summary>
     /// The parameters of the whole solution a command names with another value than the solution has, the
     /// template's default counting as a value: a service cannot change them, and dropping them would be silent.
     /// </summary>
     public IReadOnlyList<string> OtherSolutionValues(TemplateArgs command) =>
         [.. TemplateArgs.SolutionOnly.Where(n => command.Has(n)
             && !string.Equals(SolutionArgs[n], command[n], StringComparison.OrdinalIgnoreCase))];
+}
+
+/// <summary>An upgrade made a part at a time: where it goes and which parts are merged.</summary>
+internal sealed record UpgradeInProgress
+{
+    [JsonPropertyName("_comment_to")]
+    [SuppressMessage(Suppressions.Performance, "CA1822", Justification = Suppressions.JsonMetadataKey)]
+    public string ToComment => "The release the upgrade goes to";
+
+    public required string To { get; init; }
+
+    [JsonPropertyName("_comment_done")]
+    [SuppressMessage(Suppressions.Performance, "CA1822", Justification = Suppressions.JsonMetadataKey)]
+    public string DoneComment => "The parts merged so far: shared - the root and deploy - then common and each project of src/common, capabilities, then each service folder";
+
+    public required List<string> Done { get; init; }
+
+    [JsonPropertyName("_comment_parts")]
+    [SuppressMessage(Suppressions.Performance, "CA1822", Justification = Suppressions.JsonMetadataKey)]
+    public string PartsComment => "Every part of the upgrade in its order, taken at its first run from the solution and the template's next output: a project the template adds is a part of its own";
+
+    public List<string>? Parts { get; init; }
 }

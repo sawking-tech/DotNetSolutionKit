@@ -58,6 +58,24 @@ internal static class Folders
         }
     }
 
+    /// <summary>
+    /// A new tree of <paramref name="baseDir"/>'s files, where every path <paramref name="fromNext"/> takes comes from
+    /// <paramref name="nextDir"/> instead: a file there is written, one only in the base is left out.
+    /// </summary>
+    public static string Overlay(string baseDir, string nextDir, Func<string, bool> fromNext)
+    {
+        var tree = NewTemp("overlay");
+        foreach (var (from, file) in RelativeFiles(baseDir).Where(f => !fromNext(f)).Select(f => (baseDir, f))
+            .Concat(RelativeFiles(nextDir).Where(fromNext).Select(f => (nextDir, f))))
+        {
+            var target = Path.Combine(tree, file);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            File.Copy(Path.Combine(from, file), target);
+        }
+
+        return tree;
+    }
+
     /// <summary>The template's files of a tree, relative to it, with forward slashes.</summary>
     public static IEnumerable<string> RelativeFiles(string root) =>
         Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)

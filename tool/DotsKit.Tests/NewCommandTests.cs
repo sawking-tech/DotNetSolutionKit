@@ -28,7 +28,7 @@ internal sealed class NewCommandTests
 
         private sealed class Planner(Fakes fakes) : IPlanner
         {
-            public Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, Merging.MergeMode mode, CancellationToken ct)
+            public Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, Merging.MergeMode mode, CancellationToken ct, PartStep? step = null)
             {
                 fakes.Planned++;
                 return Task.FromResult(new Plan(root, next, [], new MembershipChange([], [])));

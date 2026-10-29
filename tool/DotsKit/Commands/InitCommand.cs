@@ -29,6 +29,10 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
         var prefix = SolutionReader.Prefix(Path.GetFileName(Layout.SolutionFileOf(root)));
         var given = Given(options);
         var current = Manifest.Load(root);
+        if (current?.Upgrade is { } upgrade)
+        {
+            throw new InvalidOperationException($"An upgrade to {upgrade.To} goes a part at a time, {string.Join(", ", upgrade.Done)} merged: finish it, dotskit upgrade, before init reads the solution.");
+        }
         if (current is null && options.TemplateVersion is null && SolutionReader.Version(files) is null && files.Exists(Layout.CommonFolder))
         {
             return await AdviseAsync(root, files, prefix, given, ct);

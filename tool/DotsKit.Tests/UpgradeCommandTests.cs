@@ -21,25 +21,34 @@ internal sealed class UpgradeCommandTests
 
         public string Prefix { get; init; } = "";
 
+        public PartStep? Step { get; set; }
+
+        public Manifest? Written { get; set; }
+
         public Manifest? Next { get; private set; }
         public List<string> Lines { get; } = [];
 
         public UpgradeCommand Command() =>
-            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(), new Builder(), new ReferenceRepair(new RepairWriter(new ProcessRunner()), new Builder()), new Terminal(this), new Git(this)),
+            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(), new ReferenceRepair(new RepairWriter(new ProcessRunner()), new Builder()), new Terminal(this), new Git(this)),
                 new Git(this), new Terminal(this), ToolVersion, onSources: false);
 
         private sealed class Planner(Fakes fakes) : IPlanner
         {
-            public Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, Merging.MergeMode mode, CancellationToken ct)
+            public Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, Merging.MergeMode mode, CancellationToken ct, PartStep? step = null)
             {
                 fakes.Next = next;
+                fakes.Step = step;
                 return Task.FromResult(new Plan(root, next, [], new MembershipChange([], [])));
             }
         }
 
-        private sealed class Writer : IPlanWriter
+        private sealed class Writer(Fakes fakes) : IPlanWriter
         {
-            public Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct) => Task.FromResult(WriteResult.Nothing);
+            public Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct)
+            {
+                fakes.Written = plan.Next;
+                return Task.FromResult(WriteResult.Nothing);
+            }
         }
 
         private sealed class Git(Fakes fakes) : IGit
@@ -66,7 +75,7 @@ internal sealed class UpgradeCommandTests
             public bool Confirm(string question) => false;
         }
 
-        public Task<ExitCode> RunAsync(string root) => Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
+        public Task<ExitCode> RunAsync(string root) => Command().RunAsync(Options.Parse(["--yes", "--all-at-once"]), root, CancellationToken.None);
     }
 
     /// <summary>A solution with an All.sln and, when <paramref name="template"/> is given, a manifest of that version.</summary>
@@ -75,6 +84,8 @@ internal sealed class UpgradeCommandTests
         var root = Folders.NewTemp("upgrade-command");
         Directory.CreateDirectory(Layout.ServicesOf(root));
         File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "Acme.Shop" + Layout.SolutionSuffix), "");
+        Directory.CreateDirectory(Path.Combine(Layout.ServicesOf(root), "Acme.Shop.Orders"));
+        File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "Acme.Shop.Orders", "Program.cs"), "");
         if (template is null)
         {
             return root;
@@ -159,6 +170,33 @@ internal sealed class UpgradeCommandTests
 
             (await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(Solution("2.7.0")))).Message.ShouldContain("changed after the command started");
         }
+    }
+
+    [Test]
+    public async Task AnUpgrade_TakesTheSharedPartFirst_ThenTheService_AndTheLastMovesTheVersion()
+    {
+        var root = Solution("2.7.0");
+        var first = new Fakes();
+
+        await first.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
+        // The capabilities, between the shared part and the service.
+        File.WriteAllText(Path.Combine(root, Layout.ManifestPath), first.Written!.Serialize());
+        var middle = new Fakes();
+        await middle.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
+
+        File.WriteAllText(Path.Combine(root, Layout.ManifestPath), middle.Written!.Serialize());
+        var second = new Fakes();
+        await second.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
+
+        first.Step!.Part.ShouldBe(UpgradeParts.Shared);
+        first.Written!.Template.ShouldBe("2.7.0");
+        first.Written.Upgrade!.Done.ShouldBe([UpgradeParts.Shared]);
+        first.Lines.ShouldContain("Written; the solution builds.");
+        first.Lines.ShouldContain(l => l.Contains("is written: commit it, then the next part", StringComparison.Ordinal));
+        second.Step!.Part.ShouldBe("Acme.Shop.Orders");
+        second.Step.Done.ShouldBe([UpgradeParts.Shared, UpgradeParts.Capabilities]);
+        second.Written!.Template.ShouldBe(ToolVersion);
+        second.Written.Upgrade.ShouldBeNull();
     }
 
     [Test]

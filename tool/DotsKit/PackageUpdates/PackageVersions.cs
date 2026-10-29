@@ -12,6 +12,7 @@ internal static partial class PackageVersions
 {
     private const string Central = "src/Directory.Packages.props";
     private const string PerFlag = "src/package-versions/";
+    private const string ItemGroupEnd = "</ItemGroup>";
 
     [GeneratedRegex("""(?<head><PackageVersion\s+Include="(?<name>[^"]+)"\s+Version=")(?<version>[^"]+)(?<tail>")""")]
     private static partial Regex Line();
@@ -69,6 +70,46 @@ internal static partial class PackageVersions
 
         return [.. lines];
     }
+
+    /// <summary>
+    /// A step of an upgrade a part at a time: a package the template no longer declares keeps its version from
+    /// <paramref name="before"/> while a project of the tree still references it - the project of a part not merged
+    /// yet - so the shared part does not break the parts after it; the part that drops the last reference drops it.
+    /// The two trees of a step are kept alike, so the next step's base is this step's next tree.
+    /// </summary>
+    /// <param name="tree">A tree of the step; its Directory.Packages.props is written in place.</param>
+    /// <param name="before">The template's whole output before the upgrade, where a kept version is read.</param>
+    public static void KeepReferenced(string tree, string before)
+    {
+        var central = FileText.Read(tree, Central);
+        if (central is null)
+        {
+            return;
+        }
+
+        var declared = All(tree);
+        var had = All(before);
+        var kept = Folders.RelativeFiles(tree)
+            .Where(p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".props", StringComparison.OrdinalIgnoreCase))
+            .SelectMany(p => Reference().Matches(FileText.Read(tree, p)?.Text ?? "").Select(m => m.Groups["name"].Value))
+            .Where(name => !declared.ContainsKey(name) && had.ContainsKey(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var end = central.Text.LastIndexOf(ItemGroupEnd, StringComparison.Ordinal);
+        if (kept.Count == 0 || end < 0)
+        {
+            return;
+        }
+
+        var newLine = central.Text.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+        var lines = string.Concat(kept.Select(name => $"    <PackageVersion Include=\"{name}\" Version=\"{had[name]}\" />{newLine}"));
+        var lineStart = central.Text.LastIndexOf('\n', end) + 1;
+        File.WriteAllBytes(Path.Combine(tree, Central), (central with { Text = central.Text.Insert(lineStart, lines) }).ToBytes());
+    }
+
+    [GeneratedRegex("""<PackageReference\b[^>]*?\sInclude="(?<name>[^"]+)""")]
+    private static partial Regex Reference();
 
     private static Dictionary<string, string> All(string root)
     {

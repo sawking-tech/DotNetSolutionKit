@@ -22,12 +22,12 @@ if (args[0] is "--version" or "version")
 var runner = new ProcessRunner();
 var projects = new SolutionProjects(runner);
 using var http = new HttpClient();
-var staging = new Staging(new TemplateSource(runner, new TagArchive(http)), projects);
-var planner = new Planner(staging, new ThreeWayMerge(new GitMergeFile(runner)), projects, new GitRenames(runner), new GitIgnoredFiles(runner));
-var report = new PlanReport(terminal);
-var git = new Git(runner);
+var staging = new CachedStaging(new Staging(new TemplateSource(runner, new TagArchive(http)), projects), ToolVersion.Current, () => TemplateSource.SourcesFolder);
 var builder = new DotnetBuilder(runner);
 var repair = new ReferenceRepair(new RepairWriter(runner), builder);
+var planner = new Planner(staging, new ThreeWayMerge(new GitMergeFile(runner)), projects, new GitRenames(runner), new GitIgnoredFiles(runner), repair);
+var report = new PlanReport(terminal);
+var git = new Git(runner);
 var self = SelfCommand.Of(Environment.ProcessPath, typeof(StyleMergeDriver).Assembly.Location);
 var writer = new PlanWriter(projects, new GitTemplateMerge(runner, self), repair);
 var execution = new PlanExecution(report, writer, builder, repair, terminal, git);

@@ -27,12 +27,35 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         }
 
         var written = await writer.WriteAsync(plan, ct);
-        if (written.Repaired.Count > 0)
+        ShowRepairs("before the build, for the namespaces the template gave up", written.Repaired);
+        var conflicts = written.Conflicts.Count > 0;
+        var code = conflicts ? Conflicts(plan, written.Conflicts) : await BuildAsync(plan, options, ct);
+        if (plan.Written(conflicts).Upgrade is { } upgrade)
         {
-            terminal.Info($"Written; {written.Repaired.Count} usings and references changed for the namespaces the template gave up, before the build.");
+            terminal.Info((conflicts, plan.OnConflicts is not null) switch
+            {
+                (true, true) => $"The last part of the upgrade to {upgrade.To}: resolve its conflicts and commit, then dotskit upgrade repairs the usings, builds and finishes the upgrade.",
+                (true, false) => $"A part of the upgrade to {upgrade.To}: resolve its conflicts and commit, then the next part, dotskit upgrade.",
+                _ => $"A part of the upgrade to {upgrade.To} is written: commit it, then the next part, dotskit upgrade.",
+            });
         }
 
-        return written.Conflicts.Count > 0 ? Conflicts(plan, written.Conflicts) : await BuildAsync(plan, options, ct);
+        return code;
+    }
+
+    /// <summary>The usings and references a repair changed, by project, so the team sees where the template's moves reached its code.</summary>
+    private void ShowRepairs(string when, IReadOnlyList<Repair> repairs)
+    {
+        if (repairs.Count == 0)
+        {
+            return;
+        }
+
+        terminal.Info($"Written; {repairs.Count} usings and references changed {when}, by project:");
+        foreach (var line in RepairReport.ByProject(repairs))
+        {
+            terminal.Info(line);
+        }
     }
 
     private ExitCode Conflicts(Plan plan, IReadOnlyList<string> conflicts)
@@ -64,18 +87,15 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         {
             var first = await builder.BuildAsync(plan.Root, ct);
             result = first.Code != 0 && plan.Types is not null
-                ? await repair.RunAsync(plan.Root, plan.Types, first, ct)
-                : new(first, 0, null);
+                ? await repair.RunAsync(plan.Root, plan.Types, first, ct, plan.Waiting)
+                : new(first, [], null);
         }
         catch (OperationCanceledException)
         {
             terminal.Info("Written; the build was cancelled: run dotnet build to check the solution.");
             return ExitCode.Failed;
         }
-        if (result.Changed > 0)
-        {
-            terminal.Info($"Written; {result.Changed} references and usings changed for the types the template moved: git diff shows them.");
-        }
+        ShowRepairs("by the errors of the build, for the types the template moved", result.Applied);
 
         if (result.Stopped is { } why)
         {

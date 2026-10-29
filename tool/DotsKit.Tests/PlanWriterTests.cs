@@ -21,7 +21,7 @@ internal sealed class PlanWriterTests
     /// <summary>The repair, stopped by Ctrl+C at its first file.</summary>
     private sealed class Cancelled : IRepairWriter
     {
-        public Task<IReadOnlyList<string>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct) => throw new OperationCanceledException();
+        public Task<IReadOnlyList<Repair>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct) => throw new OperationCanceledException();
     }
 
     private sealed class NoBuild : IBuilder

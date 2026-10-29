@@ -50,6 +50,25 @@ internal sealed class UpgradePartsTests
     }
 
     [Test]
+    public void APackageTheTemplateDrops_KeepsItsVersion_WhileAProjectOfThePartsNotMergedYetReferencesIt()
+    {
+        var before = Folders.NewTemp("p-before");
+        var step = Folders.NewTemp("p-step");
+        Put(before, Central, Props(("Npgsql", "8.0.4"), ("Polly", "8.4.1"), ("Gone", "1.0.0")));
+        Put(step, Central, Props(("Npgsql", "8.0.11")));
+        Put(step, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Infrastructure/Acme.Shop.Orders.Infrastructure.csproj",
+            "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Polly\" />\n    <PackageReference Include=\"Npgsql\" />\n  </ItemGroup>\n</Project>\n");
+
+        PackageVersions.KeepReferenced(step, before);
+        var kept = PackageVersions.Read(File.ReadAllText(Path.Combine(step, Central)));
+        PackageVersions.KeepReferenced(step, before);
+
+        kept.ShouldBe(new Dictionary<string, string> { ["Npgsql"] = "8.0.11", ["Polly"] = "8.4.1" });
+        File.ReadAllText(Path.Combine(step, Central)).Split("Include=\"Polly\"").Length.ShouldBe(2, "kept once, however many runs");
+        File.ReadAllText(Path.Combine(step, Central)).ShouldEndWith("    <PackageVersion Include=\"Polly\" Version=\"8.4.1\" />\n  </ItemGroup>\n</Project>\n");
+    }
+
+    [Test]
     public void APin_MatchesThePackageInAnyCase_AndAPinOfNoPackageOfTheTemplateIsReported()
     {
         var before = Folders.NewTemp("p-base");
