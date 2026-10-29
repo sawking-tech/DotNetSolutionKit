@@ -5,24 +5,58 @@ using DotsKit.Solutions;
 namespace DotsKit.Planning;
 
 /// <summary>
-/// Writes a plan in one transaction: the files, the manifest and the projects of All.sln all land, or none does.
+/// Writes a plan: the files - by the tool, or by a git merge of the template's output - then the manifest and the
+/// projects of All.sln in one transaction, which all land or none does.
 /// </summary>
 internal interface IPlanWriter
 {
-    Task WriteAsync(Plan plan, CancellationToken ct);
+    /// <summary>Writes the plan and returns the files left in conflict.</summary>
+    Task<IReadOnlyList<string>> WriteAsync(Plan plan, CancellationToken ct);
 }
 
-internal sealed class PlanWriter(ISolutionProjects projects) : IPlanWriter
+internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git) : IPlanWriter
 {
-    public Task WriteAsync(Plan plan, CancellationToken ct)
+    public async Task<IReadOnlyList<string>> WriteAsync(Plan plan, CancellationToken ct)
     {
         var transaction = new FileTransaction(plan.Root);
-        foreach (var change in plan.Changes)
-            Add(transaction, change);
+        IReadOnlyList<string> conflicts;
+        if (plan.ByGit is var (@base, next))
+            conflicts = await git.MergeAsync(plan.Root, @base, next, plan.PreferTemplate, ct);
+        else
+        {
+            foreach (var change in plan.Changes)
+                Add(transaction, change);
+            conflicts = [.. plan.Changes.Where(c => c.Kind == ChangeKind.Conflict).Select(c => c.Path)];
+        }
         transaction.Write(Layout.ManifestPath, System.Text.Encoding.UTF8.GetBytes(plan.Next.Serialize()));
         if (!plan.Membership.IsEmpty)
-            transaction.Guard(Path.GetRelativePath(plan.Root, Layout.SolutionFileOf(plan.Root)));
-        return transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
+            transaction.Guard(SolutionFile(plan.Root));
+        if (plan.ByGit is null)
+            await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
+        else
+            await WriteBesideTheMergeAsync(plan, transaction, SolutionFile(plan.Root), ct);
+        return conflicts;
+    }
+
+    /// <summary>All.sln relative to the root; a solution there already has it, a new one not yet.</summary>
+    private static string SolutionFile(string root) => Path.GetRelativePath(root, Layout.SolutionFileOf(root)).Replace('\\', '/');
+
+    /// <summary>
+    /// The manifest and All.sln join git's merge, so committing it takes them and <c>git merge --abort</c> puts them
+    /// back; a failure here undoes the merge as well as the files.
+    /// </summary>
+    private async Task WriteBesideTheMergeAsync(Plan plan, FileTransaction transaction, string solutionFile, CancellationToken ct)
+    {
+        try
+        {
+            await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
+            await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
+        }
+        catch
+        {
+            await git.AbortAsync(plan.Root, CancellationToken.None);
+            throw;
+        }
     }
 
     /// <summary>A conflict with no content - a file one side removed and the other changed - stays as it is.</summary>

@@ -25,7 +25,7 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
             await RefuseFilesOutsideGitAsync(folder, options, ct);
         var current = root is null ? null : await LoadCheckedAsync(root, options, ct);
         var next = Next(current, command);
-        var plan = await planner.BuildAsync(root ?? folder, current, next, options.Force, ct);
+        var plan = await planner.BuildAsync(root ?? folder, current, next, new Merging.MergeMode(options.ByGit, options.Force), ct);
         return await execution.RunAsync(plan, options, ct);
     }
 
@@ -51,6 +51,8 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
                 : $"The solution is of the template {manifest.Template}, dotskit is {version}: bring the solution to {version} first, dotskit upgrade.");
         if (!options.AllowDirty && !await git.IsCleanAsync(root, ct))
             throw new InvalidOperationException("The git working tree has uncommitted changes: commit or stash them, so what dotskit writes can be seen and undone (--allow-dirty to go on).");
+        if (options.AllowDirty && options.ByGit)
+            throw new ArgumentException("--allow-dirty needs --merge files: a git merge runs on a clean tree.");
         return manifest;
     }
 
