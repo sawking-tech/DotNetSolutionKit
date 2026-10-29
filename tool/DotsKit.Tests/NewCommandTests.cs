@@ -24,7 +24,7 @@ internal sealed class NewCommandTests
         public List<string> Lines { get; } = [];
 
         public NewCommand Command() =>
-            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(), new ReferenceRepair(new RepairWriter(new ProcessRunner()), new Builder()), new Terminal(this)), new Git(this), ToolVersion, onSources: false);
+            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(), new ReferenceRepair(new RepairWriter(new ProcessRunner()), new Builder()), new Terminal(this), new Git(this)), new Git(this), ToolVersion, onSources: false);
 
         private sealed class Planner(Fakes fakes) : IPlanner
         {
@@ -47,6 +47,8 @@ internal sealed class NewCommandTests
         private sealed class Git(Fakes fakes) : IGit
         {
             public Task<bool> IsCleanAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Clean);
+
+            public Task<string?> CleanHeadAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Clean ? "head" : null);
 
             public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
         }

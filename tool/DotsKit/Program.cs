@@ -30,7 +30,7 @@ var builder = new DotnetBuilder(runner);
 var repair = new ReferenceRepair(new RepairWriter(runner), builder);
 var self = SelfCommand.Of(Environment.ProcessPath, typeof(StyleMergeDriver).Assembly.Location);
 var writer = new PlanWriter(projects, new GitTemplateMerge(runner, self), repair);
-var execution = new PlanExecution(report, writer, builder, repair, terminal);
+var execution = new PlanExecution(report, writer, builder, repair, terminal, git);
 
 AppDomain.CurrentDomain.ProcessExit += (_, _) => Folders.RemoveRunFolders();
 

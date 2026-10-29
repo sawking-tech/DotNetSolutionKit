@@ -6,11 +6,13 @@ namespace DotsKit.Commands;
 
 /// <summary>
 /// The end every command that changes a solution shares: show the plan, ask, write it in one transaction, then
-/// build - or stop at the conflicts a person resolves first.
+/// build - or stop at the conflicts a person resolves first. The plan holds the files as they were read: a tree the
+/// command found clean at a commit, startHead, is written only while it is still clean at that commit, so a
+/// file saved or a commit made while the plan was built or waited for a yes is not written over.
 /// </summary>
-internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuilder builder, ReferenceRepair repair, ITerminal terminal)
+internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuilder builder, ReferenceRepair repair, ITerminal terminal, IGit git)
 {
-    public async Task<ExitCode> RunAsync(Plan plan, Options options, CancellationToken ct)
+    public async Task<ExitCode> RunAsync(Plan plan, Options options, string? startHead, CancellationToken ct)
     {
         report.Show(plan);
         if (!options.Yes && !terminal.Confirm("Write these changes?"))
@@ -18,6 +20,12 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
             terminal.Info("Nothing written: answer y to write, or pass --yes where no one can answer.");
             return ExitCode.Failed;
         }
+
+        if (startHead is not null && await git.CleanHeadAsync(plan.Root, ct) != startHead)
+        {
+            throw new InvalidOperationException("The working tree or its commit changed after the command started: nothing is written; run the command again on the tree as it is now.");
+        }
+
         var written = await writer.WriteAsync(plan, ct);
         if (written.Repaired.Count > 0)
         {
