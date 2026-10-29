@@ -6,27 +6,28 @@ namespace DotsKit.Solutions;
 /// <summary>Writes the repairs: a reference through <c>dotnet add reference</c>, a using into the file's text.</summary>
 internal interface IRepairWriter
 {
-    /// <summary>Applies the repairs and returns how many changed a file: a using or a reference there already is no change.</summary>
-    Task<int> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct);
+    /// <summary>Applies the repairs and returns the files they changed: a using or a reference there already is no change.</summary>
+    Task<IReadOnlyList<string>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct);
 }
 
 internal sealed class RepairWriter(IProcessRunner runner) : IRepairWriter
 {
-    public async Task<int> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct)
+    public async Task<IReadOnlyList<string>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct)
     {
-        var changed = 0;
+        var changed = new List<string>();
         foreach (var repair in repairs)
         {
-            var did = repair switch
+            var (did, file) = repair switch
             {
-                AddReference r => await ReferenceAsync(r, ct),
-                AddUsing u => await EditAsync(u.File, text => UsingLines.Add(text, u.Namespace), ct),
-                ReplaceUsing u => await EditAsync(u.File, text => UsingLines.Replace(text, u.Namespace, u.With), ct),
-                _ => false,
+                AddReference r => (await ReferenceAsync(r, ct), r.Project),
+                AddUsing u => (await EditAsync(u.File, text => UsingLines.Add(text, u.Namespace), ct), u.File),
+                ReplaceUsing u => (await EditAsync(u.File, text => UsingLines.Replace(text, u.Namespace, u.With), ct), u.File),
+                _ => (false, ""),
             };
-            changed += did ? 1 : 0;
+            if (did)
+                changed.Add(file);
         }
-        return changed;
+        return [.. changed.Distinct()];
     }
 
     /// <summary>A project the team removed, on either end, gets no reference.</summary>
@@ -77,7 +78,7 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
                 break;
             try
             {
-                changed += await writer.ApplyAsync(repairs, ct);
+                changed += (await writer.ApplyAsync(repairs, ct)).Count;
             }
             catch (Exception e) when (e is InvalidOperationException or IOException or UnauthorizedAccessException)
             {
@@ -90,4 +91,50 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
     }
 
     private static IReadOnlyList<string> UsingsOf(string file) => File.Exists(file) ? UsingLines.Of(File.ReadAllText(file)) : [];
+
+    /// <summary>
+    /// Before any build: every using of the solution's code that names a namespace the template gave up is replaced
+    /// by where its types went, and the project gets their projects, from the text alone. A build then has less to
+    /// find, often nothing. A file left in conflict, or of a project left in conflict, waits for its resolution and
+    /// the build. Returns the files changed.
+    /// </summary>
+    /// <param name="conflicts">The files left in conflict, relative to the root.</param>
+    public async Task<IReadOnlyList<string>> BeforeBuildAsync(string root, TypeMap map, IReadOnlyList<string> conflicts, CancellationToken ct)
+    {
+        var left = conflicts.Select(c => Path.GetFullPath(Path.Combine(root, c))).ToHashSet(PathComparer);
+        var repairs = ReferenceRepairs.FromText(SourceFiles(root).Where(f => !left.Contains(f.File) && !left.Contains(f.Project)), map, root);
+        return repairs.Count == 0 ? [] : await writer.ApplyAsync(repairs, ct);
+    }
+
+    private static StringComparer PathComparer => OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+
+    /// <summary>
+    /// The C# files under src with their project, the nearest .csproj above them, their usings and the namespaces
+    /// they declare. A folder with two projects names no one project, and its files are left to the build.
+    /// </summary>
+    private static IEnumerable<SourceFile> SourceFiles(string root)
+    {
+        var src = Path.Combine(root, Layout.SourceFolder);
+        if (!Directory.Exists(src))
+            yield break;
+        var projects = Directory.GetFiles(src, "*" + Layout.ProjectExtension, SearchOption.AllDirectories)
+            .GroupBy(p => Path.GetDirectoryName(p)!, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() == 1)
+            .ToDictionary(g => g.Key, g => Path.GetFullPath(g.Single()), StringComparer.OrdinalIgnoreCase);
+        foreach (var file in Directory.EnumerateFiles(src, "*.cs", SearchOption.AllDirectories))
+        {
+            if (Path.GetRelativePath(src, file).Replace('\\', '/').Split('/').Any(Layout.Ignored.Contains) || ProjectOf(file, projects) is not { } project)
+                continue;
+            var text = File.ReadAllText(file);
+            yield return new SourceFile(Path.GetFullPath(file), project, UsingLines.Of(text), UsingLines.Declared(text));
+        }
+    }
+
+    private static string? ProjectOf(string file, Dictionary<string, string> projects)
+    {
+        for (var dir = Path.GetDirectoryName(file); dir is not null; dir = Path.GetDirectoryName(dir))
+            if (projects.TryGetValue(dir, out var project))
+                return project;
+        return null;
+    }
 }

@@ -4,6 +4,7 @@ namespace DotsKit;
 internal static class Layout
 {
     public const string ProjectExtension = ".csproj";
+    public const string SourceFolder = "src";
     public const string ServicesFolder = "src/services";
     public const string CommonFolder = "src/common";
     public const string SolutionPattern = "*.All.sln";

@@ -10,13 +10,19 @@ namespace DotsKit.Planning;
 /// </summary>
 internal interface IPlanWriter
 {
-    /// <summary>Writes the plan and returns the files left in conflict.</summary>
-    Task<IReadOnlyList<string>> WriteAsync(Plan plan, CancellationToken ct);
+    /// <summary>Writes the plan, repairs what the text shows of the types the template moved, and says what is left.</summary>
+    Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct);
 }
 
-internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git) : IPlanWriter
+/// <summary>The files left in conflict, and the files the repair before the build changed.</summary>
+internal sealed record WriteResult(IReadOnlyList<string> Conflicts, IReadOnlyList<string> Repaired)
 {
-    public async Task<IReadOnlyList<string>> WriteAsync(Plan plan, CancellationToken ct)
+    public static readonly WriteResult Nothing = new([], []);
+}
+
+internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, ReferenceRepair repair) : IPlanWriter
+{
+    public async Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct)
     {
         var transaction = new FileTransaction(plan.Root);
         IReadOnlyList<string> conflicts;
@@ -32,25 +38,34 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git) : IP
         if (!plan.Membership.IsEmpty)
             transaction.Guard(SolutionFile(plan.Root));
         if (plan.ByGit is null)
+        {
             await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
-        else
-            await WriteBesideTheMergeAsync(plan, transaction, SolutionFile(plan.Root), ct);
-        return conflicts;
+            return new(conflicts, await RepairAsync(plan, conflicts, ct));
+        }
+        return new(conflicts, await WriteBesideTheMergeAsync(plan, transaction, conflicts, SolutionFile(plan.Root), ct));
     }
+
+    /// <summary>The usings of namespaces the template gave up, repaired from the text before any build.</summary>
+    private async Task<IReadOnlyList<string>> RepairAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct) =>
+        plan.Types is null ? [] : await repair.BeforeBuildAsync(plan.Root, plan.Types, conflicts, ct);
 
     /// <summary>All.sln relative to the root; a solution there already has it, a new one not yet.</summary>
     private static string SolutionFile(string root) => Path.GetRelativePath(root, Layout.SolutionFileOf(root)).Replace('\\', '/');
 
     /// <summary>
-    /// The manifest and All.sln join git's merge, so committing it takes them and <c>git merge --abort</c> puts them
-    /// back; a failure here undoes the merge as well as the files.
+    /// The manifest, All.sln and the files the repair changed join git's merge, so committing it takes them and
+    /// <c>git merge --abort</c> puts them back; a failure here undoes the merge as well as the files. The repair
+    /// leaves a file in conflict alone, so staging never marks one resolved.
     /// </summary>
-    private async Task WriteBesideTheMergeAsync(Plan plan, FileTransaction transaction, string solutionFile, CancellationToken ct)
+    private async Task<IReadOnlyList<string>> WriteBesideTheMergeAsync(Plan plan, FileTransaction transaction, IReadOnlyList<string> conflicts, string solutionFile, CancellationToken ct)
     {
         try
         {
             await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
-            await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
+            var repaired = await RepairAsync(plan, conflicts, ct);
+            var written = repaired.Select(f => Path.GetRelativePath(plan.Root, f).Replace('\\', '/'));
+            await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile, .. written.Distinct()], ct);
+            return repaired;
         }
         catch
         {

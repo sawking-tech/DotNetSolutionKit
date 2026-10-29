@@ -33,7 +33,7 @@ internal sealed class UpgradeCommandTests
 
         private sealed class Writer : IPlanWriter
         {
-            public Task<IReadOnlyList<string>> WriteAsync(Plan plan, CancellationToken ct) => Task.FromResult<IReadOnlyList<string>>([]);
+            public Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct) => Task.FromResult(WriteResult.Nothing);
         }
 
         private sealed class Git(Fakes fakes) : IGit

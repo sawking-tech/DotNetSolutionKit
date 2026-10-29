@@ -35,10 +35,10 @@ internal sealed class NewCommandTests
 
         private sealed class Writer(Fakes fakes) : IPlanWriter
         {
-            public Task<IReadOnlyList<string>> WriteAsync(Plan plan, CancellationToken ct)
+            public Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct)
             {
                 fakes.Written++;
-                return Task.FromResult<IReadOnlyList<string>>([]);
+                return Task.FromResult(WriteResult.Nothing);
             }
         }
 
