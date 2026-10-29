@@ -177,8 +177,14 @@ A type the template moves to another project or namespace, as 3.0 moves the type
 team's code that uses it. The tool reads where each public type lives - project and namespace - from both
 outputs of the template it generated for the merge, so the step works for any version and needs no list kept
 by hand. A type is followed inside its own area: a service's copy of a type leads to the same service, a type of
-the shared code to the shared code, so a service never gets a `using` or a reference of another service. After a
-build that fails:
+the shared code to the shared code, so a service never gets a `using` or a reference of another service.
+
+Right after the merge is written, before any build and whether it has conflicts or not, every `using` of the
+solution's code that names a namespace the template no longer has is replaced by where its types went, and the
+project gets the reference to their projects. A file left in conflict, a file of a project left in conflict and a
+namespace the solution's own code still declares are left for the build after the conflicts are resolved. In the
+merge by git the changed files join the merge. Then the build has less to find, often nothing. After a build that
+fails:
 
 - a `using` of a namespace the template no longer has (`CS0234`) becomes the `using` of the namespaces its
   types went to, and the project gets a reference to the projects they are in;

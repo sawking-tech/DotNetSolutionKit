@@ -29,7 +29,7 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
     /// project under src, so the files say it without a <c>dotnet sln list</c>.
     /// </summary>
     public static HashSet<string> InTree(string root) =>
-        Directory.GetFiles(Path.Combine(root, "src"), ProjectPattern, SearchOption.AllDirectories)
+        Directory.GetFiles(Path.Combine(root, Layout.SourceFolder), ProjectPattern, SearchOption.AllDirectories)
             .Select(p => Path.GetRelativePath(Layout.ServicesOf(root), p).Replace('\\', '/'))
             .Where(p => !p.Split('/').Any(Layout.Ignored.Contains))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);

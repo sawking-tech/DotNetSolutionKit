@@ -88,4 +88,30 @@ internal sealed class MovedTypeScenarios
         File.ReadAllText(Path.Combine(root, Order)).ShouldStartWith("using Acme.Shop.Framework.Events;\n");
         File.ReadAllText(Path.Combine(root, Orders)).ShouldContain("Acme.Shop.Framework.Events.csproj");
     }
+
+    [Test]
+    public async Task TheTeamsCode_ThatUsesAGivenUpNamespace_IsRepairedFromItsText_AndBuildsTheFirstTime()
+    {
+        var before = Folders.NewTemp("moved-text-base");
+        Put(before, Common, Project);
+        Put(before, Folder(Common) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Common.Events"));
+        Put(before, Folder(Common) + "/Marker.cs", Marker);
+        var root = Folders.NewTemp("moved-text-next");
+        Put(root, Common, Project);
+        Put(root, Folder(Common) + "/Marker.cs", Marker);
+        Put(root, Framework, Project);
+        Put(root, Folder(Framework) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Framework.Events"));
+        Put(root, Orders, Project);
+        Put(root, Order, OrderText);
+        Put(root, Solution, EmptySolution);
+        await Runner.RunCheckedAsync("dotnet", ["sln", Solution, "add", Common, Framework, Orders], root, CancellationToken.None);
+        await Runner.RunCheckedAsync("dotnet", ["add", Orders, "reference", Common], root, CancellationToken.None);
+        var map = TypeMap.Between(TypeIndex.Read(before), TypeIndex.Read(root));
+
+        var repaired = await new ReferenceRepair(new RepairWriter(Runner), new DotnetBuilder(Runner)).BeforeBuildAsync(root, map, [], CancellationToken.None);
+        var build = await new DotnetBuilder(Runner).BuildAsync(root, CancellationToken.None);
+
+        repaired.Count.ShouldBe(2);
+        build.Code.ShouldBe(0, build.Output + build.Error);
+    }
 }

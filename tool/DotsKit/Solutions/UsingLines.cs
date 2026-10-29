@@ -16,9 +16,16 @@ internal static partial class UsingLines
     [GeneratedRegex(@"^\s*(global\s+)?using\s+(?<ns>[\w.]+)\s*;\s*$")]
     private static partial Regex NamespaceUsing();
 
+    [GeneratedRegex(@"^\s*namespace\s+(?<ns>[\w.]+)\s*[;{]?\s*$")]
+    private static partial Regex NamespaceDeclaration();
+
     /// <summary>The namespaces a file has a using of, global ones too; an alias or a static using is not one.</summary>
     public static IReadOnlyList<string> Of(string text) =>
         [.. LineEndings.ToLf(text).Split('\n').Select(NamespaceOf).OfType<string>()];
+
+    /// <summary>The namespaces a file declares, file-scoped or in a block.</summary>
+    public static IReadOnlyList<string> Declared(string text) =>
+        [.. LineEndings.ToLf(text).Split('\n').Select(l => NamespaceDeclaration().Match(l)).Where(m => m.Success).Select(m => m.Groups["ns"].Value)];
 
     public static string Add(string text, string ns)
     {

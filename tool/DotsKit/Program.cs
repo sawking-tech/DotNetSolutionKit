@@ -25,10 +25,11 @@ using var http = new HttpClient();
 var staging = new Staging(new TemplateSource(runner, new TagArchive(http)), projects);
 var planner = new Planner(staging, new ThreeWayMerge(new GitMergeFile(runner)), projects, new GitRenames(runner));
 var report = new PlanReport(terminal);
-var writer = new PlanWriter(projects, new GitTemplateMerge(runner));
 var git = new Git(runner);
 var builder = new DotnetBuilder(runner);
-var execution = new PlanExecution(report, writer, builder, new ReferenceRepair(new RepairWriter(runner), builder), terminal);
+var repair = new ReferenceRepair(new RepairWriter(runner), builder);
+var writer = new PlanWriter(projects, new GitTemplateMerge(runner), repair);
+var execution = new PlanExecution(report, writer, builder, repair, terminal);
 
 AppDomain.CurrentDomain.ProcessExit += (_, _) => Folders.RemoveRunFolders();
 

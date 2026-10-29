@@ -111,6 +111,80 @@ internal sealed class ReferenceRepairTests
     }
 
     [Test]
+    public void AUsingOfAGivenUpNamespace_IsRepairedFromTheText_BeforeAnyBuild_AndAKeptOneIsLeft()
+    {
+        var files = new[]
+        {
+            new SourceFile(OrderFile, Orders, ["System", "Acme.Shop.Common.Events", "Acme.Shop.Common"], ["Acme.Shop.Orders.Domain"]),
+            new SourceFile("/s/src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Other.cs", Orders, ["Acme.Shop.Common"], []),
+        };
+
+        ReferenceRepairs.FromText(files, TypeMap.Between(Before, After), Root).ShouldBe([
+            new ReplaceUsing(OrderFile, "Acme.Shop.Common.Events", "Acme.Shop.Framework.Events"),
+            new AddReference(Path.GetFullPath(Orders), Path.GetFullPath(Path.Combine(Root, Framework))),
+        ]);
+    }
+
+    [Test]
+    public void AGivenUpNamespace_ThatTheTeamsCodeStillDeclares_IsLeftToTheBuild()
+    {
+        var files = new[]
+        {
+            new SourceFile(OrderFile, Orders, ["Acme.Shop.Common.Events"], []),
+            new SourceFile("/s/src/common/Acme.Shop.Common/Events/OrderShipped.cs", "/s/" + Common, [], ["Acme.Shop.Common.Events"]),
+        };
+
+        ReferenceRepairs.FromText(files, TypeMap.Between(Before, After), Root).ShouldBeEmpty();
+    }
+
+    [Test]
+    public void TheNamespacesAFileDeclares_FileScopedOrInABlock_AreRead()
+    {
+        UsingLines.Declared("using System;\r\n\r\nnamespace A.B;\r\n").ShouldBe(["A.B"]);
+        UsingLines.Declared("namespace C\n{\n    namespace D { }\n}\n").ShouldBe(["C"]);
+    }
+
+    private sealed class RecordingWriter : IRepairWriter
+    {
+        public List<Repair> Repairs { get; } = [];
+
+        public Task<IReadOnlyList<string>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct)
+        {
+            Repairs.AddRange(repairs);
+            return Task.FromResult<IReadOnlyList<string>>([]);
+        }
+    }
+
+    [Test]
+    public async Task BeforeTheBuild_AFileInConflict_AFileOfAProjectInConflict_AndAFolderOfTwoProjects_AreLeftAlone()
+    {
+        var root = Io.Folders.NewTemp("repair-before");
+        const string given = "using Acme.Shop.Common.Events;\n";
+        string Put(string path, string text)
+        {
+            var full = Path.Combine(root, path);
+            Directory.CreateDirectory(Path.GetDirectoryName(full)!);
+            File.WriteAllText(full, text);
+            return Path.GetFullPath(full);
+        }
+        Put(Orders[3..], "<Project />");
+        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs", given);
+        var free = Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Free.cs", given);
+        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Api/Acme.Shop.Orders.Api.csproj", "<Project />");
+        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Api/Api.cs", given);
+        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Twin/A.csproj", "<Project />");
+        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Twin/B.csproj", "<Project />");
+        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Twin/Twin.cs", given);
+        var writer = new RecordingWriter();
+
+        await new ReferenceRepair(writer, new NoBuilder()).BeforeBuildAsync(root, TypeMap.Between(Before, After),
+            ["src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs", "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Api/Acme.Shop.Orders.Api.csproj"],
+            CancellationToken.None);
+
+        writer.Repairs.OfType<ReplaceUsing>().Select(r => r.File).ShouldBe([free]);
+    }
+
+    [Test]
     public void ATypeNotFound_ThatTheTemplateHasInOnePlace_GetsItsNamespaceAndProject_EvenWhenGeneric()
     {
         var repairs = ReferenceRepairs.Decide(
@@ -149,7 +223,7 @@ internal sealed class ReferenceRepairTests
 
     private sealed class FailingWriter : IRepairWriter
     {
-        public Task<int> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct) =>
+        public Task<IReadOnlyList<string>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct) =>
             throw new IOException("The file Order.cs is locked by another process.");
     }
 
