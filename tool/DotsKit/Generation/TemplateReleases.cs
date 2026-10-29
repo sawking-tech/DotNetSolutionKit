@@ -25,7 +25,7 @@ internal sealed partial class GitTemplateReleases(IProcessRunner runner) : ITemp
         return listed.Code == 0
             ? Parse(listed.Output)
             : throw new InvalidOperationException(
-                $"The releases of the template could not be listed from {Repository.Url}: check the network, or name the version, dotskit init --template-version 2.x.y.");
+                $"The releases of the template could not be listed from {Repository.Url}: check the network, or name the version, dotskit init --template-version 2.x.y; a solution of 1.x is brought to 2.0.0 first, by docs/getting-started/upgrading.md, \"A solution of v1\".");
     }
 
     /// <summary>The versions of the release tags in the output of <c>git ls-remote --tags</c>.</summary>

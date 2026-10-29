@@ -181,7 +181,7 @@ internal static class TemplateVersions
     {
         if (version is null)
         {
-            return $"The solution does not say its template version (it does since {Declared.ToString(3)}): name it, dotskit init --template-version 2.x.y.";
+            return $"The solution does not say its template version (it does since {Declared.ToString(3)}): name it, dotskit init --template-version 2.x.y; a solution of 1.x is brought to 2.0.0 first, by docs/getting-started/upgrading.md, \"A solution of v1\".";
         }
 
         if (version == TemplateSource.SourcesVersion)

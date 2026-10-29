@@ -197,7 +197,7 @@ projects. The check installs the template of that version from nuget.org.
 | empty | writes nothing, and names `dotskit new -N <Company> -P <Product> -S <Service>` |
 | no `src/services/*.All.sln` | writes nothing: not a solution of DotNetSolutionKit |
 | a solution of 2.7 or later, no manifest | reads it, checks it, shows the manifest and the report, writes it after a yes |
-| a solution before 2.7, from 1.0.0, which does not say its version | with `Common`, checks it against the last patch of each minor before 2.7, side by side, from the tags of the repository, shows the share of the template's files each reproduces, writes nothing, and names the closest: `dotskit init --template-version <it>`; without `Common`, asks for the version; with the version given, the check shows how well it reproduces the solution, generated from nuget.org or, before 2.6.1, from its tag on GitHub |
+| a solution before 2.7, from 1.0.0, which does not say its version | with `Common`, checks it against the last patch of each minor before 2.7, side by side, from the tags of the repository, shows the share of the template's files each reproduces, writes nothing, and names the closest: `dotskit init --template-version <it>`, or, when it is 1.0.0, `2.0.0`, to bring the code to by hand first ([upgrading](upgrading.md#a-solution-of-v1)); without `Common`, asks for the version; with the version given, the check shows how well it reproduces the solution, generated from nuget.org or, before 2.6.1, from its tag on GitHub |
 | generated from the template's sources (version `source`) | writes nothing, and asks for the release it came from with `--template-version` |
 | newer than the tool | writes nothing, and names `dotnet tool update -g SawKing.DotsKit.Tool` |
 | of an earlier major version than the tool, other than the last release of the previous one | writes nothing, and names the tool of the solution's major |
@@ -260,9 +260,10 @@ no build and no repair.
 Which versions: one major version at a time. dotskit X.y upgrades a solution of every minor of X and of the
 last minor of X-1. From an older major the tool names the steps: the tool of the solution's own major,
 `dotskit upgrade`, then the next major, and so on. A solution newer than the tool is refused with the command
-that updates the tool. The tools of 2.x also take 1.0.0, the only release of 1.x. The tool generates a
-version from its package on nuget.org, which has the template from 2.6.1, and an earlier release from the
-archive of its tag on GitHub, so a solution of any release from 1.0.0 is upgraded the same way.
+that updates the tool. The tool generates a version from its package on nuget.org, which has the template from
+2.6.1, and an earlier release from the archive of its tag on GitHub, so a solution of any 2.x release is
+upgraded the same way. The tools of 2.x also take 1.0.0, the only release of 1.x, but it differs from 2.0.0 in
+most files: a solution of v1 is brought to 2.0.0 by hand first ([upgrading](upgrading.md#a-solution-of-v1)).
 
 `--to 2.x.y` brings the solution to that release instead of the tool's version, a release newer than the
 solution and not newer than the tool. A solution far behind can go a release at a time, each step a merge of
