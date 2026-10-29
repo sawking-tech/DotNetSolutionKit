@@ -26,8 +26,33 @@ internal sealed class GitRenames(IProcessRunner runner) : IRenames
         var result = await runner.RunAsync("git", ["diff", "--no-index", "-M", "--name-status", "-z", baseDir, newDir], Path.GetTempPath(), ct);
         if (result.Code is not (0 or Differ))
             throw new InvalidOperationException($"git could not compare the template's two outputs: {result.Error.Trim()}");
-        return Parse(result.Output, baseDir, newDir);
+        return WithinServices(Parse(result.Output, baseDir, newDir), path => File.Exists(Path.Combine(newDir, path)));
     }
+
+    /// <summary>
+    /// The template moves a file inside a service, never from one service to another: where two services have
+    /// the same file and both move it, git may pair one service's old path with the other's new one. Such a pair
+    /// is taken to the same move inside the old path's own service, or dropped when that service has no such file.
+    /// </summary>
+    /// <param name="existsInNew">Whether a path, relative to the trees, is a file of the template's new output.</param>
+    public static IReadOnlyDictionary<string, string> WithinServices(IReadOnlyDictionary<string, string> renames, Func<string, bool> existsInNew)
+    {
+        var kept = renames.Where(r => !AcrossServices(r.Key, r.Value)).ToDictionary(r => r.Key, r => r.Value, StringComparer.Ordinal);
+        foreach (var (moved, old) in renames.Where(r => AcrossServices(r.Key, r.Value)))
+        {
+            // The other service's name is in its project folders too: Acme.Shop.Billing/Acme.Shop.Billing.Tests.
+            var (to, from) = (Layout.ServiceFolderOf(moved)!, Layout.ServiceFolderOf(old)!);
+            var own = from + moved[to.Length..].Replace(NameOf(to), NameOf(from), StringComparison.Ordinal);
+            if (existsInNew(own) && !kept.ContainsKey(own))
+                kept[own] = old;
+        }
+        return kept;
+    }
+
+    private static bool AcrossServices(string moved, string old) =>
+        Layout.ServiceFolderOf(moved) is { } to && Layout.ServiceFolderOf(old) is { } from && to != from;
+
+    private static string NameOf(string serviceFolder) => serviceFolder[(serviceFolder.LastIndexOf('/') + 1)..];
 
     /// <summary>The renames of git's -z output: a status, then two paths for a rename, one for anything else.</summary>
     public static IReadOnlyDictionary<string, string> Parse(string output, string baseDir, string newDir)

@@ -29,7 +29,8 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
         if (current is null)
             return new Plan(root, next, changes, new MembershipChange([], []), packages);
         var membership = await MembershipAsync(root, baseDir!, nextDir, ct);
-        return new Plan(root, next, [.. changes.Where(c => !IsSolutionFile(c.Path))], membership, packages);
+        var types = TypeMap.Between(TypeIndex.Read(baseDir!), TypeIndex.Read(nextDir));
+        return new Plan(root, next, [.. changes.Where(c => !IsSolutionFile(c.Path))], membership, packages, types);
     }
 
     private async Task<MembershipChange> MembershipAsync(string root, string baseDir, string nextDir, CancellationToken ct) =>

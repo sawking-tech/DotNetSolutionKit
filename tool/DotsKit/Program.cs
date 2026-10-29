@@ -21,13 +21,14 @@ if (args[0] is "--version" or "version")
 
 var runner = new ProcessRunner();
 var projects = new SolutionProjects(runner);
-var staging = new Staging(new TemplateSource(runner), projects);
+using var http = new HttpClient();
+var staging = new Staging(new TemplateSource(runner, new TagArchive(http)), projects);
 var planner = new Planner(staging, new ThreeWayMerge(new GitMergeFile(runner)), projects, new GitRenames(runner));
 var report = new PlanReport(terminal);
 var writer = new PlanWriter(projects);
 var git = new Git(runner);
 var builder = new DotnetBuilder(runner);
-var execution = new PlanExecution(report, writer, builder, terminal);
+var execution = new PlanExecution(report, writer, builder, new ReferenceRepair(new RepairWriter(runner), builder), terminal);
 
 AppDomain.CurrentDomain.ProcessExit += (_, _) => Folders.RemoveRunFolders();
 

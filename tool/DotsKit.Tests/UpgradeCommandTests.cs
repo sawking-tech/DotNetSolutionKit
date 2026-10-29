@@ -19,7 +19,7 @@ internal sealed class UpgradeCommandTests
         public List<string> Lines { get; } = [];
 
         public UpgradeCommand Command() =>
-            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(), new Builder(), new Terminal(this)),
+            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(), new Builder(), new ReferenceRepair(new RepairWriter(new Io.ProcessRunner()), new Builder()), new Terminal(this)),
                 new Git(this), new Terminal(this), ToolVersion, onSources: false);
 
         private sealed class Planner(Fakes fakes) : IPlanner

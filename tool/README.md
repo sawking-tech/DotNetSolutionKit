@@ -33,6 +33,9 @@ dotskit init
 
 # in a solution: bring it to the tool's version of the template
 dotskit upgrade
+
+# in a solution far behind: a release at a time
+dotskit upgrade --to 2.3.0
 ```
 
 Every command shows the files it will change and why, and asks before writing; `--yes` writes without asking.

@@ -113,11 +113,10 @@ projects. The check installs the template of that version from nuget.org.
 | empty | writes nothing, and names `dotskit new -N <Company> -P <Product> -S <Service>` |
 | no `src/services/*.All.sln` | writes nothing: not a solution of DotNetSolutionKit |
 | a solution of 2.7 or later, no manifest | reads it, checks it, shows the manifest and the report, writes it after a yes |
-| a solution of 2.6.1-2.6.2, which does not say its version | writes nothing, and asks for `--template-version 2.x.y`; the check then shows how well that version reproduces the solution |
-| a version before 2.6.1 | writes nothing: nuget.org has no package of it to generate it again; the solution is carried over by [upgrading](upgrading.md) first |
+| a solution before 2.7, from 1.0.0, which does not say its version | writes nothing, and asks for `--template-version`; the check then shows how well that version reproduces the solution, generated from nuget.org or, before 2.6.1, from its tag on GitHub |
 | generated from the template's sources (version `source`) | writes nothing, and asks for the release it came from with `--template-version` |
 | newer than the tool | writes nothing, and names `dotnet tool update -g SawKing.DotsKit.Tool` |
-| of an earlier major version than the tool | writes nothing: the tool describes solutions of its own major version |
+| of an earlier major version than the tool, other than the last release of the previous one | writes nothing, and names the tool of the solution's major |
 | a service of another version than the solution | writes nothing, names the service and its version, and asks for the version to describe the solution by with `--template-version`; with it, the check shows what differs |
 | with a manifest that lists every service | writes nothing: "the manifest is current: 2.8.0, services Orders, Billing" |
 | with a manifest, and a service under `src/services` it does not list | adds the service, read from its files, after the same check |
@@ -142,14 +141,44 @@ What the merge adds for an upgrade:
   path, and the old path is deleted;
 - a file the template removed is deleted when the team did not change it, and kept and reported when it did;
 - the package versions follow the manifest's `packages`, below;
-- after writing, the solution is built, and the errors are listed by project.
+- after writing, the solution is built; the references and `using` lines of the types the template moved are
+  repaired, below, and the errors left are listed by project.
+
+A type the template moves to another project or namespace, as 3.0 moves the types of `Common`, breaks the
+team's code that uses it. The tool reads where each public type lives - project and namespace - from both
+outputs of the template it generated for the merge, so the step works for any version and needs no list kept
+by hand. A type is followed inside its own area: a service's copy of a type leads to the same service, a type of
+the shared code to the shared code, so a service never gets a `using` or a reference of another service. After a
+build that fails:
+
+- a `using` of a namespace the template no longer has (`CS0234`) becomes the `using` of the namespaces its
+  types went to, and the project gets a reference to the projects they are in;
+- a type not found (`CS0246`) that the template moved out of a namespace the file uses gets its `using` and
+  the reference to its project; a type of the team's with a template's name, a type the template did not move,
+  or moved to two homes, is left as it is;
+- the solution is built again, while each round finds something new to repair: once a project builds, the
+  projects that reference it show their own errors.
+
+The report says how many references and `using` lines changed; `git diff` shows them. The repair runs after
+the merge is written: a write of it that fails stops it, and the report says why. With `--no-build` there is
+no build and no repair.
 
 Which versions: one major version at a time. dotskit X.y upgrades a solution of every minor of X and of the
 last minor of X-1. From an older major the tool names the steps: the tool of the solution's own major,
 `dotskit upgrade`, then the next major, and so on. A solution newer than the tool is refused with the command
-that updates the tool. The tool generates a version from its package on nuget.org, which has the template
-from 2.6.1: a solution of an earlier version is carried over to 2.6.1 or later by the steps of
-[upgrading](upgrading.md) first.
+that updates the tool. The tools of 2.x also take 1.0.0, the only release of 1.x. The tool generates a
+version from its package on nuget.org, which has the template from 2.6.1, and an earlier release from the
+archive of its tag on GitHub, so a solution of any release from 1.0.0 is upgraded the same way.
+
+`--to 2.x.y` brings the solution to that release instead of the tool's version, a release newer than the
+solution and not newer than the tool. A solution far behind can go a release at a time, each step a merge of
+its own with a build after it:
+
+```bash
+dotskit upgrade --to 2.0.0
+dotskit upgrade --to 2.1.0
+dotskit upgrade
+```
 
 Package versions come with an upgrade as far as the manifest lets them:
 
@@ -176,8 +205,7 @@ project.
 
 The upgrade does the mechanical part: the text of the files, moves and removals, the package versions, the
 build. Whether the team's own code should change with the template's - a handler of its own beside one the
-template changed - is the team's to decide, and its tests show it. Adding the project references and `using`
-lines for types the template moves between projects comes in 2.9, before 3.0 moves the first of them.
+template changed - is the team's to decide, and its tests show it.
 
 ## Options
 
@@ -188,6 +216,7 @@ lines for types the template moves between projects comes in 2.9, before 3.0 mov
 | `--no-build` | does not build the solution after writing |
 | `--allow-dirty` | runs on a working tree with uncommitted changes |
 | `--template-version 2.x.y` | `init`: the version the solution was made by, where it does not say it |
+| `--to 2.x.y` | `upgrade`: the release to bring the solution to, not newer than the tool |
 
 ## Exit codes
 

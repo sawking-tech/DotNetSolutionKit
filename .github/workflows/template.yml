@@ -271,7 +271,27 @@ jobs:
       - name: Build
         run: dotnet build tool/DotsKit.Tests -warnaserror
       - name: Test
-        run: dotnet test tool/DotsKit.Tests --no-build
+        run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory!=Chain"
+
+  # A solution of 1.0.0 upgraded by dotskit a release at a time to the template's sources, building after every
+  # step (#117): an hour of upgrades, so on one OS. The releases before 2.6.1 come from their tags on GitHub.
+  chain:
+    name: dotskit upgrades from 1.0.0
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+      - name: Git for the scenarios
+        run: |
+          git config --global user.name "dotskit scenarios"
+          git config --global user.email "scenarios@dotskit.invalid"
+      - name: Build
+        run: dotnet build tool/DotsKit.Tests -warnaserror
+      - name: Test
+        run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory=Chain"
 
   # A link to a section of a document names a heading of it, in the language of the linking document.
   doc-links:

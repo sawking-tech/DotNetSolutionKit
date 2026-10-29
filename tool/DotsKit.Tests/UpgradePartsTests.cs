@@ -73,13 +73,35 @@ internal sealed class UpgradePartsTests
         args.ForVersion(TemplateSource.SourcesVersion).ToArgs().Count.ShouldBe(8);
     }
 
+    [TestCase("1.0.0")]
     [TestCase("2.0.0")]
     [TestCase("2.6.0")]
-    public void AVersionNotOnNuGet_IsNeitherDescribedNorUpgraded(string version)
+    public void AReleaseBeforeNuGet_IsDescribedAndUpgraded_FromItsTag(string version)
     {
-        TemplateVersions.WhyNotDescribed(version, "2.8.0", onSources: false)!.ShouldContain("not on nuget.org");
-        TemplateVersions.WhyNotUpgraded(version, "2.8.0", onSources: true)!.ShouldContain("not on nuget.org");
-        TemplateVersions.WhyNotUpgraded("2.6.1", "2.8.0", onSources: false).ShouldBeNull();
+        TemplateVersions.WhyNotDescribed(version, "2.9.0", onSources: false).ShouldBeNull();
+        TemplateVersions.WhyNotUpgraded(version, "2.9.0", onSources: false).ShouldBeNull();
+        TemplateVersions.IsPublished(version).ShouldBeFalse();
+        TemplateVersions.IsPublished("2.6.1").ShouldBeTrue();
+        TemplateVersions.IsPublished(TemplateSource.SourcesVersion).ShouldBeFalse();
+    }
+
+    [Test]
+    public void TheReleaseToGoTo_IsNewerThanTheSolution_AndNotNewerThanTheTool()
+    {
+        TemplateVersions.WhyNotTarget("1.0.0", "2.0.0", "2.9.0", onSources: false).ShouldBeNull();
+        TemplateVersions.WhyNotTarget("2.3.0", "2.1.0", "2.9.0", onSources: false)!.ShouldContain("not older than 2.1.0");
+        TemplateVersions.WhyNotTarget("2.3.0", "3.0.0", "2.9.0", onSources: false)!.ShouldContain("newer than dotskit 2.9.0");
+        TemplateVersions.WhyNotTarget("2.3.0", "3.0.0", "2.9.0", onSources: true).ShouldBeNull();
+        TemplateVersions.WhyNotTarget("2.3.0", TemplateSource.SourcesVersion, "2.9.0", onSources: true)!.ShouldContain("not a release");
+        TemplateVersions.WhyNotTarget("2.1.0", "2.3", "2.9.0", onSources: false)!.ShouldContain("not a release");
+    }
+
+    [Test]
+    public void TheReleaseToGoTo_IsAnOptionOfUpgradeOnly()
+    {
+        Options.Parse("upgrade", ["--to", "2.3.0", "--yes"]).To.ShouldBe("2.3.0");
+        Should.Throw<ArgumentException>(() => Options.Parse("init", ["--to", "2.3.0"])).Message.ShouldContain("option of dotskit upgrade");
+        Should.Throw<ArgumentException>(() => Options.Parse("upgrade", ["--to"])).Message.ShouldContain("needs a version");
     }
 
     [Test]
@@ -140,6 +162,27 @@ internal sealed class UpgradePartsTests
         var output = "D\0C:/t/base/b.cs\0M\0C:/t/base/a.cs\0R087\0C:/t/base/src/common/X.cs\0C:/t/next/src/capabilities/X.cs\0";
 
         GitRenames.Parse(output, "C:/t/base", "C:/t/next").ShouldBe(new Dictionary<string, string> { ["src/capabilities/X.cs"] = "src/common/X.cs" });
+    }
+
+    [Test]
+    public void AMoveGitPairsAcrossTwoServices_IsTakenToTheSameMoveInsideTheOldPathsService()
+    {
+        // Both services moved Stabs/ to Stubs/; git paired Orders' old file with Billing's new one.
+        const string orders = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Tests/Misc/";
+        const string billing = "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Tests/Misc/";
+        var renames = new Dictionary<string, string>
+        {
+            [billing + "Stubs/UserContextMock.cs"] = orders + "Stabs/UserContextMock.cs",
+            ["src/common/Web/Swagger.cs"] = orders + "Setup/Swagger.cs",
+            [billing + "Stubs/Lost.cs"] = orders + "Stabs/Lost.cs",
+        };
+        string[] files = [orders + "Stubs/UserContextMock.cs", billing + "Stubs/UserContextMock.cs", "src/common/Web/Swagger.cs"];
+
+        GitRenames.WithinServices(renames, files.Contains).ShouldBe(new Dictionary<string, string>
+        {
+            [orders + "Stubs/UserContextMock.cs"] = orders + "Stabs/UserContextMock.cs",
+            ["src/common/Web/Swagger.cs"] = orders + "Setup/Swagger.cs",
+        }, ignoreOrder: true);
     }
 
     [Test]

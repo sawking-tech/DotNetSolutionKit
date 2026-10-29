@@ -8,7 +8,7 @@ namespace DotsKit.Commands;
 /// The end every command that changes a solution shares: show the plan, ask, write it in one transaction, then
 /// build - or stop at the conflicts a person resolves first.
 /// </summary>
-internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuilder builder, ITerminal terminal)
+internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuilder builder, ReferenceRepair repair, ITerminal terminal)
 {
     public async Task<ExitCode> RunAsync(Plan plan, Options options, CancellationToken ct)
     {
@@ -19,7 +19,7 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
             return ExitCode.Failed;
         }
         await writer.WriteAsync(plan, ct);
-        return plan.HasConflicts ? Conflicts() : await BuildAsync(plan.Root, options, ct);
+        return plan.HasConflicts ? Conflicts() : await BuildAsync(plan, options, ct);
     }
 
     private ExitCode Conflicts()
@@ -28,20 +28,28 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         return ExitCode.Conflicts;
     }
 
-    private async Task<ExitCode> BuildAsync(string root, Options options, CancellationToken ct)
+    private async Task<ExitCode> BuildAsync(Plan plan, Options options, CancellationToken ct)
     {
         if (options.NoBuild)
             return ExitCode.Done;
-        ProcessResult build;
+        RepairResult result;
         try
         {
-            build = await builder.BuildAsync(root, ct);
+            var first = await builder.BuildAsync(plan.Root, ct);
+            result = first.Code != 0 && plan.Types is not null
+                ? await repair.RunAsync(plan.Root, plan.Types, first, ct)
+                : new(first, 0, null);
         }
         catch (OperationCanceledException)
         {
             terminal.Info("Written; the build was cancelled: run dotnet build to check the solution.");
             return ExitCode.Failed;
         }
+        if (result.Changed > 0)
+            terminal.Info($"Written; {result.Changed} references and usings changed for the types the template moved: git diff shows them.");
+        if (result.Stopped is { } why)
+            terminal.Info($"Written; the repair of references stopped: {why}");
+        var build = result.Build;
         if (build.Code == 0)
         {
             terminal.Info("Written; the solution builds.");

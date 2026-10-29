@@ -24,10 +24,10 @@ internal static class TemplateVersions
     public static bool AddsServiceToSolution(string version) => IsAtLeast(version, SelfAddingService);
 
     /// <summary>
-    /// The last minor of the previous major, which this tool upgrades as well (CONTRIBUTING.md, Releases); none
-    /// for 2.x, since 1.x is not supported. 3.0 sets it to the last 2.x when it is released.
+    /// The last minor of the previous major, which this tool upgrades as well (CONTRIBUTING.md, Releases): 1.0, the
+    /// only release of 1.x, for the tools of 2.x. 3.0 sets it to the last 2.x when it is released.
     /// </summary>
-    private static readonly Version? LastOfPreviousMajor = null;
+    private static readonly Version LastOfPreviousMajor = new(1, 0);
 
     /// <summary>
     /// Why the tool of <paramref name="toolVersion"/> cannot bring a solution of <paramref name="from"/> to its
@@ -38,16 +38,16 @@ internal static class TemplateVersions
     {
         if (from == TemplateSource.SourcesVersion)
             return onSources ? null : "The solution was made from the template's sources: name the release it came from in its manifest, or describe it again, dotskit init --template-version 2.x.y.";
-        var solution = Version.Parse(from.Split('-')[0]);
-        if (WhyNotPublished(solution) is { } unpublished)
-            return unpublished;
         if (onSources)
             return null;
+        var solution = Version.Parse(from.Split('-')[0]);
         var tool = Version.Parse(toolVersion.Split('-')[0]);
         if (solution > tool)
             return $"The solution is of the template {from}, newer than dotskit {toolVersion}: update the tool, dotnet tool update -g SawKing.DotsKit.Tool.";
-        if (solution.Major == tool.Major || (LastOfPreviousMajor is { } last && solution.Major == last.Major && solution.Minor == last.Minor))
+        if (IsTaken(solution, tool))
             return null;
+        if (WhyNoTool(solution) is { } noTool)
+            return noTool;
         // Each major in turn: the tool of the solution's major brings it to that major's last minor, and so on up.
         var steps = Enumerable.Range(solution.Major, tool.Major - solution.Major)
             .Select(major => $"dotnet tool update -g SawKing.DotsKit.Tool --version {major}.*, dotskit upgrade");
@@ -55,24 +55,52 @@ internal static class TemplateVersions
             + string.Join("; then ", [.. steps, "dotnet tool update -g SawKing.DotsKit.Tool, dotskit upgrade"]) + ".";
     }
 
-    /// <summary>
-    /// The first version on nuget.org: the tool generates a version from its package, so an earlier one has no base.
-    /// </summary>
-    private static readonly Version FirstPublished = new(2, 6, 1);
+    /// <summary>Every minor of the tool's major, and the last minor of the one before.</summary>
+    private static bool IsTaken(Version solution, Version tool) =>
+        solution.Major == tool.Major
+        || (solution.Major == tool.Major - 1 && solution.Major == LastOfPreviousMajor.Major && solution.Minor == LastOfPreviousMajor.Minor);
 
-    /// <summary>Why the tool cannot generate the template of <paramref name="version"/>, or null when it can.</summary>
-    private static string? WhyNotPublished(Version version) =>
-        version < FirstPublished
-            ? $"The template {version} is not on nuget.org, where dotskit takes a version from (from {FirstPublished}): carry the solution over to {FirstPublished} or later by the template's notes, docs/getting-started/upgrading.md, then describe it as that version."
+    /// <summary>The first major with a dotskit of its own; a solution of an earlier one has only the last release of it.</summary>
+    private const int FirstToolMajor = 2;
+
+    /// <summary>A solution of a major before dotskit that no tool takes: it goes over by the notes.</summary>
+    private static string? WhyNoTool(Version solution) =>
+        solution.Major < FirstToolMajor
+            ? $"The template {solution} has no dotskit to take it, the tools of 2.x take 1.0.0 only: carry the solution over to 2.x by docs/getting-started/upgrading.md, then describe it as that version."
             : null;
 
     /// <summary>
-    /// The version each parameter came with; one not listed is there since 2.0.0. A manifest keeps every parameter
+    /// The first version on nuget.org; an earlier one is taken from its tag on GitHub (<see cref="TagArchive"/>).
+    /// </summary>
+    private static readonly Version FirstPublished = new(2, 6, 1);
+
+    /// <summary>Whether the package of <paramref name="version"/> is on nuget.org; the template's sources are not.</summary>
+    public static bool IsPublished(string version) => IsAtLeast(version, FirstPublished) && version != TemplateSource.SourcesVersion;
+
+    /// <summary>
+    /// Why a solution of <paramref name="from"/> cannot go to <paramref name="to"/>, named by --to, with the tool of
+    /// <paramref name="toolVersion"/>; null when it can. A release newer than the solution and not newer than the tool.
+    /// </summary>
+    public static string? WhyNotTarget(string from, string to, string toolVersion, bool onSources)
+    {
+        if (to == TemplateSource.SourcesVersion || !Version.TryParse(to.Split('-')[0], out var target) || target.Build < 0)
+            return $"--to {to} is not a release of the template: name one, --to 2.x.y.";
+        if (from != TemplateSource.SourcesVersion && !IsNewer(to, from))
+            return $"The solution is of the template {from} already, not older than {to}: name a newer version, or leave out --to.";
+        if (!onSources && target > Version.Parse(toolVersion.Split('-')[0]))
+            return $"--to {to} is newer than dotskit {toolVersion}: update the tool, dotnet tool update -g SawKing.DotsKit.Tool.";
+        return null;
+    }
+
+    /// <summary>
+    /// The version each parameter came with; one not listed is there since 1.0.0. A manifest keeps every parameter
     /// it was read with, and a version is given only those it has: a solution of 2.0 described by init says
     /// --Agent none, which 2.0 does not know and generates as it is.
     /// </summary>
     private static readonly Dictionary<string, Version> ParameterSince = new(StringComparer.OrdinalIgnoreCase)
     {
+        ["Hangfire"] = new(2, 0, 0), ["Messaging"] = new(2, 0, 0), ["Infisical"] = new(2, 0, 0), ["HttpPort"] = new(2, 0, 0),
+        ["DiffApi"] = new(2, 0, 0), ["FeatureFlags"] = new(2, 0, 0), ["HierarchyRules"] = new(2, 0, 0),
         ["ApiGateway"] = new(2, 1, 0), ["ClickHouse"] = new(2, 1, 0), ["Deploy"] = new(2, 1, 0), ["GitHubCiCd"] = new(2, 1, 0),
         ["Storage"] = new(2, 1, 0), ["Audit"] = new(2, 5, 0), ["TestFramework"] = new(2, 6, 0), ["Agent"] = new(2, 7, 0),
         ["Database"] = new(2, 7, 0), ["Vault"] = new(2, 7, 0), ["MongoDB"] = new(2, 8, 0), ["Notify"] = new(2, 8, 0),
@@ -107,17 +135,16 @@ internal static class TemplateVersions
             return onSources ? null : "The solution was made from the template's sources: name the release it came from, dotskit init --template-version 2.x.y.";
         if (!IsVersion(version))
             return $"\"{version}\" is not a version of the template: name one, dotskit init --template-version 2.x.y.";
-        var solution = Version.Parse(version.Split('-')[0]);
-        if (WhyNotPublished(solution) is { } unpublished)
-            return unpublished;
         if (onSources)
             return null;
+        var solution = Version.Parse(version.Split('-')[0]);
         var tool = Version.Parse(toolVersion.Split('-')[0]);
         if (solution > tool)
             return $"The solution was made by the template {version}, dotskit is {toolVersion}: update the tool, dotnet tool update -g SawKing.DotsKit.Tool.";
-        return solution.Major < tool.Major
-            ? $"The solution was made by the template {version}; dotskit {toolVersion} describes solutions of {tool.Major}.x: bring it to {tool.Major}.0 by the template's upgrading notes first."
-            : null;
+        if (IsTaken(solution, tool))
+            return null;
+        return WhyNoTool(solution)
+            ?? $"The solution was made by the template {version}; dotskit {toolVersion} describes solutions of {tool.Major}.x and {LastOfPreviousMajor.Major}.{LastOfPreviousMajor.Minor}: describe it with the tool of its major, dotnet tool update -g SawKing.DotsKit.Tool --version {solution.Major}.*.";
     }
 
     /// <summary>Whether <paramref name="version"/> is newer than <paramref name="than"/>; the template's sources are the newest.</summary>

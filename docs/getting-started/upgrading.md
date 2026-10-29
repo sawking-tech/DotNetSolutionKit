@@ -8,6 +8,11 @@ The template is versioned with git tags, by semantic versioning.
 | `v2.0.0-preview.1` | The breaking changes in progress. |
 | `v2.0.0` | The breaking changes completed and checked. |
 
+From 2.9 `dotskit upgrade` brings a solution of any release from `v1.0.0` to the current one, keeping the team's
+changes: `dotskit init --template-version` with the release the solution was made by, then `dotskit upgrade`, or
+a release at a time with `--to` ([dotskit](dotskit.md#upgrading-a-solution)). The sections below are the same
+changes by hand.
+
 What each version brings, from `v2.1.0` on, is in [version.json](../../version.json) and on the
 [releases page](https://github.com/sawking-tech/DotNetSolutionKit/releases); the table lists only the
 versions those do not explain.
@@ -221,11 +226,11 @@ The solution is generated with `--Solution`, and every further service without i
 versions still means the same and is hidden from `dotnet new --help`; it goes in 3.0. Nothing to change in a
 solution; in your scripts, `-M false` can become `--Solution`.
 
-## Do not regenerate over an older solution
+## A solution of v1
 
-`dotnet new ... --force` over a solution generated from `v1` overwrites files that `v2` changed and leaves
-the rest, and the result does not build. Generate new solutions from `v2`, and port changes into existing
-ones by hand, using the list below.
+`dotskit upgrade` brings it to `v2` and on, keeping the team's changes. `dotnet new ... --force` over it
+overwrites the files `v2` changed and leaves the rest, and the result does not build. The list below is what
+changed, for a change made by hand.
 
 ## What changed in v2
 
