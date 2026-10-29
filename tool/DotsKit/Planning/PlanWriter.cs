@@ -62,7 +62,8 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
 
     /// <summary>
     /// The manifest, All.sln and the files the repair changed join git's merge, so committing it takes them and
-    /// <c>git merge --abort</c> puts them back; a failure here undoes the merge as well as the files. The repair
+    /// <c>git merge --abort</c> puts them back; a failure here undoes the merge as well as the files. The manifest and
+    /// All.sln are staged as soon as they are written, so a repair that fails leaves neither on disk. The repair
     /// leaves a file in conflict alone, so staging never marks one resolved.
     /// </summary>
     private async Task<IReadOnlyList<string>> WriteBesideTheMergeAsync(Plan plan, FileTransaction transaction, IReadOnlyList<string> conflicts, string solutionFile, CancellationToken ct)
@@ -70,14 +71,19 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         try
         {
             await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
+            await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
             var repaired = await RepairAsync(plan, conflicts, ct);
-            var written = repaired.Select(f => Path.GetRelativePath(plan.Root, f).Replace('\\', '/'));
-            await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile, .. written.Distinct()], ct);
+            var written = repaired.Select(f => Path.GetRelativePath(plan.Root, f).Replace('\\', '/')).Distinct().ToList();
+            if (written.Count > 0)
+            {
+                await git.StageAsync(plan.Root, written, ct);
+            }
+
             return repaired;
         }
-        catch
+        catch (Exception failure)
         {
-            await git.AbortAsync(plan.Root, CancellationToken.None);
+            await git.AbortKeepingTheCauseAsync(plan.Root, failure);
             throw;
         }
     }

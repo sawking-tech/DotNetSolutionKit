@@ -210,4 +210,41 @@ internal sealed class GitMergeScenarios
         again.ShouldBeEmpty();
         Read(root, Program).ShouldBe("new in 3.0\na\nb\nC by the template\nd\ne\nteam\n");
     }
+
+    [Test]
+    public async Task AStepThatFailsAfterTheMerge_LeavesNoBranchAndNoCommitOfTheRun()
+    {
+        var root = await SolutionAsync();
+        var head = await HeadAsync(root);
+        var merge = new GitTemplateMerge(Runner, Sandbox.Self);
+        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((Program, "template\na\nb\nc\nd\ne\n")), "2.0.0"), false, CancellationToken.None);
+
+        await merge.AbortAsync(root, CancellationToken.None);
+
+        (await HeadAsync(root)).ShouldBe(head);
+        (await Runner.RunAsync("git", ["rev-parse", "-q", "--verify", "refs/heads/" + GitTemplateMerge.Branch], root, CancellationToken.None)).Code.ShouldNotBe(0);
+        (await Runner.RunCheckedAsync("git", ["status", "--porcelain"], root, CancellationToken.None)).ShouldBeEmpty();
+        Read(root, Program).ShouldBe("a\nb\nc\nd\ne\nteam\n");
+    }
+
+    [Test]
+    public async Task AMergeGitRefuses_PutsBackTheCommitAndTheBranchOfTheRun_AndSaysSo()
+    {
+        const string added = "src/new.cs";
+        var root = await SolutionAsync();
+        var head = await HeadAsync(root);
+        Write(root, added, "the team's file, not in git yet\n");
+        var next = Tree((".gitignore", "appsettings.Secrets.json\n"), (Program, "a\nb\nc\nd\ne\n"), (added, "the template's\n"));
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() =>
+            new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(next, "2.0.0"), false, CancellationToken.None));
+
+        refused.Message.ShouldContain("put back");
+        (await HeadAsync(root)).ShouldBe(head);
+        (await Runner.RunAsync("git", ["rev-parse", "-q", "--verify", "refs/heads/" + GitTemplateMerge.Branch], root, CancellationToken.None)).Code.ShouldNotBe(0);
+        Read(root, added).ShouldBe("the team's file, not in git yet\n");
+    }
+
+    private static async Task<string> HeadAsync(string root) =>
+        (await Runner.RunCheckedAsync("git", ["rev-parse", "HEAD"], root, CancellationToken.None)).Trim();
 }
