@@ -32,6 +32,9 @@ internal sealed record TypeMap(IReadOnlyList<TypeMove> Moves, IReadOnlySet<strin
     }
 }
 
+/// <summary>A C# file of the solution: its path, its project, the namespaces it has a using of and those it declares.</summary>
+internal sealed record SourceFile(string File, string Project, IReadOnlyList<string> Usings, IReadOnlyList<string> Declares);
+
 /// <summary>A change to the team's code that a type of the template moving to another project or namespace asks for.</summary>
 internal abstract record Repair;
 
@@ -62,6 +65,24 @@ internal static partial class ReferenceRepairs
     public static IReadOnlyList<Repair> Decide(IEnumerable<BuildError> errors, TypeMap map, string root, Func<string, IReadOnlyList<string>> usingsOf) =>
         errors.SelectMany(e => Of(e, map, root, usingsOf)).Distinct().ToList();
 
+    /// <summary>
+    /// The usings that name a namespace the template gave up, decided from the text with no build: what the build
+    /// would report first as CS0234. A namespace the solution's own code still declares holds the team's types, and
+    /// its usings are left to the build.
+    /// </summary>
+    public static IReadOnlyList<Repair> FromText(IEnumerable<SourceFile> files, TypeMap map, string root)
+    {
+        var all = files.ToList();
+        var declared = all.SelectMany(f => f.Declares).ToHashSet(StringComparer.Ordinal);
+        return all.SelectMany(f => f.Usings
+                .Where(u => !declared.Contains(u))
+                .Select(u => (Using: u, Moves: map.OutOf(u).Where(m => Reaches(TypeMap.AreaOf(Relative(root, f.Project)), m.To)).ToList()))
+                .Where(g => g.Moves.Count > 0)
+                .SelectMany(g => ForGivenUp(f.File, f.Project, g.Using, g.Moves, root)))
+            .Distinct()
+            .ToList();
+    }
+
     private static IEnumerable<Repair> Of(BuildError error, TypeMap map, string root, Func<string, IReadOnlyList<string>> usingsOf)
     {
         if (error.Code is not (TypeNotFound or NotInNamespace) || Missing().Match(error.Message) is not { Success: true } m)
@@ -75,13 +96,13 @@ internal static partial class ReferenceRepairs
             .Where(g => g.Moves.Count > 0)
             .ToList();
         if (given.Count > 0)
-            return given.SelectMany(g => ForGivenUp(error, g.Using, g.Moves, root));
+            return given.SelectMany(g => ForGivenUp(error.File, error.Project, g.Using, g.Moves, root));
         return error.Code == TypeNotFound ? ForType(error, name, area, usingsOf(error.File), map, root) : [];
     }
 
-    private static IEnumerable<Repair> ForGivenUp(BuildError error, string old, IReadOnlyList<TypeMove> moves, string root) =>
-        [.. moves.Select(m => m.To.Namespace).Distinct().Select(ns => new ReplaceUsing(error.File, old, ns)),
-            .. References(error, moves.Select(m => m.To.Project).Distinct(), root)];
+    private static IEnumerable<Repair> ForGivenUp(string file, string project, string old, IReadOnlyList<TypeMove> moves, string root) =>
+        [.. moves.Select(m => m.To.Namespace).Distinct().Select(ns => new ReplaceUsing(file, old, ns)),
+            .. References(project, moves.Select(m => m.To.Project).Distinct(), root)];
 
     /// <summary>
     /// The type's move in the file's own area first, else in the shared code; two homes are left as they are. Only a
@@ -93,17 +114,17 @@ internal static partial class ReferenceRepairs
         var moves = map.Moves.Where(m => m.To.Name == name && Reaches(area, m.To) && usings.Contains(m.From.Namespace)).Select(m => m.To).Distinct().ToList();
         var own = moves.Where(h => TypeMap.AreaOf(h.Project) == area).ToList();
         return (own.Count > 0 ? own : moves) is [var home]
-            ? [new AddUsing(error.File, home.Namespace), .. References(error, [home.Project], root)]
+            ? [new AddUsing(error.File, home.Namespace), .. References(error.Project, [home.Project], root)]
             : [];
     }
 
     /// <summary>A file of a service reaches its own service and the shared code; a file of the shared code, only that.</summary>
     private static bool Reaches(string? area, TypeHome home) => TypeMap.AreaOf(home.Project) is not { } other || other == area;
 
-    private static IEnumerable<Repair> References(BuildError error, IEnumerable<string> projects, string root) =>
+    private static IEnumerable<Repair> References(string project, IEnumerable<string> projects, string root) =>
         projects.Select(p => Path.GetFullPath(Path.Combine(root, p)))
-            .Where(p => !SamePath(p, error.Project))
-            .Select(p => new AddReference(Path.GetFullPath(error.Project), p));
+            .Where(p => !SamePath(p, project))
+            .Select(p => new AddReference(Path.GetFullPath(project), p));
 
     private static string Relative(string root, string path) => Path.GetRelativePath(root, path).Replace('\\', '/');
 

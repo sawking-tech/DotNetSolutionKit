@@ -18,8 +18,10 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
             terminal.Info("Nothing written: answer y to write, or pass --yes where no one can answer.");
             return ExitCode.Failed;
         }
-        var conflicts = await writer.WriteAsync(plan, ct);
-        return conflicts.Count > 0 ? Conflicts(plan, conflicts) : await BuildAsync(plan, options, ct);
+        var written = await writer.WriteAsync(plan, ct);
+        if (written.Repaired.Count > 0)
+            terminal.Info($"Written; {written.Repaired.Count} usings and references changed for the namespaces the template gave up, before the build.");
+        return written.Conflicts.Count > 0 ? Conflicts(plan, written.Conflicts) : await BuildAsync(plan, options, ct);
     }
 
     private ExitCode Conflicts(Plan plan, IReadOnlyList<string> conflicts)
