@@ -61,6 +61,9 @@ internal static partial class ReferenceRepairs
     [GeneratedRegex(@"^The type or namespace name '(?<name>[\w.]+)(<[^']*>)?'( does not exist in the namespace '(?<ns>[\w.]+)')?")]
     private static partial Regex Missing();
 
+    /// <param name="errors">The errors of the build that failed.</param>
+    /// <param name="map">The types the template moved between the solution's version and the next.</param>
+    /// <param name="root">The solution's root, the paths of the projects are relative to.</param>
     /// <param name="usingsOf">The namespaces a file has a using of: the compiler names only the first segment it misses.</param>
     public static IReadOnlyList<Repair> Decide(IEnumerable<BuildError> errors, TypeMap map, string root, Func<string, IReadOnlyList<string>> usingsOf) =>
         errors.SelectMany(e => Of(e, map, root, usingsOf)).Distinct().ToList();
@@ -86,7 +89,10 @@ internal static partial class ReferenceRepairs
     private static IEnumerable<Repair> Of(BuildError error, TypeMap map, string root, Func<string, IReadOnlyList<string>> usingsOf)
     {
         if (error.Code is not (TypeNotFound or NotInNamespace) || Missing().Match(error.Message) is not { Success: true } m)
+        {
             return [];
+        }
+
         var area = TypeMap.AreaOf(Relative(root, error.Project));
         var name = m.Groups["name"].Value;
         var missing = m.Groups["ns"].Success ? $"{m.Groups["ns"].Value}.{name}" : name;
@@ -96,7 +102,10 @@ internal static partial class ReferenceRepairs
             .Where(g => g.Moves.Count > 0)
             .ToList();
         if (given.Count > 0)
+        {
             return given.SelectMany(g => ForGivenUp(error.File, error.Project, g.Using, g.Moves, root));
+        }
+
         return error.Code == TypeNotFound ? ForType(error, name, area, usingsOf(error.File), map, root) : [];
     }
 

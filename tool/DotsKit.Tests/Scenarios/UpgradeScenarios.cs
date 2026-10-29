@@ -16,6 +16,9 @@ internal sealed class UpgradeScenarios
     private const string Pinned = "Npgsql.EntityFrameworkCore.PostgreSQL";
     private const string PinnedVersion = "8.0.10";
 
+    /// <summary>Where a solution keeps its package versions: one file, or one per database since 2.7.</summary>
+    private static readonly string[] VersionFiles = ["src/Directory.Packages.props", "src/package-versions/postgres.props"];
+
     /// <summary>
     /// A solution made by a release from nuget.org with the template alone, as before dotskit, and described by init:
     /// the first service with the solution, the second with flags of its own, which leave the root as it was.
@@ -58,7 +61,7 @@ internal sealed class UpgradeScenarios
         upgraded.Code.ShouldBe(0, upgraded.Output + upgraded.Error);
         upgraded.Output.ShouldContain($"{Pinned}: pinned on {PinnedVersion}");
         solution.Read(Program).ShouldContain(TeamsLine);
-        PackageVersions.Read(string.Concat(new[] { "src/Directory.Packages.props", "src/package-versions/postgres.props" }
+        PackageVersions.Read(string.Concat(VersionFiles
             .Where(solution.Exists).Select(solution.Read)))[Pinned].ShouldBe(PinnedVersion);
         solution.Exists("src/services/manual-add-projects.sh").ShouldBeFalse();
         var tests = await solution.DotnetAsync("test", "src/services/Acme.Shop.All.sln", "--filter", "TestCategory!=Integration");

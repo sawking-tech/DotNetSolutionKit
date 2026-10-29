@@ -38,10 +38,15 @@ internal sealed class TagArchive(HttpClient http) : ITagArchive
     {
         using var response = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
         if (!response.IsSuccessStatusCode)
+        {
             throw new InvalidOperationException($"The template {version} is not on nuget.org, and its tag cannot be fetched ({url}: {(int)response.StatusCode}): name a released version, or check the network.");
+        }
+
         var target = Folders.NewTemp("tag-" + version);
         await using (var gzip = new GZipStream(await response.Content.ReadAsStreamAsync(ct), CompressionMode.Decompress))
+        {
             await TarFile.ExtractToDirectoryAsync(gzip, target, overwriteFiles: true, ct);
+        }
         // GitHub puts the tree in a folder named after the repository and the tag.
         return Path.Combine(Directory.GetDirectories(target).Single(), TemplateFolder);
     }

@@ -47,19 +47,25 @@ internal static partial class SolutionReader
     /// root with the first command and left it so, and the manifest is the base the files were generated from.
     /// The next dotskit new widens it, and brings what a service's flag needs outside its folder as new.
     /// </summary>
+    /// <param name="files">The solution's files, read as text.</param>
+    /// <param name="prefix">NamespaceRoot.ProductName, from the name of All.sln.</param>
+    /// <param name="version">The template's version the manifest names.</param>
     /// <param name="given">What the command names itself: -N and -P where the name of All.sln does not tell them apart.</param>
     public static Manifest Read(ISolutionFiles files, string prefix, string version, TemplateArgs given)
     {
-        var services = FirstServiceFirst(files, prefix, ServiceFolders(files, prefix));
+        var services = FirstServiceFirst(files, ServiceFolders(files, prefix));
         if (services.Count == 0)
+        {
             throw new InvalidOperationException($"{Layout.ServicesFolder} has no service of the template: dotskit new -S <Service> adds one.");
+        }
+
         var solution = Solution(files, prefix, Names(files, prefix, given), services[0]);
         var manifest = new Manifest { Template = version, Solution = solution.ToArgs(), Services = [] };
         return services.Aggregate(manifest, (m, folder) => m.WithServiceAsItIs(Service(files, prefix, folder)));
     }
 
     /// <summary>The service folders with the one the solution was made with first, where the solution tells it (<see cref="Markers.FirstServiceScript"/>).</summary>
-    private static IReadOnlyList<string> FirstServiceFirst(ISolutionFiles files, string prefix, IReadOnlyList<string> services)
+    private static IReadOnlyList<string> FirstServiceFirst(ISolutionFiles files, IReadOnlyList<string> services)
     {
         var script = (files.Read(Markers.FirstServiceScript) ?? "").ReplaceLineEndings("\n").Split('\n');
         var first = services.FirstOrDefault(f => script.Any(l => l.TrimEnd().EndsWith($"# {f}", StringComparison.Ordinal)));
@@ -72,24 +78,51 @@ internal static partial class SolutionReader
         var name = ServiceName(prefix, folder);
         var args = TemplateArgs.Empty.With(TemplateArgs.ServiceName, name);
         if (Port(files, prefix, folder) is { } port)
+        {
             args = args.With(TemplateArgs.HttpPort, port);
+        }
+
         if (files.Exists(ServicePath(Markers.GatewayFile, prefix, folder)))
+        {
             return args.With("ApiGateway", On);
+        }
+
         var settings = Sections(files.Read(ServicePath(Markers.AppSettings, prefix, folder)));
         if (!settings.Contains(Markers.HangfireSection))
+        {
             args = args.With("Hangfire", Off);
+        }
+
         if (Messaging(files, prefix, folder, settings) is { } messaging)
+        {
             args = args.With("Messaging", messaging);
+        }
+
         foreach (var (flag, section) in Markers.ServiceSections.Where(s => settings.Contains(s.Section)))
+        {
             args = args.With(flag, On);
+        }
+
         if (settings.Contains(Markers.EmailSection))
+        {
             args = args.With("Notify", "email");
+        }
+
         if (Contains(files, ServicePath(Markers.ProgramFile, prefix, folder), Markers.DiffApiLine))
+        {
             args = args.With("DiffApi", On);
+        }
+
         if (Contains(files, ServicePath(Markers.ConfigurationFile, prefix, folder), Markers.FeatureFlagsLine))
+        {
             args = args.With("FeatureFlags", On);
+        }
+
         if (files.Exists(ServicePath(Markers.AuditGuardFile, prefix, folder)))
+        {
             args = args.With("Audit", On);
+        }
+
         return args;
     }
 
@@ -101,18 +134,28 @@ internal static partial class SolutionReader
     private static (string Root, string Product) Names(ISolutionFiles files, string prefix, TemplateArgs given)
     {
         if (given.Has("NamespaceRoot") && given.Has("ProductName"))
+        {
             return Checked(prefix, given["NamespaceRoot"]!, given["ProductName"]!);
+        }
+
         var parts = prefix.Split('.');
         if (ImageName().Match(files.Read(Markers.BuildImagesPath) ?? "") is { Success: true } image)
         {
             // The image writes the product in lower case with each dot as an underscore: the cut whose tail gives it.
             var product = image.Groups["product"].Value;
             for (var cut = 1; cut < parts.Length; cut++)
-                if (string.Join('_', parts[cut..]).ToLowerInvariant() == product)
+            {
+                if (string.Equals(string.Join('_', parts[cut..]), product, StringComparison.OrdinalIgnoreCase))
+                {
                     return Checked(prefix, string.Join('.', parts[..cut]), string.Join('.', parts[cut..]));
+                }
+            }
         }
         if (parts.Length == 2)
+        {
             return (parts[0], parts[1]);
+        }
+
         throw new ArgumentException($"{prefix} does not tell its NamespaceRoot from its ProductName: name them, dotskit init -N <NamespaceRoot> -P <ProductName>.");
     }
 
@@ -130,11 +173,20 @@ internal static partial class SolutionReader
         args = NotDefault(args, "Agent", files.Exists(Markers.ClaudePath) ? "claude" : files.Exists(Markers.OpenCodePath) ? "opencode" : "none");
         args = NotDefault(args, "TestFramework", Contains(files, ServicePath(Markers.TestsProject, prefix, firstService), Markers.XunitLine) ? "xunit" : "nunit");
         foreach (var (flag, path) in Markers.SolutionFlags.Where(m => files.Exists(Markers.Of(m.Path, prefix))))
+        {
             args = args.With(flag, On);
+        }
+
         if (files.Exists(Markers.Of(Markers.NotifyEmailPath, prefix)))
+        {
             args = args.With("Notify", "email");
+        }
+
         if (files.Exists(Markers.Of(Markers.AuditPath, prefix)))
+        {
             args = args.With("Audit", On).With("Messaging", "outbox");
+        }
+
         return RootOnly(files, args);
     }
 
@@ -145,7 +197,10 @@ internal static partial class SolutionReader
     private static TemplateArgs RootOnly(ISolutionFiles files, TemplateArgs args)
     {
         if (files.Read(Markers.EnvExamplePath) is not { } env)
+        {
             return args.With("Hangfire", Off);
+        }
+
         args = NotDefault(args, "Hangfire", env.Contains(Markers.HangfireEnvLine, StringComparison.Ordinal) ? On : Off);
         return env.Contains(Markers.RabbitMqEnvLine, StringComparison.Ordinal) && !args.Has("Messaging") ? args.With("Messaging", "direct") : args;
     }
@@ -154,7 +209,7 @@ internal static partial class SolutionReader
     private static TemplateArgs NotDefault(TemplateArgs args, string name, string value) =>
         string.Equals(TemplateArgs.Empty[name], value, StringComparison.OrdinalIgnoreCase) ? args : args.With(name, value);
 
-    private static string? Messaging(ISolutionFiles files, string prefix, string folder, IReadOnlySet<string> settings) =>
+    private static string? Messaging(ISolutionFiles files, string prefix, string folder, HashSet<string> settings) =>
         !settings.Contains(Markers.BusSection) ? null
         : Contains(files, ServicePath(Markers.ConfigurationFile, prefix, folder), Markers.OutboxLine) ? "outbox"
         : "direct";
@@ -166,7 +221,10 @@ internal static partial class SolutionReader
     private static HashSet<string> Sections(string? json)
     {
         if (json is null)
+        {
             return [];
+        }
+
         try
         {
             using var document = JsonDocument.Parse(json.TrimStart('﻿'), JsonOptions);
@@ -188,7 +246,10 @@ internal static partial class SolutionReader
     private static string? ElementOf(string? xml, string element)
     {
         if (xml is null)
+        {
             return null;
+        }
+
         var match = Regex.Match(xml, $"<{element}>([^<]+)</{element}>");
         return match.Success ? match.Groups[1].Value.Trim() : null;
     }

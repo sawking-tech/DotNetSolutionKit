@@ -46,7 +46,10 @@ internal sealed class ChainScenarios
         var hive = Folders.NewTemp("hive-" + First);
         (await solution.DotnetAsync("new", "install", template, "--debug:custom-hive", hive)).Code.ShouldBe(0);
         foreach (var args in new[] { new[] { "-S", "Orders", "-M", "false" }, ["-S", "Billing"] })
+        {
             await solution.DotnetAsync(["new", "DotNetSolutionKit", "-N", "Acme", "-P", "Shop", .. args, "--debug:custom-hive", hive]);
+        }
+
         await new Solutions.SolutionProjects(new ProcessRunner()).AddMissingAsync(solution.Root, CancellationToken.None);
         solution.Write(TeamFile, TeamCode);
         await solution.CommitAsync($"made by the template {First}, with the team's code");

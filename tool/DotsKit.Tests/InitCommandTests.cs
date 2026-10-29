@@ -72,9 +72,15 @@ internal sealed class InitCommandTests
         Write(root, "src/services/Acme.Shop.All.sln", "");
         Service(root, Orders, 5000);
         if (common)
+        {
             Write(root, "src/common/Acme.Shop.Common/Acme.Shop.Common.csproj", "<Project />");
+        }
+
         if (version is not null)
+        {
             Write(root, "Directory.Build.props", $"<Project><DotNetSolutionKitVersion>{version}</DotNetSolutionKitVersion></Project>");
+        }
+
         return root;
     }
 

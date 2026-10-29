@@ -106,9 +106,13 @@ internal sealed class TeamScenarios
         var again = await solution.DotnetNewAsync("-N", "Acme", "-P", "Shop", "-S", "orders", "--allow-scripts", "yes");
 
         if (OperatingSystem.IsLinux())
+        {
             (again.Output + again.Error).ShouldContain("already", Case.Insensitive);
+        }
         else
+        {
             again.Code.ShouldBe(WouldOverwrite);
+        }
     }
 
     [TestCase(Merging.MergeMode.Git)]

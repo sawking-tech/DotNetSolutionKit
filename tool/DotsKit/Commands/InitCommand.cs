@@ -11,6 +11,10 @@ namespace DotsKit.Commands;
 /// template's files that reproduces, and writes <c>.dotskit/manifest.json</c> - and nothing else - after a yes.
 /// A solution with a manifest gets the services it does not list.
 /// </summary>
+/// <param name="staging">Generates the solution again by the manifest read from its files, to show how much that reproduces.</param>
+/// <param name="projects">Reads the projects All.sln lists, to compare them with the ones of the tree generated again.</param>
+/// <param name="terminal">Shows the reproduction and asks before the manifest is written.</param>
+/// <param name="toolVersion">The version of the tool, the newest version of a solution it describes.</param>
 /// <param name="onSources">The tool runs against the template's sources: a solution of version "source" is theirs.</param>
 internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, ITerminal terminal, string toolVersion, bool onSources)
 {
@@ -25,13 +29,22 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
         var current = Manifest.Load(root);
         var next = current is null ? Described(files, prefix, options, given) : WithUnlisted(current, files, prefix, options);
         if (next is null)
+        {
             return Current(current!);
+        }
+
         if (!files.Exists(Layout.CommonFolder))
+        {
             return await WriteAsync(root, next, options,
                 "No Common: the solution's database and flags, which are read from it, are the template's defaults here, and there is nothing to check the reading against. dotskit new takes Common for removed by the team and does not add it back.");
+        }
+
         var reproduction = await CheckAsync(root, next, ct);
         foreach (var line in reproduction.Lines())
+        {
             terminal.Info(line);
+        }
+
         return await WriteAsync(root, next, options, reproduction.IsWhole ? null : "A file that differs is a change of yours or a wrong reading: check them before you rely on the manifest.");
     }
 
@@ -50,7 +63,10 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
     {
         var version = options.TemplateVersion ?? SolutionReader.Version(files);
         if (TemplateVersions.WhyNotDescribed(version, toolVersion, onSources) is { } why)
+        {
             throw new InvalidOperationException(why);
+        }
+
         RefuseServicesOfOtherVersions(files, prefix, SolutionReader.ServiceFolders(files, prefix), version!, options);
         return SolutionReader.Read(files, prefix, version!, given);
     }
@@ -63,15 +79,20 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
     private static void RefuseServicesOfOtherVersions(ISolutionFiles files, string prefix, IEnumerable<string> services, string version, Options options)
     {
         if (options.TemplateVersion is not null)
+        {
             return;
+        }
+
         var others = services
             .Select(f => (Name: SolutionReader.ServiceName(prefix, f), Version: SolutionReader.ServiceVersion(files, prefix, f)))
             .Where(s => s.Version is not null && s.Version != version && s.Version != TemplateSource.SourcesVersion)
             .ToList();
         if (others.Count > 0)
+        {
             throw new InvalidOperationException(
                 $"The solution is {version}, and {string.Join(", ", others.Select(s => $"{s.Name} is {s.Version}"))}: the manifest keeps one version; "
                 + $"name the one to describe the solution by, dotskit init --template-version {version}, and the check shows what differs.");
+        }
     }
 
     /// <summary>The manifest with the services of src/services it does not list; null when it lists them all.</summary>
@@ -81,7 +102,10 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
             .Where(f => current.FindService(SolutionReader.ServiceName(prefix, f)) is null)
             .ToList();
         if (options.TemplateVersion is { } named && named != current.Template)
+        {
             throw new ArgumentException($"The manifest is {current.Template}: a service it does not list is described by that version, not {named}; dotskit upgrade moves the manifest to another.");
+        }
+
         RefuseServicesOfOtherVersions(files, prefix, unlisted, current.Template, options);
         return unlisted.Count == 0 ? null : unlisted.Aggregate(current, (m, f) => m.WithServiceAsItIs(SolutionReader.Service(files, prefix, f)));
     }
@@ -105,7 +129,10 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
         terminal.Info($"  manifest  {Layout.ManifestPath}");
         terminal.Info(manifest.Serialize().TrimEnd());
         if (note is not null)
+        {
             terminal.Info(note);
+        }
+
         if (!options.Yes && !terminal.Confirm("Write the manifest?"))
         {
             terminal.Info("Nothing written: answer y to write, or pass --yes where no one can answer.");

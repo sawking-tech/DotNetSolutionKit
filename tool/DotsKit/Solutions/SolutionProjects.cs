@@ -72,15 +72,19 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
     public async Task AddAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct)
     {
         foreach (var folder in listedProjects.GroupBy(FolderOfListed, StringComparer.Ordinal).OrderBy(g => g.Key, StringComparer.Ordinal))
+        {
             await runner.RunCheckedAsync("dotnet",
                 ["sln", solutionFile, "add", .. folder.Order(StringComparer.Ordinal), "--solution-folder", folder.Key], DirectoryOf(solutionFile), ct);
+        }
     }
 
     /// <summary>One <c>dotnet sln remove</c> for them all; none when there is nothing to remove.</summary>
     public async Task RemoveAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct)
     {
         if (listedProjects.Count > 0)
+        {
             await runner.RunCheckedAsync("dotnet", ["sln", solutionFile, "remove", .. listedProjects.Order(StringComparer.Ordinal)], DirectoryOf(solutionFile), ct);
+        }
     }
 
     private static IEnumerable<string> ServiceProjects(string root) =>

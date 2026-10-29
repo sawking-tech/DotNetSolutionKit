@@ -35,12 +35,19 @@ var execution = new PlanExecution(report, writer, builder, repair, terminal);
 AppDomain.CurrentDomain.ProcessExit += (_, _) => Folders.RemoveRunFolders();
 
 using var cts = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true;
+    cts.Cancel();
+};
 try
 {
     // git runs the driver inside the merge of a command that holds the solution's lock: it takes none.
     if (args[0] == StyleMergeDriver.Command)
+    {
         return await new StyleMergeDriver(new GitMergeFile(runner)).RunAsync(args[1..], cts.Token);
+    }
+
     var options = Options.Parse(args[0], args[1..]);
     var folder = Folders.RealPath(Directory.GetCurrentDirectory());
     using var solutionLock = SolutionLock.TryTake(SolutionRoot.Find(folder) ?? folder)

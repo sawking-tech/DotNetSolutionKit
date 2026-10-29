@@ -19,7 +19,7 @@ internal sealed class UpgradeCommandTests
         public List<string> Lines { get; } = [];
 
         public UpgradeCommand Command() =>
-            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(), new Builder(), new ReferenceRepair(new RepairWriter(new Io.ProcessRunner()), new Builder()), new Terminal(this)),
+            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(), new Builder(), new ReferenceRepair(new RepairWriter(new ProcessRunner()), new Builder()), new Terminal(this)),
                 new Git(this), new Terminal(this), ToolVersion, onSources: false);
 
         private sealed class Planner(Fakes fakes) : IPlanner
@@ -65,7 +65,10 @@ internal sealed class UpgradeCommandTests
         Directory.CreateDirectory(Layout.ServicesOf(root));
         File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "Acme.Shop" + Layout.SolutionSuffix), "");
         if (template is null)
+        {
             return root;
+        }
+
         var manifest = new Manifest { Template = template, Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"], Services = [["--ServiceNameOrCustom", "Orders"]] };
         Directory.CreateDirectory(Path.Combine(root, ".dotskit"));
         File.WriteAllText(Path.Combine(root, Layout.ManifestPath), manifest.Serialize());

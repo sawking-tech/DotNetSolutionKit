@@ -10,6 +10,10 @@ namespace DotsKit.Commands;
 /// adds the service, or joins the flags to a service it has. Whether to make or to add is read from the
 /// folder; <c>--Solution</c> changes nothing.
 /// </summary>
+/// <param name="planner">Builds the plan: the trees of the template, their merge with the solution and the report.</param>
+/// <param name="execution">Shows the plan, asks, writes it and builds.</param>
+/// <param name="git">Tells whether the solution's working tree is clean before anything is written.</param>
+/// <param name="toolVersion">The version of the tool, the template's version a new service is generated with.</param>
 /// <param name="onSources">The tool runs against the template's sources: it generates with them, as version "source".</param>
 internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit git, string toolVersion, bool onSources)
 {
@@ -19,10 +23,16 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
     {
         var command = TemplateArgs.Parse(options.TemplateArgs);
         if (!command.HasService)
+        {
             throw new ArgumentException("Name the service with -S.");
+        }
+
         var root = SolutionRoot.Find(folder);
         if (root is null)
+        {
             await RefuseFilesOutsideGitAsync(folder, options, ct);
+        }
+
         var current = root is null ? null : await LoadCheckedAsync(root, options, ct);
         var next = Next(current, command);
         var plan = await planner.BuildAsync(root ?? folder, current, next, new Merging.MergeMode(options.ByGit, options.Force), ct);
@@ -36,7 +46,9 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
     private async Task RefuseFilesOutsideGitAsync(string folder, Options options, CancellationToken ct)
     {
         if (!SolutionRoot.IsEmpty(folder) && !options.AllowDirty && !await git.IsCleanAsync(folder, ct))
+        {
             throw new InvalidOperationException("The folder has files outside a clean git tree: make the solution in an empty folder, or commit what is here first (--allow-dirty to go on).");
+        }
     }
 
     /// <summary>The manifest of a solution to add to: there, of this version, and the tree clean.</summary>
@@ -46,13 +58,22 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
             ?? throw new InvalidOperationException($"{Layout.ManifestPath} is missing: describe the solution first, dotskit init.");
         var version = Target;
         if (manifest.Template != version)
+        {
             throw new InvalidOperationException(TemplateVersions.IsNewer(manifest.Template, version)
                 ? $"The solution is of the template {manifest.Template}, newer than dotskit {version}: update the tool, dotnet tool update -g SawKing.DotsKit.Tool."
                 : $"The solution is of the template {manifest.Template}, dotskit is {version}: bring the solution to {version} first, dotskit upgrade.");
+        }
+
         if (!options.AllowDirty && !await git.IsCleanAsync(root, ct))
+        {
             throw new InvalidOperationException("The git working tree has uncommitted changes: commit or stash them, so what dotskit writes can be seen and undone (--allow-dirty to go on).");
+        }
+
         if (options.AllowDirty && options.ByGit)
+        {
             throw new ArgumentException("--allow-dirty needs --merge files: a git merge runs on a clean tree.");
+        }
+
         return manifest;
     }
 
@@ -61,7 +82,10 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
     {
         var service = Ports.Assign(command.ServicePart(), current);
         if (current is null)
+        {
             return new Manifest { Template = Target, Solution = command.SolutionPart().ToArgs(), Services = [] }.WithService(service);
+        }
+
         RefuseOtherSolutionValues(current, command);
         return current.WithService(service);
     }
@@ -71,6 +95,8 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
     {
         var different = current.OtherSolutionValues(command);
         if (different.Count > 0)
+        {
             throw new ArgumentException($"The solution has its own {string.Join(", ", different.Select(n => $"{n} ({current.SolutionArgs[n]})"))}: a service takes them from it, leave them out of the command.");
+        }
     }
 }

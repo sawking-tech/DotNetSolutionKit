@@ -14,7 +14,10 @@ internal static class TemplateStyle
     public static FileText Of(string path, FileText file)
     {
         if (file.IsBinary || path.EndsWith(WithBomAndTabs, StringComparison.OrdinalIgnoreCase))
+        {
             return file;
+        }
+
         return new FileText(LineEndings.Apply(Normalized(LineEndings.ToLf(file.Text)), LineEndings.Of(file.Text)), Bom: false);
     }
 
@@ -22,10 +25,16 @@ internal static class TemplateStyle
     private static string Normalized(string text)
     {
         if (text.Length == 0)
+        {
             return text;
+        }
+
         var lines = text.Split('\n').Select(line => line.TrimEnd(' ', '\t')).ToList();
         if (lines[^1].Length == 0)
+        {
             lines.RemoveAt(lines.Count - 1);
+        }
+
         return string.Join('\n', lines) + "\n";
     }
 }

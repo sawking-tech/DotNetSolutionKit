@@ -33,9 +33,30 @@ internal sealed class TemplateArgs
     /// <summary>The parameters of the template this version of the tool is released with.</summary>
     private static readonly string[] Parameters =
     [
-        "NamespaceRoot", "ProductName", ServiceName, Solution, Minimal, "Hangfire", Messaging,
-        ApiGateway, "Storage", "ClickHouse", "MongoDB", Notify, "Audit", "TestFramework", "Agent", "Deploy",
-        "Infisical", "Database", "Vault", "HttpPort", "DiffApi", "GitHubCiCd", "FeatureFlags", "HierarchyRules",
+        "NamespaceRoot",
+        "ProductName",
+        ServiceName,
+        Solution,
+        Minimal,
+        "Hangfire",
+        Messaging,
+        ApiGateway,
+        "Storage",
+        "ClickHouse",
+        "MongoDB",
+        Notify,
+        "Audit",
+        "TestFramework",
+        "Agent",
+        "Deploy",
+        "Infisical",
+        "Database",
+        "Vault",
+        "HttpPort",
+        "DiffApi",
+        "GitHubCiCd",
+        "FeatureFlags",
+        "HierarchyRules",
     ];
 
     /// <summary>One for the whole solution: a service takes them from the solution, a command need not name them.</summary>
@@ -91,7 +112,10 @@ internal sealed class TemplateArgs
             // A flag with no value is a bool switched on; --Solution is written that way.
             var hasValue = i + 1 < args.Count && !args[i + 1].StartsWith('-');
             if (!hasValue && WithValue.Contains(name))
+            {
                 throw new ArgumentException($"{args[i]} needs a value.");
+            }
+
             values.Add(new(name, hasValue ? args[++i] : On));
         }
         return new TemplateArgs(values);
@@ -104,9 +128,15 @@ internal sealed class TemplateArgs
     private static string? Canonical(string arg)
     {
         if (ShortNames.TryGetValue(arg, out var name))
+        {
             return name;
+        }
+
         if (!arg.StartsWith("--", StringComparison.Ordinal) || arg.Length <= 2)
+        {
             return null;
+        }
+
         var key = arg[2..].Replace("-", "", StringComparison.Ordinal);
         return Parameters.FirstOrDefault(p => string.Equals(p, key, StringComparison.OrdinalIgnoreCase));
     }
@@ -135,7 +165,10 @@ internal sealed class TemplateArgs
     {
         var at = _values.FindIndex(v => Is(v.Key, name));
         if (at < 0)
+        {
             return new([.. _values, new(name, value)]);
+        }
+
         var values = Without(name)._values;
         values.Insert(at, new(_values[at].Key, value));
         return new(values);
@@ -162,11 +195,14 @@ internal sealed class TemplateArgs
         var solution = WidenedFlags.Where(service.IsOn).Aggregate(this, (args, flag) => args.With(flag, On));
         var channels = Channels(this).Union(Channels(service), StringComparer.OrdinalIgnoreCase).ToList();
         if (channels.Count > 0)
+        {
             solution = solution.With(Notify, string.Join(',', channels));
+        }
+
         return Rank(service[Messaging]) > Rank(solution[Messaging]) ? solution.With(Messaging, service[Messaging]!) : solution;
     }
 
-    private static IEnumerable<string> Channels(TemplateArgs args) =>
+    private static string[] Channels(TemplateArgs args) =>
         (args[Notify] ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
     private static int Rank(string? messaging) =>
