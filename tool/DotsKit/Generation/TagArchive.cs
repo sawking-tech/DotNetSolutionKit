@@ -27,7 +27,8 @@ internal sealed class TagArchive(HttpClient http) : ITagArchive
         {
             return await FetchAsync(version, url, ct);
         }
-        catch (Exception e) when (e is HttpRequestException or InvalidDataException)
+        // HttpClient reports its own timeout as a cancel; a cancel the user asked for is ct's and goes on as one.
+        catch (Exception e) when (e is HttpRequestException or InvalidDataException || (e is TaskCanceledException && !ct.IsCancellationRequested))
         {
             throw new InvalidOperationException($"The template {version} is not on nuget.org, and its tag could not be fetched from {url} ({e.Message}): check the network and run again.");
         }
