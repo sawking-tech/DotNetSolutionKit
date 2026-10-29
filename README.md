@@ -7,10 +7,8 @@ Made by Vladimir Savkin at [sawking.tech](https://sawking.tech/).
 Site: [dotskit.sawking.tech](https://dotskit.sawking.tech/). Documentation, in English and Russian:
 [dotskit.sawking.tech/docs.html](https://dotskit.sawking.tech/docs.html).
 
-> **Version 2 breaks version 1. Do not apply this template with `--force` over a solution generated from
-> v1:** namespaces, project references, package management, versioning and the shape of error responses
-> changed, and the overwritten solution will not build. Use v2 for new solutions; port changes into
-> existing ones by hand, using [what changed in v2](docs/getting-started/upgrading.md).
+A solution of an earlier version, v1 included, is brought to the current one by `dotskit upgrade`, keeping
+the team's changes ([upgrading](docs/getting-started/upgrading.md)).
 
 **DotNetSolutionKit (dotskit)** is a configurable `dotnet new` template and lifecycle toolkit for standardized .NET solutions.
 
@@ -34,6 +32,7 @@ dotskit new -S Billing --Storage true             # in the solution: one more se
 dotskit new -S Orders --MongoDB true              # in the solution: a flag for a service it has
 dotskit init                                      # in a solution made without dotskit: describe it in its manifest
 dotskit upgrade                                   # in the solution: bring it to the tool's version of the template
+dotskit upgrade --to 2.3.0                        # in the solution: to an earlier release, a step at a time
 ```
 
 <details>

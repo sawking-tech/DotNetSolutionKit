@@ -32,6 +32,8 @@ internal sealed class ProcessRunner : IProcessRunner
     /// <summary>dotnet prints in the language of the machine; the tool keeps the messages it passes on in English.</summary>
     private const string UiLanguage = "en";
 
+    private static readonly System.Text.Encoding Utf8 = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
     public async Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct)
     {
         var start = new ProcessStartInfo(program)
@@ -39,6 +41,10 @@ internal sealed class ProcessRunner : IProcessRunner
             WorkingDirectory = workingDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            // git prints a file's text as its bytes, UTF-8; read by the console's code page (866 on a Russian
+            // Windows) every non-ASCII character of a merged file would be written back broken.
+            StandardOutputEncoding = Utf8,
+            StandardErrorEncoding = Utf8,
             UseShellExecute = false,
         };
         foreach (var arg in args)
