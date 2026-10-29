@@ -11,5 +11,6 @@ internal interface IBuilder
 internal sealed class DotnetBuilder(IProcessRunner runner) : IBuilder
 {
     public Task<ProcessResult> BuildAsync(string root, CancellationToken ct) =>
-        runner.RunAsync("dotnet", ["build", Layout.SolutionFileOf(root), "-nologo", "-v", "q", "--disable-build-servers"], root, ct);
+        // The compiler server is let run, a third of a build; MSBuild's own nodes and server stay off (ProcessRunner).
+        runner.RunAsync("dotnet", ["build", Layout.SolutionFileOf(root), "-nologo", "-v", "q"], root, ct);
 }

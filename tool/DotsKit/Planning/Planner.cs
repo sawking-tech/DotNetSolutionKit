@@ -21,8 +21,11 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
     /// <param name="current">The solution's manifest; null when there is no solution yet, and the base is empty.</param>
     public async Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, MergeMode mode, CancellationToken ct)
     {
-        var baseDir = current is null ? null : await staging.BuildAsync(current, ct);
-        var nextDir = await staging.BuildAsync(next, ct);
+        // The two trees do not depend on each other: generated side by side.
+        var baseTree = current is null ? Task.FromResult<string?>(null) : BaseAsync(current, ct);
+        var nextTree = staging.BuildAsync(next, withSolutionFile: current is null, ct);
+        var baseDir = await baseTree;
+        var nextDir = await nextTree;
         var packages = PackageVersions.Hold(baseDir, nextDir, next.Packages, TemplateVersions.IsMajorStep(current?.Template, next.Template));
         var byGit = mode.ByGit && current is not null;
         var changes = byGit ? TemplateDiff.Of(baseDir!, nextDir) : await MergeAsync(root, baseDir, nextDir, mode, ct);
@@ -41,11 +44,13 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
         return await merge.ComputeAsync(root, baseDir, nextDir, mode.PreferTemplate, moved, ct);
     }
 
+    private async Task<string?> BaseAsync(Manifest current, CancellationToken ct) => await staging.BuildAsync(current, withSolutionFile: false, ct);
+
     private async Task<MembershipChange> MembershipAsync(string root, string baseDir, string nextDir, CancellationToken ct) =>
         MembershipChange.Of(
             await projects.ListAsync(Layout.SolutionFileOf(root), ct),
-            await projects.ListAsync(Layout.SolutionFileOf(baseDir), ct),
-            await projects.ListAsync(Layout.SolutionFileOf(nextDir), ct));
+            SolutionProjects.InTree(baseDir),
+            SolutionProjects.InTree(nextDir));
 
     /// <summary>All.sln of an existing solution changes by its projects, never by its text.</summary>
     private static bool IsSolutionFile(string path) =>
