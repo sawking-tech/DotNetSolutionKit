@@ -57,7 +57,7 @@ try
         "new" => await new NewCommand(planner, execution, git, ToolVersion.Current, TemplateSource.SourcesFolder is not null).RunAsync(options, folder, cts.Token),
         "upgrade" => await new UpgradeCommand(planner, execution, git, terminal, ToolVersion.Current,
             TemplateSource.SourcesFolder is not null).RunAsync(options, folder, cts.Token),
-        "init" => await new InitCommand(staging, projects, terminal, ToolVersion.Current, TemplateSource.SourcesFolder is not null).RunAsync(options, folder, cts.Token),
+        "init" => await new InitCommand(staging, projects, new GitTemplateReleases(runner), terminal, ToolVersion.Current, TemplateSource.SourcesFolder is not null).RunAsync(options, folder, cts.Token),
         _ => throw new ArgumentException($"Unknown command {args[0]}.\n{Options.Usage}"),
     };
     return (int)code;

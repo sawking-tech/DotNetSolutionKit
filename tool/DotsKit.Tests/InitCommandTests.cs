@@ -23,18 +23,46 @@ internal sealed class InitCommandTests
         public int Staged { get; private set; }
         public List<string> Lines { get; } = [];
 
-        public InitCommand Command() => new(new Staging(this), new Projects(this), new Terminal(this), ToolVersion, OnSources);
+        /// <summary>The releases the tags name.</summary>
+        public IReadOnlyList<string> Releases { get; init; } = [];
+
+        /// <summary>The release whose output is the solution as it is; every other one gives a file more. Null: all are.</summary>
+        public string? Closest { get; init; }
+
+        /// <summary>A release the template fails to generate by, as dotnet new fails on a choice it does not know.</summary>
+        public string? Failing { get; init; }
+
+        public InitCommand Command() => new(new Staging(this), new Projects(this), new TagReleases(this), new Terminal(this), ToolVersion, OnSources);
 
         /// <summary>What the template "gives" is the solution as it is, so the check reproduces every file.</summary>
         private sealed class Staging(Fakes fakes) : IStaging
         {
             public Task<string> BuildAsync(Manifest manifest, bool withSolutionFile, CancellationToken ct)
             {
-                fakes.Staged++;
+                lock (fakes)
+                {
+                    fakes.Staged++;
+                }
+
+                if (manifest.Template == fakes.Failing)
+                {
+                    throw new InvalidOperationException("dotnet new DotNetSolutionKit --output C:/t/staged exited with 127:\nan unknown choice\n");
+                }
+
                 var staged = Folders.NewTemp("init-staged");
                 Folders.Copy(fakes.Root!, staged);
+                if (fakes.Closest is { } closest && manifest.Template != closest)
+                {
+                    File.WriteAllText(Path.Combine(staged, "src", "common", "Added.cs"), "// not in the solution\n");
+                }
+
                 return Task.FromResult(staged);
             }
+        }
+
+        private sealed class TagReleases(Fakes fakes) : ITemplateReleases
+        {
+            public Task<IReadOnlyList<string>> ListAsync(CancellationToken ct) => Task.FromResult(fakes.Releases);
         }
 
         /// <summary>The solution's All.sln lists what its files are, as a generated one does.</summary>
@@ -146,7 +174,57 @@ internal sealed class InitCommandTests
     }
 
     [Test]
-    public async Task ASolutionThatDoesNotSayItsVersion_AsksForIt()
+    public async Task ASolutionThatDoesNotSayItsVersion_IsCheckedByEachMinorBefore27_AndTheClosestIsNamed_NothingWritten()
+    {
+        var root = Solution(version: null);
+        var fakes = new Fakes { Releases = ["1.0.0", "2.0.0", "2.1.0", "2.1.3", "2.6.2", "2.7.0", "2.8.0"], Closest = "2.1.3" };
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(root));
+
+        refused.Message.ShouldContain("dotskit init --template-version 2.1.3");
+        fakes.Staged.ShouldBe(4);
+        fakes.Lines.ShouldContain(l => l.StartsWith("  2.1.3: ", StringComparison.Ordinal) && l.EndsWith("(100%)", StringComparison.Ordinal));
+        fakes.Lines.ShouldNotContain(l => l.StartsWith("  2.7.0", StringComparison.Ordinal));
+        HasManifest(root).ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task AReleaseThatCannotBeGenerated_IsItsLineInTheTable_AndTheOthersStillDecide()
+    {
+        var root = Solution(version: null);
+        var fakes = new Fakes { Releases = ["1.0.0", "2.0.0", "2.1.3"], Closest = "2.1.3", Failing = "2.0.0" };
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(root));
+
+        refused.Message.ShouldContain("dotskit init --template-version 2.1.3");
+        fakes.Lines.ShouldContain("  2.0.0: not generated - an unknown choice");
+        HasManifest(root).ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task NoReleaseThatCanBeGenerated_AsksForTheVersion()
+    {
+        var root = Solution(version: null);
+        var fakes = new Fakes { Releases = ["2.0.0"], Failing = "2.0.0" };
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(root));
+
+        refused.Message.ShouldContain("no release could generate the solution again");
+        refused.Message.ShouldContain("--template-version 2.x.y");
+        HasManifest(root).ShouldBeFalse();
+    }
+
+    [Test]
+    public void OfTwoReleasesThatReproduceAsMuch_TheNewerIsTheClosest()
+    {
+        var same = new Reading.Reproduction(10, ["a.cs"]);
+
+        VersionAdvice.Closest([new("2.1.3", same), new("2.6.2", same), new("2.0.0", null, "failed")]).ShouldBe("2.6.2");
+        VersionAdvice.Closest([new("2.0.0", null, "failed")]).ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ASolutionThatDoesNotSayItsVersion_AsksForIt_WhenNoReleaseIsListed()
     {
         var root = Solution(version: null);
 
