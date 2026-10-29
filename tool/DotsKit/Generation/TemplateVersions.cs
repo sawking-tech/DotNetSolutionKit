@@ -99,11 +99,25 @@ internal static class TemplateVersions
     /// </summary>
     private static readonly Dictionary<string, Version> ParameterSince = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Hangfire"] = new(2, 0, 0), ["Messaging"] = new(2, 0, 0), ["Infisical"] = new(2, 0, 0), ["HttpPort"] = new(2, 0, 0),
-        ["DiffApi"] = new(2, 0, 0), ["FeatureFlags"] = new(2, 0, 0), ["HierarchyRules"] = new(2, 0, 0),
-        ["ApiGateway"] = new(2, 1, 0), ["ClickHouse"] = new(2, 1, 0), ["Deploy"] = new(2, 1, 0), ["GitHubCiCd"] = new(2, 1, 0),
-        ["Storage"] = new(2, 1, 0), ["Audit"] = new(2, 5, 0), ["TestFramework"] = new(2, 6, 0), ["Agent"] = new(2, 7, 0),
-        ["Database"] = new(2, 7, 0), ["Vault"] = new(2, 7, 0), ["MongoDB"] = new(2, 8, 0), ["Notify"] = new(2, 8, 0),
+        ["Hangfire"] = new(2, 0, 0),
+        ["Messaging"] = new(2, 0, 0),
+        ["Infisical"] = new(2, 0, 0),
+        ["HttpPort"] = new(2, 0, 0),
+        ["DiffApi"] = new(2, 0, 0),
+        ["FeatureFlags"] = new(2, 0, 0),
+        ["HierarchyRules"] = new(2, 0, 0),
+        ["ApiGateway"] = new(2, 1, 0),
+        ["ClickHouse"] = new(2, 1, 0),
+        ["Deploy"] = new(2, 1, 0),
+        ["GitHubCiCd"] = new(2, 1, 0),
+        ["Storage"] = new(2, 1, 0),
+        ["Audit"] = new(2, 5, 0),
+        ["TestFramework"] = new(2, 6, 0),
+        ["Agent"] = new(2, 7, 0),
+        ["Database"] = new(2, 7, 0),
+        ["Vault"] = new(2, 7, 0),
+        ["MongoDB"] = new(2, 8, 0),
+        ["Notify"] = new(2, 8, 0),
         ["Solution"] = new(2, 8, 0),
     };
 

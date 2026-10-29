@@ -1,4 +1,4 @@
-﻿namespace NamespaceRoot.ProductName.Common.Exceptions;
+namespace NamespaceRoot.ProductName.Common.Exceptions;
 
 /// <summary>
 /// Occurs when rate limit is exceeded
@@ -8,12 +8,12 @@ public class RateLimitException(string? message) : Exception(message)
     /// <summary>Number of seconds after which the caller may retry.</summary>
     public int? RetryAfterSeconds { get; init; }
 
-    public RateLimitException(int limit, TimeSpan period) 
+    public RateLimitException(int limit, TimeSpan period)
         : this($"Rate limit exceeded. Maximum {limit} requests per {period.TotalSeconds} seconds.")
     {
     }
-    
-    public RateLimitException(string resource, int limit, TimeSpan period) 
+
+    public RateLimitException(string resource, int limit, TimeSpan period)
         : this($"Rate limit exceeded for {resource}. Maximum {limit} requests per {period.TotalSeconds} seconds.")
     {
     }

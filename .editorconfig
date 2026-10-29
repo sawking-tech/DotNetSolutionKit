@@ -1,0 +1,20 @@
+# The style of every file of the repository, the template's sources among them. It sits outside template/, so
+# the package and a generated solution do not carry it; the job One style of template.yml holds a pull request
+# to its bytes with scripts/check-style.py.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.{cs,csproj,sh,py}]
+indent_size = 4
+
+# Visual Studio writes a solution file with a byte order mark and tabs.
+[*.sln]
+charset = utf-8-bom
+indent_style = tab

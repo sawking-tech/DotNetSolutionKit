@@ -1,4 +1,4 @@
-﻿namespace NamespaceRoot.ProductName.Common.Exceptions;
+namespace NamespaceRoot.ProductName.Common.Exceptions;
 
 /// <summary>
 /// Occurs when data is incomplete or inconsistent
@@ -64,7 +64,7 @@ public class InconsistentDataException(string? message, string? parameterName = 
             throw new InconsistentDataException($"{name} must contain currency code");
         }
     }
-    
+
     /// <summary>
     /// Checks if value is in range from 0 to 100
     /// </summary>

@@ -9,12 +9,12 @@ public interface IAuthContext
     /// Authentication type (JWT, API_KEY, etc.)
     /// </summary>
     AuthMethod Type { get; }
-    
+
     /// <summary>
     /// Authentication identifier (JWT ID or API Key ID)
     /// </summary>
     string Id { get; }
-    
+
     /// <summary>
     /// Authentication expiration date and time
     /// </summary>

@@ -1,4 +1,4 @@
-﻿using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Common.Application.Tracing;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using MassTransit;

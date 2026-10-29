@@ -1,4 +1,4 @@
-﻿using NamespaceRoot.ProductName.Common.Application.Extensions;
+using NamespaceRoot.ProductName.Common.Application.Extensions;
 using NamespaceRoot.ProductName.Common.Domain.Querying;
 using Shouldly;
 

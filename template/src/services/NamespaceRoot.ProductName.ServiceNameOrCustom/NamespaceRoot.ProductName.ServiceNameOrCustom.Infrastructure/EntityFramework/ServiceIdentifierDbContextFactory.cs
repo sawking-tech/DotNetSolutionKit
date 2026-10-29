@@ -28,13 +28,13 @@ public class ServiceIdentifierDbContextFactory : IDesignTimeDbContextFactory<Ser
 
         var currentDir = Directory.GetCurrentDirectory();
         Console.WriteLine($"Current directory: {currentDir}");
-    
+
         // If we're in Infrastructure, go up one level to API project
         var apiProjectPath = Path.Combine(currentDir, "..", "NamespaceRoot.ProductName.ServiceNameOrCustom.API");
         var apiProjectFullPath = Path.GetFullPath(apiProjectPath);
-    
+
         Console.WriteLine($"Looking for configs in: {apiProjectFullPath}");
-    
+
         if (!Directory.Exists(apiProjectFullPath))
         {
             throw new Exception($"API project directory not found: {apiProjectFullPath}");
@@ -48,7 +48,7 @@ public class ServiceIdentifierDbContextFactory : IDesignTimeDbContextFactory<Ser
             .Build();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-    
+
         if (string.IsNullOrEmpty(connectionString))
         {
             // Adding a migration compares the model with the snapshot and never opens a connection,

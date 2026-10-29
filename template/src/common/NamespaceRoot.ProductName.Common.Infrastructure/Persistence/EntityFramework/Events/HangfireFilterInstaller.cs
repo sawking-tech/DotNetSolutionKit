@@ -1,4 +1,4 @@
-﻿using Hangfire;
+using Hangfire;
 using Hangfire.Client;
 using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;

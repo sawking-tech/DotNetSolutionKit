@@ -306,6 +306,15 @@ jobs:
       - uses: actions/checkout@v7
       - run: python3 scripts/check-doc-anchors.py
 
+  # Every file git tracks has the style of .editorconfig, the template's sources among them (scripts/check-style.py).
+  style:
+    name: One style
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: python3 scripts/test_check_style.py
+      - run: python3 scripts/check-style.py
+
   # Names that must not appear in the template. The list is a repository secret, LEAK_PATTERN (an extended
   # regular expression), so the check does not publish the names it guards. Without the secret, as in a
   # fork, the check is skipped.

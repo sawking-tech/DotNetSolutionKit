@@ -11,27 +11,27 @@ public interface ICorsSettings
     /// Array of allowed origins for CORS
     /// </summary>
     string[] AllowedOrigins { get; }
-    
+
     /// <summary>
     /// Array of allowed HTTP methods
     /// </summary>
     string[] AllowedMethods { get; }
-    
+
     /// <summary>
     /// Whether to allow credentials (cookies, auth headers)
     /// </summary>
     bool AllowCredentials { get; }
-    
+
     /// <summary>
     /// Preflight cache duration in seconds
     /// </summary>
     int PreflightMaxAge { get; }
-    
+
     /// <summary>
     /// Array of allowed headers (if empty, allows any)
     /// </summary>
     string[] AllowedHeaders { get; }
-    
+
     /// <summary>
     /// Array of exposed headers
     /// </summary>
@@ -44,7 +44,7 @@ public interface ICorsSettings
 public class CorsSettings : ICorsSettings
 {
     public const string SectionName = "Cors";
-    
+
     /// <inheritdoc />
     public string[] AllowedOrigins { get; set; } = [];
 
