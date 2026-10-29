@@ -34,6 +34,8 @@ internal static partial class PackageVersions
     /// </summary>
     /// <param name="baseDir">What the template gave before; null for a new solution.</param>
     /// <param name="nextDir">What the template gives now; its version files are rewritten in place.</param>
+    /// <param name="policy">The solution's policy: the pinned versions and how far an update goes.</param>
+    /// <param name="majorUpgrade">The template moves to its next major version: a package's major version may come with it.</param>
     public static IReadOnlyList<string> Hold(string? baseDir, string nextDir, PackagePolicy policy, bool majorUpgrade)
     {
         var had = baseDir is null ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) : All(baseDir);
@@ -48,15 +50,23 @@ internal static partial class PackageVersions
                 brought.Add(name);
                 var decision = policy.Decide(name, had.GetValueOrDefault(name), version, majorUpgrade);
                 if (decision.Line is not null)
+                {
                     lines.Add($"{name}: {decision.Line}");
+                }
+
                 return decision.Version;
             });
             if (rewritten != file.Text)
+            {
                 File.WriteAllBytes(Path.Combine(nextDir, path), (file with { Text = rewritten }).ToBytes());
+            }
         }
         // A pin of a package the template does not have - or of a misspelt one - pins nothing, and says so.
         foreach (var (name, version) in policy.Pinned.Where(p => !brought.Contains(p.Key)))
+        {
             lines.Add($"{name}: pinned on {version}, not among the template's packages");
+        }
+
         return [.. lines];
     }
 
@@ -64,8 +74,13 @@ internal static partial class PackageVersions
     {
         var all = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var path in Folders.RelativeFiles(root).Where(IsVersionsFile))
+        {
             foreach (var (name, version) in Read(FileText.Read(root, path)!.Text))
+            {
                 all[name] = version;
+            }
+        }
+
         return all;
     }
 }

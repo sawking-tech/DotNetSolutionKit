@@ -27,7 +27,10 @@ internal static partial class BuildErrors
             .OrderBy(g => g.Key, StringComparer.Ordinal)
             .ToList();
         if (errors.Count == 0)
+        {
             return [output.Trim()];
+        }
+
         return errors.SelectMany(g => (IEnumerable<string>)[$"  {g.Key}", .. g.Select(e => $"    {e.Text}")]);
     }
 

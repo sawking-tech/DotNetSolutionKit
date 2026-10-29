@@ -18,7 +18,9 @@ internal static class Folders
         {
             current = Path.Combine(current, part);
             if (new DirectoryInfo(current).ResolveLinkTarget(returnFinalTarget: true) is { } target)
+            {
                 current = target.FullName;
+            }
         }
         return current;
     }
@@ -37,7 +39,9 @@ internal static class Folders
         try
         {
             if (Directory.Exists(Run))
+            {
                 Directory.Delete(Run, recursive: true);
+            }
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {

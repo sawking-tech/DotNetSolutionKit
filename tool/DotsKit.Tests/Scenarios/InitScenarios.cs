@@ -17,7 +17,10 @@ internal sealed class InitScenarios
         var made = await Sandbox.EmptyAsync();
         await GenerateAsync(made, [.. solution, "--Solution"]);
         foreach (var service in services)
+        {
             await GenerateAsync(made, [.. solution.Where((_, i) => i < 4), .. service]);
+        }
+
         await made.CommitAsync("made by the template alone");
         return made;
     }
@@ -32,8 +35,7 @@ internal sealed class InitScenarios
     public async Task ASolutionWithFlagsOnItsServices_IsReproducedWhole_AndDotskitAddsToIt()
     {
         var solution = await MadeByTheTemplateAsync(
-            ["-N", "Acme", "-P", "Shop", "-S", "Orders", "--Storage", "true", "--MongoDB", "true", "--Notify", "email",
-             "--Messaging", "outbox", "--Audit", "true", "--DiffApi", "true", "--FeatureFlags", "true", "--ClickHouse", "true"],
+            ["-N", "Acme", "-P", "Shop", "-S", "Orders", "--Storage", "true", "--MongoDB", "true", "--Notify", "email", "--Messaging", "outbox", "--Audit", "true", "--DiffApi", "true", "--FeatureFlags", "true", "--ClickHouse", "true"],
             ["-S", "Billing", "--Storage", "true", "--Messaging", "outbox", "--Notify", "email", "--Audit", "true"],
             ["-S", "Stock", "--Hangfire", "false", "--Messaging", "direct", "--ClickHouse", "true", "--FeatureFlags", "true"]);
 
@@ -54,8 +56,7 @@ internal sealed class InitScenarios
     public async Task ASolutionOfOtherChoices_AndAGateway_IsReproducedWhole()
     {
         var solution = await MadeByTheTemplateAsync(
-            ["-N", "Acme", "-P", "Shop", "-S", "Orders", "--Database", "mssql", "--Deploy", "k8s", "--TestFramework", "xunit",
-             "--Agent", "opencode", "--GitHubCiCd", "true", "--Vault", "true", "--Infisical", "true", "--HierarchyRules", "true"],
+            ["-N", "Acme", "-P", "Shop", "-S", "Orders", "--Database", "mssql", "--Deploy", "k8s", "--TestFramework", "xunit", "--Agent", "opencode", "--GitHubCiCd", "true", "--Vault", "true", "--Infisical", "true", "--HierarchyRules", "true"],
             ["-S", "Gate", "--ApiGateway", "true", "--Database", "mssql", "--Deploy", "k8s", "--TestFramework", "xunit", "--Agent", "opencode"],
             ["-S", "Billing", "--Database", "mssql", "--Deploy", "k8s", "--TestFramework", "xunit", "--Agent", "opencode", "--Vault", "true"]);
 

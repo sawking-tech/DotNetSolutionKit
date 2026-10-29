@@ -16,5 +16,8 @@ internal enum ChangeKind
     Conflict,
 }
 
+/// <param name="Path">The file, relative to the solution's root, with forward slashes.</param>
+/// <param name="Kind">What happens to the file.</param>
 /// <param name="Content">What the file becomes; null for a deletion and for a file kept as it is.</param>
+/// <param name="Reason">Why, as the report says it.</param>
 internal sealed record Change(string Path, ChangeKind Kind, FileText? Content, string Reason);

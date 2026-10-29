@@ -48,8 +48,13 @@ internal sealed class Sandbox
         get
         {
             for (var folder = new DirectoryInfo(AppContext.BaseDirectory); folder is not null; folder = folder.Parent)
+            {
                 if (Directory.Exists(Path.Combine(folder.FullName, "template", ".template.config")))
+                {
                     return Path.Combine(folder.FullName, "template");
+                }
+            }
+
             throw new InvalidOperationException("The template's sources are not above the tests' folder.");
         }
     }
@@ -111,7 +116,10 @@ internal sealed class Sandbox
         Directory.CreateDirectory(root);
         var made = await DotskitIn(root, ["new", "-N", "Acme", "-P", "Shop", "-S", "Orders", "--yes", "--no-build"]);
         if (made.Code != 0)
+        {
             throw new InvalidOperationException($"The reference solution was not made:\n{made.Output}{made.Error}");
+        }
+
         return root;
     }
 

@@ -21,7 +21,10 @@ internal sealed class ConsoleTerminal : ITerminal
     {
         // CI or a pipe has no one to answer: --yes is how to say yes there.
         if (Console.IsInputRedirected)
+        {
             return false;
+        }
+
         Console.Write($"{question} [y/N] ");
         return Console.ReadLine()?.Trim().ToLowerInvariant() is "y" or "yes";
     }

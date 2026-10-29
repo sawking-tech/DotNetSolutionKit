@@ -50,7 +50,10 @@ internal sealed partial class TypeIndex
     private static IEnumerable<TypeHome> TypesOf(string project, string text)
     {
         if (Namespace().Match(text) is not { Success: true } ns)
+        {
             return [];
+        }
+
         return PublicType().Matches(text).Select(m => new TypeHome(m.Groups["name"].Value, ns.Groups["name"].Value, project));
     }
 
@@ -62,8 +65,13 @@ internal sealed partial class TypeIndex
     private static string? OwnerOf(string file, HashSet<string> projectFolders)
     {
         for (var dir = Path.GetDirectoryName(file); dir is not null; dir = Path.GetDirectoryName(dir))
+        {
             if (projectFolders.Contains(dir))
+            {
                 return dir;
+            }
+        }
+
         return null;
     }
 

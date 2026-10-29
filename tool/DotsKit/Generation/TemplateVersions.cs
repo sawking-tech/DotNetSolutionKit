@@ -37,17 +37,31 @@ internal static class TemplateVersions
     public static string? WhyNotUpgraded(string from, string toolVersion, bool onSources)
     {
         if (from == TemplateSource.SourcesVersion)
+        {
             return onSources ? null : "The solution was made from the template's sources: name the release it came from in its manifest, or describe it again, dotskit init --template-version 2.x.y.";
+        }
+
         if (onSources)
+        {
             return null;
+        }
+
         var solution = Version.Parse(from.Split('-')[0]);
         var tool = Version.Parse(toolVersion.Split('-')[0]);
         if (solution > tool)
+        {
             return $"The solution is of the template {from}, newer than dotskit {toolVersion}: update the tool, dotnet tool update -g SawKing.DotsKit.Tool.";
+        }
+
         if (IsTaken(solution, tool))
+        {
             return null;
+        }
+
         if (WhyNoTool(solution) is { } noTool)
+        {
             return noTool;
+        }
         // Each major in turn: the tool of the solution's major brings it to that major's last minor, and so on up.
         var steps = Enumerable.Range(solution.Major, tool.Major - solution.Major)
             .Select(major => $"dotnet tool update -g SawKing.DotsKit.Tool --version {major}.*, dotskit upgrade");
@@ -84,11 +98,20 @@ internal static class TemplateVersions
     public static string? WhyNotTarget(string from, string to, string toolVersion, bool onSources)
     {
         if (to == TemplateSource.SourcesVersion || !Version.TryParse(to.Split('-')[0], out var target) || target.Build < 0)
+        {
             return $"--to {to} is not a release of the template: name one, --to 2.x.y.";
+        }
+
         if (from != TemplateSource.SourcesVersion && !IsNewer(to, from))
+        {
             return $"The solution is of the template {from} already, not older than {to}: name a newer version, or leave out --to.";
+        }
+
         if (!onSources && target > Version.Parse(toolVersion.Split('-')[0]))
+        {
             return $"--to {to} is newer than dotskit {toolVersion}: update the tool, dotnet tool update -g SawKing.DotsKit.Tool.";
+        }
+
         return null;
     }
 
@@ -141,22 +164,42 @@ internal static class TemplateVersions
     /// with what to do instead; null when it can. The tool run against the template's sources takes any version.
     /// </summary>
     /// <param name="version">The version the solution says, or the command names; null when there is none.</param>
+    /// <param name="toolVersion">The version of the tool, the newest version it describes.</param>
+    /// <param name="onSources">The tool runs against the template's sources and takes any version.</param>
     public static string? WhyNotDescribed(string? version, string toolVersion, bool onSources)
     {
         if (version is null)
+        {
             return "The solution does not say its template version (it does since 2.7.0): name it, dotskit init --template-version 2.x.y.";
+        }
+
         if (version == TemplateSource.SourcesVersion)
+        {
             return onSources ? null : "The solution was made from the template's sources: name the release it came from, dotskit init --template-version 2.x.y.";
+        }
+
         if (!IsVersion(version))
+        {
             return $"\"{version}\" is not a version of the template: name one, dotskit init --template-version 2.x.y.";
+        }
+
         if (onSources)
+        {
             return null;
+        }
+
         var solution = Version.Parse(version.Split('-')[0]);
         var tool = Version.Parse(toolVersion.Split('-')[0]);
         if (solution > tool)
+        {
             return $"The solution was made by the template {version}, dotskit is {toolVersion}: update the tool, dotnet tool update -g SawKing.DotsKit.Tool.";
+        }
+
         if (IsTaken(solution, tool))
+        {
             return null;
+        }
+
         return WhyNoTool(solution)
             ?? $"The solution was made by the template {version}; dotskit {toolVersion} describes solutions of {tool.Major}.x and {LastOfPreviousMajor.Major}.{LastOfPreviousMajor.Minor}: describe it with the tool of its major, dotnet tool update -g SawKing.DotsKit.Tool --version {solution.Major}.*.";
     }
