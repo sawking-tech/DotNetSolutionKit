@@ -38,6 +38,7 @@ window.SITE = {
       ["settings", "docs/architecture/settings", ["Settings", "Настройки"], true],
       ["domain-events", "docs/architecture/domain-events", ["Domain events", "Доменные события"], true],
       ["testing", "docs/architecture/testing", ["Testing", "Тестирование"], true],
+      ["code-style", "docs/architecture/code-style", ["Code style", "Стиль кода"], true],
     ]},
     { group: ["Features", "Возможности"], docs: [
       ["jobs", "docs/features/background-jobs", ["Background jobs", "Фоновые задачи"], true],
@@ -68,6 +69,7 @@ window.SITE = {
       ["adr-004", "docs/adr/004-product-version-by-hand", ["ADR-004: The product version by hand", "ADR-004: версия продукта вручную"], true],
       ["adr-005", "docs/adr/005-testing-a-service", ["ADR-005: How a service is tested", "ADR-005: как тестируется сервис"], true],
       ["adr-006", "docs/adr/006-json-metadata-key-convention", ["ADR-006: JSON metadata keys", "ADR-006: ключи метаданных в JSON"], true],
+      ["adr-007", "docs/adr/007-code-style", ["ADR-007: One code style, owned by the formatters", "ADR-007: единый стиль кода, за который отвечают форматтеры"], true],
     ]},
   ],
 };

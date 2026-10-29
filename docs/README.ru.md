@@ -71,6 +71,7 @@ mindmap
 - [Настройки](architecture/settings.md): откуда берутся и что меняется, пока сервис работает
 - [Доменные события](architecture/domain-events.md)
 - [Тестирование](architecture/testing.md)
+- [Стиль кода](architecture/code-style.md): правила каждого файла и как CI их держит
 
 ## Возможности
 
@@ -107,6 +108,7 @@ mindmap
 - [ADR-004: Версия продукта задаётся вручную](adr/004-product-version-by-hand.md)
 - [ADR-005: Как тестируется сервис](adr/005-testing-a-service.md)
 - [ADR-006: ключи метаданных в JSON](adr/006-json-metadata-key-convention.md)
+- [ADR-007: единый стиль кода, за который отвечают форматтеры](adr/007-code-style.md)
 
 ## [Дорожная карта](roadmap.md)
 

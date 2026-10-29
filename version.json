@@ -2,11 +2,29 @@
   "version": "2.9.0-rc",
   "releaseNotes": {
     "2.9.0-rc": {
-      "headline": "",
-      "highlights": [],
+      "headline": "dotskit upgrades a solution of any release and keeps the team's code building.",
+      "highlights": [
+        "dotskit upgrade takes a solution of any release from 1.0.0, a release at a time with --to.",
+        "The references and usings of the types the template moved are repaired, from the text before the build and by the build after it.",
+        "The merge runs by git through the branch dotskit/template, with a conflict resolved in the IDE; --merge files keeps the tool's own merge.",
+        "A change of the template's style alone conflicts with nothing the team wrote: both merges bring the three sides of a file to the style first.",
+        "An upgrade step takes 51 s instead of 114 s.",
+        "Two dotskit commands in one solution do not run at once: the second says so and changes nothing.",
+        "The template's files are UTF-8 with LF, a line end at the end and no spaces at the ends of lines, a byte order mark only in a solution file.",
+        "One code style, owned by the formatters (ADR-007): CI fails a pull request that breaks the bytes of any file or the C# style of the tool; the C# of the template follows."
+      ],
       "ru": {
-        "headline": "",
-        "highlights": []
+        "headline": "dotskit обновляет решение любого выпуска так, что код команды собирается.",
+        "highlights": [
+          "dotskit upgrade берёт решение любого выпуска с 1.0.0, с --to по выпуску за раз.",
+          "Ссылки и using типов, которые шаблон перенёс, чинятся: по тексту до сборки и по ошибкам сборки после.",
+          "Слияние идёт через git, по ветке dotskit/template, конфликт разрешается в IDE; --merge files оставляет собственное слияние инструмента.",
+          "Одна смена стиля шаблона не конфликтует ни с чем, что написала команда: оба слияния сначала приводят три стороны файла к стилю.",
+          "Шаг обновления занимает 51 с вместо 114 с.",
+          "Две команды dotskit в одном решении не идут одновременно: вторая говорит об этом и ничего не меняет.",
+          "Файлы шаблона в UTF-8 с LF, переводом строки в конце и без пробелов в конце строк, BOM только у файла решения.",
+          "Единый стиль кода, за который отвечают форматтеры (ADR-007): CI роняет PR, который нарушает байты любого файла или стиль C# инструмента; C# шаблона - следом."
+        ]
       }
     },
     "2.8.1": {
