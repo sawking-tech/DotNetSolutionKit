@@ -12,6 +12,7 @@ scenario is in the category `Sandbox.Category`, and each file's summary links ba
 | `UpgradeScenarios.cs` | A solution of an earlier release brought to the template's sources by `upgrade`, the team's changes and package pins kept. |
 | `ChainScenarios.cs` | A solution of 1.0.0 with the team's code on `Common`, upgraded a release at a time to the last minor of each 2.x and to the sources; every step builds. Needs the network for the tags before 2.6.1. |
 | `MovedTypeScenarios.cs` | A type of the template moved to another project and namespace, as 3.0 moves `Common`'s; the team's code that used it builds again by the repair of `upgrade`. |
+| `SolutionProjectsScenarios.cs` | The projects of `All.sln` added and removed by a real `dotnet sln` while `Directory.Build.props` and `Directory.Packages.props` hold the markers of a conflict. |
 | `GitMerge/` | The merge by git through the branch `dotskit/template`, below. |
 
 ## GitMerge

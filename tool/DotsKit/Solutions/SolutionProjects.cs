@@ -25,6 +25,20 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
     private const string ProjectPattern = "*.csproj";
 
     /// <summary>
+    /// <c>dotnet sln add</c> loads the project it adds through MSBuild, which imports the Directory.*.props and
+    /// .targets above it; a merge that left one of them in conflict, as Directory.Build.props, has markers there that
+    /// MSBuild cannot read. These MSBuild switches, read from the environment, leave them out. They are the second try
+    /// only: the team's props may set the platforms of its projects, and an add that reads them maps the new project
+    /// to those platforms in All.sln.
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, string> WithoutDirectoryImports = new Dictionary<string, string>
+    {
+        ["ImportDirectoryBuildProps"] = "false",
+        ["ImportDirectoryBuildTargets"] = "false",
+        ["ImportDirectoryPackagesProps"] = "false",
+    };
+
+    /// <summary>
     /// The projects a generated tree has, as All.sln lists them, relative to it: the template's All.sln lists every
     /// project under src, so the files say it without a <c>dotnet sln list</c>.
     /// </summary>
@@ -79,7 +93,7 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
             string[] command = ["sln", solutionFile, "add"], options = ["--solution-folder", folder.Key];
             foreach (var batch in CommandLine.Batches(folder.Order(StringComparer.Ordinal), [.. command, .. options]))
             {
-                await runner.RunCheckedAsync("dotnet", [.. command, .. batch, .. options], DirectoryOf(solutionFile), ct);
+                await AddBatchAsync(solutionFile, [.. command, .. batch, .. options], ct);
             }
         }
     }
@@ -91,6 +105,15 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
         foreach (var batch in CommandLine.Batches(listedProjects.Order(StringComparer.Ordinal), command))
         {
             await runner.RunCheckedAsync("dotnet", [.. command, .. batch], DirectoryOf(solutionFile), ct);
+        }
+    }
+
+    /// <summary>One batch of <c>dotnet sln add</c>, again without the Directory imports when it fails; an add that fails writes nothing.</summary>
+    private async Task AddBatchAsync(string solutionFile, string[] args, CancellationToken ct)
+    {
+        if ((await runner.RunAsync("dotnet", args, DirectoryOf(solutionFile), ct)).Code != 0)
+        {
+            await runner.RunCheckedAsync("dotnet", args, DirectoryOf(solutionFile), ct, WithoutDirectoryImports);
         }
     }
 
