@@ -11,7 +11,8 @@ internal interface ITemplateReleases
 
 /// <summary>
 /// <c>git ls-remote --tags</c> of the repository: no clone, and the tags are where the releases before nuget.org are
-/// taken from as well (<see cref="TagArchive"/>).
+/// taken from as well (<see cref="TagArchive"/>). Every git command here is listed in docs/getting-started/dotskit.md,
+/// "What dotskit runs in git": a command added or changed here goes there too.
 /// </summary>
 internal sealed partial class GitTemplateReleases(IProcessRunner runner) : ITemplateReleases
 {

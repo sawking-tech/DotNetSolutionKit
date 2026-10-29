@@ -9,7 +9,11 @@ internal interface IIgnoredFiles
     Task<IReadOnlySet<string>> InAsync(string root, CancellationToken ct);
 }
 
-/// <summary><c>git ls-files --others --ignored --exclude-standard</c>: the files on disk the solution's rules leave out of git.</summary>
+/// <summary>
+/// <c>git ls-files --others --ignored --exclude-standard</c>: the files on disk the solution's rules leave out of git.
+/// Every git command here is listed in docs/getting-started/dotskit.md, "What dotskit runs in git": a command added
+/// or changed here goes there too.
+/// </summary>
 internal sealed class GitIgnoredFiles(IProcessRunner runner) : IIgnoredFiles
 {
     public async Task<IReadOnlySet<string>> InAsync(string root, CancellationToken ct)

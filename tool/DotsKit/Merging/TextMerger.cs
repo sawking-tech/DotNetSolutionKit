@@ -13,7 +13,11 @@ internal interface ITextMerger
     Task<TextMergeResult> MergeAsync(string solution, string @base, string template, bool preferTemplate, CancellationToken ct);
 }
 
-/// <summary><c>git merge-file</c>: conflicts are marked &lt;&lt;&lt;&lt;&lt;&lt;&lt; solution / &gt;&gt;&gt;&gt;&gt;&gt;&gt; template.</summary>
+/// <summary>
+/// <c>git merge-file</c>: conflicts are marked &lt;&lt;&lt;&lt;&lt;&lt;&lt; solution / &gt;&gt;&gt;&gt;&gt;&gt;&gt; template.
+/// Every git command here is listed in docs/getting-started/dotskit.md, "What dotskit runs in git": a command added
+/// or changed here goes there too.
+/// </summary>
 internal sealed class GitMergeFile(IProcessRunner runner) : ITextMerger
 {
     private const int MaxConflicts = 127;
