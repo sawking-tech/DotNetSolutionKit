@@ -26,7 +26,7 @@ internal sealed class NewCommandTests
 
         private sealed class Planner(Fakes fakes) : IPlanner
         {
-            public Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, bool preferTemplate, CancellationToken ct)
+            public Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, Merging.MergeMode mode, CancellationToken ct)
             {
                 fakes.Planned++;
                 return Task.FromResult(new Plan(root, next, [], new MembershipChange([], [])));
@@ -35,10 +35,10 @@ internal sealed class NewCommandTests
 
         private sealed class Writer(Fakes fakes) : IPlanWriter
         {
-            public Task WriteAsync(Plan plan, CancellationToken ct)
+            public Task<IReadOnlyList<string>> WriteAsync(Plan plan, CancellationToken ct)
             {
                 fakes.Written++;
-                return Task.CompletedTask;
+                return Task.FromResult<IReadOnlyList<string>>([]);
             }
         }
 
