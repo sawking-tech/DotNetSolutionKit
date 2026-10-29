@@ -11,7 +11,9 @@ internal interface IRenames
 
 /// <summary>
 /// <c>git diff --no-index -M</c> between the two trees: a file removed from one path and added at another with
-/// mostly the same text is a move, so the team's changes to it follow it to the new path.
+/// mostly the same text is a move, so the team's changes to it follow it to the new path. Every git command here is
+/// listed in docs/getting-started/dotskit.md, "What dotskit runs in git": a command added or changed here goes there
+/// too.
 /// </summary>
 internal sealed class GitRenames(IProcessRunner runner) : IRenames
 {

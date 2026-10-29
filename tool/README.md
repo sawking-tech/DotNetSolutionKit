@@ -44,6 +44,10 @@ It writes all files or none, then builds the solution. A conflict is marked
 
 What a solution was made from is kept in `.dotskit/manifest.json`: commit it with the solution.
 
+Every git command the tool runs in a solution, and what each does to the repository, is listed in
+[dotskit.md, What dotskit runs in git](https://github.com/sawking-tech/DotNetSolutionKit/blob/master/docs/getting-started/dotskit.md#what-dotskit-runs-in-git).
+It never commits the merge, never pushes and never checks out a branch.
+
 What a solution may have to change by hand, release by release, is in
 [upgrading.md](https://github.com/sawking-tech/DotNetSolutionKit/blob/master/docs/getting-started/upgrading.md);
 `dotskit upgrade` names its sections for the versions it crosses.

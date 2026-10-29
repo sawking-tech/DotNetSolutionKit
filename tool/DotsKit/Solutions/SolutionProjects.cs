@@ -68,22 +68,29 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
         await RemoveAsync(solutionFile, gone, ct);
     }
 
-    /// <summary>One <c>dotnet sln add</c> per solution folder, each a process of half a second or more.</summary>
+    /// <summary>
+    /// One <c>dotnet sln add</c> per solution folder, each a process of half a second or more; a folder with more
+    /// projects than one command line holds takes a batch at a time (<see cref="CommandLine"/>).
+    /// </summary>
     public async Task AddAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct)
     {
         foreach (var folder in listedProjects.GroupBy(FolderOfListed, StringComparer.Ordinal).OrderBy(g => g.Key, StringComparer.Ordinal))
         {
-            await runner.RunCheckedAsync("dotnet",
-                ["sln", solutionFile, "add", .. folder.Order(StringComparer.Ordinal), "--solution-folder", folder.Key], DirectoryOf(solutionFile), ct);
+            string[] command = ["sln", solutionFile, "add"], options = ["--solution-folder", folder.Key];
+            foreach (var batch in CommandLine.Batches(folder.Order(StringComparer.Ordinal), [.. command, .. options]))
+            {
+                await runner.RunCheckedAsync("dotnet", [.. command, .. batch, .. options], DirectoryOf(solutionFile), ct);
+            }
         }
     }
 
-    /// <summary>One <c>dotnet sln remove</c> for them all; none when there is nothing to remove.</summary>
+    /// <summary>One <c>dotnet sln remove</c> for as many as one command line holds; none when there is nothing to remove.</summary>
     public async Task RemoveAsync(string solutionFile, IReadOnlyCollection<string> listedProjects, CancellationToken ct)
     {
-        if (listedProjects.Count > 0)
+        string[] command = ["sln", solutionFile, "remove"];
+        foreach (var batch in CommandLine.Batches(listedProjects.Order(StringComparer.Ordinal), command))
         {
-            await runner.RunCheckedAsync("dotnet", ["sln", solutionFile, "remove", .. listedProjects.Order(StringComparer.Ordinal)], DirectoryOf(solutionFile), ct);
+            await runner.RunCheckedAsync("dotnet", [.. command, .. batch], DirectoryOf(solutionFile), ct);
         }
     }
 

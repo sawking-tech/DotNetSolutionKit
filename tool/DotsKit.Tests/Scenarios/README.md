@@ -24,4 +24,5 @@ template's outputs are folders a test writes.
 | `GitSolution.cs` | Not a scenario: the solution in git as the template 1.0 gave it, the template's outputs, the texts the scenarios compare. |
 | `StyleScenarios.cs` | The three sides of a file brought to the template's style: a change of style alone is no conflict, a solution file keeps its byte order mark, the merged file keeps the team's line ends. |
 | `MergeScenarios.cs` | The template's change merged with the team's; a line both changed is a conflict for the IDE; what the solution's git ignores and `All.sln` are never in the branch; the base adopted again on a branch without it. |
-| `RollbackScenarios.cs` | A merge that cannot go on leaves git as it was: a merge over one in progress is refused, a step that fails after the merge and a merge git refuses put back the adopting commit and the branch. |
+| `RollbackScenarios.cs` | A merge that cannot go on leaves git as it was: a merge over one in progress is refused, a step that fails after the merge, a staging that fails over a manifest in git and a merge git refuses put back the adopting commit, the branch and the files. |
+| `StagingScenarios.cs` | What the command stages beside the merge reaches git whole, however many files: the paths go in a file, not on the command line. |

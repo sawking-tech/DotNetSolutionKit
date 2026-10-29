@@ -7,6 +7,10 @@ internal interface IGit
     Task<bool> IsCleanAsync(string root, CancellationToken ct);
 }
 
+/// <summary>
+/// <c>git status --porcelain</c>. Every git command here is listed in docs/getting-started/dotskit.md, "What dotskit
+/// runs in git": a command added or changed here goes there too.
+/// </summary>
 internal sealed class Git(IProcessRunner runner) : IGit
 {
     public async Task<bool> IsCleanAsync(string root, CancellationToken ct)
