@@ -6,6 +6,7 @@ namespace DotsKit.Tests.Scenarios;
 /// A solution several people work on: one adds a project by hand, one leaves a service out of All.sln, one
 /// follows the rules, one types the name of a service there is already. Each row of that table is a test here,
 /// run with the template alone and with dotskit, on every OS the CI has.
+/// The scenarios of this folder and what each file checks: README.md beside this file.
 /// </summary>
 [TestFixture]
 [Category(Sandbox.Category)]
