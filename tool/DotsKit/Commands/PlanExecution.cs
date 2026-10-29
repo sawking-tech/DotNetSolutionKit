@@ -18,13 +18,21 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
             terminal.Info("Nothing written: answer y to write, or pass --yes where no one can answer.");
             return ExitCode.Failed;
         }
-        await writer.WriteAsync(plan, ct);
-        return plan.HasConflicts ? Conflicts() : await BuildAsync(plan, options, ct);
+        var conflicts = await writer.WriteAsync(plan, ct);
+        return conflicts.Count > 0 ? Conflicts(plan, conflicts) : await BuildAsync(plan, options, ct);
     }
 
-    private ExitCode Conflicts()
+    private ExitCode Conflicts(Plan plan, IReadOnlyList<string> conflicts)
     {
-        terminal.Info("Written. Resolve the conflicts marked <<<<<<< solution / >>>>>>> template, then build.");
+        if (plan.ByGit is null)
+        {
+            terminal.Info("Written. Resolve the conflicts marked <<<<<<< solution / >>>>>>> template, then build.");
+            return ExitCode.Conflicts;
+        }
+        terminal.Info($"Merged by git, not committed; {conflicts.Count} file(s) in conflict:");
+        foreach (var path in conflicts)
+            terminal.Info($"  {path}");
+        terminal.Info("Resolve them in the IDE or with git mergetool, then git commit and dotnet build; git merge --abort undoes the merge.");
         return ExitCode.Conflicts;
     }
 

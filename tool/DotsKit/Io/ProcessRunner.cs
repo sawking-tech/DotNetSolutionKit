@@ -7,16 +7,18 @@ internal sealed record ProcessResult(int Code, string Output, string Error);
 /// <summary>Runs a program; the one door to the outside processes the tool calls - dotnet and git.</summary>
 internal interface IProcessRunner
 {
-    Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct);
+    /// <param name="environment">Variables set for this run only, such as git's GIT_INDEX_FILE.</param>
+    Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
+        IReadOnlyDictionary<string, string>? environment = null);
 }
 
 internal static class ProcessRunnerExtensions
 {
     /// <summary>Runs a program that must succeed, and returns what it printed.</summary>
     public static async Task<string> RunCheckedAsync(this IProcessRunner runner, string program, IReadOnlyList<string> args,
-        string workingDirectory, CancellationToken ct)
+        string workingDirectory, CancellationToken ct, IReadOnlyDictionary<string, string>? environment = null)
     {
-        var result = await runner.RunAsync(program, args, workingDirectory, ct);
+        var result = await runner.RunAsync(program, args, workingDirectory, ct, environment);
         if (result.Code != 0)
             throw new InvalidOperationException($"{program} {string.Join(' ', args)} exited with {result.Code}:\n{Why(result)}");
         return result.Output;
@@ -34,7 +36,8 @@ internal sealed class ProcessRunner : IProcessRunner
 
     private static readonly System.Text.Encoding Utf8 = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
-    public async Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct)
+    public async Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
         var start = new ProcessStartInfo(program)
         {
@@ -54,6 +57,8 @@ internal sealed class ProcessRunner : IProcessRunner
         // to its end would never finish.
         start.Environment["MSBUILDDISABLENODEREUSE"] = "1";
         start.Environment["DOTNET_CLI_USE_MSBUILD_SERVER"] = "0";
+        foreach (var (name, value) in environment ?? new Dictionary<string, string>())
+            start.Environment[name] = value;
 
         using var process = Process.Start(start) ?? throw new InvalidOperationException($"Could not start {program}");
         var output = process.StandardOutput.ReadToEndAsync(ct);

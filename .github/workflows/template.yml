@@ -274,11 +274,16 @@ jobs:
         run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory!=Chain"
 
   # A solution of 1.0.0 upgraded by dotskit a release at a time to the template's sources, building after every
-  # step (#117): an hour of upgrades, so on one OS. The releases before 2.6.1 come from their tags on GitHub.
+  # step (#117), merged by git and by the tool's own merge in two jobs side by side; twenty minutes each, so on
+  # one OS. The releases before 2.6.1 come from their tags on GitHub.
   chain:
-    name: dotskit upgrades from 1.0.0
+    name: dotskit upgrades from 1.0.0, merge ${{ matrix.merge }}
     runs-on: ubuntu-24.04
     timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        merge: [git, files]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -291,7 +296,7 @@ jobs:
       - name: Build
         run: dotnet build tool/DotsKit.Tests -warnaserror
       - name: Test
-        run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory=Chain"
+        run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory=Chain&Name~${{ matrix.merge }}"
 
   # A link to a section of a document names a heading of it, in the language of the linking document.
   doc-links:

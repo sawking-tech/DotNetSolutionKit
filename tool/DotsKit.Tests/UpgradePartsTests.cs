@@ -101,7 +101,7 @@ internal sealed class UpgradePartsTests
     {
         Options.Parse("upgrade", ["--to", "2.3.0", "--yes"]).To.ShouldBe("2.3.0");
         Should.Throw<ArgumentException>(() => Options.Parse("init", ["--to", "2.3.0"])).Message.ShouldContain("option of dotskit upgrade");
-        Should.Throw<ArgumentException>(() => Options.Parse("upgrade", ["--to"])).Message.ShouldContain("needs a version");
+        Should.Throw<ArgumentException>(() => Options.Parse("upgrade", ["--to"])).Message.ShouldContain("needs a value");
     }
 
     [Test]

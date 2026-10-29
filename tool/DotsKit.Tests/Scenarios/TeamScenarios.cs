@@ -12,6 +12,9 @@ namespace DotsKit.Tests.Scenarios;
 [Parallelizable(ParallelScope.All)]
 internal sealed class TeamScenarios
 {
+    /// <summary>A conflict as both merges mark it: the tool labels its sides solution and template, git HEAD and dotskit/template.</summary>
+    private const string ConflictMarker = "<<<<<<< ";
+
     private const string Orders = $"{Sandbox.Prefix}.Orders";
     private const string HandProject = $"{Sandbox.Prefix}.Tools/{Sandbox.Prefix}.Tools.Cli/{Sandbox.Prefix}.Tools.Cli.csproj";
     private const string HandFolder = "MyTools";
@@ -108,23 +111,25 @@ internal sealed class TeamScenarios
             again.Code.ShouldBe(WouldOverwrite);
     }
 
-    [Test]
-    public async Task FileTheTeamAddedWhereTheTemplateAddsOne_IsAConflict_NotOverwritten()
+    [TestCase(Merging.MergeMode.Git)]
+    [TestCase(Merging.MergeMode.Files)]
+    public async Task FileTheTeamAddedWhereTheTemplateAddsOne_IsAConflict_NotOverwritten(string merge)
     {
         var solution = await Sandbox.SolutionAsync();
         const string mongo = "deploy/compose/infra/mongo.yml";
         solution.Write(mongo, "# the team's own mongo\n");
         await solution.CommitAsync("the team's mongo");
 
-        var added = await solution.DotskitAsync("new", "-S", "Orders", "--MongoDB", "true", "--yes", "--no-build");
+        var added = await solution.DotskitAsync("new", "-S", "Orders", "--MongoDB", "true", "--yes", "--no-build", "--merge", merge);
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         solution.Read(mongo).ShouldContain("# the team's own mongo");
-        solution.Read(mongo).ShouldContain("<<<<<<< solution");
+        solution.Read(mongo).ShouldContain(ConflictMarker);
     }
 
-    [Test]
-    public async Task LineTheTeamChangedWhereTheTemplateChangesIt_IsAMarkedConflict_WithExitCodeTwo()
+    [TestCase(Merging.MergeMode.Git)]
+    [TestCase(Merging.MergeMode.Files)]
+    public async Task LineTheTeamChangedWhereTheTemplateChangesIt_IsAMarkedConflict_WithExitCodeTwo(string merge)
     {
         var solution = await Sandbox.SolutionAsync();
         var configuration = $"src/services/{Orders}/{Orders}.API/Setup/ApplicationConfiguration.cs";
@@ -134,17 +139,18 @@ internal sealed class TeamScenarios
         await solution.CommitAsync("the team's note on the bus line");
 
         // The outbox turns this very line into busNeedsDatabase: true.
-        var added = await solution.DotskitAsync("new", "-S", "Orders", "--Messaging", "outbox", "--yes", "--no-build");
+        var added = await solution.DotskitAsync("new", "-S", "Orders", "--Messaging", "outbox", "--yes", "--no-build", "--merge", merge);
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         added.Output.ShouldContain(configuration);
-        solution.Read(configuration).ShouldContain("<<<<<<< solution");
+        solution.Read(configuration).ShouldContain(ConflictMarker);
         solution.Read(configuration).ShouldContain(teams);
         solution.Read(configuration).ShouldContain("busNeedsDatabase: true);");
     }
 
-    [Test]
-    public async Task LineTheTeamChangedRightBesideWhatTheTemplateAdds_IsAMarkedConflict_NotAMerge()
+    [TestCase(Merging.MergeMode.Git)]
+    [TestCase(Merging.MergeMode.Files)]
+    public async Task LineTheTeamChangedRightBesideWhatTheTemplateAdds_IsAMarkedConflict_NotAMerge(string merge)
     {
         var solution = await Sandbox.SolutionAsync();
         const string env = "deploy/compose/.env.example";
@@ -154,11 +160,11 @@ internal sealed class TeamScenarios
 
         // The template's email block starts on the line right after the team's, with Hangfire on and ClickHouse
         // off as the sandbox has them: git merge-file takes changes that touch for one place.
-        var added = await solution.DotskitAsync("new", "-S", "Notifications", "--Notify", "email", "--yes", "--no-build");
+        var added = await solution.DotskitAsync("new", "-S", "Notifications", "--Notify", "email", "--yes", "--no-build", "--merge", merge);
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         added.Output.ShouldContain(env);
-        solution.Read(env).ShouldContain("<<<<<<< solution");
+        solution.Read(env).ShouldContain(ConflictMarker);
         solution.Read(env).ShouldContain(teams);
         solution.Read(env).ShouldContain("SMTP_HOST=mailhog");
     }
