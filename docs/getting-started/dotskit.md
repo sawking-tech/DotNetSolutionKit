@@ -82,7 +82,8 @@ In a solution there already, `dotskit new` and `dotskit upgrade` merge by git, t
   base when the branch's last commit has the base's files and the working branch has that commit in its history;
   otherwise, as the first time or on another branch, the base is committed there and merged into the working
   branch with `git merge -s ours`: the solution's files stay as they are, and git knows the base from then on.
-  `git merge --abort` leaves this commit, it changes no file;
+  `git merge --abort` leaves this commit, it changes no file. When a step of the command fails, the command takes
+  back the merge, this commit and the move of the branch itself: git is as it was before the run;
 - the command commits the template's new output there and runs `git merge --no-ff --no-commit dotskit/template`.
   git takes the template's changes and the team's, follows the files the template moved, and marks the lines
   both changed for the IDE or `git mergetool`. The merge stays uncommitted: look at it, commit it, or undo it

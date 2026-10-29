@@ -18,6 +18,25 @@ internal interface IGitMerge
     Task AbortAsync(string root, CancellationToken ct);
 }
 
+internal static class GitMergeExtensions
+{
+    /// <summary>
+    /// Undoes the merge after <paramref name="cause"/>; when the undo fails too, the error says both, the cause
+    /// first, so the reader learns what failed before what is left to put back.
+    /// </summary>
+    public static async Task AbortKeepingTheCauseAsync(this IGitMerge git, string root, Exception cause)
+    {
+        try
+        {
+            await git.AbortAsync(root, CancellationToken.None);
+        }
+        catch (InvalidOperationException undo)
+        {
+            throw new InvalidOperationException($"{cause.Message} {undo.Message}", cause);
+        }
+    }
+}
+
 /// <summary>A tree the template generated and the version it is of.</summary>
 internal sealed record TemplateCommit(string Tree, string Version);
 
@@ -49,10 +68,26 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     /// <summary>--force: a line both sides changed takes the template's.</summary>
     private static readonly string[] TheirsOption = ["-X", "theirs"];
 
+    /// <summary>The working branch's commit and the branch's tip before this run, put back by <see cref="AbortAsync"/>.</summary>
+    private Before? _before;
+
     public async Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
     {
         await RefuseAMergeInProgressAsync(root, ct);
-        var tip = await TipAsync(root, ct);
+        _before = new((await runner.RunCheckedAsync("git", ["rev-parse", "HEAD"], root, ct)).Trim(), await TipAsync(root, ct));
+        try
+        {
+            return await MergeOverAsync(root, _before.Tip, @base, next, preferTemplate, ct);
+        }
+        catch (Exception failure)
+        {
+            await this.AbortKeepingTheCauseAsync(root, failure);
+            throw;
+        }
+    }
+
+    private async Task<IReadOnlyList<string>> MergeOverAsync(string root, string? tip, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
+    {
         var baseCommit = await KnownBaseAsync(root, tip, @base, ct);
         var nextCommit = await CommitAsync(root, next.Tree, baseCommit, $"dotskit: the template {next.Version}", ct);
         // Moved only from the tip read above: a commit another run put there in between is not lost (empty: no branch yet).
@@ -62,7 +97,7 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         var conflicts = await PathsAsync(root, ["diff", "--name-only", "-z", "--diff-filter=U"], null, ct);
         if (merge.Code != 0 && conflicts.Count == 0)
         {
-            throw new InvalidOperationException($"git could not merge {Branch}: {FirstLine(merge)} Nothing is merged; run git merge --abort if git started one.");
+            throw new InvalidOperationException($"git could not merge {Branch}: {FirstLine(merge)} Nothing is merged: the commit and the branch of this run are put back.");
         }
 
         return conflicts;
@@ -71,7 +106,30 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) =>
         runner.RunCheckedAsync("git", ["add", "--", .. paths], root, ct);
 
-    public Task AbortAsync(string root, CancellationToken ct) => runner.RunAsync("git", ["merge", "--abort"], root, ct);
+    /// <summary>
+    /// The merge, then the commit that adopted the base and the move of the branch: the working branch and
+    /// <see cref="Branch"/> are as they were before the run. The adopting commit kept the solution's tree, so a soft
+    /// reset changes no file. What git refuses to put back is named with the commands that do it by hand.
+    /// </summary>
+    public async Task AbortAsync(string root, CancellationToken ct)
+    {
+        await runner.RunAsync("git", ["merge", "--abort"], root, ct);
+        if (_before is not { } before)
+        {
+            return;
+        }
+
+        string[] branch = before.Tip is null ? ["update-ref", "-d", BranchRef] : ["update-ref", BranchRef, before.Tip];
+        var reset = await runner.RunAsync("git", ["reset", "-q", "--soft", before.Head], root, ct);
+        var moved = await runner.RunAsync("git", branch, root, ct);
+        if (reset.Code != 0 || moved.Code != 0)
+        {
+            throw new InvalidOperationException(
+                $"git could not put back the commit and the branch of this run ({FirstLine(reset.Code != 0 ? reset : moved)}): run git merge --abort, git reset --soft {before.Head} and git {string.Join(' ', branch)}.");
+        }
+    }
+
+    private sealed record Before(string Head, string? Tip);
 
     /// <summary>
     /// The options that give this merge <see cref="StyleMergeDriver"/>: an attributes file with the user's global
