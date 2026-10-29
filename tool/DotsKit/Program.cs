@@ -38,6 +38,8 @@ try
 {
     var options = Options.Parse(args[0], args[1..]);
     var folder = Folders.RealPath(Directory.GetCurrentDirectory());
+    using var solutionLock = SolutionLock.TryTake(SolutionRoot.Find(folder) ?? folder)
+        ?? throw new InvalidOperationException("Another dotskit is running in this solution: wait for it to finish, then run the command again.");
     var code = args[0] switch
     {
         "new" => await new NewCommand(planner, execution, git, ToolVersion.Current, TemplateSource.SourcesFolder is not null).RunAsync(options, folder, cts.Token),
