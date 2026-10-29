@@ -49,6 +49,18 @@ internal sealed class GitModeTests
         outsideGit.ShouldBeEmpty();
     }
 
+    [Test]
+    public async Task TheFolderOfASolution_InItsRepository_IsNamed_AndTheRootIsNone()
+    {
+        var runner = new ProcessRunner();
+        var root = Folders.NewTemp("prefix");
+        Directory.CreateDirectory(Path.Combine(root, "backend"));
+        await runner.RunCheckedAsync("git", ["init", "-q"], root, CancellationToken.None);
+
+        (await new Git(runner).PrefixAsync(Path.Combine(root, "backend"), CancellationToken.None)).ShouldBe("backend/");
+        (await new Git(runner).PrefixAsync(root, CancellationToken.None)).ShouldBeEmpty();
+    }
+
     /// <summary>A merge by git that merges nothing and names the files of the next output it left off the branch.</summary>
     private sealed class LeavingOut(params string[] leftOut) : IGitMerge
     {

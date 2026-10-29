@@ -13,7 +13,7 @@ namespace DotsKit.Commands;
 /// </summary>
 /// <param name="planner">Builds the plan: the trees of the template, their merge with the solution and the report.</param>
 /// <param name="execution">Shows the plan, asks, writes it and builds.</param>
-/// <param name="git">Tells whether the solution's working tree is clean before anything is written.</param>
+/// <param name="git">Tells whether the solution's working tree is clean, and whether it is at the root of its repository, before anything is written.</param>
 /// <param name="terminal">Says where the solution goes from and to, or that it is there already.</param>
 /// <param name="toolVersion">The version of the tool, where an upgrade goes when --to names no release.</param>
 /// <param name="onSources">The tool runs against the template's sources: it upgrades any release to them.</param>
@@ -46,15 +46,7 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
             throw new InvalidOperationException(whyNotTo);
         }
 
-        if (!options.AllowDirty && !await git.IsCleanAsync(root, ct))
-        {
-            throw new InvalidOperationException("The git working tree has uncommitted changes: commit or stash them, so what dotskit writes can be seen and undone (--allow-dirty to go on).");
-        }
-
-        if (options.AllowDirty && options.ByGit)
-        {
-            throw new ArgumentException("--allow-dirty needs --merge files: a git merge runs on a clean tree.");
-        }
+        await GitPreconditions.CheckAsync(git, root, options, ct);
 
         terminal.Info($"Upgrading the solution from the template {current.Template} to {target}.");
         terminal.Info(UpgradeGuide.Of(current.Template, target));

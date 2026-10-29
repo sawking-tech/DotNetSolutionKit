@@ -15,6 +15,9 @@ internal sealed class UpgradeCommandTests
     private sealed class Fakes
     {
         public bool Clean { get; init; } = true;
+
+        public string Prefix { get; init; } = "";
+
         public Manifest? Next { get; private set; }
         public List<string> Lines { get; } = [];
 
@@ -39,6 +42,8 @@ internal sealed class UpgradeCommandTests
         private sealed class Git(Fakes fakes) : IGit
         {
             public Task<bool> IsCleanAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Clean);
+
+            public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
         }
 
         private sealed class Builder : IBuilder
@@ -134,5 +139,18 @@ internal sealed class UpgradeCommandTests
 
         (await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(Solution("2.7.0")))).Message.ShouldContain("--allow-dirty");
         fakes.Next.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ASolutionInAFolderOfItsRepository_IsRefusedTheMergeByGit_AndTakesTheMergeByFiles()
+    {
+        var refused = new Fakes { Prefix = "backend/" };
+        var byFiles = new Fakes { Prefix = "backend/" };
+
+        (await Should.ThrowAsync<InvalidOperationException>(() => refused.RunAsync(Solution("2.7.0")))).Message.ShouldContain("in backend of its git repository");
+        await byFiles.Command().RunAsync(Options.Parse(["--yes", "--merge", "files"]), Solution("2.7.0"), CancellationToken.None);
+
+        refused.Next.ShouldBeNull();
+        byFiles.Next.ShouldNotBeNull();
     }
 }
