@@ -15,7 +15,7 @@ internal interface ITagArchive
 
 internal sealed class TagArchive(HttpClient http) : ITagArchive
 {
-    private const string ArchiveUrl = "https://github.com/sawking-tech/DotNetSolutionKit/archive/refs/tags/v{0}.tar.gz";
+    private const string ArchiveUrl = Repository.Url + "/archive/refs/tags/v{0}.tar.gz";
 
     /// <summary>Where the template lives in the repository, in every tag from 1.0.0.</summary>
     private const string TemplateFolder = "template";

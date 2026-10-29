@@ -100,6 +100,7 @@ internal sealed class UpgradeCommandTests
         (await fakes.RunAsync(Solution("2.7.0"))).ShouldBe(ExitCode.Done);
 
         fakes.Next!.Template.ShouldBe(ToolVersion);
+        fakes.Lines.ShouldContain(UpgradeGuide.Of("2.7.0", ToolVersion));
     }
 
     [Test]
