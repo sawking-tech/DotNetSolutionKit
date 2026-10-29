@@ -155,7 +155,7 @@ projects. The check installs the template of that version from nuget.org.
 | empty | writes nothing, and names `dotskit new -N <Company> -P <Product> -S <Service>` |
 | no `src/services/*.All.sln` | writes nothing: not a solution of DotNetSolutionKit |
 | a solution of 2.7 or later, no manifest | reads it, checks it, shows the manifest and the report, writes it after a yes |
-| a solution before 2.7, from 1.0.0, which does not say its version | writes nothing, and asks for `--template-version`; the check then shows how well that version reproduces the solution, generated from nuget.org or, before 2.6.1, from its tag on GitHub |
+| a solution before 2.7, from 1.0.0, which does not say its version | with `Common`, checks it against the last patch of each minor before 2.7, side by side, from the tags of the repository, shows the share of the template's files each reproduces, writes nothing, and names the closest: `dotskit init --template-version <it>`; without `Common`, asks for the version; with the version given, the check shows how well it reproduces the solution, generated from nuget.org or, before 2.6.1, from its tag on GitHub |
 | generated from the template's sources (version `source`) | writes nothing, and asks for the release it came from with `--template-version` |
 | newer than the tool | writes nothing, and names `dotnet tool update -g SawKing.DotsKit.Tool` |
 | of an earlier major version than the tool, other than the last release of the previous one | writes nothing, and names the tool of the solution's major |
