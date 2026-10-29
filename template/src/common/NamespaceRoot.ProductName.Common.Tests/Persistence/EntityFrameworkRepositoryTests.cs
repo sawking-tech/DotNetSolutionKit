@@ -1,4 +1,4 @@
-﻿using NamespaceRoot.ProductName.Common.Exceptions;
+using NamespaceRoot.ProductName.Common.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Domain.Specifications;
 using NamespaceRoot.ProductName.Common.Domain.Querying;

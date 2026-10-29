@@ -3,7 +3,7 @@ using NamespaceRoot.ProductName.Common.Domain.Events;
 namespace NamespaceRoot.ProductName.Common.Application.Events;
 
 /// <summary>
-/// Orchestrates the execution of domain event handlers across different phases 
+/// Orchestrates the execution of domain event handlers across different phases
 /// of the transaction lifecycle (Pre-Save, Post-Commit, Rollback).
 /// </summary>
 public interface IDomainEventDispatcher

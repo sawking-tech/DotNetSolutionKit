@@ -1,4 +1,4 @@
-﻿namespace NamespaceRoot.ProductName.Common.Exceptions;
+namespace NamespaceRoot.ProductName.Common.Exceptions;
 
 /// <summary>
 /// Thrown when a unique constraint violation occurs, e.g., duplicate entity.

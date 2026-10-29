@@ -33,7 +33,7 @@ public class DataSeeder
         CancellationToken cancellationToken)
     {
         _logger.LogDebug("Running seeder: {SeederName}", seederName);
-        
+
         try
         {
             await seeder.SeedAsync(cancellationToken);

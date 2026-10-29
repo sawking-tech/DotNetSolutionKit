@@ -1,4 +1,4 @@
-﻿using NamespaceRoot.ProductName.Common.Application.Events;
+using NamespaceRoot.ProductName.Common.Application.Events;
 using NamespaceRoot.ProductName.Common.Application.Events.Handlers;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Domain;
