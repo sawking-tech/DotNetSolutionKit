@@ -11,6 +11,7 @@
         "An upgrade step takes 51 s instead of 114 s.",
         "Two dotskit commands in one solution do not run at once: the second says so and changes nothing.",
         "A project the team took out of All.sln stays out: an upgrade adds only the projects the template added.",
+        "An upgrade by git that fails leaves no commit and no branch of its own behind.",
         "The template's files are UTF-8 with LF, a line end at the end and no spaces at the ends of lines, a byte order mark only in a solution file.",
         "One code style, owned by the formatters (ADR-007): CI fails a pull request that breaks the bytes of any file or the C# style of the tool; the C# of the template follows."
       ],
@@ -24,6 +25,7 @@
           "Шаг обновления занимает 51 с вместо 114 с.",
           "Две команды dotskit в одном решении не идут одновременно: вторая говорит об этом и ничего не меняет.",
           "Проект, который команда убрала из All.sln, не возвращается: обновление добавляет только проекты, которые добавил шаблон.",
+          "Обновление через git, которое упало, не оставляет своего коммита и своей ветки.",
           "Файлы шаблона в UTF-8 с LF, переводом строки в конце и без пробелов в конце строк, BOM только у файла решения.",
           "Единый стиль кода, за который отвечают форматтеры (ADR-007): CI роняет PR, который нарушает байты любого файла или стиль C# инструмента; C# шаблона - следом."
         ]
