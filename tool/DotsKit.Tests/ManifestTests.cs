@@ -68,8 +68,25 @@ internal sealed class ManifestTests
     [TestCase("null")]
     [TestCase("""{ "template": "2.8.0", "solution": [], "services": [] }""")]
     [TestCase("""{ "template": "2.8.0", "solution": [], "services": [["--Storage", "true"]] }""")]
+    [TestCase("""{ "template": "2.7.0", "solution": [], "services": [["-S", "Orders"]], "upgrade": { "to": "next", "done": [] } }""")]
+    [TestCase("""{ "template": "2.7.0", "solution": [], "services": [["-S", "Orders"]], "upgrade": { "to": "2.9.0", "done": null } }""")]
+    [TestCase("""{ "template": "2.7.0", "solution": [], "services": [["-S", "Orders"]], "upgrade": { "to": "2.9.0", "done": ["shared", "shared"] } }""")]
+    [TestCase("""{ "template": "2.7.0", "solution": [], "services": [["-S", "Orders"]], "upgrade": { "to": "2.9.0", "done": ["Billing"], "parts": ["shared", "Orders"] } }""")]
+    [TestCase("""{ "template": "2.7.0", "solution": [], "services": [["-S", "Orders"]], "upgrade": { "to": "2.9.0", "done": [], "parts": ["shared", "shared"] } }""")]
+    [TestCase("""{ "template": "1.0.0-\\..\\..\\evil\\repo", "solution": [], "services": [["-S", "Orders"]] }""")]
+    [TestCase("""{ "template": "2.7.0", "solution": [], "services": [["-S", "Orders"]], "upgrade": { "to": "1.0.0-/../../evil/repo", "done": [] } }""")]
+    [TestCase("""{ "template": "2.7.0 ", "solution": [], "services": [["-S", "Orders"]] }""")]
     public void Should_Refuse_When_TheManifestCannotRebuildTheSolution(string text) =>
         Should.Throw<InvalidOperationException>(() => Manifest.Parse(text)).Message.ShouldContain("put it back from git");
+
+    [TestCase("--NamespaceRoot", "Acme; } public class X { } namespace Y")]
+    [TestCase("-S", "../Orders")]
+    [TestCase("-P", "Shop/x")]
+    [TestCase("--HttpPort", "5000;x")]
+    [TestCase("--Database", "postgres\"")]
+    public void Should_Refuse_When_AValueOfTheManifestIsNoValueOfItsParameter(string name, string value) =>
+        Should.Throw<ArgumentException>(() => Manifest.Parse($$"""{ "template": "2.7.0", "solution": [], "services": [["-S", "Orders", "{{name}}", {{System.Text.Json.JsonSerializer.Serialize(value)}}]] }"""))
+            .Message.ShouldContain(value);
 
     [Test]
     public void Should_ReadBack_What_ItWrote()

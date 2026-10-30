@@ -63,14 +63,14 @@ internal static partial class CentralVersions
         var has = PackageVersions.Read(central.Text).GetValueOrDefault(repair.Package);
         if (has is null)
         {
-            File.WriteAllBytes(repair.Central, (central with { Text = Insert(central.Text, repair.Package, repair.Version) }).ToBytes());
+            Folders.WriteWhole(repair.Central, (central with { Text = Insert(central.Text, repair.Package, repair.Version) }).ToBytes());
         }
 
         var overrides = has is not null && has != repair.Version;
         var moved = Versioned().Replace(project.Text, m => !string.Equals(m.Groups["name"].Value, repair.Package, StringComparison.OrdinalIgnoreCase)
             ? m.Value
             : overrides ? $"{m.Groups["head"].Value} VersionOverride=\"{m.Groups["version"].Value}\"{m.Groups["tail"].Value}" : m.Groups["head"].Value + m.Groups["tail"].Value);
-        File.WriteAllBytes(repair.Project, (project with { Text = moved }).ToBytes());
+        Folders.WriteWhole(repair.Project, (project with { Text = moved }).ToBytes());
         return true;
     }
 

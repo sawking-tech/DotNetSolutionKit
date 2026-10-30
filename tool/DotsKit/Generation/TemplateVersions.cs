@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace DotsKit.Generation;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace DotsKit.Generation;
 /// every minor of its major and the last minor of the one before (CONTRIBUTING.md, Releases), so each entry
 /// names the major that removes its older branch.
 /// </summary>
-internal static class TemplateVersions
+internal static partial class TemplateVersions
 {
     /// <summary>
     /// <c>--Solution</c> since 2.8; before it the solution was <c>-M false</c>, which 3.0 removes. The <c>-M</c>
@@ -97,10 +99,12 @@ internal static class TemplateVersions
     /// </summary>
     public static string? WhyNotTarget(string from, string to, string toolVersion, bool onSources)
     {
-        if (to == TemplateSource.SourcesVersion || !Version.TryParse(to.Split('-')[0], out var target) || target.Build < 0)
+        if (to == TemplateSource.SourcesVersion || !IsVersion(to))
         {
             return $"--to {to} is not a release of the template: name one, --to 2.x.y.";
         }
+
+        var target = Version.Parse(to.Split('-')[0]);
 
         if (from != TemplateSource.SourcesVersion && !IsNewer(to, from))
         {
@@ -155,9 +159,16 @@ internal static class TemplateVersions
     public static bool IsMajorStep(string? from, string to) =>
         from is not null && Version.TryParse(from.Split('-')[0], out var a) && Version.TryParse(to.Split('-')[0], out var b) && b.Major > a.Major;
 
-    /// <summary>A version a manifest may name: a release, a pre-release (2.8.0-rc) or the template's sources.</summary>
+    /// <summary>
+    /// A version a manifest, a solution or a command may name: a release, a pre-release (2.8.0-rc.1) or the template's
+    /// sources. A version goes into the address of a tag and a package, so nothing else passes: no path, no range.
+    /// </summary>
     public static bool IsVersion(string version) =>
-        version == TemplateSource.SourcesVersion || Version.TryParse(version.Split('-')[0], out _);
+        version == TemplateSource.SourcesVersion || ReleaseVersion().IsMatch(version);
+
+    /// <summary>Three numbers and a label of letters and digits in parts by dots, as the tags and NuGet name a release.</summary>
+    [GeneratedRegex(@"^\d{1,9}\.\d{1,9}\.\d{1,9}(-[0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?\z")]
+    private static partial Regex ReleaseVersion();
 
     /// <summary>A solution says its version, DotNetSolutionKitVersion of Directory.Build.props, since 2.7.0.</summary>
     private static readonly Version Declared = new(2, 7, 0);

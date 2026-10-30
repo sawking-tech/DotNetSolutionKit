@@ -15,7 +15,7 @@ internal interface IRepairWriter
 
 internal sealed class RepairWriter : IRepairWriter
 {
-    public async Task<IReadOnlyList<Repair>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct)
+    public Task<IReadOnlyList<Repair>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct)
     {
         var applied = new List<Repair>();
         foreach (var repair in repairs)
@@ -23,12 +23,12 @@ internal sealed class RepairWriter : IRepairWriter
             var did = repair switch
             {
                 // A project the team removed, on either end, gets no reference.
-                AddReference r => File.Exists(r.Referenced) && await EditAsync(r.Project, text => ProjectReferences.Add(text, r.Project, r.Referenced), ct),
-                RemoveReference r => await EditAsync(r.Project, text => ProjectReferences.Remove(text, r.Project, r.Referenced), ct),
+                AddReference r => File.Exists(r.Referenced) && Edit(r.Project, text => ProjectReferences.Add(text, r.Project, r.Referenced)),
+                RemoveReference r => Edit(r.Project, text => ProjectReferences.Remove(text, r.Project, r.Referenced)),
                 CentralizeVersion c => PackageUpdates.CentralVersions.Apply(c),
-                AddUsing u => await EditAsync(u.File, text => UsingLines.Add(text, u.Namespace), ct),
-                ReplaceUsing u => await EditAsync(u.File, text => UsingLines.Replace(text, u.Namespace, u.With), ct),
-                ReplaceQualified q => await EditAsync(q.File, text => QualifiedNames.Replace(text, q.Namespace, q.Type, q.With), ct),
+                AddUsing u => Edit(u.File, text => UsingLines.Add(text, u.Namespace)),
+                ReplaceUsing u => Edit(u.File, text => UsingLines.Replace(text, u.Namespace, u.With)),
+                ReplaceQualified q => Edit(q.File, text => QualifiedNames.Replace(text, q.Namespace, q.Type, q.With)),
                 _ => false,
             };
             if (did)
@@ -36,10 +36,10 @@ internal sealed class RepairWriter : IRepairWriter
                 applied.Add(repair);
             }
         }
-        return applied;
+        return Task.FromResult<IReadOnlyList<Repair>>(applied);
     }
 
-    private static async Task<bool> EditAsync(string file, Func<string, string> edit, CancellationToken ct)
+    private static bool Edit(string file, Func<string, string> edit)
     {
         var text = FileText.Read(Path.GetDirectoryName(file), Path.GetFileName(file));
         if (text is null || text.IsBinary)
@@ -53,7 +53,7 @@ internal sealed class RepairWriter : IRepairWriter
             return false;
         }
 
-        await File.WriteAllBytesAsync(file, (text with { Text = edited }).ToBytes(), ct);
+        Folders.WriteWhole(file, (text with { Text = edited }).ToBytes());
         return true;
     }
 }

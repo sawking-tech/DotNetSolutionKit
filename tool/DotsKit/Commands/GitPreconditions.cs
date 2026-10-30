@@ -4,7 +4,7 @@ namespace DotsKit.Commands;
 
 /// <summary>
 /// What new and upgrade need of git before they plan a write into a solution: a clean working tree, so what they write
-/// can be seen and undone, and, for the merge by git, the solution at the root of its repository.
+/// can be seen and undone, no file git hides the changes of, and, for the merge by git, the solution at the root of its repository.
 /// </summary>
 internal static class GitPreconditions
 {
@@ -17,6 +17,12 @@ internal static class GitPreconditions
         {
             throw new InvalidOperationException(
                 $"The solution is in {prefix.TrimEnd('/')} of its git repository, and the merge by git works at the root of one: run the command with --merge files.");
+        }
+
+        if (await git.HiddenChangesAsync(root, ct) is [_, ..] hidden)
+        {
+            throw new InvalidOperationException($"git hides the local changes of {string.Join(", ", hidden)} (assume-unchanged), and dotskit could not keep them: "
+                + "git update-index --no-assume-unchanged on them, commit or stash what they hold, then run again.");
         }
 
         if (!options.AllowDirty && !await git.IsCleanAsync(root, ct))

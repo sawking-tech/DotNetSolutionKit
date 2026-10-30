@@ -25,6 +25,20 @@ internal static class Folders
         return current;
     }
 
+    /// <summary>
+    /// Writes a file of the solution whole or not at all: the content goes beside it first and then takes its place, so
+    /// a run stopped in the middle leaves the file as it was, never cut short.
+    /// </summary>
+    public static void WriteWhole(string path, byte[] content)
+    {
+        var beside = path + WriteSuffix;
+        File.WriteAllBytes(beside, content);
+        File.Move(beside, path, overwrite: true);
+    }
+
+    /// <summary>The suffix of a file being written beside the one it replaces; git status shows one a kill left.</summary>
+    private const string WriteSuffix = ".dotskit-new";
+
     /// <summary>A new empty folder of this run; short, since a generated solution has deep paths.</summary>
     public static string NewTemp(string purpose)
     {
