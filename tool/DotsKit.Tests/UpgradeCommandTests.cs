@@ -21,6 +21,11 @@ internal sealed class UpgradeCommandTests
 
         public string Prefix { get; init; } = "";
 
+        public IReadOnlyList<string> Hidden { get; init; } = [];
+
+        /// <summary>What happens to the tree while the plan is built and waits for a yes.</summary>
+        public Action? WhilePlanning { get; init; }
+
         public PartStep? Step { get; set; }
 
         public Manifest? Written { get; set; }
@@ -38,6 +43,7 @@ internal sealed class UpgradeCommandTests
             {
                 fakes.Next = next;
                 fakes.Step = step;
+                fakes.WhilePlanning?.Invoke();
                 return Task.FromResult(new Plan(root, next, [], new MembershipChange([], [])));
             }
         }
@@ -57,6 +63,8 @@ internal sealed class UpgradeCommandTests
 
             public Task<string?> CleanHeadAsync(string root, CancellationToken ct) =>
                 Task.FromResult(fakes.Heads.Count > 0 ? fakes.Heads.Dequeue() : fakes.Clean ? "head" : null);
+
+            public Task<IReadOnlyList<string>> HiddenChangesAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Hidden);
 
             public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
         }
@@ -188,6 +196,7 @@ internal sealed class UpgradeCommandTests
         var second = new Fakes();
         await second.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
 
+        first.Lines.ShouldContain(l => l.EndsWith(": shared, 1 of 3.", StringComparison.Ordinal));
         first.Step!.Part.ShouldBe(UpgradeParts.Shared);
         first.Written!.Template.ShouldBe("2.7.0");
         first.Written.Upgrade!.Done.ShouldBe([UpgradeParts.Shared]);
@@ -197,6 +206,49 @@ internal sealed class UpgradeCommandTests
         second.Step.Done.ShouldBe([UpgradeParts.Shared, UpgradeParts.Capabilities]);
         second.Written!.Template.ShouldBe(ToolVersion);
         second.Written.Upgrade.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task AnUpgradeBegunByANewerTool_IsRefusedByAnOlderOne_BeforeAnythingIsPlanned()
+    {
+        var root = Solution("2.7.0");
+        var manifest = Manifest.Load(root)! with { Upgrade = new UpgradeInProgress { To = "2.9.0", Done = [UpgradeParts.Shared] } };
+        File.WriteAllText(Path.Combine(root, Layout.ManifestPath), manifest.Serialize());
+        var fakes = new Fakes();
+
+        var error = await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None));
+
+        error.Message.ShouldContain($"newer than dotskit {ToolVersion}");
+        fakes.Step.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task UnderAllowDirty_AFileSavedAfterTheStart_IsNotWrittenOver_AndAnUntouchedTreeIs()
+    {
+        var root = Solution("2.7.0");
+        var program = Path.Combine(Layout.ServicesOf(root), "Acme.Shop.Orders", "Program.cs");
+        var saved = new Fakes { WhilePlanning = () => File.WriteAllText(program, "// saved in the IDE while the plan waited") };
+        var untouched = new Fakes();
+        var dirty = Options.Parse(["--yes", "--allow-dirty", "--merge", "files", "--all-at-once"]);
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => saved.Command().RunAsync(dirty, root, CancellationToken.None));
+        await untouched.Command().RunAsync(dirty, root, CancellationToken.None);
+
+        refused.Message.ShouldContain("a file of it or its commit changed after the command started");
+        saved.Written.ShouldBeNull();
+        untouched.Written.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task AFileGitHidesTheChangesOf_IsNamed_BeforeAnythingIsPlanned()
+    {
+        var fakes = new Fakes { Hidden = ["src/services/Acme.Shop.Orders/appsettings.Development.json"] };
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(Solution("2.7.0")));
+
+        refused.Message.ShouldContain("appsettings.Development.json (assume-unchanged)");
+        refused.Message.ShouldContain("git update-index --no-assume-unchanged");
+        fakes.Next.ShouldBeNull();
     }
 
     [Test]

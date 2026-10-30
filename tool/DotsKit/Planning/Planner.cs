@@ -43,6 +43,8 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
             var moves = types!;
             var before = baseDir;
             parts = step.Parts ?? PartsOf(root, nextDir, moves);
+            // The first run decides the parts here: its step reads a path's part from them, as every later run does.
+            step = step with { Parts = parts };
             // A part follows only the moves between the parts merged so far: a type that goes to a part not yet merged keeps its using.
             types = moves.Within(step.InDoneOrThis);
             (baseDir, nextDir) = (Folders.Overlay(baseDir, nextDir, step.InDone), Folders.Overlay(baseDir, nextDir, step.InDoneOrThis));

@@ -24,18 +24,33 @@ internal sealed record FileText(string Text, bool Bom, byte[]? Raw = null)
         }
 
         var bytes = File.ReadAllBytes(full);
-        if (bytes.AsSpan().Contains((byte)0))
-        {
-            return new(string.Empty, false, bytes);
-        }
-
         var bom = bytes.AsSpan().StartsWith(Utf8Mark);
-        return new(Encoding.UTF8.GetString(bom ? bytes[Utf8Mark.Length..] : bytes), bom);
+        return bytes.AsSpan().Contains((byte)0) || Decoded(bom ? bytes[Utf8Mark.Length..] : bytes) is not { } text
+            ? new(string.Empty, false, bytes)
+            : new(text, bom);
     }
+
+    /// <summary>
+    /// The text of UTF-8 bytes; null for bytes of another encoding (a file saved in Windows-1251), which are carried
+    /// as they are: decoded as UTF-8 and written back, each of their letters would become a replacement character.
+    /// </summary>
+    private static string? Decoded(byte[] bytes)
+    {
+        try
+        {
+            return StrictUtf8.GetString(bytes);
+        }
+        catch (DecoderFallbackException)
+        {
+            return null;
+        }
+    }
+
+    private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
     public byte[] ToBytes() => Raw ?? [.. Bom ? Utf8Mark : [], .. Encoding.UTF8.GetBytes(Text)];
 
-    /// <summary>A file with a NUL byte in it is not text to merge.</summary>
+    /// <summary>A file with a NUL byte in it, or not in UTF-8, is not text to merge or repair.</summary>
     public bool IsBinary => Raw is not null;
 
     /// <summary>Equal as text, whatever the line endings: a checkout with autocrlf is not a change; a binary file by its bytes.</summary>

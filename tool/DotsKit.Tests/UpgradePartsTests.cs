@@ -116,6 +116,25 @@ internal sealed class UpgradePartsTests
         TemplateVersions.WhyNotTarget("2.1.0", "2.3", "2.9.0", onSources: false)!.ShouldContain("not a release");
     }
 
+    [TestCase("2.9.0-rc.1", true)]
+    [TestCase("2.9.0", true)]
+    [TestCase("source", true)]
+    [TestCase("2.9", false)]
+    [TestCase("2.9.0-", false)]
+    [TestCase("2.9.0-rc/../x", false)]
+    [TestCase("2.9.0\n", false)]
+    [TestCase("[2.9.0,)", false)]
+    [TestCase("2.9.*", false)]
+    public void AVersion_IsThreeNumbersAndALabel_OrTheSources(string version, bool valid)
+    {
+        TemplateVersions.IsVersion(version).ShouldBe(valid);
+        if (!valid)
+        {
+            TemplateVersions.WhyNotDescribed(version, "2.9.0", onSources: false).ShouldNotBeNull();
+            TemplateVersions.WhyNotTarget("2.7.0", version, "2.9.0", onSources: false).ShouldNotBeNull();
+        }
+    }
+
     [Test]
     public void TheReleaseToGoTo_IsAnOptionOfUpgradeOnly()
     {
