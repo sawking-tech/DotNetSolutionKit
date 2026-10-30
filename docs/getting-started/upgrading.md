@@ -11,7 +11,7 @@ The template is versioned with git tags, by semantic versioning.
 From 2.9 `dotskit upgrade` brings a solution of a 2.x release to the current one, and git keeps the team's
 changes where they merge with the template's; the rest are conflicts to resolve. First `dotskit init
 --template-version` with the release the solution was made by (`dotskit init` alone names the closest one), then
-`dotskit upgrade`, or a release at a time with `--to` ([dotskit](dotskit.md#upgrading-a-solution)). A solution
+`dotskit upgrade`, a part a run, or a release at a time with `--to` ([dotskit](dotskit.md#upgrading-a-solution)). A solution
 of v1 is brought to `v2.0.0` by hand first, [below](#a-solution-of-v1). The sections below are the same changes
 by hand.
 
@@ -227,6 +227,14 @@ To take the change, copy the settings of each service's and the gateway's `deplo
 The solution is generated with `--Solution`, and every further service without it. `-M false` of earlier
 versions still means the same and is hidden from `dotnet new --help`; it goes in 3.0. Nothing to change in a
 solution; in your scripts, `-M false` can become `--Solution`.
+
+## From v2.8 to v2.9
+
+Nothing in a solution changes by hand: v2.9 changes the upgrade itself. `dotskit upgrade` goes a part a run -
+the shared files, then each project of `Common`, the capabilities, then a service at a time - so the team
+resolves one part's conflicts before the next; `--all-at-once` keeps the one merge of v2.8. After each part the
+run repairs what the template's moves broke in the solution - project references, `using` lines, full names of
+moved types, central package versions - and builds ([dotskit](dotskit.md#upgrading-a-solution)).
 
 ## A solution of v1
 

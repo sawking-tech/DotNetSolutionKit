@@ -25,10 +25,15 @@ internal static class GitPreconditions
                 + "git update-index --no-assume-unchanged on them, commit or stash what they hold, then run again.");
         }
 
+        if (!await git.IsRepositoryAsync(root, ct))
+        {
+            throw new InvalidOperationException("The solution is not in a git repository, and dotskit writes only what git can show and undo: git init, add and commit it, then run again.");
+        }
+
         if (!options.AllowDirty && !await git.IsCleanAsync(root, ct))
         {
             throw new InvalidOperationException("The git working tree has uncommitted changes: commit or stash them, so what dotskit writes can be seen and undone"
-                + (options.Force ? "; --force needs them committed." : " (--allow-dirty to go on)."));
+                + (options.Force ? "; --force needs them committed." : " (--merge files --allow-dirty to go on)."));
         }
 
         if (options.AllowDirty && options.Force)

@@ -23,6 +23,13 @@ internal sealed record FileText(string Text, bool Bom, byte[]? Raw = null)
             return null;
         }
 
+        // A committed symbolic link is carried as a link, never read: reading would put what it points at - a file
+        // outside the solution - into a merged file, and a repair would write over the target.
+        if (new FileInfo(full).ResolveLinkTarget(returnFinalTarget: false) is { } link)
+        {
+            return new(string.Empty, false, Encoding.UTF8.GetBytes(link.FullName));
+        }
+
         var bytes = File.ReadAllBytes(full);
         var bom = bytes.AsSpan().StartsWith(Utf8Mark);
         return bytes.AsSpan().Contains((byte)0) || Decoded(bom ? bytes[Utf8Mark.Length..] : bytes) is not { } text
@@ -50,7 +57,7 @@ internal sealed record FileText(string Text, bool Bom, byte[]? Raw = null)
 
     public byte[] ToBytes() => Raw ?? [.. Bom ? Utf8Mark : [], .. Encoding.UTF8.GetBytes(Text)];
 
-    /// <summary>A file with a NUL byte in it, or not in UTF-8, is not text to merge or repair.</summary>
+    /// <summary>A file with a NUL byte in it, not in UTF-8, or a symbolic link is not text to merge or repair.</summary>
     public bool IsBinary => Raw is not null;
 
     /// <summary>Equal as text, whatever the line endings: a checkout with autocrlf is not a change; a binary file by its bytes.</summary>

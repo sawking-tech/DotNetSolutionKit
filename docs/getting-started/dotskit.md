@@ -80,7 +80,9 @@ What happens to a file:
 A file of the solution its git ignores, a local `appsettings.Secrets.json` among them, is never written, in either
 merge. A new file the template adds that the solution's git would ignore, as the secrets file of a new service, is
 written by both: the merge by git, which leaves it off the branch, writes it beside the merge, and `git merge --abort`
-by hand leaves it, as git does not know it.
+by hand leaves it, as git does not know it. A committed symbolic link is carried as a link and never read, like a
+binary file, and a path that leads outside the solution through a linked folder is refused before anything is
+written: what a link points at never gets into a merged file, and no file of the template is written through it.
 
 `All.sln` is changed by `dotnet sln`, project by project, and never merged as text: `dotnet sln add` gives
 a project a new GUID each time. Its projects are merged the way a file's lines are: a project the template added
@@ -128,7 +130,11 @@ What git then shows: `git log dotskit/template` - what each version of the templ
 version, and nothing else.
 
 `--merge files` merges by the tool itself, as in the table above, and writes the files with no branch and no
-merge commit. `--allow-dirty` takes `--merge files`: a git merge needs a clean tree.
+merge commit. `--allow-dirty` takes `--merge files`: a git merge needs a clean tree. The two merges differ in two
+places. A file one side removed and the other changed is `Kept` by the merge by files, with the reason in the
+plan, and a modify/delete conflict in the merge by git, for the team to decide. The files the template moved are
+paired by the tool in the merge by files - a pair git makes across two services is corrected - and by git itself
+in the merge by git.
 
 ### What dotskit runs in git
 
@@ -145,6 +151,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git config --path --get core.attributesFile` | the user's global attributes, kept under the merge driver's |
 | | `git ls-files --others --ignored --exclude-standard` | the files the solution's git ignores, never written |
 | | `git diff --name-only --diff-filter=U` | the files left in conflict |
+| | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed |
 | | `git diff --no-index -M` | the files the template moved, between two of its outputs outside the repository |
 | | `git merge-file -p`, again with `--theirs` under `--force` | a file merged by `--merge files` and by the merge driver, on copies of the three sides; the first run counts the conflicts `--force` decides |
 | | `git ls-remote --tags` | the releases of the template, for `init` on a solution that does not say its version |
@@ -153,6 +160,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | commits on the working branch, files unchanged | `git commit-tree -p HEAD -p <base>`, `git update-ref HEAD` | the base adopted, the first time or on another branch, with no commit hook of the team |
 | merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge |
 | stages | `git add` | the manifest, `All.sln` and the files the repair changed join the merge |
+| removes from the tree and the index | `git rm -f` | a file the team removed that the template only restyled - line ends, spaces, a byte order mark - stays removed instead of conflicting |
 | undoes a run that failed | `git reset --hard`, `git update-ref` (or `-d`); `git rev-parse --git-path index.lock` when git refuses | the working branch, its tracked files and the branch `dotskit/template` back where they were before the run |
 
 The tool never commits the merge, never pushes, and never checks out a branch: the merge is the team's to look
@@ -287,8 +295,8 @@ releases between, as the team decides: either way the upgrade goes a part at a t
 the whole distance. A release between is worth a stop where the team wants to build and test the solution on it:
 
 ```bash
-dotskit upgrade --to 2.7.0   # the parts of 2.7.0; build and test
-dotskit upgrade              # the parts of the tool's version
+dotskit upgrade --to 2.7.0   # a part of 2.7.0 a run, until the manifest says 2.7.0; build and test there
+dotskit upgrade              # then the parts of the tool's version, a run each
 ```
 
 An upgrade goes one part a run, so the team resolves the conflicts of one part before the next: first the
@@ -308,7 +316,7 @@ before the next; the last one moves the manifest to the release, and `dotskit ne
 last part leaves conflicts, the upgrade stays open: once they are resolved and committed, `dotskit upgrade`
 changes no file of the template, repairs the usings of the whole upgrade, builds and moves the manifest.
 `--all-at-once` merges every part in one run. The template's output for a version is generated once and kept
-in the temp folder (`dotskit/outputs`) for two days, so a part after the first takes seconds, not the generation.
+in the tool's folder under the user's local application data (`dotskit/outputs`) for two days, so a part after the first skips the generation.
 
 ```bash
 dotskit upgrade --to 2.7.0               # the shared part; resolve, commit
@@ -351,7 +359,7 @@ template changed - is the team's to decide, and its tests show it.
 | `--yes` | writes without asking, for CI |
 | `--force` | resolves a conflict with the template's lines; with `--merge files` the plan names each file it did that in; the team's lines stay in git history, so it needs a clean tree and refuses `--allow-dirty` |
 | `--no-build` | does not build the solution after writing |
-| `--allow-dirty` | runs on a working tree with uncommitted changes |
+| `--allow-dirty` | runs on a working tree with uncommitted changes; takes `--merge files` |
 | `--template-version 2.x.y` | `init`: the version the solution was made by, where it does not say it |
 | `--to 2.x.y` | `upgrade`: the release to bring the solution to, not newer than the tool |
 | `--all-at-once` | `upgrade`: every part in one merge, instead of the shared files first, then a service folder at a time |

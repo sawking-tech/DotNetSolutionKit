@@ -34,13 +34,16 @@ dotskit init
 # in a solution: bring it to the tool's version of the template
 dotskit upgrade
 
-# in a solution far behind: a release at a time
+# in a solution far behind: stop at a release between, a part a run
 dotskit upgrade --to 2.3.0
 ```
 
 Every command shows the files it will change and why, and asks before writing; `--yes` writes without asking.
-It writes all files or none, then builds the solution. A conflict is marked
-`<<<<<<< solution` / `>>>>>>> template` and the command exits with 2.
+An upgrade goes a part a run - the shared files first, then a service at a time - and each run merges by git,
+repairs the usings and references the new version asks for, builds the solution and leaves the merge for the
+team to commit. A conflict stays in the files for the IDE or `git mergetool`, and the command exits with 2;
+a run that fails is taken back by git. `--merge files` writes the files directly instead, all or none, with
+conflicts marked `<<<<<<< solution` / `>>>>>>> template`.
 
 What a solution was made from is kept in `.dotskit/manifest.json`: commit it with the solution.
 

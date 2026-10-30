@@ -94,10 +94,10 @@ internal sealed class PartRepairScenarios
         var codes = new List<ExitCode>();
         var outputs = new Outputs(NextProperty: "Previous");
 
-        for (var run = 0; run < 4; run++)
+        for (var run = 0; run < 3; run++)
         {
             codes.Add(await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes", "--merge", merge]), root, CancellationToken.None));
-            if (run < 3)
+            if (run < 2)
             {
                 await CommitAsync(root, $"part {run + 1}");
             }
@@ -108,9 +108,9 @@ internal sealed class PartRepairScenarios
         await CommitAsync(root, "the conflict resolved");
         var finished = await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes", "--merge", merge]), root, CancellationToken.None);
 
-        codes.ShouldBe([ExitCode.Done, ExitCode.Done, ExitCode.Done, ExitCode.Conflicts]);
+        codes.ShouldBe([ExitCode.Done, ExitCode.Done, ExitCode.Conflicts]);
         open.Template.ShouldBe(From);
-        open.Upgrade!.Done.Count.ShouldBe(4);
+        open.Upgrade!.Done.Count.ShouldBe(3);
         lines.ShouldContain(l => l.Contains("then dotskit upgrade repairs the usings, builds and finishes the upgrade", StringComparison.Ordinal));
         finished.ShouldBe(ExitCode.Done);
         Manifest.Load(root)!.Template.ShouldBe(To);
@@ -160,7 +160,7 @@ internal sealed class PartRepairScenarios
         }
 
         codes.ShouldAllBe(code => code == ExitCode.Done);
-        lines.ShouldContain(l => l.EndsWith(": shared, 1 of 5.", StringComparison.Ordinal), "the count takes the project the template adds");
+        lines.ShouldContain(l => l.EndsWith(": shared, 1 of 4.", StringComparison.Ordinal), "the count takes the project the template adds");
         arrived.ShouldBe([false, true, true, true, true]);
         repaired.ShouldBe([false, false, true, true, true]);
         Manifest.Load(root)!.Template.ShouldBe(To);
@@ -236,7 +236,7 @@ internal sealed class PartRepairScenarios
         var repair = new ReferenceRepair(new RepairWriter(), builder);
         var planner = new Planner(outputs ?? new Outputs(), new ThreeWayMerge(new GitMergeFile(Runner)), projects, new GitRenames(Runner), new GitIgnoredFiles(Runner), repair);
         var writer = new PlanWriter(projects, new GitTemplateMerge(Runner, Sandbox.Self), repair);
-        return new UpgradeCommand(planner, new PlanExecution(new PlanReport(terminal), writer, builder, repair, terminal, git), git, terminal, To, onSources: false);
+        return new UpgradeCommand(planner, new PlanExecution(new PlanReport(terminal), writer, builder, repair, terminal, git), git, new GitIgnoredFiles(Runner), terminal, To, onSources: false);
     }
 
     /// <summary>A solution of the template 2.7.0 in git: Common with its event, the service's file of the template and the team's own.</summary>

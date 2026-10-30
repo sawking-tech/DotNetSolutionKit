@@ -25,7 +25,8 @@ using var http = new HttpClient();
 var staging = new CachedStaging(new Staging(new TemplateSource(runner, new TagArchive(http)), projects), ToolVersion.Current, () => TemplateSource.SourcesFolder);
 var builder = new DotnetBuilder(runner);
 var repair = new ReferenceRepair(new RepairWriter(), builder);
-var planner = new Planner(staging, new ThreeWayMerge(new GitMergeFile(runner)), projects, new GitRenames(runner), new GitIgnoredFiles(runner), repair);
+var ignoredFiles = new GitIgnoredFiles(runner);
+var planner = new Planner(staging, new ThreeWayMerge(new GitMergeFile(runner)), projects, new GitRenames(runner), ignoredFiles, repair);
 var report = new PlanReport(terminal);
 var git = new Git(runner);
 var self = SelfCommand.Of(Environment.ProcessPath, typeof(StyleMergeDriver).Assembly.Location);
@@ -55,7 +56,7 @@ try
     var code = args[0] switch
     {
         "new" => await new NewCommand(planner, execution, git, ToolVersion.Current, TemplateSource.SourcesFolder is not null).RunAsync(options, folder, cts.Token),
-        "upgrade" => await new UpgradeCommand(planner, execution, git, terminal, ToolVersion.Current,
+        "upgrade" => await new UpgradeCommand(planner, execution, git, ignoredFiles, terminal, ToolVersion.Current,
             TemplateSource.SourcesFolder is not null).RunAsync(options, folder, cts.Token),
         "init" => await new InitCommand(staging, projects, new GitTemplateReleases(runner), terminal, ToolVersion.Current, TemplateSource.SourcesFolder is not null).RunAsync(options, folder, cts.Token),
         _ => throw new ArgumentException($"Unknown command {args[0]}.\n{Options.Usage}"),
