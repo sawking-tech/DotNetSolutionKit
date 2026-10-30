@@ -19,7 +19,13 @@ internal static partial class PackageVersions
     private static partial Regex Line();
 
     public static bool IsVersionsFile(string path) =>
-        path == Central || (path.StartsWith(PerFlag, StringComparison.Ordinal) && path.EndsWith(".props", StringComparison.Ordinal));
+        path == Central || path == RootCentral || (path.StartsWith(PerFlag, StringComparison.Ordinal) && path.EndsWith(".props", StringComparison.Ordinal));
+
+    /// <summary>
+    /// Central package management at the root of a solution, where MSBuild also looks and where the template kept it
+    /// before 2.0: a solution of 1.x declares its versions there, and they are the team's to keep.
+    /// </summary>
+    private const string RootCentral = "Directory.Packages.props";
 
     /// <summary>Every package of a text with its version.</summary>
     public static Dictionary<string, string> Read(string text) =>
@@ -82,7 +88,8 @@ internal static partial class PackageVersions
     /// <param name="before">The template's whole output before the upgrade, where a kept version is read.</param>
     /// <param name="solution">
     /// The solution's root: a project of the team's that references a package the template drops keeps the package's
-    /// version too, as the merge would otherwise take the line the team never touched out of the central file.
+    /// version too, as the merge would otherwise take the line the team never touched out of the central file; a
+    /// package of the team's own, which no output of the template declares, keeps its line the same way.
     /// </param>
     public static void KeepReferenced(string tree, string before, string solution)
     {
@@ -94,6 +101,13 @@ internal static partial class PackageVersions
 
         var declared = All(tree);
         var had = All(before);
+        // The solution's own packages: a team's PackageVersion line sits in a block the template rewrites, and a
+        // merge resolved to the template's side would take it along (NU1010). The template's own last version wins.
+        foreach (var (name, version) in All(solution))
+        {
+            had.TryAdd(name, version);
+        }
+
         var kept = ReferencedIn(tree).Concat(ReferencedIn(solution))
             .Where(name => !declared.ContainsKey(name) && had.ContainsKey(name))
             .Distinct(StringComparer.OrdinalIgnoreCase)

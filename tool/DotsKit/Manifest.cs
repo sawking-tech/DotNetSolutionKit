@@ -70,7 +70,12 @@ internal sealed record Manifest
         var problem = manifest switch
         {
             null => "is empty",
+            // required only asks the field to be there: a null passes it and would throw where the value is read.
+            { Services: null } => "has services set to null",
+            { Solution: null } => "has solution set to null",
+            { Template: null } => "has template set to null",
             { Services.Count: 0 } => "lists no service",
+            _ when manifest.Services.Any(s => s is null) => "has a service set to null",
             _ when !Generation.TemplateVersions.IsVersion(manifest.Template) => $"has no version of the template, but \"{manifest.Template}\"",
             _ when manifest.Services.Any(s => !TemplateArgs.Parse(s).HasService) => "has a service with no -S",
             _ when manifest.Packages is null => "has packages set to null",

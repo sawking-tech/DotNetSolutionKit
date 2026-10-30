@@ -76,6 +76,10 @@ internal sealed class ManifestTests
     [TestCase("""{ "template": "1.0.0-\\..\\..\\evil\\repo", "solution": [], "services": [["-S", "Orders"]] }""")]
     [TestCase("""{ "template": "2.7.0", "solution": [], "services": [["-S", "Orders"]], "upgrade": { "to": "1.0.0-/../../evil/repo", "done": [] } }""")]
     [TestCase("""{ "template": "2.7.0 ", "solution": [], "services": [["-S", "Orders"]] }""")]
+    [TestCase("""{ "template": "2.8.0", "solution": [], "services": null }""")]
+    [TestCase("""{ "template": "2.8.0", "solution": null, "services": [["-S", "Orders"]] }""")]
+    [TestCase("""{ "template": null, "solution": [], "services": [["-S", "Orders"]] }""")]
+    [TestCase("""{ "template": "2.8.0", "solution": [], "services": [null] }""")]
     public void Should_Refuse_When_TheManifestCannotRebuildTheSolution(string text) =>
         Should.Throw<InvalidOperationException>(() => Manifest.Parse(text)).Message.ShouldContain("put it back from git");
 

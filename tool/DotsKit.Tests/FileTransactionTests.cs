@@ -68,6 +68,30 @@ internal sealed class FileTransactionTests
     }
 
     [Test]
+    public void AFileBehindALinkedFolder_IsNoFileOfTheSolution_AndNoRepairReachesIt()
+    {
+        var root = Folders.NewTemp("walk-link");
+        var outside = Folders.NewTemp("walk-outside");
+        Directory.CreateDirectory(Path.Combine(root, "src", "Api"));
+        File.WriteAllText(Path.Combine(root, "src", "Api", "mine.csproj"), "<Project />");
+        File.WriteAllText(Path.Combine(outside, "theirs.csproj"), "<Project />");
+        try
+        {
+            Directory.CreateSymbolicLink(Path.Combine(root, "src", "vendor"), outside);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            Assert.Ignore("creating a symbolic link needs a privilege this machine does not give");
+        }
+
+        var files = Folders.RelativeFiles(root).ToList();
+
+        files.ShouldBe(["src/Api/mine.csproj"]);
+        Folders.IsInside(root, Path.Combine(root, "src", "vendor", "theirs.csproj")).ShouldBeFalse();
+        Folders.IsInside(root, Path.Combine(root, "src", "Api", "mine.csproj")).ShouldBeTrue();
+    }
+
+    [Test]
     public void TheToolsOwnFolders_AreUnderTheUsersLocalData_NotTheSharedTemp()
     {
         var folder = Folders.OwnFolder("outputs");
