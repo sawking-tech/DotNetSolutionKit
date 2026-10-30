@@ -53,8 +53,9 @@ internal static class Folders
     {
         var realRoot = RealPath(root).TrimEnd(Path.DirectorySeparatorChar);
         // A path a file has yet to take: resolved down to the folders that exist, since the rest holds no link.
+        // The deepest existing folder is resolved itself, so a folder that is a link is seen as what it points at.
         var full = Path.GetFullPath(path);
-        var existing = Existing(Path.GetDirectoryName(full) ?? full);
+        var existing = Existing(full);
         var real = Path.Combine(RealPath(existing), Path.GetRelativePath(existing, full)).TrimEnd(Path.DirectorySeparatorChar);
         var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         return string.Equals(real, realRoot, comparison) || real.StartsWith(realRoot + Path.DirectorySeparatorChar, comparison);

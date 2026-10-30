@@ -21,19 +21,33 @@ internal sealed class FileTransactionTests
         return root;
     }
 
+    /// <summary>
+    /// A link to a folder: a symbolic link where the OS gives one, else a junction, which Windows makes without
+    /// the privilege a symbolic link needs. Both are reparse points, and both are what a repository can carry.
+    /// </summary>
+    private static void LinkFolder(string link, string target)
+    {
+        try
+        {
+            Directory.CreateSymbolicLink(link, target);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                Assert.Ignore("this machine gives no way to link a folder");
+            }
+
+            new ProcessRunner().RunCheckedAsync("cmd", ["/c", "mklink", "/J", link, target], Path.GetTempPath(), CancellationToken.None).GetAwaiter().GetResult();
+        }
+    }
+
     [Test]
     public async Task APathThroughALinkedFolder_IsRefused_AndNothingIsWritten()
     {
         var root = Folders.NewTemp("txn-link");
         var outside = Folders.NewTemp("txn-outside");
-        try
-        {
-            Directory.CreateSymbolicLink(Path.Combine(root, "deploy"), outside);
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
-            Assert.Ignore("creating a symbolic link needs a privilege this machine does not give");
-        }
+        LinkFolder(Path.Combine(root, "deploy"), outside);
 
         var transaction = new FileTransaction(root);
         transaction.Write("deploy/evil.txt", [1]);
@@ -75,14 +89,7 @@ internal sealed class FileTransactionTests
         Directory.CreateDirectory(Path.Combine(root, "src", "Api"));
         File.WriteAllText(Path.Combine(root, "src", "Api", "mine.csproj"), "<Project />");
         File.WriteAllText(Path.Combine(outside, "theirs.csproj"), "<Project />");
-        try
-        {
-            Directory.CreateSymbolicLink(Path.Combine(root, "src", "vendor"), outside);
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
-            Assert.Ignore("creating a symbolic link needs a privilege this machine does not give");
-        }
+        LinkFolder(Path.Combine(root, "src", "vendor"), outside);
 
         var files = Folders.RelativeFiles(root).ToList();
 
