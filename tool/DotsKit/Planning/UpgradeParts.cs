@@ -53,8 +53,10 @@ internal static class UpgradeParts
     {
         var found = paths.Select(Of).Distinct(StringComparer.Ordinal).ToList();
         var projects = found.Where(p => p.StartsWith(CommonProject, StringComparison.Ordinal)).OrderBy(LayerOf).ThenBy(p => p, StringComparer.Ordinal).ToList();
+        // Only the parts the tree has: most solutions have no src/capabilities, and a part that merges nothing would
+        // still ask for a yes, build the solution and need a commit of the manifest alone.
         return [Shared, .. found.Contains(Common) ? [Common] : Array.Empty<string>(), .. DependenciesFirst(projects, references ?? new Dictionary<string, IReadOnlySet<string>>()),
-            Capabilities, .. found.Where(p => !IsShared(p)).Order(StringComparer.Ordinal)];
+            .. found.Contains(Capabilities) ? [Capabilities] : Array.Empty<string>(), .. found.Where(p => !IsShared(p)).Order(StringComparer.Ordinal)];
     }
 
     /// <summary>

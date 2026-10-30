@@ -61,7 +61,7 @@ internal static partial class CentralVersions
     {
         var central = FileText.Read(Path.GetDirectoryName(repair.Central), Path.GetFileName(repair.Central));
         var project = FileText.Read(Path.GetDirectoryName(repair.Project), Path.GetFileName(repair.Project));
-        if (central is null || project is null)
+        if (central is null || project is null || central.IsBinary || project.IsBinary)
         {
             return false;
         }

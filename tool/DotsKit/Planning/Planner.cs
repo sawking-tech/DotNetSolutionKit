@@ -42,7 +42,7 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
         {
             var moves = types!;
             var before = baseDir;
-            parts = step.Parts ?? PartsOf(root, nextDir, moves);
+            parts = step.Parts ?? PartsOf(root, nextDir, moves, await ignored.InAsync(root, ct));
             // The first run decides the parts here: its step reads a path's part from them, as every later run does. The
             // files the template moves are read from the whole outputs, before a step cuts a move in two.
             var movedTo = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -100,9 +100,9 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
     /// The parts of an upgrade a part at a time, from the solution's files and the template's next output together: a
     /// project the template adds is a part of its own, in the order of what it references.
     /// </summary>
-    private static IReadOnlyList<string> PartsOf(string root, string nextDir, TypeMap moves)
+    private static IReadOnlyList<string> PartsOf(string root, string nextDir, TypeMap moves, IReadOnlySet<string> leftAlone)
     {
-        var solution = Folders.RelativeFiles(root).ToList();
+        var solution = Folders.RelativeFiles(root).Where(f => !leftAlone.Contains(f)).ToList();
         var next = Folders.RelativeFiles(nextDir).ToList();
         var references = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
         void Add(string part, IEnumerable<string> uses) =>

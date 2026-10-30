@@ -27,7 +27,7 @@ internal sealed class UpgradeByPartTests
     public void TheParts_AreTheSharedOneFirst_ThenTheServiceFoldersInOrder()
     {
         UpgradeParts.In([$"src/services/{Orders}/a.cs", "Directory.Build.props", $"src/services/{Billing}/b.cs", "src/common/Acme.Shop.Common.Web/w.cs",
-                "src/common/Acme.Shop.Common/c.cs"])
+                "src/common/Acme.Shop.Common/c.cs", "src/capabilities/Acme.Shop.Capabilities.Mongo/m.cs"])
             .ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common", "common/Acme.Shop.Common.Web", UpgradeParts.Capabilities, Billing, Orders]);
     }
 
@@ -38,7 +38,7 @@ internal sealed class UpgradeByPartTests
             "src/common/Acme.Shop.Common.Application/a.cs", "src/common/Acme.Shop.Common.Contracts/c.cs", "src/common/Acme.Shop.Common/d.cs"];
 
         UpgradeParts.In(paths).ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common", "common/Acme.Shop.Common.Contracts", "common/Acme.Shop.Common.Application",
-            "common/Acme.Shop.Common.Infrastructure", "common/Acme.Shop.Common.Web", "common/Acme.Shop.Common.Tests", UpgradeParts.Capabilities]);
+            "common/Acme.Shop.Common.Infrastructure", "common/Acme.Shop.Common.Web", "common/Acme.Shop.Common.Tests"]);
     }
 
     [Test]
@@ -53,7 +53,7 @@ internal sealed class UpgradeByPartTests
         };
 
         UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, UpgradeParts.Common, "common/Acme.Shop.Common.Domain", "common/Acme.Shop.Common.Web",
-            "common/Acme.Shop.Common.Application", UpgradeParts.Capabilities]);
+            "common/Acme.Shop.Common.Application"]);
     }
 
     [Test]
@@ -96,11 +96,11 @@ internal sealed class UpgradeByPartTests
     }
 
     [Test]
-    public void TheFoldersOfAnIde_BesideAllSln_AreNoParts()
+    public void TheFoldersOfAnIde_BesideAllSln_AreNoParts_AndASolutionWithoutCapabilitiesHasNoSuchPart()
     {
         var root = Tree(($"src/services/{Orders}/a.cs", "x"), ("src/services/.vs/Acme/v17/.suo", "x"), ("src/services/.idea/workspace.xml", "x"));
 
-        UpgradeParts.In(Folders.RelativeFiles(root)).ShouldBe([UpgradeParts.Shared, UpgradeParts.Capabilities, Orders]);
+        UpgradeParts.In(Folders.RelativeFiles(root)).ShouldBe([UpgradeParts.Shared, Orders]);
     }
 
     [Test]
