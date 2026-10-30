@@ -289,10 +289,11 @@ that updates the tool. The tool generates a version from its package on nuget.or
 upgraded the same way. The tools of 2.x also take 1.0.0, the only release of 1.x, but it differs from 2.0.0 in
 most files: a solution of v1 is brought to 2.0.0 by hand first ([upgrading](upgrading.md#a-solution-of-v1)).
 
-`--to 2.x.y` brings the solution to that release instead of the tool's version, a release newer than the
-solution and not newer than the tool. A solution far behind goes to the tool's version at once or through
-releases between, as the team decides: either way the upgrade goes a part at a time, so a step is a part, not
-the whole distance. A release between is worth a stop where the team wants to build and test the solution on it:
+Inside one major version the template takes a solution of its first release to any later one, so the usual way
+is one `dotskit upgrade` from where the solution stands. `--to 2.x.y` stops at a release between instead, a
+release newer than the solution and not newer than the tool: the more conservative path, for a team that wants
+to build the solution and run its tests on that release before going on. Either way the upgrade goes a part at a
+time, so a step is a part, not the whole distance.
 
 ```bash
 dotskit upgrade --to 2.7.0   # a part of 2.7.0 a run, until the manifest says 2.7.0; build and test there

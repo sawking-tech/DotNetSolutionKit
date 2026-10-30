@@ -11,7 +11,9 @@ The template is versioned with git tags, by semantic versioning.
 From 2.9 `dotskit upgrade` brings a solution of a 2.x release to the current one, and git keeps the team's
 changes where they merge with the template's; the rest are conflicts to resolve. First `dotskit init
 --template-version` with the release the solution was made by (`dotskit init` alone names the closest one), then
-`dotskit upgrade`, a part a run, or a release at a time with `--to` ([dotskit](dotskit.md#upgrading-a-solution)). A solution
+`dotskit upgrade`, a part a run. Inside one major version that goes from the first release of the major to any
+later one; `--to` stops at a release between, for a team that wants to build and test the solution there first
+([dotskit](dotskit.md#upgrading-a-solution)). A solution
 of v1 is brought to `v2.0.0` by hand first, [below](#a-solution-of-v1). The sections below are the same changes
 by hand.
 
