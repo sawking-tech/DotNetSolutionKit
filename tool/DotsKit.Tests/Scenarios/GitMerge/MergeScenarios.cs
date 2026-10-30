@@ -113,4 +113,20 @@ internal sealed class MergeScenarios
         again.ShouldBeEmpty();
         Read(root, ProgramFile).ShouldBe("new in 3.0\na\nb\nC by the template\nd\ne\nteam\n");
     }
+
+    [TestCase("a  \r\nb\r\n", "a\nb\n", false)]
+    [TestCase("a\nb\n", "a\nB by the template\n", true)]
+    public async Task AFileTheTeamRemoved_StaysRemoved_WhenTheTemplateOnlyRestyledIt(string before, string after, bool conflicts)
+    {
+        const string removed = "src/services/Acme.Shop.Orders/Removed.cs";
+        var root = await SolutionAsync();
+        (string, string)[] common = [(".gitignore", "appsettings.Secrets.json\n"), (ProgramFile, BaseProgram), (Solution, "the template's All.sln\n"), (Secrets, "the template's secret\n")];
+        var baseTree = Tree([.. common, (removed, before)]);
+        var next = Tree([.. common, (removed, after)]);
+
+        var left = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(baseTree, "1.0.0"), new(next, "2.0.0"), false, CancellationToken.None);
+
+        left.Contains(removed).ShouldBe(conflicts);
+        File.Exists(Path.Combine(root, removed)).ShouldBe(conflicts);
+    }
 }

@@ -10,8 +10,11 @@ internal static class RepairReport
     public static string FileOf(Repair repair) => repair switch
     {
         AddReference r => r.Project,
+        RemoveReference r => r.Project,
+        CentralizeVersion c => c.Project,
         AddUsing u => u.File,
         ReplaceUsing u => u.File,
+        ReplaceQualified q => q.File,
         _ => throw new ArgumentOutOfRangeException(nameof(repair), repair, "A repair of an unknown kind."),
     };
 
@@ -30,7 +33,12 @@ internal static class RepairReport
     {
         ReplaceUsing u => $"using {u.Namespace} -> {u.With}",
         AddUsing u => $"using {u.Namespace} added",
+        ReplaceQualified q => $"{q.Namespace}.{q.Type} -> {q.With}.{q.Type}",
         AddReference r => $"reference to {Path.GetFileNameWithoutExtension(r.Referenced)}",
+        CentralizeVersion c => c.Kept is { } kept && kept != c.Version
+            ? $"{c.Package} {c.Version} kept as VersionOverride, Directory.Packages.props has {kept}"
+            : $"{c.Package} {c.Version} -> Directory.Packages.props",
+        RemoveReference r => $"reference to {Path.GetFileNameWithoutExtension(r.Referenced)} removed, as the template has it",
         _ => repair.ToString(),
     };
 

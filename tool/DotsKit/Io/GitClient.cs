@@ -20,6 +20,15 @@ internal sealed class GitClient(IProcessRunner runner)
         }
     }
 
+    /// <summary>Removes the paths from the working tree and the index: a conflict of a file resolved as removed.</summary>
+    public async Task RemoveAsync(string root, IReadOnlyCollection<string> paths, CancellationToken ct)
+    {
+        if (paths.Count > 0)
+        {
+            await runner.RunCheckedAsync("git", await WithPathsAsync(["rm", "-q", "-f"], paths, ct), root, ct);
+        }
+    }
+
     /// <summary>
     /// Takes the paths out of an index of its own (<paramref name="environment"/>), whatever the files on disk are:
     /// -f, as git would otherwise compare that index with the solution's files.

@@ -45,8 +45,8 @@ internal sealed record TypeMap(IReadOnlyList<TypeMove> Moves, IReadOnlySet<strin
     }
 }
 
-/// <summary>A C# file of the solution: its path, its project, the namespaces it has a using of and those it declares.</summary>
-internal sealed record SourceFile(string File, string Project, IReadOnlyList<string> Usings, IReadOnlyList<string> Declares);
+/// <summary>A C# file of the solution: its path, its project, the namespaces it has a using of and those it declares, and its text.</summary>
+internal sealed record SourceFile(string File, string Project, IReadOnlyList<string> Usings, IReadOnlyList<string> Declares, string Text = "");
 
 /// <summary>A change to the team's code that a type of the template moving to another project or namespace asks for.</summary>
 internal abstract record Repair;
@@ -54,11 +54,20 @@ internal abstract record Repair;
 /// <summary>A project references the project a type it uses lives in now; both full paths.</summary>
 internal sealed record AddReference(string Project, string Referenced) : Repair;
 
+/// <summary>A project of the template drops a reference to another the template no longer has it reference; both full paths.</summary>
+internal sealed record RemoveReference(string Project, string Referenced) : Repair;
+
+/// <summary>A project gives the version of a package to the central file and drops it, or keeps it as VersionOverride when the central file has another (Kept); full paths.</summary>
+internal sealed record CentralizeVersion(string Project, string Package, string Version, string Central, string? Kept = null) : Repair;
+
 /// <summary>A file takes the namespace a type it uses lives in now.</summary>
 internal sealed record AddUsing(string File, string Namespace) : Repair;
 
 /// <summary>A file's using of a namespace the template gave up becomes the usings of the namespaces its types went to.</summary>
 internal sealed record ReplaceUsing(string File, string Namespace, string With) : Repair;
+
+/// <summary>A file names a type the template moved by its full name: <c>Namespace.Type</c> becomes <c>With.Type</c>.</summary>
+internal sealed record ReplaceQualified(string File, string Namespace, string Type, string With) : Repair;
 
 /// <summary>
 /// Decides the repairs from the errors of a build: a using of a namespace the template gave up is replaced by where
@@ -94,10 +103,22 @@ internal static partial class ReferenceRepairs
                 .Where(u => !declared.Contains(u))
                 .Select(u => (Using: u, Moves: map.OutOf(u).Where(m => Reaches(TypeMap.AreaOf(Relative(root, f.Project)), m.To)).ToList()))
                 .Where(g => g.Moves.Count > 0)
-                .SelectMany(g => ForGivenUp(f.File, f.Project, g.Using, g.Moves, root)))
+                .SelectMany(g => ForGivenUp(f.File, f.Project, g.Using, g.Moves, root))
+                .Concat(ForFullNames(f, map, root)))
             .Distinct()
             .ToList();
     }
+
+    /// <summary>
+    /// The full names of the types the template moved to another namespace, as the file writes them: each becomes
+    /// the type's new namespace, and the project gets its project. A move within one namespace changes no name.
+    /// </summary>
+    private static IEnumerable<Repair> ForFullNames(SourceFile file, TypeMap map, string root) =>
+        map.Moves
+            .Where(m => m.From.Namespace != m.To.Namespace && Reaches(TypeMap.AreaOf(Relative(root, file.Project)), m.To)
+                && QualifiedNames.Names(file.Text, m.From.Namespace, m.From.Name))
+            .SelectMany(m => (IEnumerable<Repair>)[new ReplaceQualified(file.File, m.From.Namespace, m.From.Name, m.To.Namespace),
+                .. References(file.Project, [m.To.Project], root)]);
 
     private static IEnumerable<Repair> Of(BuildError error, TypeMap map, string root, Func<string, IReadOnlyList<string>> usingsOf)
     {

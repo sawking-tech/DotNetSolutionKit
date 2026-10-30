@@ -91,7 +91,7 @@ internal sealed class GitModeTests
         Change[] added = [new(secrets, ChangeKind.Add, Text("{}\n"), "new in the template"), new(moved, ChangeKind.Add, Text("class New;\n"), "new in the template")];
         var plan = new Planning.Plan(root, manifest, added, new Solutions.MembershipChange([], []), ByGit: (new TemplateCommit("base", "2.8.0"), new TemplateCommit("next", "2.9.0")));
         var writer = new Planning.PlanWriter(new Solutions.SolutionProjects(new ProcessRunner()), new LeavingOut(secrets),
-            new Solutions.ReferenceRepair(new Solutions.RepairWriter(new ProcessRunner()), new NoBuild()));
+            new Solutions.ReferenceRepair(new Solutions.RepairWriter(), new NoBuild()));
 
         await writer.WriteAsync(plan, CancellationToken.None);
 

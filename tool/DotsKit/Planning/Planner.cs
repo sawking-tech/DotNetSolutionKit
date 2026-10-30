@@ -67,7 +67,7 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
 
         var membership = await MembershipAsync(root, baseDir!, nextDir, ct);
         return new Plan(root, next, [.. changes.Where(c => !IsSolutionFile(c.Path))], membership, packages, types,
-            byGit ? (new TemplateCommit(baseDir!, current!.Template), new TemplateCommit(nextDir, next.Template)) : null, mode.PreferTemplate, Parts: parts, Waiting: waiting);
+            byGit ? (new TemplateCommit(baseDir!, current!.Template), new TemplateCommit(nextDir, next.Template)) : null, mode.PreferTemplate, Parts: parts, Waiting: waiting, BaseTree: baseDir, NextTree: nextDir);
     }
 
     /// <summary>

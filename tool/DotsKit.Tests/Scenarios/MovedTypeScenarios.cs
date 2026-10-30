@@ -81,7 +81,7 @@ internal sealed class MovedTypeScenarios
         failed.Code.ShouldNotBe(0);
 
         var map = TypeMap.Between(TypeIndex.Read(before), TypeIndex.Read(root));
-        var (build, repaired, stopped) = await new ReferenceRepair(new RepairWriter(Runner), builder).RunAsync(root, map, failed, CancellationToken.None);
+        var (build, repaired, stopped) = await new ReferenceRepair(new RepairWriter(), builder).RunAsync(root, map, failed, CancellationToken.None);
 
         build.Code.ShouldBe(0, build.Output + build.Error);
         repaired.ShouldNotBeEmpty();
@@ -109,10 +109,43 @@ internal sealed class MovedTypeScenarios
         await Runner.RunCheckedAsync("dotnet", ["add", Orders, "reference", Common], root, CancellationToken.None);
         var map = TypeMap.Between(TypeIndex.Read(before), TypeIndex.Read(root));
 
-        var repaired = await new ReferenceRepair(new RepairWriter(Runner), new DotnetBuilder(Runner)).BeforeBuildAsync(root, map, [], CancellationToken.None);
+        var repaired = await new ReferenceRepair(new RepairWriter(), new DotnetBuilder(Runner)).BeforeBuildAsync(root, map, [], CancellationToken.None);
         var build = await new DotnetBuilder(Runner).BuildAsync(root, CancellationToken.None);
 
         repaired.Count.ShouldBe(2);
+        build.Code.ShouldBe(0, build.Output + build.Error);
+    }
+
+    [Test]
+    public async Task TheTeamsCode_ThatNamesAMovedTypeByItsFullName_IsRepairedFromItsText_TheNamespaceItLeftStaying()
+    {
+        const string shipped = "namespace Acme.Shop.Common.Events;\n\npublic sealed class OrderShipped;\n";
+        const string fullNames = "namespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{\n"
+            + "    public Acme.Shop.Common.Events.DomainEvent? Last { get; set; }\n"
+            + "    public System.Type Kind => typeof(global::Acme.Shop.Common.Events.DomainEvent);\n"
+            + "    public Acme.Shop.Common.Events.OrderShipped? Shipped { get; set; }\n}\n";
+        var before = Folders.NewTemp("moved-full-base");
+        Put(before, Common, Project);
+        Put(before, Folder(Common) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Common.Events"));
+        Put(before, Folder(Common) + "/OrderShipped.cs", shipped);
+        var root = Folders.NewTemp("moved-full-next");
+        Put(root, Common, Project);
+        Put(root, Folder(Common) + "/OrderShipped.cs", shipped);
+        Put(root, Framework, Project);
+        Put(root, Folder(Framework) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Framework.Events"));
+        Put(root, Orders, Project);
+        Put(root, Order, fullNames);
+        Put(root, Solution, EmptySolution);
+        await Runner.RunCheckedAsync("dotnet", ["sln", Solution, "add", Common, Framework, Orders], root, CancellationToken.None);
+        await Runner.RunCheckedAsync("dotnet", ["add", Orders, "reference", Common], root, CancellationToken.None);
+        var map = TypeMap.Between(TypeIndex.Read(before), TypeIndex.Read(root));
+
+        var repaired = await new ReferenceRepair(new RepairWriter(), new DotnetBuilder(Runner)).BeforeBuildAsync(root, map, [], CancellationToken.None);
+        var build = await new DotnetBuilder(Runner).BuildAsync(root, CancellationToken.None);
+
+        RepairReport.ByProject(repaired).ShouldBe(["  Acme.Shop.Orders.Domain: Acme.Shop.Common.Events.DomainEvent -> Acme.Shop.Framework.Events.DomainEvent; reference to Acme.Shop.Framework.Events"]);
+        File.ReadAllText(Path.Combine(root, Order)).ShouldContain("typeof(global::Acme.Shop.Framework.Events.DomainEvent)");
+        File.ReadAllText(Path.Combine(root, Order)).ShouldContain("Acme.Shop.Common.Events.OrderShipped?");
         build.Code.ShouldBe(0, build.Output + build.Error);
     }
 }

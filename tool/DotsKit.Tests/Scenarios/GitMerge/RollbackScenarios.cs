@@ -151,7 +151,7 @@ internal sealed class RollbackScenarios
         var plan = new Planning.Plan(root, manifest, [], new Solutions.MembershipChange([], []),
             ByGit: (new TemplateCommit(Base(), "1.0.0"), new TemplateCommit(Tree((ProgramFile, NextProgram)), "2.0.0")));
         var writer = new Planning.PlanWriter(new Solutions.SolutionProjects(Runner), new FailingAfterStage(new GitTemplateMerge(Runner, Sandbox.Self)),
-            new Solutions.ReferenceRepair(new Solutions.RepairWriter(Runner), new NoBuild()));
+            new Solutions.ReferenceRepair(new Solutions.RepairWriter(), new NoBuild()));
 
         await Should.ThrowAsync<IOException>(() => writer.WriteAsync(plan, CancellationToken.None));
 
