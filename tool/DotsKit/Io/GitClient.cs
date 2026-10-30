@@ -4,7 +4,7 @@ namespace DotsKit.Io;
 /// The calls of git that take a list of paths. A list of paths goes to git in
 /// a file (<c>--pathspec-from-file</c>), never on the command line, so a solution of any size fits
 /// (<see cref="CommandLine"/>).
-/// Every git command here is listed in docs/getting-started/dotskit.md, "What dotskit runs in git": a command added
+/// Every git command here is listed in docs/getting-started/tool.md, "What dotskit runs in git": a command added
 /// or changed here goes there too.
 /// </summary>
 internal sealed class GitClient(IProcessRunner runner)

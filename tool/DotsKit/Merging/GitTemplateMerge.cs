@@ -59,7 +59,7 @@ internal sealed record TemplateCommit(string Tree, string Version);
 /// A file both sides changed is merged by <see cref="StyleMergeDriver"/>, given to this one merge by <c>-c</c> and an
 /// attributes file of its own: the solution's config and files are not touched. The solution's .gitattributes wins
 /// over that file, so a file with a merge of its own, as one of Git LFS, keeps it.
-/// Every git command this class and <see cref="GitClient"/> run is listed in docs/getting-started/dotskit.md, "What
+/// Every git command this class and <see cref="GitClient"/> run is listed in docs/getting-started/tool.md, "What
 /// dotskit runs in git", by what it does to the repository: a command added or changed here goes there too.
 /// </summary>
 /// <param name="runner">Runs git.</param>

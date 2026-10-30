@@ -1,6 +1,6 @@
 # Documentation
 
-**DotNetSolutionKit (dotskit)** generates a .NET microservice solution to a team's needs: DDD and Clean Architecture, CI, deployment and tests, with modules and integrations with infrastructure services turned on by flags. `dotskit` adds services to the solution and flags to its services. The generated solution is an ordinary .NET solution the team owns.
+**DotNetSolutionKit (dotskit)** generates a .NET solution to a team's needs - the frame for DDD and Clean Architecture, CI, deployment and tests, with modules and integrations with infrastructure services turned on by flags. `dotskit` adds services to the solution and flags to its services. The generated solution is an ordinary .NET solution the team owns.
 
 `dotskit upgrade` brings the template's later improvements into a generated solution under the team's control and helps the team maintain its solution: a three-way merge with the team's code, where what does not merge is a conflict for the team to resolve.
 
@@ -52,13 +52,14 @@ mindmap
 
 ## Getting started
 
+- [dotskit](getting-started/dotskit.md): the contents of the project - what dotskit is and which page to open
 - [What the template gives](getting-started/what-it-gives.md): what a solution gets, the principles, the cost and the risks
-- [Generating a solution](getting-started/generating-a-solution.md): install, parameters, dotted names,
-  running locally
-- [dotskit](getting-started/dotskit.md): the tool that makes a solution, adds services and flags to it,
+- [Generating a solution](getting-started/template.md): install, parameters, dotted names, running locally
+- [The layout of a solution](getting-started/layout.md): the folders, the projects of one service, how the template and the tool meet
+- [The dotskit tool](getting-started/tool.md): the tool that makes a solution, adds services and flags to it,
   describes a solution made without it and upgrades a solution, keeping the team's changes
-- [Versions of the template](getting-started/upgrading.md): v1 and v2, what changed, how to update
-- [Working with AI agents](getting-started/working-with-ai-agents.md): the rules and skills a solution gets
+- [Upgrading a solution](getting-started/upgrading.md): the course of an upgrade, its repairs, the versions it covers, what a release asks by hand
+- [Working with AI agents](getting-started/agents.md): the rules and skills a solution gets
 
 ## Architecture
 

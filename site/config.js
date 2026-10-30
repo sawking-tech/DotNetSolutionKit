@@ -20,11 +20,13 @@ window.SITE = {
      and the page shows it to a reader of Russian. */
   shelf: [
     { group: ["Getting started", "С чего начать"], docs: [
+      ["dotskit", "docs/getting-started/dotskit", ["dotskit at a glance", "dotskit - оглавление"], true],
       ["gives", "docs/getting-started/what-it-gives", ["What the template gives", "Что даёт шаблон"], true],
-      ["generating", "docs/getting-started/generating-a-solution", ["Generating a solution", "Генерация решения"], true],
-      ["dotskit", "docs/getting-started/dotskit", ["dotskit", "dotskit"], true],
-      ["upgrading", "docs/getting-started/upgrading", ["Versions of the template", "Версии шаблона"], true],
-      ["agents", "docs/getting-started/working-with-ai-agents", ["Working with AI agents", "Работа с ИИ-агентами"], true],
+      ["template", "docs/getting-started/template", ["Generating a solution", "Генерация решения"], true],
+      ["layout", "docs/getting-started/layout", ["The layout of a solution", "Устройство решения"], true],
+      ["tool", "docs/getting-started/tool", ["The dotskit tool", "Инструмент dotskit"], true],
+      ["upgrading", "docs/getting-started/upgrading", ["Upgrading a solution", "Обновление решения"], true],
+      ["agents", "docs/getting-started/agents", ["Working with AI agents", "Работа с ИИ-агентами"], true],
       ["overview", "docs/README", ["The documentation at a glance", "Обзор документации"], true],
       ["roadmap", "docs/roadmap", ["Roadmap", "Дорожная карта"], true],
     ]},
