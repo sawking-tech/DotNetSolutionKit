@@ -14,8 +14,41 @@ permissions:
   contents: read
 
 jobs:
+  # The paths a change may touch without the checks below: the documentation, the site and what only a reader
+  # sees. Anything else - the template, the tool, the scripts, a workflow - and every check runs. A path that is
+  # not on this list counts as code, so a new folder is checked until someone says otherwise.
+  scope:
+    name: What the change touches
+    runs-on: ubuntu-24.04
+    outputs:
+      code: ${{ steps.look.outputs.code }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: look
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$base" 2>/dev/null; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "No base to compare with: every check runs."
+            exit 0
+          fi
+          changed=$(git diff --name-only "$base" HEAD)
+          echo "Changed:"; echo "$changed"
+          code=$(echo "$changed" | grep -vE '^(docs/|site/|\.claude/|[^/]*\.md$|LICENSE$|CNAME$|docs\.html$|index\.html$)' || true)
+          if [ -n "$code" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "Code is touched, every check runs:"; echo "$code"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "Only the documentation and the site are touched: the checks of the template and the tool are skipped."
+          fi
+
   generate:
     name: ${{ matrix.name }}
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -183,6 +216,8 @@ jobs:
   # The template as users install it once published: packed, installed from the package, generated.
   package:
     name: Installed from the package
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -226,6 +261,8 @@ jobs:
   # Windows and sh elsewhere: the generate job checks sh, this one PowerShell.
   service-adds-itself-windows:
     name: A service adds itself to All.sln on Windows
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v7
@@ -252,6 +289,8 @@ jobs:
   # OSes: its tests, the scenarios with the template from these sources among them, run on all three.
   tool:
     name: dotskit on ${{ matrix.os }}
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -284,6 +323,8 @@ jobs:
   # one OS. The releases before 2.6.1 come from their tags on GitHub.
   chain:
     name: dotskit upgrades from 1.0.0, merge ${{ matrix.merge }}
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     strategy:
