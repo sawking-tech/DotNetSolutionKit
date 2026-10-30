@@ -43,11 +43,13 @@ internal sealed class GitModeTests
         await runner.RunCheckedAsync("git", ["init", "-q"], root, CancellationToken.None);
         await runner.RunCheckedAsync("git", ["add", "-A"], root, CancellationToken.None);
         await runner.RunCheckedAsync("git", ["update-index", "--assume-unchanged", "src/a.json"], root, CancellationToken.None);
+        // skip-worktree hides local changes the same way, and a merge or a reset writes over them too.
+        await runner.RunCheckedAsync("git", ["update-index", "--skip-worktree", "src/b.json"], root, CancellationToken.None);
 
         var hidden = await new Git(runner).HiddenChangesAsync(root, CancellationToken.None);
 
         outside.ShouldBeEmpty();
-        hidden.ShouldBe(["src/a.json"]);
+        hidden.ShouldBe(["src/a.json", "src/b.json"], ignoreOrder: true);
     }
 
     [Test]
