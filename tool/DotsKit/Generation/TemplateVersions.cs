@@ -106,7 +106,14 @@ internal static partial class TemplateVersions
 
         var target = Version.Parse(to.Split('-')[0]);
 
-        if (from != TemplateSource.SourcesVersion && !IsNewer(to, from))
+        // An upgrade only goes forward: a solution is never taken back to an older release, whatever it was made from.
+        if (from == TemplateSource.SourcesVersion)
+        {
+            return $"The solution was made from the template's sources, which are newer than any release: --to {to} would take it back. "
+                + "Describe it as the release it came from, dotskit init --template-version 2.x.y, to upgrade from there.";
+        }
+
+        if (!IsNewer(to, from))
         {
             return $"The solution is of the template {from} already, not older than {to}: name a newer version, or leave out --to.";
         }

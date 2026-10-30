@@ -250,7 +250,7 @@ internal sealed class UpgradeCommandTests
 
         var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(Solution("2.7.0")));
 
-        refused.Message.ShouldContain("appsettings.Development.json (assume-unchanged)");
+        refused.Message.ShouldContain("appsettings.Development.json (assume-unchanged or skip-worktree)");
         refused.Message.ShouldContain("git update-index --no-assume-unchanged");
         fakes.Next.ShouldBeNull();
     }

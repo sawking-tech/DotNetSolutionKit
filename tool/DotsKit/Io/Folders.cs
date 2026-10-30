@@ -46,6 +46,33 @@ internal static class Folders
     }
 
     /// <summary>
+    /// The path with its links resolved is <paramref name="root"/> or below it: a committed link must not lead a
+    /// write or a read of the solution's files outside it.
+    /// </summary>
+    public static bool IsInside(string root, string path)
+    {
+        var realRoot = RealPath(root).TrimEnd(Path.DirectorySeparatorChar);
+        // A path a file has yet to take: resolved down to the folders that exist, since the rest holds no link.
+        var full = Path.GetFullPath(path);
+        var existing = Existing(Path.GetDirectoryName(full) ?? full);
+        var real = Path.Combine(RealPath(existing), Path.GetRelativePath(existing, full)).TrimEnd(Path.DirectorySeparatorChar);
+        var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        return string.Equals(real, realRoot, comparison) || real.StartsWith(realRoot + Path.DirectorySeparatorChar, comparison);
+    }
+
+    /// <summary>The deepest folder of the path that exists; the folders below it are yet to be created.</summary>
+    private static string Existing(string folder)
+    {
+        var current = folder;
+        while (!Directory.Exists(current) && Path.GetDirectoryName(current) is { } parent)
+        {
+            current = parent;
+        }
+
+        return current;
+    }
+
+    /// <summary>
     /// Writes a file of the solution whole or not at all: the content goes beside it first and then takes its place, so
     /// a run stopped in the middle leaves the file as it was, never cut short.
     /// </summary>
@@ -112,7 +139,32 @@ internal static class Folders
 
     /// <summary>The template's files of a tree, relative to it, with forward slashes.</summary>
     public static IEnumerable<string> RelativeFiles(string root) =>
-        Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
-            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
+        FilesOf(root).Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
             .Where(f => !f.Split('/').Any(Layout.Ignored.Contains));
+
+    /// <summary>
+    /// Every file of a tree, by full path, without descending into a folder that is a link: a committed link would
+    /// otherwise put the files of another place - the user's other repository - among the solution's own, where a
+    /// repair would rewrite them outside anything git can undo.
+    /// </summary>
+    public static IEnumerable<string> FilesOf(string root)
+    {
+        var folders = new Stack<string>([root]);
+        while (folders.Count > 0)
+        {
+            var folder = folders.Pop();
+            foreach (var child in Directory.EnumerateDirectories(folder))
+            {
+                if (new DirectoryInfo(child).LinkTarget is null && !Layout.Ignored.Contains(Path.GetFileName(child)))
+                {
+                    folders.Push(child);
+                }
+            }
+
+            foreach (var file in Directory.EnumerateFiles(folder))
+            {
+                yield return file;
+            }
+        }
+    }
 }

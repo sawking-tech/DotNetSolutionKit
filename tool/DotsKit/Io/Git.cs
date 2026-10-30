@@ -52,10 +52,16 @@ internal sealed class Git(IProcessRunner runner) : IGit
     public async Task<IReadOnlyList<string>> HiddenChangesAsync(string root, CancellationToken ct)
     {
         var files = await runner.RunAsync("git", ["ls-files", "-v", "-z"], root, ct);
-        // git ls-files -v tags a file assume-unchanged with a lower case letter: "h path" instead of "H path".
+        // git ls-files -v tags a cached file H; assume-unchanged makes the letter lower case, and skip-worktree
+        // is S or, with both bits, s. Either way git hides the file's local changes and a checkout or a merge
+        // writes over them.
         return files.Code != 0 ? [] : [.. files.Output.Split('\0', StringSplitOptions.RemoveEmptyEntries)
-            .Where(entry => entry.Length > TagLength && char.IsLower(entry[0]) && entry[1] == ' ').Select(entry => entry[TagLength..])];
+            .Where(entry => entry.Length > TagLength && entry[1] == ' ' && (char.IsLower(entry[0]) || entry[0] == SkipWorktree))
+            .Select(entry => entry[TagLength..])];
     }
+
+    /// <summary>The tag git ls-files -v puts on a skip-worktree file.</summary>
+    private const char SkipWorktree = 'S';
 
     /// <summary>The letter and the space git ls-files -v puts before a path.</summary>
     private const int TagLength = 2;

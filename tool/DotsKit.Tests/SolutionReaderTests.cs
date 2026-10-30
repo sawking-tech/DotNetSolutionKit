@@ -1,6 +1,29 @@
 using DotsKit.Reading;
+using DotsKit.Solutions;
 
 namespace DotsKit.Tests;
+
+/// <summary>dotnet sln rewrites All.sln and silently drops a Project line that misses its EndProject: the tool refuses first.</summary>
+[TestFixture]
+[Parallelizable(ParallelScope.All)]
+internal sealed class SolutionTextTests
+{
+    private const string Declaration = "Project(\"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}\") = \"A\", \"A\\A.csproj\", \"{30C2C50E-CE11-4405-9593-189C878FD099}\"";
+
+    [Test]
+    public void APairedSolution_IsTakenAsItIs() =>
+        SolutionProjects.WhyMalformed($"\nMicrosoft Visual Studio Solution File, Format Version 12.00\n{Declaration}\nEndProject\n{Declaration}\nEndProject\nGlobal\nEndGlobal\n")
+            .ShouldBeNull();
+
+    [Test]
+    public void AProjectWithoutItsEndProject_IsNamedWithItsLine()
+    {
+        SolutionProjects.WhyMalformed($"\nheader\n{Declaration}\n{Declaration}\nEndProject\nGlobal\nEndGlobal\n")
+            .ShouldBe("is malformed: the Project of line 3 has no EndProject before the Project of line 4");
+        SolutionProjects.WhyMalformed($"{Declaration}\n").ShouldBe("is malformed: the Project of line 1 has no EndProject");
+        SolutionProjects.WhyMalformed("header\nEndProject\n").ShouldBe("is malformed: the EndProject of line 2 closes no Project");
+    }
+}
 
 /// <summary>How a solution made without dotskit is read into a manifest: files in memory, no template.</summary>
 [TestFixture]

@@ -87,6 +87,41 @@ internal sealed class UpgradePartsTests
     }
 
     [Test]
+    public void APackageOfTheTeamsOwn_KeepsItsCentralLine_WhichNoOutputOfTheTemplateDeclares()
+    {
+        var before = Folders.NewTemp("own-before");
+        var next = Folders.NewTemp("own-next");
+        var solution = Folders.NewTemp("own-solution");
+        Put(before, Central, Props(("Npgsql", "8.0.4")));
+        Put(next, Central, Props(("Npgsql", "8.0.11")));
+        Put(solution, Central, Props(("Npgsql", "8.0.4"), ("Scriban", "5.10.0")));
+        Put(solution, "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Application/Acme.Shop.Billing.Application.csproj",
+            "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Scriban\" />\n  </ItemGroup>\n</Project>\n");
+
+        PackageVersions.KeepReferenced(next, before, solution);
+
+        PackageVersions.Read(File.ReadAllText(Path.Combine(next, Central))).ShouldBe(new Dictionary<string, string> { ["Npgsql"] = "8.0.11", ["Scriban"] = "5.10.0" });
+    }
+
+    [Test]
+    public void APackageOfASolutionOf1x_WhoseCentralFileIsAtItsRoot_KeepsItsVersion()
+    {
+        var before = Folders.NewTemp("root-before");
+        var next = Folders.NewTemp("root-next");
+        var solution = Folders.NewTemp("root-solution");
+        Put(before, Central, Props(("Npgsql", "8.0.4")));
+        Put(next, Central, Props(("Npgsql", "8.0.11")));
+        // A solution of 1.x declares its versions in Directory.Packages.props at the root, not under src.
+        Put(solution, "Directory.Packages.props", Props(("Npgsql", "8.0.4"), ("Scriban", "7.0.0")));
+        Put(solution, "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Application/Acme.Shop.Billing.Application.csproj",
+            "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Scriban\" />\n  </ItemGroup>\n</Project>\n");
+
+        PackageVersions.KeepReferenced(next, before, solution);
+
+        PackageVersions.Read(File.ReadAllText(Path.Combine(next, Central))).ShouldBe(new Dictionary<string, string> { ["Npgsql"] = "8.0.11", ["Scriban"] = "7.0.0" });
+    }
+
+    [Test]
     public void APinHoldsAPackage_AFlagsFileMovesByUpdate()
     {
         var next = Folders.NewTemp("update-next");
@@ -146,6 +181,22 @@ internal sealed class UpgradePartsTests
         TemplateVersions.WhyNotTarget("2.3.0", "3.0.0", "2.9.0", onSources: true).ShouldBeNull();
         TemplateVersions.WhyNotTarget("2.3.0", TemplateSource.SourcesVersion, "2.9.0", onSources: true)!.ShouldContain("not a release");
         TemplateVersions.WhyNotTarget("2.1.0", "2.3", "2.9.0", onSources: false)!.ShouldContain("not a release");
+    }
+
+    [Test]
+    public void AnUpgrade_NeverTakesASolutionBack_WhateverItWasMadeFrom()
+    {
+        // The same release, an older one, and an older pre-release of the solution's own minor.
+        TemplateVersions.WhyNotTarget("2.7.0", "2.7.0", "2.9.0", onSources: false)!.ShouldContain("not older than");
+        TemplateVersions.WhyNotTarget("2.7.0", "2.6.1", "2.9.0", onSources: false)!.ShouldContain("not older than");
+        TemplateVersions.WhyNotTarget("2.7.0", "2.7.0-rc.1", "2.9.0", onSources: false)!.ShouldContain("not older than");
+        // Made from the sources, which are newer than any release: --to would take it back, on sources too.
+        foreach (var onSources in new[] { false, true })
+        {
+            var why = TemplateVersions.WhyNotTarget(TemplateSource.SourcesVersion, "2.0.0", "2.9.0", onSources)!;
+            why.ShouldContain("would take it back");
+            why.ShouldContain("--template-version");
+        }
     }
 
     [TestCase("2.9.0-rc.1", true)]

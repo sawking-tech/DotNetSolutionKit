@@ -21,8 +21,8 @@ internal static class GitPreconditions
 
         if (await git.HiddenChangesAsync(root, ct) is [_, ..] hidden)
         {
-            throw new InvalidOperationException($"git hides the local changes of {string.Join(", ", hidden)} (assume-unchanged), and dotskit could not keep them: "
-                + "git update-index --no-assume-unchanged on them, commit or stash what they hold, then run again.");
+            throw new InvalidOperationException($"git hides the local changes of {string.Join(", ", hidden)} (assume-unchanged or skip-worktree), and dotskit could not keep them: "
+                + "git update-index --no-assume-unchanged --no-skip-worktree on them, commit or stash what they hold, then run again.");
         }
 
         if (!await git.IsRepositoryAsync(root, ct))

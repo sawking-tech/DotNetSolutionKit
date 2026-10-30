@@ -83,8 +83,11 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
         var applied = new List<Repair>();
         for (var round = 0; round < MaxRounds && build.Code != 0; round++)
         {
+            // The build names the files of every project of All.sln: one of them outside the solution, reached
+            // through a link or added by the team from elsewhere, is not the solution's to repair.
             var repairs = ReferenceRepairs.Decide(BuildErrors.Parse(build.Output), map, root, TextOf)
-                .Where(r => !made.Contains(r) && waiting?.Contains(Path.GetRelativePath(root, RepairReport.FileOf(r)).Replace('\\', '/')) != true).ToList();
+                .Where(r => !made.Contains(r) && Folders.IsInside(root, RepairReport.FileOf(r))
+                    && waiting?.Contains(Path.GetRelativePath(root, RepairReport.FileOf(r)).Replace('\\', '/')) != true).ToList();
             if (repairs.Count == 0)
             {
                 break;
@@ -141,11 +144,14 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
             yield break;
         }
 
-        var projects = Directory.GetFiles(src, "*" + Layout.ProjectExtension, SearchOption.AllDirectories)
+        // Through Folders, which never descends into a folder that is a link: a file of another place is not the
+        // solution's to repair, and a write there would be outside what git can undo.
+        var files = Folders.FilesOf(src).ToList();
+        var projects = files.Where(p => p.EndsWith(Layout.ProjectExtension, StringComparison.OrdinalIgnoreCase))
             .GroupBy(p => Path.GetDirectoryName(p)!, StringComparer.OrdinalIgnoreCase)
             .Where(g => g.Count() == 1)
             .ToDictionary(g => g.Key, g => Path.GetFullPath(g.Single()), StringComparer.OrdinalIgnoreCase);
-        foreach (var file in Directory.EnumerateFiles(src, "*.cs", SearchOption.AllDirectories))
+        foreach (var file in files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
         {
             if (Path.GetRelativePath(src, file).Replace('\\', '/').Split('/').Any(Layout.Ignored.Contains) || ProjectOf(file, projects) is not { } project)
             {

@@ -59,11 +59,54 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
 
     public async Task<HashSet<string>> ListAsync(string solutionFile, CancellationToken ct)
     {
+        // Before anything reads or rewrites the file: dotnet sln rewrites All.sln on add and remove, and it drops
+        // a Project line that misses its EndProject without a word - the solution loses a project of the team's.
+        if (WhyMalformed(await File.ReadAllTextAsync(solutionFile, ct)) is { } why)
+        {
+            throw new InvalidOperationException($"{solutionFile} {why}: fix the pairing, then run again.");
+        }
+
         var listed = await runner.RunCheckedAsync("dotnet", ["sln", solutionFile, "list"], DirectoryOf(solutionFile), ct);
         return listed.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Where(l => l.EndsWith(Layout.ProjectExtension, StringComparison.OrdinalIgnoreCase))
             .Select(l => l.Replace('\\', '/'))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Why the text of a solution file is not safe to hand to dotnet sln; null when it is. Each Project line is
+    /// closed by its EndProject before the next: dotnet sln silently drops an unclosed one when it rewrites the file.
+    /// </summary>
+    public static string? WhyMalformed(string text)
+    {
+        var open = 0;
+        var openedAt = 0;
+        var line = 0;
+        foreach (var raw in text.Split('\n'))
+        {
+            line++;
+            var trimmed = raw.TrimEnd();
+            if (trimmed.StartsWith("Project(", StringComparison.Ordinal))
+            {
+                if (open > 0)
+                {
+                    return $"is malformed: the Project of line {openedAt} has no EndProject before the Project of line {line}";
+                }
+
+                (open, openedAt) = (1, line);
+            }
+            else if (trimmed == "EndProject")
+            {
+                if (open == 0)
+                {
+                    return $"is malformed: the EndProject of line {line} closes no Project";
+                }
+
+                open = 0;
+            }
+        }
+
+        return open > 0 ? $"is malformed: the Project of line {openedAt} has no EndProject" : null;
     }
 
     /// <summary>Adds every service project of the solution All.sln does not list yet.</summary>
