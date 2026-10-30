@@ -115,7 +115,26 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
             throw new InvalidOperationException($"git could not merge {Branch}: {FirstLine(merge)} Nothing is merged: the commit and the branch of this run are put back.");
         }
 
-        return conflicts;
+        // A conflict with no stage 2 is a file the solution's side removed: git ls-files -u lists the stages of each.
+        var ours = (await PathsAsync(root, ["ls-files", "-u", "-z"], null, ct))
+            .Select(e => e.Split('\t', 2)).Where(e => e.Length == 2 && e[0].EndsWith(" 2", StringComparison.Ordinal)).Select(e => e[1]).ToHashSet(StringComparer.Ordinal);
+        var restyled = conflicts.Where(p => !ours.Contains(p) && OnlyRestyled(p, @base.Tree, next.Tree)).ToList();
+        await _git.RemoveAsync(root, restyled, ct);
+        return [.. conflicts.Except(restyled, StringComparer.Ordinal)];
+    }
+
+    /// <summary>
+    /// A file the team removed whose change in the template is the style alone - line ends, spaces, a byte order
+    /// mark - stays removed: git runs no merge driver for a file one side removed, and the conflict would mean nothing.
+    /// </summary>
+    private static bool OnlyRestyled(string path, string baseTree, string nextTree)
+    {
+        if (FileText.Read(baseTree, path) is not { } before || FileText.Read(nextTree, path) is not { } after)
+        {
+            return false;
+        }
+
+        return TemplateStyle.Of(path, before).SameTextAs(TemplateStyle.Of(path, after));
     }
 
     public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) => _git.StageAsync(root, paths, ct);

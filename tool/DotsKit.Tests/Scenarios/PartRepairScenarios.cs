@@ -176,7 +176,7 @@ internal sealed class PartRepairScenarios
         var terminal = new Lines(lines);
         var git = new Git(Runner);
         var builder = new Builds();
-        var repair = new ReferenceRepair(new RepairWriter(Runner), builder);
+        var repair = new ReferenceRepair(new RepairWriter(), builder);
         var planner = new Planner(outputs ?? new Outputs(), new ThreeWayMerge(new GitMergeFile(Runner)), projects, new GitRenames(Runner), new GitIgnoredFiles(Runner), repair);
         var writer = new PlanWriter(projects, new GitTemplateMerge(Runner, Sandbox.Self), repair);
         return new UpgradeCommand(planner, new PlanExecution(new PlanReport(terminal), writer, builder, repair, terminal, git), git, terminal, To, onSources: false);

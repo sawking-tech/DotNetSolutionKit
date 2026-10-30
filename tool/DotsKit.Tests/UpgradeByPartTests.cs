@@ -84,6 +84,14 @@ internal sealed class UpgradeByPartTests
     }
 
     [Test]
+    public void TheFoldersOfAnIde_BesideAllSln_AreNoParts()
+    {
+        var root = Tree(($"src/services/{Orders}/a.cs", "x"), ("src/services/.vs/Acme/v17/.suo", "x"), ("src/services/.idea/workspace.xml", "x"));
+
+        UpgradeParts.In(Folders.RelativeFiles(root)).ShouldBe([UpgradeParts.Shared, UpgradeParts.Capabilities, Orders]);
+    }
+
+    [Test]
     public void AnUpgrade_GoesAPartAtATime_UnlessAllAtOnce_AnOptionOfUpgradeOnly()
     {
         Options.Parse("upgrade", ["--yes"]).AllAtOnce.ShouldBeFalse();
