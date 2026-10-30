@@ -3,14 +3,17 @@ using DotsKit.Merging;
 
 namespace DotsKit.Solutions;
 
-/// <summary>Writes the repairs: a reference through <c>dotnet add reference</c>, a using into the file's text.</summary>
+/// <summary>
+/// Writes the repairs into the files' text: a reference into its project (<see cref="ProjectReferences"/>), with no
+/// MSBuild to evaluate it, so a props file left in conflict stops nothing; a using and a name into the source.
+/// </summary>
 internal interface IRepairWriter
 {
     /// <summary>Applies the repairs and returns those that changed a file: a using or a reference there already is no change.</summary>
     Task<IReadOnlyList<Repair>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct);
 }
 
-internal sealed class RepairWriter(IProcessRunner runner) : IRepairWriter
+internal sealed class RepairWriter : IRepairWriter
 {
     public async Task<IReadOnlyList<Repair>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct)
     {
@@ -19,9 +22,13 @@ internal sealed class RepairWriter(IProcessRunner runner) : IRepairWriter
         {
             var did = repair switch
             {
-                AddReference r => await ReferenceAsync(r, ct),
+                // A project the team removed, on either end, gets no reference.
+                AddReference r => File.Exists(r.Referenced) && await EditAsync(r.Project, text => ProjectReferences.Add(text, r.Project, r.Referenced), ct),
+                RemoveReference r => await EditAsync(r.Project, text => ProjectReferences.Remove(text, r.Project, r.Referenced), ct),
+                CentralizeVersion c => PackageUpdates.CentralVersions.Apply(c),
                 AddUsing u => await EditAsync(u.File, text => UsingLines.Add(text, u.Namespace), ct),
                 ReplaceUsing u => await EditAsync(u.File, text => UsingLines.Replace(text, u.Namespace, u.With), ct),
+                ReplaceQualified q => await EditAsync(q.File, text => QualifiedNames.Replace(text, q.Namespace, q.Type, q.With), ct),
                 _ => false,
             };
             if (did)
@@ -30,19 +37,6 @@ internal sealed class RepairWriter(IProcessRunner runner) : IRepairWriter
             }
         }
         return applied;
-    }
-
-    /// <summary>A project the team removed, on either end, gets no reference.</summary>
-    private async Task<bool> ReferenceAsync(AddReference r, CancellationToken ct)
-    {
-        if (!File.Exists(r.Project) || !File.Exists(r.Referenced))
-        {
-            return false;
-        }
-
-        var before = await File.ReadAllTextAsync(r.Project, ct);
-        await runner.RunCheckedAsync("dotnet", ["add", r.Project, "reference", r.Referenced], Path.GetDirectoryName(r.Project)!, ct);
-        return await File.ReadAllTextAsync(r.Project, ct) != before;
     }
 
     private static async Task<bool> EditAsync(string file, Func<string, string> edit, CancellationToken ct)
@@ -112,6 +106,10 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
 
     private static IReadOnlyList<string> UsingsOf(string file) => File.Exists(file) ? UsingLines.Of(File.ReadAllText(file)) : [];
 
+    /// <summary>Applies repairs decided elsewhere, as the template's frame of references; returns those that changed a file.</summary>
+    public Task<IReadOnlyList<Repair>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct) =>
+        repairs.Count == 0 ? Task.FromResult<IReadOnlyList<Repair>>([]) : writer.ApplyAsync(repairs, ct);
+
     /// <summary>
     /// Before any build: every using of the solution's code that names a namespace the template gave up is replaced
     /// by where its types went, and the project gets their projects, from the text alone. A build then has less to
@@ -155,7 +153,7 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
             }
 
             var text = File.ReadAllText(file);
-            yield return new SourceFile(Path.GetFullPath(file), project, UsingLines.Of(text), UsingLines.Declared(text));
+            yield return new SourceFile(Path.GetFullPath(file), project, UsingLines.Of(text), UsingLines.Declared(text), text);
         }
     }
 

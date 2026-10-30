@@ -43,4 +43,14 @@
     <ItemGroup>
         <InternalsVisibleTo Include="DotsKit.Tests" />
     </ItemGroup>
+    <ItemGroup>
+        <!-- The C# syntax alone, for the full names of the types the template moved (QualifiedNames): no workspace, no MSBuild. -->
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    </ItemGroup>
+    <PropertyGroup>
+        <!-- Roslyn's messages in English only: its other languages would add thirteen folders to the tool. -->
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    </PropertyGroup>
+    <ItemGroup>
+    </ItemGroup>
 </Project>

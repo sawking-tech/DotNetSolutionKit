@@ -14,8 +14,8 @@ internal static class Layout
     /// <summary>The solution folder All.sln keeps Common's projects in.</summary>
     public const string CommonSolutionFolder = "Common";
 
-    /// <summary>What a generated tree holds that is not the template's: build output, git, the tool's own state.</summary>
-    public static readonly string[] Ignored = ["bin", "obj", ".git", ".dotskit"];
+    /// <summary>What a tree holds that is not the template's: build output, git, the tool's own state, the folders of an IDE.</summary>
+    public static readonly string[] Ignored = ["bin", "obj", ".git", ".dotskit", ".vs", ".idea", ".vscode"];
 
     public static string ServicesOf(string root) => Path.Combine(root, ServicesFolder);
 

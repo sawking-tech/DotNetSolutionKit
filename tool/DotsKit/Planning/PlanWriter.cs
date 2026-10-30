@@ -58,8 +58,15 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     /// The usings of namespaces the template gave up, repaired from the text before any build, in every project of
     /// the solution; a part of an upgrade a part at a time repairs by the moves of the parts merged so far.
     /// </summary>
-    private async Task<IReadOnlyList<Repair>> RepairAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct) =>
-        plan.Types is null ? [] : await repair.BeforeBuildAsync(plan.Root, plan.Types, conflicts, ct);
+    private async Task<IReadOnlyList<Repair>> RepairAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct)
+    {
+        // The template's frame first: the references between its projects as its next version has them.
+        var left = conflicts.ToHashSet(StringComparer.Ordinal);
+        IReadOnlyList<Repair> frame = plan.NextTree is null || plan.BaseTree is null
+            ? []
+            : await repair.ApplyAsync([.. TemplateReferences.Decide(plan.Root, plan.BaseTree, plan.NextTree, left), .. PackageUpdates.CentralVersions.Decide(plan.Root, left)], ct);
+        return plan.Types is null ? frame : [.. frame, .. await repair.BeforeBuildAsync(plan.Root, plan.Types, conflicts, ct)];
+    }
 
     /// <summary>
     /// The repair of the merge by files, which runs once its files are written: a repair that stops, by an error or a
@@ -99,7 +106,8 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
                 await ApplyMembershipAsync(plan, ct);
                 await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
                 repaired = await RepairAsync(plan, conflicts, ct);
-                var written = repaired.Select(r => Path.GetRelativePath(plan.Root, RepairReport.FileOf(r)).Replace('\\', '/')).Distinct().ToList();
+                var written = repaired.Select(RepairReport.FileOf).Concat(repaired.OfType<CentralizeVersion>().Select(c => c.Central))
+                    .Select(f => Path.GetRelativePath(plan.Root, f).Replace('\\', '/')).Distinct().ToList();
                 if (written.Count > 0)
                 {
                     await git.StageAsync(plan.Root, written, ct);

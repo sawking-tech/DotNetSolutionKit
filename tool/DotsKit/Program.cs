@@ -24,7 +24,7 @@ var projects = new SolutionProjects(runner);
 using var http = new HttpClient();
 var staging = new CachedStaging(new Staging(new TemplateSource(runner, new TagArchive(http)), projects), ToolVersion.Current, () => TemplateSource.SourcesFolder);
 var builder = new DotnetBuilder(runner);
-var repair = new ReferenceRepair(new RepairWriter(runner), builder);
+var repair = new ReferenceRepair(new RepairWriter(), builder);
 var planner = new Planner(staging, new ThreeWayMerge(new GitMergeFile(runner)), projects, new GitRenames(runner), new GitIgnoredFiles(runner), repair);
 var report = new PlanReport(terminal);
 var git = new Git(runner);

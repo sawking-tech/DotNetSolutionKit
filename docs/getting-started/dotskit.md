@@ -238,9 +238,17 @@ outputs of the template it generated for the merge, so the step works for any ve
 by hand. A type is followed inside its own area: a service's copy of a type leads to the same service, a type of
 the shared code to the shared code, so a service never gets a `using` or a reference of another service.
 
-Right after the merge is written, before any build and whether it has conflicts or not, every `using` of the
+Right after the merge is written, a project of the template references the projects of the template its new
+version references, no more and no fewer: a reference its earlier version got wrong goes, one it adds comes, and a
+reference to a project of the team's stays; on central package management, a version a `PackageReference` still
+names goes to `src/Directory.Packages.props` - one there already stays - and leaves the project. A project left
+in conflict waits for its resolution. Then, before any
+build and whether it has conflicts or not, every `using` of the
 solution's code that names a namespace the template no longer has is replaced by where its types went, and the
-project gets the reference to their projects. A file left in conflict, a file of a project left in conflict and a
+project gets the reference to their projects. A type the template moved to another namespace that the code names
+by its full name - as a type, in `new`, `typeof`, a generic argument or before a static member, with `global::` or
+without, in an alias or a static using - gets its new namespace in place, read from the C# syntax, and the project
+the reference; a `cref` of an XML comment and code under an inactive `#if` are left to the build. A file left in conflict, a file of a project left in conflict and a
 namespace the solution's own code still declares are left for the build after the conflicts are resolved. In the
 merge by git the changed files join the merge. Then the build has less to find, often nothing. After a build that
 fails:
@@ -253,7 +261,7 @@ fails:
 - the solution is built again, while each round finds something new to repair: once a project builds, the
   projects that reference it show their own errors.
 
-The report says how many references and `using` lines changed; `git diff` shows them. The repair runs after
+The report names, by project, the `using` lines and full names it changed and the references it added; `git diff` shows them. The repair runs after
 the merge is written. The one before the build is a step of the write: in the merge by git a failure or Ctrl+C
 there takes back the run; in the merge by files the files stay written, and the error says so. A write of the
 repair after a build that fails stops the repair, and the report says why. With `--no-build` there is
