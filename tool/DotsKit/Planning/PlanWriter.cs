@@ -64,7 +64,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         var left = conflicts.ToHashSet(StringComparer.Ordinal);
         IReadOnlyList<Repair> frame = plan.NextTree is null || plan.BaseTree is null
             ? []
-            : await repair.ApplyAsync([.. TemplateReferences.Decide(plan.Root, plan.BaseTree, plan.NextTree, left), .. PackageUpdates.CentralVersions.Decide(plan.Root, left)], ct);
+            : await repair.ApplyAsync([.. TemplateReferences.Decide(plan.Root, plan.BaseTree, plan.NextTree, left), .. PackageUpdates.CentralVersions.Decide(plan.Root, left, plan.Waiting)], ct);
         return plan.Types is null ? frame : [.. frame, .. await repair.BeforeBuildAsync(plan.Root, plan.Types, conflicts, ct)];
     }
 

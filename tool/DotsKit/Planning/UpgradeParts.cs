@@ -141,11 +141,17 @@ internal static class UpgradeParts
 /// The parts of the upgrade, kept in the manifest from its first run; null at the first run, when the planner takes
 /// them from the solution and the template's next output. A path of no part of them goes with the shared part.
 /// </param>
-internal sealed record PartStep(IReadOnlySet<string> Done, string Part, IReadOnlyList<string>? Parts = null)
+/// <param name="MovedTo">
+/// The files the template moves, each old path to its new one. A move is one change of two paths: the old path goes
+/// with the part of the new one, so the step that brings the file sees it leave and arrive, and the team's changes
+/// follow it, even when the move crosses parts.
+/// </param>
+internal sealed record PartStep(IReadOnlySet<string> Done, string Part, IReadOnlyList<string>? Parts = null, IReadOnlyDictionary<string, string>? MovedTo = null)
 {
     public bool InDone(string path) => Done.Contains(PartOf(path));
 
     public bool InDoneOrThis(string path) => InDone(path) || PartOf(path) == Part;
 
-    private string PartOf(string path) => UpgradeParts.Of(path) is var part && (Parts is null || Parts.Contains(part)) ? part : UpgradeParts.Shared;
+    private string PartOf(string path) =>
+        UpgradeParts.Of(MovedTo?.GetValueOrDefault(path) ?? path) is var part && (Parts is null || Parts.Contains(part)) ? part : UpgradeParts.Shared;
 }

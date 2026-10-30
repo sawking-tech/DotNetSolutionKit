@@ -170,8 +170,64 @@ internal sealed class PartRepairScenarios
         Read(root, OrdersProject).Split("Acme.Shop.Common.Domain.csproj").Length.ShouldBe(2, "one reference to the new project, not two");
     }
 
+    [TestCase(MergeMode.Git)]
+    [TestCase(MergeMode.Files)]
+    public async Task AFileTheTemplateMovesToAnotherProjectOfCommon_TakesTheTeamsChange_AcrossTheParts(string merge)
+    {
+        var root = await SolutionAsync();
+        Put(root, RulesProject, Project);
+        Put(root, RulesDomainProject, Project);
+        Put(root, RulesInApplication, RulesOf(TeamsLine));
+        await CommitAsync(root, "the team's rule");
+        var lines = new List<string>();
+        var codes = new List<ExitCode>();
+
+        // shared, common/Acme.Shop.Common, common/Acme.Shop.Common.Domain the file goes to, common/Acme.Shop.Common.Application it leaves, capabilities, Acme.Shop.Orders.
+        for (var run = 0; run < 6; run++)
+        {
+            codes.Add(await Upgrade(lines, new MovingRules()).RunAsync(Options.Parse("upgrade", ["--yes", "--merge", merge]), root, CancellationToken.None));
+            await CommitAsync(root, $"part {run + 1}");
+        }
+
+        codes.ShouldAllBe(code => code == ExitCode.Done);
+        Manifest.Load(root)!.Template.ShouldBe(To);
+        Exists(root, RulesInApplication).ShouldBeFalse();
+        Read(root, RulesInDomain).ShouldContain(TeamsLine);
+        Read(root, RulesInDomain).ShouldContain(TemplatesLine);
+    }
+
+    private const string RulesProject = "src/common/Acme.Shop.Common.Application/Acme.Shop.Common.Application.csproj";
+    private const string RulesDomainProject = "src/common/Acme.Shop.Common.Domain/Acme.Shop.Common.Domain.csproj";
+    private const string RulesInApplication = "src/common/Acme.Shop.Common.Application/Rules/Rules.cs";
+    private const string RulesInDomain = "src/common/Acme.Shop.Common.Domain/Rules/Rules.cs";
+    private const string TeamsLine = "    // the team's own rule";
+    private const string TemplatesLine = "    // the template's new rule";
+
+    /// <summary>A file long enough for git to pair its old path with its new one, with a line of its own at the end.</summary>
+    private static string RulesOf(string last, string first = "") =>
+        "namespace Acme.Shop.Common.Rules;\n\npublic static class Rules\n{\n" + (first.Length > 0 ? first + "\n" : "")
+        + string.Concat(Enumerable.Range(1, 12).Select(i => $"    public const int Rule{i} = {i};\n")) + last + "\n}\n";
+
+    /// <summary>2.7.0 keeps Rules.cs in Common.Application; 2.9.0 moves it to Common.Domain and adds a rule at its top.</summary>
+    private sealed class MovingRules : IStaging
+    {
+        public Task<string> BuildAsync(Manifest manifest, bool withSolutionFile, CancellationToken ct)
+        {
+            var next = manifest.Template == To;
+            var root = Folders.NewTemp("moving-rules-output");
+            Put(root, CommonProject, Project);
+            Put(root, OldEvent, string.Format(EventOf, OldNamespace));
+            Put(root, OrdersProject, Project);
+            Put(root, TemplatesOrder, string.Format(OrderOf, OldNamespace, Property));
+            Put(root, RulesProject, Project);
+            Put(root, RulesDomainProject, Project);
+            Put(root, next ? RulesInDomain : RulesInApplication, next ? RulesOf("", TemplatesLine) : RulesOf(""));
+            return Task.FromResult(root);
+        }
+    }
+
     /// <summary>The command as Program.cs puts it together, the template's outputs taken from <see cref="Outputs"/>.</summary>
-    private static UpgradeCommand Upgrade(List<string> lines, Outputs? outputs = null)
+    private static UpgradeCommand Upgrade(List<string> lines, IStaging? outputs = null)
     {
         var projects = new SolutionProjects(Runner);
         var terminal = new Lines(lines);

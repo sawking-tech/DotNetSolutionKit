@@ -59,13 +59,45 @@ internal sealed class UpgradePartsTests
         Put(step, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Infrastructure/Acme.Shop.Orders.Infrastructure.csproj",
             "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Polly\" />\n    <PackageReference Include=\"Npgsql\" />\n  </ItemGroup>\n</Project>\n");
 
-        PackageVersions.KeepReferenced(step, before);
+        var solution = Folders.NewTemp("p-solution");
+
+        PackageVersions.KeepReferenced(step, before, solution);
         var kept = PackageVersions.Read(File.ReadAllText(Path.Combine(step, Central)));
-        PackageVersions.KeepReferenced(step, before);
+        PackageVersions.KeepReferenced(step, before, solution);
 
         kept.ShouldBe(new Dictionary<string, string> { ["Npgsql"] = "8.0.11", ["Polly"] = "8.4.1" });
         File.ReadAllText(Path.Combine(step, Central)).Split("Include=\"Polly\"").Length.ShouldBe(2, "kept once, however many runs");
         File.ReadAllText(Path.Combine(step, Central)).ShouldEndWith("    <PackageVersion Include=\"Polly\" Version=\"8.4.1\" />\n  </ItemGroup>\n</Project>\n");
+    }
+
+    [Test]
+    public void APackageTheTemplateDrops_KeepsItsVersion_WhileAProjectOfTheTeamsReferencesIt()
+    {
+        var before = Folders.NewTemp("t-before");
+        var next = Folders.NewTemp("t-next");
+        var solution = Folders.NewTemp("t-solution");
+        Put(before, Central, Props(("Npgsql", "8.0.4"), ("Moq", "4.20.0")));
+        Put(next, Central, Props(("Npgsql", "8.0.11")));
+        Put(solution, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Reports/Acme.Shop.Orders.Reports.csproj",
+            "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Moq\" />\n  </ItemGroup>\n</Project>\n");
+
+        PackageVersions.KeepReferenced(next, before, solution);
+
+        PackageVersions.Read(File.ReadAllText(Path.Combine(next, Central))).ShouldBe(new Dictionary<string, string> { ["Npgsql"] = "8.0.11", ["Moq"] = "4.20.0" });
+    }
+
+    [Test]
+    public void APinHoldsAPackage_AFlagsFileMovesByUpdate()
+    {
+        var next = Folders.NewTemp("update-next");
+        Put(next, Central, Props(("Microsoft.IdentityModel.Tokens", "7.1.2")));
+        Put(next, "src/package-versions/notify-email.props",
+            "<Project>\n  <ItemGroup>\n    <PackageVersion Update=\"Microsoft.IdentityModel.Tokens\" Version=\"8.15.0\" />\n  </ItemGroup>\n</Project>\n");
+        var policy = new PackagePolicy { Pinned = new() { ["Microsoft.IdentityModel.Tokens"] = "7.1.2" } };
+
+        PackageVersions.Hold(null, next, policy, majorUpgrade: false);
+
+        File.ReadAllText(Path.Combine(next, "src/package-versions/notify-email.props")).ShouldContain("Update=\"Microsoft.IdentityModel.Tokens\" Version=\"7.1.2\"");
     }
 
     [Test]

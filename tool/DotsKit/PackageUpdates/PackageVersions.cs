@@ -6,7 +6,8 @@ namespace DotsKit.PackageUpdates;
 
 /// <summary>
 /// The package versions of a generated tree, in the files of central package management: src/Directory.Packages.props
-/// and the files of src/package-versions it imports. Each version is a line <c>&lt;PackageVersion Include="X" Version="Y" /&gt;</c>.
+/// and the files of src/package-versions it imports. Each version is a line <c>&lt;PackageVersion Include="X" Version="Y" /&gt;</c>,
+/// or <c>Update="X"</c> where a flag's file moves the version of a package another file declares.
 /// </summary>
 internal static partial class PackageVersions
 {
@@ -14,7 +15,7 @@ internal static partial class PackageVersions
     private const string PerFlag = "src/package-versions/";
     private const string ItemGroupEnd = "</ItemGroup>";
 
-    [GeneratedRegex("""(?<head><PackageVersion\s+Include="(?<name>[^"]+)"\s+Version=")(?<version>[^"]+)(?<tail>")""")]
+    [GeneratedRegex("""(?<head><PackageVersion\s+(?:Include|Update)="(?<name>[^"]+)"\s+Version=")(?<version>[^"]+)(?<tail>")""")]
     private static partial Regex Line();
 
     public static bool IsVersionsFile(string path) =>
@@ -77,9 +78,13 @@ internal static partial class PackageVersions
     /// yet - so the shared part does not break the parts after it; the part that drops the last reference drops it.
     /// The two trees of a step are kept alike, so the next step's base is this step's next tree.
     /// </summary>
-    /// <param name="tree">A tree of the step; its Directory.Packages.props is written in place.</param>
+    /// <param name="tree">A tree of the template's output; its Directory.Packages.props is written in place.</param>
     /// <param name="before">The template's whole output before the upgrade, where a kept version is read.</param>
-    public static void KeepReferenced(string tree, string before)
+    /// <param name="solution">
+    /// The solution's root: a project of the team's that references a package the template drops keeps the package's
+    /// version too, as the merge would otherwise take the line the team never touched out of the central file.
+    /// </param>
+    public static void KeepReferenced(string tree, string before, string solution)
     {
         var central = FileText.Read(tree, Central);
         if (central is null)
@@ -89,9 +94,7 @@ internal static partial class PackageVersions
 
         var declared = All(tree);
         var had = All(before);
-        var kept = Folders.RelativeFiles(tree)
-            .Where(p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".props", StringComparison.OrdinalIgnoreCase))
-            .SelectMany(p => Reference().Matches(FileText.Read(tree, p)?.Text ?? "").Select(m => m.Groups["name"].Value))
+        var kept = ReferencedIn(tree).Concat(ReferencedIn(solution))
             .Where(name => !declared.ContainsKey(name) && had.ContainsKey(name))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
@@ -111,7 +114,14 @@ internal static partial class PackageVersions
     [GeneratedRegex("""<PackageReference\b[^>]*?\sInclude="(?<name>[^"]+)""")]
     private static partial Regex Reference();
 
-    private static Dictionary<string, string> All(string root)
+    /// <summary>The packages the projects and props of a tree reference.</summary>
+    private static IEnumerable<string> ReferencedIn(string root) =>
+        Folders.RelativeFiles(root)
+            .Where(p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".props", StringComparison.OrdinalIgnoreCase))
+            .SelectMany(p => Reference().Matches(FileText.Read(root, p)?.Text ?? "").Select(m => m.Groups["name"].Value));
+
+    /// <summary>Every package the version files of a tree declare, the central file and each flag's, with its version.</summary>
+    public static Dictionary<string, string> All(string root)
     {
         var all = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var path in Folders.RelativeFiles(root).Where(IsVersionsFile))
