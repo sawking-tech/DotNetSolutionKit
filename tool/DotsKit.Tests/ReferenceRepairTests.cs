@@ -29,7 +29,8 @@ internal sealed class ReferenceRepairTests
     private static BuildError Error(string code, string message) => new(OrderFile, code, message, Orders);
 
     /// <summary>Order.cs as the team wrote it, with the using of the namespace the template gave up.</summary>
-    private static IReadOnlyList<string> Usings(string file) => file == OrderFile ? ["System", "Acme.Shop.Common.Events"] : [];
+    private static string Text(string file) =>
+        file == OrderFile ? "using System;\nusing Acme.Shop.Common.Events;\n\nnamespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{\n    public DomainEvent? Last { get; set; }\n}\n" : "";
 
     [Test]
     public void TheIndex_HoldsThePublicTypes_WithTheirProjectAndNamespace_AndLeavesOutTheInternalOnes()
@@ -72,14 +73,15 @@ internal sealed class ReferenceRepairTests
         ]);
         var map = TypeMap.Between(before, after);
 
+        const string endpoint = "using Acme.Shop.Orders.Application.Events;\n\npublic class Endpoint\n{\n    public Handler? H { get; set; }\n}\n";
         var given = ReferenceRepairs.Decide(
             [new BuildError(ordersFile, "CS0234", "The type or namespace name 'Events' does not exist in the namespace 'Acme.Shop.Orders.Application'", ordersApi)],
-            map, Root, _ => ["Acme.Shop.Orders.Application.Events"]);
+            map, Root, _ => endpoint);
         var type = ReferenceRepairs.Decide(
-            [new BuildError(ordersFile, "CS0246", "The type or namespace name 'Handler' could not be found", ordersApi)], map, Root,
-            _ => ["Acme.Shop.Orders.Application.Events"]);
+            [new BuildError(ordersFile, "CS0246", "The type or namespace name 'Handler' could not be found", ordersApi)], map, Root, _ => endpoint);
         var teams = ReferenceRepairs.Decide(
-            [new BuildError(ordersFile, "CS0246", "The type or namespace name 'Handler' could not be found", ordersApi)], map, Root, _ => ["Acme.Shop.Orders.Team"]);
+            [new BuildError(ordersFile, "CS0246", "The type or namespace name 'Handler' could not be found", ordersApi)], map, Root,
+            _ => "using Acme.Shop.Orders.Team;\n\npublic class Endpoint\n{\n    public Handler? H { get; set; }\n}\n");
 
         Repair[] expected = [new AddReference(Path.GetFullPath(ordersApi), Path.GetFullPath(Path.Combine(Root, ordersDomain)))];
         given.ShouldBe([new ReplaceUsing(ordersFile, "Acme.Shop.Orders.Application.Events", "Acme.Shop.Orders.Domain.Events"), .. expected]);
@@ -92,7 +94,7 @@ internal sealed class ReferenceRepairTests
     {
         var repairs = ReferenceRepairs.Decide(
             [Error("CS0234", "The type or namespace name 'Events' does not exist in the namespace 'Acme.Shop.Common' (are you missing an assembly reference?)")],
-            TypeMap.Between(Before, After), Root, Usings);
+            TypeMap.Between(Before, After), Root, Text);
 
         repairs.ShouldBe([
             new ReplaceUsing(OrderFile, "Acme.Shop.Common.Events", "Acme.Shop.Framework.Events"),
@@ -105,7 +107,7 @@ internal sealed class ReferenceRepairTests
     {
         var repairs = ReferenceRepairs.Decide(
             [Error("CS0234", "The type or namespace name 'Common' does not exist in the namespace 'Acme.Shop' (are you missing an assembly reference?)")],
-            TypeMap.Between(Before, After), Root, Usings);
+            TypeMap.Between(Before, After), Root, Text);
 
         repairs.ShouldContain(new ReplaceUsing(OrderFile, "Acme.Shop.Common.Events", "Acme.Shop.Framework.Events"));
     }
@@ -123,6 +125,63 @@ internal sealed class ReferenceRepairTests
             new ReplaceUsing(OrderFile, "Acme.Shop.Common.Events", "Acme.Shop.Framework.Events"),
             new AddReference(Path.GetFullPath(Orders), Path.GetFullPath(Path.Combine(Root, Framework))),
         ]);
+    }
+
+    private const string CommonDomain = "src/common/Acme.Shop.Common.Domain/Acme.Shop.Common.Domain.csproj";
+    private const string CommonInfrastructure = "src/common/Acme.Shop.Common.Infrastructure/Acme.Shop.Common.Infrastructure.csproj";
+
+    /// <summary>2.x Common.Events holds two types; the next version takes them apart, to the domain and the infrastructure.</summary>
+    private static readonly TypeMap Split = TypeMap.Between(
+        TypeIndex.Of([
+            (Common, "namespace Acme.Shop.Common.Events;\n\npublic sealed class DomainEvent;\npublic static class EventDispatcher { }\n"),
+        ]),
+        TypeIndex.Of([
+            (CommonDomain, "namespace Acme.Shop.Common.Domain.Events;\n\npublic sealed class DomainEvent;\n"),
+            (CommonInfrastructure, "namespace Acme.Shop.Common.Infrastructure.Events;\n\npublic static class EventDispatcher { }\n"),
+        ]));
+
+    [Test]
+    public void AFileGetsTheDestinationsOfTheTypesItNames_NotEveryDestinationOfItsUsing()
+    {
+        var files = new[]
+        {
+            new SourceFile(OrderFile, Orders, ["Acme.Shop.Common.Events"], ["Acme.Shop.Orders.Domain"],
+                "using Acme.Shop.Common.Events;\n\nnamespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{\n    public DomainEvent? Last { get; set; }\n    // EventDispatcher in a comment does not count\n    public string Kind = \"EventDispatcher\";\n}\n"),
+        };
+
+        ReferenceRepairs.FromText(files, Split, Root).ShouldBe([
+            new ReplaceUsing(OrderFile, "Acme.Shop.Common.Events", "Acme.Shop.Common.Domain.Events"),
+            new AddReference(Path.GetFullPath(Orders), Path.GetFullPath(Path.Combine(Root, CommonDomain))),
+        ]);
+    }
+
+    [Test]
+    public void AFileThatNamesNoMovedType_AsOneUsingExtensionMethodsOnly_GetsEveryDestination()
+    {
+        var files = new[]
+        {
+            new SourceFile(OrderFile, Orders, ["Acme.Shop.Common.Events"], ["Acme.Shop.Orders.Domain"],
+                "using Acme.Shop.Common.Events;\n\nnamespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{\n    public void Raise(object e) => e.Dispatch();\n}\n"),
+        };
+
+        var repairs = ReferenceRepairs.FromText(files, Split, Root);
+
+        repairs.OfType<ReplaceUsing>().Select(r => r.With).ShouldBe(["Acme.Shop.Common.Domain.Events", "Acme.Shop.Common.Infrastructure.Events"], ignoreOrder: true);
+        repairs.OfType<AddReference>().Count().ShouldBe(2);
+    }
+
+    [Test]
+    public void ATypeDeleted_BesideANamesakeTheBaseAlreadyHad_IsNoMove()
+    {
+        var before = TypeIndex.Of([
+            (Common, "namespace Acme.Shop.Common.Events;\n\npublic sealed class Marker;\n"),
+            (CommonDomain, "namespace Acme.Shop.Common.Domain;\n\npublic sealed class Marker;\n"),
+        ]);
+        var after = TypeIndex.Of([
+            (CommonDomain, "namespace Acme.Shop.Common.Domain;\n\npublic sealed class Marker;\n"),
+        ]);
+
+        TypeMap.Between(before, after).Moves.ShouldBeEmpty();
     }
 
     [Test]
@@ -189,7 +248,7 @@ internal sealed class ReferenceRepairTests
     {
         var repairs = ReferenceRepairs.Decide(
             [Error("CS0246", "The type or namespace name 'DomainEvent<>' could not be found (are you missing a using directive or an assembly reference?)")],
-            TypeMap.Between(Before, After), Root, Usings);
+            TypeMap.Between(Before, After), Root, Text);
 
         repairs.ShouldBe([
             new AddUsing(OrderFile, "Acme.Shop.Framework.Events"),
@@ -208,8 +267,8 @@ internal sealed class ReferenceRepairTests
             Error("CS0246", "The type or namespace name 'Marker' could not be found"),
             Error("CS0246", "The type or namespace name 'Unknown' could not be found"),
             Error("CS0103", "The name 'x' does not exist in the current context"),
-        ], TypeMap.Between(before, after), Root, Usings).ShouldBeEmpty();
-        ReferenceRepairs.Decide([Error("CS0246", "The type or namespace name 'Marker' could not be found")], TypeMap.Between(Before, After), Root, Usings)
+        ], TypeMap.Between(before, after), Root, Text).ShouldBeEmpty();
+        ReferenceRepairs.Decide([Error("CS0246", "The type or namespace name 'Marker' could not be found")], TypeMap.Between(Before, After), Root, Text)
             .ShouldBeEmpty();
     }
 

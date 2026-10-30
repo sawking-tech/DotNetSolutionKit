@@ -14,7 +14,7 @@ internal sealed record TypeMove(TypeHome From, TypeHome To);
 internal sealed record TypeMap(IReadOnlyList<TypeMove> Moves, IReadOnlySet<string> NextNamespaces)
 {
     public static TypeMap Between(TypeIndex before, TypeIndex after) =>
-        new([.. before.All.Select(t => (From: t, To: NextHomeOf(t, after))).Where(m => m.To is not null && m.To != m.From).Select(m => new TypeMove(m.From, m.To!))],
+        new([.. before.All.Select(t => (From: t, To: NextHomeOf(t, before, after))).Where(m => m.To is not null && m.To != m.From).Select(m => new TypeMove(m.From, m.To!))],
             after.All.Select(t => t.Namespace).ToHashSet(StringComparer.Ordinal));
 
     /// <summary>
@@ -37,9 +37,11 @@ internal sealed record TypeMap(IReadOnlyList<TypeMove> Moves, IReadOnlySet<strin
     public IEnumerable<TypeMove> OutOf(string ns) =>
         NextNamespaces.Contains(ns) ? [] : Moves.Where(m => m.From.Namespace == ns);
 
-    private static TypeHome? NextHomeOf(TypeHome type, TypeIndex after)
+    private static TypeHome? NextHomeOf(TypeHome type, TypeIndex before, TypeIndex after)
     {
-        var area = after.Find(type.Name).Where(h => AreaOf(h.Project) == AreaOf(type.Project)).ToList();
+        // A home the base had already is a namesake, not where this type went: beside it the type was deleted.
+        var had = before.Find(type.Name).ToHashSet();
+        var area = after.Find(type.Name).Where(h => AreaOf(h.Project) == AreaOf(type.Project) && (h == type || !had.Contains(h))).ToList();
         var own = area.Where(h => h.Project == type.Project).ToList();
         return own is [var same] ? same : area is [var only] ? only : null;
     }
@@ -86,9 +88,9 @@ internal static partial class ReferenceRepairs
     /// <param name="errors">The errors of the build that failed.</param>
     /// <param name="map">The types the template moved between the solution's version and the next.</param>
     /// <param name="root">The solution's root, the paths of the projects are relative to.</param>
-    /// <param name="usingsOf">The namespaces a file has a using of: the compiler names only the first segment it misses.</param>
-    public static IReadOnlyList<Repair> Decide(IEnumerable<BuildError> errors, TypeMap map, string root, Func<string, IReadOnlyList<string>> usingsOf) =>
-        errors.SelectMany(e => Of(e, map, root, usingsOf)).Distinct().ToList();
+    /// <param name="textOf">The text of a file: the usings are read from it, and a destination counts when it names the type.</param>
+    public static IReadOnlyList<Repair> Decide(IEnumerable<BuildError> errors, TypeMap map, string root, Func<string, string> textOf) =>
+        errors.SelectMany(e => Of(e, map, root, textOf)).Distinct().ToList();
 
     /// <summary>
     /// The usings that name a namespace the template gave up, decided from the text with no build: what the build
@@ -103,7 +105,7 @@ internal static partial class ReferenceRepairs
                 .Where(u => !declared.Contains(u))
                 .Select(u => (Using: u, Moves: map.OutOf(u).Where(m => Reaches(TypeMap.AreaOf(Relative(root, f.Project)), m.To)).ToList()))
                 .Where(g => g.Moves.Count > 0)
-                .SelectMany(g => ForGivenUp(f.File, f.Project, g.Using, g.Moves, root))
+                .SelectMany(g => ForGivenUp(f.File, f.Project, g.Using, g.Moves, root, f.Text))
                 .Concat(ForFullNames(f, map, root)))
             .Distinct()
             .ToList();
@@ -120,7 +122,7 @@ internal static partial class ReferenceRepairs
             .SelectMany(m => (IEnumerable<Repair>)[new ReplaceQualified(file.File, m.From.Namespace, m.From.Name, m.To.Namespace),
                 .. References(file.Project, [m.To.Project], root)]);
 
-    private static IEnumerable<Repair> Of(BuildError error, TypeMap map, string root, Func<string, IReadOnlyList<string>> usingsOf)
+    private static IEnumerable<Repair> Of(BuildError error, TypeMap map, string root, Func<string, string> textOf)
     {
         if (error.Code is not (TypeNotFound or NotInNamespace) || Missing().Match(error.Message) is not { Success: true } m)
         {
@@ -130,22 +132,34 @@ internal static partial class ReferenceRepairs
         var area = TypeMap.AreaOf(Relative(root, error.Project));
         var name = m.Groups["name"].Value;
         var missing = m.Groups["ns"].Success ? $"{m.Groups["ns"].Value}.{name}" : name;
-        var given = usingsOf(error.File)
+        var text = textOf(error.File);
+        var usings = UsingLines.Of(text);
+        var given = usings
             .Where(u => u == missing || u.StartsWith(missing + ".", StringComparison.Ordinal))
             .Select(u => (Using: u, Moves: map.OutOf(u).Where(mv => Reaches(area, mv.To)).ToList()))
             .Where(g => g.Moves.Count > 0)
             .ToList();
         if (given.Count > 0)
         {
-            return given.SelectMany(g => ForGivenUp(error.File, error.Project, g.Using, g.Moves, root));
+            return given.SelectMany(g => ForGivenUp(error.File, error.Project, g.Using, g.Moves, root, text));
         }
 
-        return error.Code == TypeNotFound ? ForType(error, name, area, usingsOf(error.File), map, root) : [];
+        return error.Code == TypeNotFound ? ForType(error, name, area, usings, map, root) : [];
     }
 
-    private static IEnumerable<Repair> ForGivenUp(string file, string project, string old, IReadOnlyList<TypeMove> moves, string root) =>
-        [.. moves.Select(m => m.To.Namespace).Distinct().Select(ns => new ReplaceUsing(file, old, ns)),
-            .. References(project, moves.Select(m => m.To.Project).Distinct(), root)];
+    /// <summary>
+    /// The destinations of the types the file names: a namespace whose types went apart must not bring the file the
+    /// usings and its project the references of types it does not use - a reference to the infrastructure from the
+    /// domain would be a cycle. A type the file uses without its name, a static class of extension methods, is named
+    /// nowhere in it: then every destination counts, as before the types went apart.
+    /// </summary>
+    private static IEnumerable<Repair> ForGivenUp(string file, string project, string old, IReadOnlyList<TypeMove> moves, string root, string text)
+    {
+        var named = moves.Where(m => QualifiedNames.NamesIdentifier(text, m.To.Name)).ToList();
+        var homes = named.Count > 0 ? named : moves;
+        return [.. homes.Select(m => m.To.Namespace).Distinct().Select(ns => new ReplaceUsing(file, old, ns)),
+            .. References(project, homes.Select(m => m.To.Project).Distinct(), root)];
+    }
 
     /// <summary>
     /// The type's move in the file's own area first, else in the shared code; two homes are left as they are. Only a

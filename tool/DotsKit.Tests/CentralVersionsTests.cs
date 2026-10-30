@@ -65,6 +65,38 @@ internal sealed class CentralVersionsTests
     }
 
     [Test]
+    public void AVersionAFlagsFileDeclares_IsNotDeclaredAgain_AndADifferentOneStaysAsAnOverride()
+    {
+        var root = Folders.NewTemp("central-flag");
+        Put(root, Central, Managed + "  <ItemGroup>\n  </ItemGroup>\n  <Import Project=\"package-versions/postgres.props\" />\n</Project>\n");
+        Put(root, "src/package-versions/postgres.props", "<Project>\n  <ItemGroup>\n    <PackageVersion Include=\"Npgsql.EntityFrameworkCore.PostgreSQL\" Version=\"8.0.11\" />\n  </ItemGroup>\n</Project>\n");
+        Put(root, Billing, References("<PackageReference Include=\"Npgsql.EntityFrameworkCore.PostgreSQL\" Version=\"8.0.11\" />"));
+        Put(root, Orders, References("<PackageReference Include=\"Npgsql.EntityFrameworkCore.PostgreSQL\" Version=\"8.0.4\" />"));
+
+        foreach (var repair in CentralVersions.Decide(root, new HashSet<string>()).Cast<CentralizeVersion>())
+        {
+            CentralVersions.Apply(repair);
+        }
+
+        Read(root, Central).ShouldNotContain("Npgsql", Case.Insensitive);
+        Read(root, Billing).ShouldContain("<PackageReference Include=\"Npgsql.EntityFrameworkCore.PostgreSQL\" />");
+        Read(root, Orders).ShouldContain("<PackageReference Include=\"Npgsql.EntityFrameworkCore.PostgreSQL\" VersionOverride=\"8.0.4\" />");
+    }
+
+    [Test]
+    public void AFolderThatOptsOutInItsBuildProps_AndAProjectOfAPartNotMergedYet_AreLeftAsTheyAre()
+    {
+        var root = Folders.NewTemp("central-props");
+        Put(root, Central, Managed + "  <ItemGroup>\n  </ItemGroup>\n</Project>\n");
+        Put(root, "src/legacy/Directory.Build.props", "<Project>\n  <PropertyGroup>\n    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>\n  </PropertyGroup>\n</Project>\n");
+        Put(root, "src/legacy/Old/Old.csproj", References("<PackageReference Include=\"Dapper\" Version=\"1.50.0\" />"));
+        Put(root, Billing, References("<PackageReference Include=\"Scriban\" Version=\"5.10.0\" />"));
+        Put(root, Orders, References("<PackageReference Include=\"Polly\" Version=\"8.0.0\" />"));
+
+        CentralVersions.Decide(root, new HashSet<string>(), new HashSet<string> { Billing }).Cast<CentralizeVersion>().Select(r => r.Package).ShouldBe(["Polly"]);
+    }
+
+    [Test]
     public void ASolutionThatDoesNotManageItsVersionsCentrally_IsLeftAsItIs()
     {
         var root = Folders.NewTemp("not-central");

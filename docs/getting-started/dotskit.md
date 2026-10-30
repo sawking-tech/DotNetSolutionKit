@@ -242,11 +242,16 @@ the shared code to the shared code, so a service never gets a `using` or a refer
 Right after the merge is written, a project of the template references the projects of the template its new
 version references, no more and no fewer: a reference its earlier version got wrong goes, one it adds comes, and a
 reference to a project of the team's stays; on central package management, a version a `PackageReference` still
-names goes to `src/Directory.Packages.props` - one there already stays - and leaves the project. A project left
-in conflict waits for its resolution. Then, before any
+names goes to `src/Directory.Packages.props` and leaves the project. A version declared already, there or in a
+flag's file of `src/package-versions`, is not declared again; the project's own version, when it differs, stays as
+its `VersionOverride`, so no package changes its version. A folder whose `Directory.Build.props` turns central
+management off, a project left in conflict and a project of a part not merged yet are left as they are. A package
+the template drops keeps its version while a project of the team's still references it. Then, before any
 build and whether it has conflicts or not, every `using` of the
-solution's code that names a namespace the template no longer has is replaced by where its types went, and the
-project gets the reference to their projects. A type the template moved to another namespace that the code names
+solution's code that names a namespace the template no longer has is replaced by where the types the file names
+went, and the project gets the reference to their projects alone - the domain does not reference the
+infrastructure for a namespace whose types went both ways. A file that names no moved type, as one that only
+calls extension methods, gets every destination. A type the template moved to another namespace that the code names
 by its full name - as a type, in `new`, `typeof`, a generic argument or before a static member, with `global::` or
 without, in an alias or a static using - gets its new namespace in place, read from the C# syntax, and the project
 the reference; a `cref` of an XML comment and code under an inactive `#if` are left to the build. A file left in conflict, a file of a project left in conflict and a
@@ -290,8 +295,8 @@ An upgrade goes one part a run, so the team resolves the conflicts of one part b
 shared parts - the root with `deploy` and the scripts, then the files of `src/common` and each of its projects, a
 project before those that reference it, then `src/capabilities` - then a service folder at a time, in order. A
 project the template adds to `src/common` is a part of its own, after those it references; the first run takes
-the parts and the manifest keeps them. A package the template drops keeps its version until no project of the
-parts left references it. A folder of the team's own is a part too, which merges nothing. Each run is the same merge, of the template's new files
+the parts and the manifest keeps them. A package the template drops keeps its version while a project of the
+parts left, or of the team's own, references it. A folder of the team's own is a part too, which merges nothing. Each run is the same merge, of the template's new files
 for the parts merged so far and this one over its files for the parts before. After the merge the run repairs the
 usings and project references of the types the template moved between the parts merged so far, in every project
 of the solution, and names them by project; a type that goes to a part not yet merged waits for it, and the usings

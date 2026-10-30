@@ -83,7 +83,7 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
         var applied = new List<Repair>();
         for (var round = 0; round < MaxRounds && build.Code != 0; round++)
         {
-            var repairs = ReferenceRepairs.Decide(BuildErrors.Parse(build.Output), map, root, UsingsOf)
+            var repairs = ReferenceRepairs.Decide(BuildErrors.Parse(build.Output), map, root, TextOf)
                 .Where(r => !made.Contains(r) && waiting?.Contains(Path.GetRelativePath(root, RepairReport.FileOf(r)).Replace('\\', '/')) != true).ToList();
             if (repairs.Count == 0)
             {
@@ -104,7 +104,7 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
         return new(build, applied, null);
     }
 
-    private static IReadOnlyList<string> UsingsOf(string file) => File.Exists(file) ? UsingLines.Of(File.ReadAllText(file)) : [];
+    private static string TextOf(string file) => File.Exists(file) ? File.ReadAllText(file) : "";
 
     /// <summary>Applies repairs decided elsewhere, as the template's frame of references; returns those that changed a file.</summary>
     public Task<IReadOnlyList<Repair>> ApplyAsync(IReadOnlyList<Repair> repairs, CancellationToken ct) =>

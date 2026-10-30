@@ -43,8 +43,15 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
             var moves = types!;
             var before = baseDir;
             parts = step.Parts ?? PartsOf(root, nextDir, moves);
-            // The first run decides the parts here: its step reads a path's part from them, as every later run does.
-            step = step with { Parts = parts };
+            // The first run decides the parts here: its step reads a path's part from them, as every later run does. The
+            // files the template moves are read from the whole outputs, before a step cuts a move in two.
+            var movedTo = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var (to, from) in await renames.FindAsync(baseDir, nextDir, ct))
+            {
+                movedTo.TryAdd(from, to);
+            }
+
+            step = step with { Parts = parts, MovedTo = movedTo };
             // A part follows only the moves between the parts merged so far: a type that goes to a part not yet merged keeps its using.
             types = moves.Within(step.InDoneOrThis);
             (baseDir, nextDir) = (Folders.Overlay(baseDir, nextDir, step.InDone), Folders.Overlay(baseDir, nextDir, step.InDoneOrThis));
@@ -52,11 +59,16 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
             // sides of the step carry it too, so a later part merges them as the template changes them, with no conflict.
             await repair.BeforeBuildAsync(baseDir, moves.Within(step.InDone), [], ct);
             await repair.BeforeBuildAsync(nextDir, types, [], ct);
-            PackageVersions.KeepReferenced(baseDir, before);
-            PackageVersions.KeepReferenced(nextDir, before);
+            PackageVersions.KeepReferenced(baseDir, before, root);
+            PackageVersions.KeepReferenced(nextDir, before, root);
             // The repair by the build's errors cannot be carried by the trees: the template's files of the parts not merged
             // yet wait for their part, which brings them repaired.
             waiting = Folders.RelativeFiles(nextDir).Where(p => !step.InDoneOrThis(p)).ToHashSet(StringComparer.Ordinal);
+        }
+        else if (baseDir is not null)
+        {
+            // All at once: a package the template drops keeps its version while a project of the team's references it.
+            PackageVersions.KeepReferenced(nextDir, baseDir, root);
         }
 
         var packages = PackageVersions.Hold(baseDir, nextDir, next.Packages, TemplateVersions.IsMajorStep(current?.Template, next.Template));

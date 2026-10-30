@@ -21,6 +21,11 @@ internal static class QualifiedNames
     public static bool Names(string text, string ns, string type) =>
         text.Contains(ns + "." + type, StringComparison.Ordinal) && Qualifiers(text, ns, type).Any();
 
+    /// <summary>Whether the code of the text names the identifier anywhere: a string or a comment does not count.</summary>
+    public static bool NamesIdentifier(string text, string name) =>
+        CSharpSyntaxTree.ParseText(text).GetRoot().DescendantTokens()
+            .Any(t => t.IsKind(SyntaxKind.IdentifierToken) && t.ValueText == name);
+
     /// <summary>The text with every full name of <paramref name="type"/> in <paramref name="ns"/> naming it in <paramref name="with"/> instead.</summary>
     public static string Replace(string text, string ns, string type, string with)
     {
