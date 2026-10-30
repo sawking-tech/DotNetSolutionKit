@@ -106,13 +106,30 @@ internal static class UpgradeParts
             return left[0];
         }
 
-        var named = parts.FirstOrDefault(p => string.Equals(p, requested, StringComparison.OrdinalIgnoreCase) || p.EndsWith("." + requested, StringComparison.OrdinalIgnoreCase))
-            ?? throw new ArgumentException($"--part {requested} is no part of this upgrade: name one of {string.Join(", ", parts)}.");
+        var named = Named(parts, requested);
         return (done.Contains(named), IsShared(left[0]) && named != left[0]) switch
         {
             (true, _) => throw new InvalidOperationException($"The part {named} is merged already; the parts left: {string.Join(", ", left)}."),
             (_, true) => throw new InvalidOperationException($"The shared parts go first, in order, as the services use them: dotskit upgrade --part {left[0]}."),
             _ => named,
+        };
+    }
+
+    /// <summary>
+    /// The part --part names: by its full name, else by the last segment of a name, which only one part may end with.
+    /// </summary>
+    private static string Named(IReadOnlyList<string> parts, string requested)
+    {
+        if (parts.FirstOrDefault(p => string.Equals(p, requested, StringComparison.OrdinalIgnoreCase)) is { } exact)
+        {
+            return exact;
+        }
+
+        return parts.Where(p => p.EndsWith("." + requested, StringComparison.OrdinalIgnoreCase)).ToList() switch
+        {
+            [var one] => one,
+            [] => throw new ArgumentException($"--part {requested} is no part of this upgrade: name one of {string.Join(", ", parts)}."),
+            var several => throw new ArgumentException($"--part {requested} names {string.Join(", ", several)}: name one of them in full."),
         };
     }
 }

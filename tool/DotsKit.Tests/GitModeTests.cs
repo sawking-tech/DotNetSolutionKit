@@ -32,6 +32,41 @@ internal sealed class GitModeTests
     }
 
     [Test]
+    public async Task TheFilesGitHidesTheChangesOf_AreNamed_AndNoneOutsideGit()
+    {
+        var runner = new ProcessRunner();
+        var root = Folders.NewTemp("hidden");
+        Directory.CreateDirectory(Path.Combine(root, "src"));
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "a.json"), "{}");
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "b.json"), "{}");
+        var outside = await new Git(runner).HiddenChangesAsync(root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["init", "-q"], root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["add", "-A"], root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["update-index", "--assume-unchanged", "src/a.json"], root, CancellationToken.None);
+
+        var hidden = await new Git(runner).HiddenChangesAsync(root, CancellationToken.None);
+
+        outside.ShouldBeEmpty();
+        hidden.ShouldBe(["src/a.json"]);
+    }
+
+    [Test]
+    public void AFileNotInUtf8_IsCarriedAsItsBytes_AndARepairLeavesIt()
+    {
+        var root = Folders.NewTemp("cp1251");
+        var file = Path.Combine(root, "Old.cs");
+        // "using Old;" and a comment in Windows-1251: bytes no UTF-8 decoder takes.
+        byte[] bytes = [.. "using Old;\n// "u8, 0xCF, 0xF0, 0xE8, 0xE2, 0xE5, 0xF2, (byte)'\n'];
+        System.IO.File.WriteAllBytes(file, bytes);
+
+        var applied = new Solutions.RepairWriter().ApplyAsync([new Solutions.ReplaceUsing(file, "Old", "New")], CancellationToken.None).Result;
+
+        FileText.Read(root, "Old.cs")!.IsBinary.ShouldBeTrue();
+        applied.ShouldBeEmpty();
+        System.IO.File.ReadAllBytes(file).ShouldBe(bytes);
+    }
+
+    [Test]
     public async Task TheFilesTheSolutionsGitIgnores_AreNamed_AndNoneOutsideGit()
     {
         var runner = new ProcessRunner();

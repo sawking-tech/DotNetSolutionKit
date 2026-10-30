@@ -84,6 +84,18 @@ internal sealed class UpgradeByPartTests
     }
 
     [Test]
+    public void APartNamedByTheEndOfItsName_IsTakenOnlyWhenNoOtherPartEndsSo()
+    {
+        IReadOnlyList<string> parts = [UpgradeParts.Shared, UpgradeParts.Capabilities, "Acme.Billing.Orders", Orders];
+        string[] shared = [UpgradeParts.Shared, UpgradeParts.Capabilities];
+
+        Should.Throw<ArgumentException>(() => UpgradeParts.Next(parts, shared, "Orders")).Message
+            .ShouldBe($"--part Orders names Acme.Billing.Orders, {Orders}: name one of them in full.");
+        UpgradeParts.Next(parts, shared, Orders).ShouldBe(Orders);
+        UpgradeParts.Next(parts, shared, "Billing.Orders").ShouldBe("Acme.Billing.Orders");
+    }
+
+    [Test]
     public void TheFoldersOfAnIde_BesideAllSln_AreNoParts()
     {
         var root = Tree(($"src/services/{Orders}/a.cs", "x"), ("src/services/.vs/Acme/v17/.suo", "x"), ("src/services/.idea/workspace.xml", "x"));

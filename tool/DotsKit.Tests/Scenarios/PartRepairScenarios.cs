@@ -160,6 +160,7 @@ internal sealed class PartRepairScenarios
         }
 
         codes.ShouldAllBe(code => code == ExitCode.Done);
+        lines.ShouldContain(l => l.EndsWith(": shared, 1 of 5.", StringComparison.Ordinal), "the count takes the project the template adds");
         arrived.ShouldBe([false, true, true, true, true]);
         repaired.ShouldBe([false, false, true, true, true]);
         Manifest.Load(root)!.Template.ShouldBe(To);

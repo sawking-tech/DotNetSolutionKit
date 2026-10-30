@@ -75,6 +75,7 @@ internal sealed record Manifest
             _ when manifest.Services.Any(s => !TemplateArgs.Parse(s).HasService) => "has a service with no -S",
             _ when manifest.Packages is null => "has packages set to null",
             _ when manifest.Packages.Problem is { } packages => packages,
+            { Upgrade: { } upgrade } => upgrade.Problem,
             _ => null,
         };
         return problem is null ? manifest! : throw new InvalidOperationException($"{Layout.ManifestPath} {problem}: put it back from git.");
@@ -162,4 +163,16 @@ internal sealed record UpgradeInProgress
     public string PartsComment => "Every part of the upgrade in its order, taken at its first run from the solution and the template's next output: a project the template adds is a part of its own";
 
     public List<string>? Parts { get; init; }
+
+    /// <summary>Why the next part could not be taken from this upgrade as it is written; null when it can.</summary>
+    [JsonIgnore]
+    public string? Problem => this switch
+    {
+        _ when To is null || !Generation.TemplateVersions.IsVersion(To) => $"has an upgrade to no version of the template, but \"{To}\"",
+        _ when Done is null => "has an upgrade with no list of the parts done",
+        _ when Done.Distinct(StringComparer.Ordinal).Count() != Done.Count => "has an upgrade with a part done twice",
+        { Parts: { } parts } when Done.Except(parts, StringComparer.Ordinal).FirstOrDefault() is { } stray => $"has an upgrade with the part {stray} done, which is not among its parts",
+        { Parts: { } parts } when parts.Distinct(StringComparer.Ordinal).Count() != parts.Count => "has an upgrade with a part listed twice",
+        _ => null,
+    };
 }

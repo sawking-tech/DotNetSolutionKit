@@ -54,8 +54,8 @@ The template's parameters are passed as they are, in short or long form, in any 
 3. Compares the base, the new template output and the solution file by file, and shows the plan: every
    file with what happens to it and why, and the projects added to `All.sln` or removed from it.
 4. Asks before writing. `--yes` writes without asking. A tree that was clean at the start is written only while it
-   is clean at the same commit: a file saved or a commit made while the plan is built or waits for a yes stops the
-   write, and nothing is written.
+   is clean at the same commit; under `--allow-dirty`, only while its files are as the command found them. A file
+   saved or a commit made while the plan is built or waits for a yes stops the write, and nothing is written.
 5. Writes the files. Each new content goes beside its file first, then the files are swapped in with the
    originals kept aside. An error or Ctrl+C before the write is done puts the originals back; a file the disk
    refuses to put back is named in the error, with its original beside it as `*.dotskit-old`, and a new file it
@@ -139,6 +139,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 |---|---|---|
 | nothing, reads | `git status --porcelain` | a clean working tree before writing |
 | | `git rev-parse --show-prefix` | whether the solution is at the root of its repository, for the merge by git |
+| | `git ls-files -v` | files marked `assume-unchanged`: git hides their local changes from `git status`, and a rollback would lose them, so the command is refused |
 | | `git rev-parse` (`HEAD`, `--absolute-git-dir`, `MERGE_HEAD`, the branch, a commit's tree) | where the solution and the branch stand |
 | | `git merge-base --is-ancestor` | whether the working branch has the branch's last commit |
 | | `git config --path --get core.attributesFile` | the user's global attributes, kept under the merge driver's |

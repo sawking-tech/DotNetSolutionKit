@@ -25,6 +25,33 @@ internal sealed class TagArchiveTests
         failed.Message.ShouldContain("check the network");
     }
 
+    /// <summary>Records every request; none should be made.</summary>
+    private sealed class Recording : HttpMessageHandler
+    {
+        public List<Uri?> Requests { get; } = [];
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+        {
+            Requests.Add(request.RequestUri);
+            return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.NotFound));
+        }
+    }
+
+    [TestCase(@"1.0.0-\..\..\..\..\evil\repo\archive\refs\tags\v1")]
+    [TestCase("1.0.0-/../../../evil/repo/archive/refs/tags/v1")]
+    [TestCase("1.0.0-x?y=1")]
+    [TestCase("source")]
+    public async Task AStringThatIsNoRelease_IsRefused_BeforeAnyRequest(string version)
+    {
+        var handler = new Recording();
+        using var http = new HttpClient(handler);
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => new TagArchive(http).FolderOfAsync(version, CancellationToken.None));
+
+        refused.Message.ShouldContain("is not a release of the template");
+        handler.Requests.ShouldBeEmpty();
+    }
+
     [Test]
     public async Task ACancelTheUserAskedFor_StaysACancel()
     {

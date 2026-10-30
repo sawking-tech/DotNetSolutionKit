@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace DotsKit;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace DotsKit;
 /// long ones in any case (<c>--Storage</c>, <c>--storage</c>, <c>--api-gateway</c>) map to the parameter's own
 /// name, so two commands compare by meaning.
 /// </summary>
-internal sealed class TemplateArgs
+internal sealed partial class TemplateArgs
 {
     private const string On = "true";
     public const string ServiceName = "ServiceNameOrCustom";
@@ -97,6 +99,21 @@ internal sealed class TemplateArgs
         "NamespaceRoot", "ProductName", ServiceName, HttpPort, Messaging, Notify, "Database", "Deploy", "TestFramework", "Agent",
     };
 
+    /// <summary>The parameters that name: the template puts their values into namespaces, types and paths.</summary>
+    private static readonly HashSet<string> Names = new(StringComparer.OrdinalIgnoreCase) { "NamespaceRoot", "ProductName", ServiceName };
+
+    /// <summary>A name of C#: identifiers by dots. The template writes it into code and file names as it is.</summary>
+    [GeneratedRegex(@"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*\z")]
+    private static partial Regex DottedName();
+
+    /// <summary>A port: one to five digits.</summary>
+    [GeneratedRegex(@"^[0-9]{1,5}\z")]
+    private static partial Regex PortNumber();
+
+    /// <summary>A bool or a choice of the template, one or several by | or a comma.</summary>
+    [GeneratedRegex(@"^[A-Za-z0-9]+([|,][A-Za-z0-9]+)*\z")]
+    private static partial Regex Choice();
+
     private readonly List<KeyValuePair<string, string>> _values;
 
     private TemplateArgs(List<KeyValuePair<string, string>> values) => _values = values;
@@ -116,10 +133,27 @@ internal sealed class TemplateArgs
                 throw new ArgumentException($"{args[i]} needs a value.");
             }
 
-            values.Add(new(name, hasValue ? args[++i] : On));
+            var value = hasValue ? args[++i] : On;
+            if (WhyNotAValue(name, value) is { } why)
+            {
+                throw new ArgumentException($"{args[i - (hasValue ? 1 : 0)]} {value}: {why}");
+            }
+
+            values.Add(new(name, value));
         }
         return new TemplateArgs(values);
     }
+
+    /// <summary>
+    /// Why a value cannot be given to the parameter: the template writes a name into code and paths, so a value is
+    /// checked by the kind of its parameter, whether it comes from a command or from a manifest in the repository.
+    /// </summary>
+    private static string? WhyNotAValue(string name, string value) => name switch
+    {
+        _ when Names.Contains(name) => DottedName().IsMatch(value) ? null : "a name is letters, digits and _ in parts by dots, as a namespace of C#.",
+        HttpPort => PortNumber().IsMatch(value) ? null : "a port is a number.",
+        _ => Choice().IsMatch(value) ? null : "a value of the template is letters and digits.",
+    };
 
     /// <summary>
     /// The template's own name of a parameter, whatever form it was given in. dotnet new tells case apart; the

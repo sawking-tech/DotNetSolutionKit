@@ -20,9 +20,18 @@ internal sealed class TagArchive(HttpClient http) : ITagArchive
     /// <summary>Where the template lives in the repository, in every tag from 1.0.0.</summary>
     private const string TemplateFolder = "template";
 
+    /// <summary>The prefix of the folder a tag is unpacked into; the version stays out of a path.</summary>
+    private const string TagFolder = "tag";
+
     public async Task<string> FolderOfAsync(string version, CancellationToken ct)
     {
-        var url = string.Format(System.Globalization.CultureInfo.InvariantCulture, ArchiveUrl, version);
+        // The version names the tag: a string of the repository that is no release must not lead the address elsewhere.
+        if (version == TemplateSource.SourcesVersion || !TemplateVersions.IsVersion(version))
+        {
+            throw new InvalidOperationException($"\"{version}\" is not a release of the template: name one, 2.x.y.");
+        }
+
+        var url = string.Format(System.Globalization.CultureInfo.InvariantCulture, ArchiveUrl, Uri.EscapeDataString(version));
         try
         {
             return await FetchAsync(version, url, ct);
@@ -42,7 +51,7 @@ internal sealed class TagArchive(HttpClient http) : ITagArchive
             throw new InvalidOperationException($"The template {version} is not on nuget.org, and its tag cannot be fetched ({url}: {(int)response.StatusCode}): name a released version, or check the network.");
         }
 
-        var target = Folders.NewTemp("tag-" + version);
+        var target = Folders.NewTemp(TagFolder);
         await using (var gzip = new GZipStream(await response.Content.ReadAsStreamAsync(ct), CompressionMode.Decompress))
         {
             await TarFile.ExtractToDirectoryAsync(gzip, target, overwriteFiles: true, ct);

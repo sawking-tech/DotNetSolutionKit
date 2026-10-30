@@ -34,37 +34,48 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
             ?? throw new InvalidOperationException($"{Layout.ManifestPath} is missing: describe the solution first, dotskit init.");
         if (current.Upgrade is { } inProgress)
         {
+            // The tool may have changed since the upgrade began: the release it goes to is checked again on every run.
+            CheckTarget(current.Template, inProgress.To);
             return await NextPartAsync(root, current, inProgress, options, ct);
         }
 
-        var target = options.To ?? (onSources ? TemplateSource.SourcesVersion : toolVersion);
+        var target = options.To ?? DefaultTarget;
         if (current.Template == target)
         {
             terminal.Info($"The solution is of the template {target} already.");
             return ExitCode.Done;
         }
-        if (TemplateVersions.WhyNotUpgraded(current.Template, toolVersion, onSources) is { } why)
-        {
-            throw new InvalidOperationException(why);
-        }
 
-        if (options.To is not null && TemplateVersions.WhyNotTarget(current.Template, options.To, toolVersion, onSources) is { } whyNotTo)
-        {
-            throw new InvalidOperationException(whyNotTo);
-        }
-
+        CheckTarget(current.Template, target);
         if (!options.AllAtOnce)
         {
             return await NextPartAsync(root, current, new UpgradeInProgress { To = target, Done = [] }, options, ct);
         }
 
         await GitPreconditions.CheckAsync(git, root, options, ct);
-        var startHead = options.AllowDirty ? null : await git.CleanHeadAsync(root, ct);
+        var start = await TreeStart.OfAsync(git, root, options, ct);
 
         terminal.Info($"Upgrading the solution from the template {current.Template} to {target}.");
         terminal.Info(UpgradeGuide.Of(current.Template, target));
         var plan = await planner.BuildAsync(root, current, current.WithTemplate(target), new Merging.MergeMode(options.ByGit, options.Force), ct);
-        return await execution.RunAsync(plan, options, startHead, ct);
+        return await execution.RunAsync(plan, options, start, ct);
+    }
+
+    /// <summary>Where an upgrade goes when --to names no release: the tool's version, or the template's sources.</summary>
+    private string DefaultTarget => onSources ? TemplateSource.SourcesVersion : toolVersion;
+
+    /// <summary>Refuses an upgrade from <paramref name="from"/> to <paramref name="to"/> this tool cannot make, with what to do instead.</summary>
+    private void CheckTarget(string from, string to)
+    {
+        if (TemplateVersions.WhyNotUpgraded(from, toolVersion, onSources) is { } why)
+        {
+            throw new InvalidOperationException(why);
+        }
+
+        if (to != DefaultTarget && TemplateVersions.WhyNotTarget(from, to, toolVersion, onSources) is { } whyNotTo)
+        {
+            throw new InvalidOperationException(whyNotTo);
+        }
     }
 
     /// <summary>
@@ -85,7 +96,7 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
         }
 
         await GitPreconditions.CheckAsync(git, root, options, ct);
-        var startHead = options.AllowDirty ? null : await git.CleanHeadAsync(root, ct);
+        var start = await TreeStart.OfAsync(git, root, options, ct);
         var target = current.WithTemplate(upgrade.To) with { Upgrade = null };
         var files = Folders.RelativeFiles(root).ToList();
         IReadOnlyList<string> parts = upgrade.Parts ?? UpgradeParts.In(files, CommonReferences.Read(root, files));
@@ -97,13 +108,10 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
 
         if (options.Part is null && parts.All(upgrade.Done.Contains))
         {
-            return await FinishAsync(root, current, upgrade, parts, options, startHead, ct);
+            return await FinishAsync(root, current, upgrade, parts, options, start, ct);
         }
 
         var part = UpgradeParts.Next(parts, upgrade.Done, options.Part);
-        var last = parts.Count(p => !upgrade.Done.Contains(p)) == 1;
-        terminal.Info($"Upgrading the solution from the template {current.Template} to {upgrade.To}, a part at a time: {part}, "
-            + $"{upgrade.Done.Count + 1} of {parts.Count}{(last ? ", the last" : "")}.");
         if (upgrade.Done.Count == 0)
         {
             terminal.Info(UpgradeGuide.Of(current.Template, upgrade.To));
@@ -111,14 +119,17 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
 
         var plan = await planner.BuildAsync(root, current with { Upgrade = null }, target, new Merging.MergeMode(options.ByGit, options.Force), ct,
             new PartStep(upgrade.Done.ToHashSet(StringComparer.Ordinal), part, upgrade.Parts));
-        // The first run takes the parts from the template's next output too: a project it adds is a part, possibly after this one.
+        // The first run takes the parts from the template's next output too: a project it adds is a part, possibly after
+        // this one, so the count is said once the plan has them.
         var all = plan.Parts ?? parts;
-        last = !all.Any(p => !upgrade.Done.Contains(p) && p != part);
+        var last = !all.Any(p => !upgrade.Done.Contains(p) && p != part);
+        terminal.Info($"Upgrading the solution from the template {current.Template} to {upgrade.To}, a part at a time: {part}, "
+            + $"{upgrade.Done.Count + 1} of {all.Count}{(last ? ", the last" : "")}.");
         return await execution.RunAsync(plan with
         {
             Next = current.WithPartMerged(upgrade.To, part, last, all),
             OnConflicts = last ? current.WithPartMerged(upgrade.To, part, last: false, all) : null,
-        }, options, startHead, ct);
+        }, options, start, ct);
     }
 
     /// <summary>
@@ -126,13 +137,13 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
     /// every move of the upgrade are repaired, the solution builds, and the manifest moves to the release.
     /// </summary>
     private async Task<ExitCode> FinishAsync(string root, Manifest current, UpgradeInProgress upgrade, IReadOnlyList<string> parts, Options options,
-        string? startHead, CancellationToken ct)
+        TreeStart start, CancellationToken ct)
     {
         terminal.Info($"Finishing the upgrade from the template {current.Template} to {upgrade.To}: every part is merged; the usings are repaired and the solution builds.");
         var target = current.WithTemplate(upgrade.To) with { Upgrade = null };
         // Every part merged: the two trees of the step are the next output, and the tool's own merge has nothing to write but the manifest.
         var plan = await planner.BuildAsync(root, current with { Upgrade = null }, target, new Merging.MergeMode(ByGit: false, options.Force), ct,
             new PartStep(upgrade.Done.ToHashSet(StringComparer.Ordinal), Part: "", parts));
-        return await execution.RunAsync(plan with { Next = target }, options, startHead, ct);
+        return await execution.RunAsync(plan with { Next = target }, options, start, ct);
     }
 }
