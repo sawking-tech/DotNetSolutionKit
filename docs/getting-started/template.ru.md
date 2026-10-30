@@ -2,7 +2,7 @@
 
 ## Установка шаблона
 
-[dotskit](dotskit.ru.md) делает то же и вдобавок добавляет флаги уже сгенерированным сервисам, сохраняя
+[dotskit](tool.ru.md) делает то же и вдобавок добавляет флаги уже сгенерированным сервисам, сохраняя
 правки команды. Эта страница - о шаблоне без инструмента.
 
 Шаблон лежит в папке `template` этого репозитория, рядом со своим `.template.config`:
@@ -27,7 +27,7 @@ dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
 ```
 
 Каждый следующий сервис добавляется из корня решения. Шаблон в любой команде отвечает и на второе короткое
-имя, `dotskit`; инструмент с тем же именем добавляет сервис командой `dotskit new` ([dotskit](dotskit.ru.md)):
+имя, `dotskit`; инструмент с тем же именем добавляет сервис командой `dotskit new` ([dotskit](tool.ru.md)):
 
 ```bash
 dotnet new dotskit -N MyCompany -P MyProduct -S Billing
@@ -72,7 +72,7 @@ dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 | `--Audit` | `false` | [Журнал аудита](../features/audit.md) изменений сущностей; действует только с `--Messaging outbox`; без него генерация сообщает, что флаг не применён. |
 | `--ApiGateway` | `false` | [API-шлюз](../features/api-gateway.md) на YARP вместо сервиса. Только без `--Solution`; с ним генерация сообщает, что флаг не применён. |
 | `--Deploy` | `compose` | [Файлы развёртывания](../operations/deployment.md): `compose`, `k8s` или `none`. Одно значение на решение: передавайте то же самое каждому следующему сервису. |
-| `--Agent` | `claude` | [Правила и скиллы для ИИ-агента](working-with-ai-agents.md): `claude`, `opencode` или `none`. С `--Solution`. |
+| `--Agent` | `claude` | [Правила и скиллы для ИИ-агента](agents.md): `claude`, `opencode` или `none`. С `--Solution`. |
 | `--HttpPort` | свободный порт | Порт в `launchSettings.json` и на хосте под compose. Без параметра берётся свободный порт из диапазона 5000-5999 на машине, где идёт генерация, поэтому сервисы, сгенерированные один за другим, не получают один и тот же порт. |
 
 `-I`, `--Vault`, `--DiffApi`, `--FeatureFlags`, `--HierarchyRules`, `--Storage`, `--ClickHouse` и `--Audit` добавляют файлы в `Common`,

@@ -11,7 +11,7 @@ internal interface IIgnoredFiles
 
 /// <summary>
 /// <c>git ls-files --others --ignored --exclude-standard</c>: the files on disk the solution's rules leave out of git.
-/// Every git command here is listed in docs/getting-started/dotskit.md, "What dotskit runs in git": a command added
+/// Every git command here is listed in docs/getting-started/tool.md, "What dotskit runs in git": a command added
 /// or changed here goes there too.
 /// </summary>
 internal sealed class GitIgnoredFiles(IProcessRunner runner) : IIgnoredFiles

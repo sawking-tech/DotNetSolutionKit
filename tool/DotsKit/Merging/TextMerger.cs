@@ -16,7 +16,7 @@ internal interface ITextMerger
 
 /// <summary>
 /// <c>git merge-file</c>: conflicts are marked &lt;&lt;&lt;&lt;&lt;&lt;&lt; solution / &gt;&gt;&gt;&gt;&gt;&gt;&gt; template.
-/// Every git command here is listed in docs/getting-started/dotskit.md, "What dotskit runs in git": a command added
+/// Every git command here is listed in docs/getting-started/tool.md, "What dotskit runs in git": a command added
 /// or changed here goes there too.
 /// </summary>
 internal sealed class GitMergeFile(IProcessRunner runner) : ITextMerger

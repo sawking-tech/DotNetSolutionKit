@@ -7,7 +7,7 @@
 ## Context
 
 Most of the repository's code is generated with an AI model used as a tool, as
-[Working with AI agents](../getting-started/working-with-ai-agents.md) describes: the author makes the decisions,
+[Working with AI agents](../getting-started/agents.md) describes: the author makes the decisions,
 lays down the architecture and the rules, the model generates the code, and the author checks the result and answers
 for it. Until 2.9 the style of that code was held by the words of CLAUDE.md alone. A probabilistic generator, by
 its nature, gives no guarantee that its output keeps to rules written in words. A formatter does, it is cheap to add, and its

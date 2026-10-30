@@ -26,7 +26,7 @@ internal interface IGit
 }
 
 /// <summary>
-/// <c>git status --porcelain</c>, <c>git rev-parse --show-prefix</c> and <c>git ls-files -v</c>. Every git command here is listed in docs/getting-started/dotskit.md, "What dotskit
+/// <c>git status --porcelain</c>, <c>git rev-parse --show-prefix</c> and <c>git ls-files -v</c>. Every git command here is listed in docs/getting-started/tool.md, "What dotskit
 /// runs in git": a command added or changed here goes there too.
 /// </summary>
 internal sealed class Git(IProcessRunner runner) : IGit

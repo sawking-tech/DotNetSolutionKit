@@ -34,7 +34,7 @@ derived from the schema name. Two replicas of one service starting together do n
 schema twice; the second waits for the first and finds nothing to do.
 
 A service with no migrations at all logs a fatal line naming the command that adds the first one; see
-[generating a solution](../getting-started/generating-a-solution.md#add-the-first-migration).
+[generating a solution](../getting-started/template.md#add-the-first-migration).
 
 ## Repositories
 

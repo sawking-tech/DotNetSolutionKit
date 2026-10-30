@@ -18,7 +18,7 @@ agent writes everything right and does not damage the architecture. Do not take 
 trust: check what can be checked formally with tests, and the rest by eye. The template works without
 agents as well.
 
-## What the solution gets
+## The rules and skills of a solution
 
 A generated solution gets rules for the agent and skills. `--Agent` chooses their format:
 
@@ -55,7 +55,7 @@ result must be. A skill names the invariants and the problem spots, explains the
 non-obvious ones, and shows by examples how to write code without breaking the architecture the project
 is built on.
 
-## How to use them
+## Using them
 
 The agent reads the rules file itself. A skill is called by its name or picked up when the task matches its
 description. A skill goes step by step and points to the documentation of the mechanism, so the agent does
