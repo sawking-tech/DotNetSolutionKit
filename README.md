@@ -7,16 +7,23 @@ Made by Vladimir Savkin at [sawking.tech](https://sawking.tech/).
 Site: [dotskit.sawking.tech](https://dotskit.sawking.tech/). Documentation, in English and Russian:
 [dotskit.sawking.tech/docs.html](https://dotskit.sawking.tech/docs.html).
 
-**DotNetSolutionKit (dotskit)** generates a .NET microservice solution to a team's needs: DDD and Clean Architecture, CI, deployment and tests, with modules and integrations with infrastructure services turned on by flags. `dotskit` adds services to the solution and flags to its services. The generated solution is an ordinary .NET solution the team owns.
+**DotNetSolutionKit (dotskit)** generates a .NET solution to a team's needs - the frame for DDD and Clean Architecture, CI, deployment and tests, with modules and integrations with infrastructure services turned on by flags. It carries no business logic of its own: a monolith, one web service or a high-load set of microservices is written on top, as strictly as the team chooses. `dotskit` adds services to the solution and flags to its services. The generated solution is an ordinary .NET solution the team owns.
 
 `dotskit upgrade` brings the template's later improvements into a generated solution under the team's control and helps the team maintain its solution: a three-way merge with the team's code, where what does not merge is a conflict for the team to resolve.
+
+No lock-in, and nothing imposed. A generated solution is an ordinary .NET solution: no runtime of the
+template, no package of ours it has to reference, no service to call home. The tool is useful, not required -
+the template works through `dotnet new` alone, and a solution that stops upgrading keeps building and shipping.
+The same goes for the architecture: DDD and Clean Architecture are what the layout is ready for, not rules it
+enforces. A team develops the way it finds right, carries a minimum of files it did not ask for, and can try
+what the template offers whenever it wants to.
 
 What it gives a solution in full - the principles, the economics, the cost:
 [what the template gives](docs/getting-started/what-it-gives.md).
 
 ## Install and generate
 
-The recommended way is the tool [dotskit](docs/getting-started/dotskit.md): it generates a solution, adds
+The recommended way is the tool [dotskit](docs/getting-started/tool.md): it generates a solution, adds
 services and flags to it, and upgrades it to a newer version of the template, keeping the team's changes by
 a three-way merge. A solution it generates carries its manifest, so `dotskit upgrade` works from the first
 commit.
@@ -87,11 +94,11 @@ shows their files and how their CI ran.
 | `--Audit` | `false` | [Audit journal](docs/features/audit.md) of entity changes, through the outbox; with `--Messaging outbox`. |
 | `--ApiGateway` | `false` | An [API gateway](docs/features/api-gateway.md) on YARP in place of a service, into a solution already there (without `--Solution`). |
 | `--Deploy` | `compose` | [Deployment files](docs/operations/deployment.md): `compose`, `k8s` or `none`. |
-| `--Agent` | `claude` | [Rules and skills for an AI agent](docs/getting-started/working-with-ai-agents.md): `claude`, `opencode` or `none`. |
+| `--Agent` | `claude` | [Rules and skills for an AI agent](docs/getting-started/agents.md): `claude`, `opencode` or `none`. |
 | `--HttpPort` | free port | Port in `launchSettings.json` and on the host under compose. |
 
 Details, dotted names and running locally:
-[generating a solution](docs/getting-started/generating-a-solution.md).
+[generating a solution](docs/getting-started/template.md).
 
 ## Documentation
 

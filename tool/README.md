@@ -48,7 +48,7 @@ conflicts marked `<<<<<<< solution` / `>>>>>>> template`.
 What a solution was made from is kept in `.dotskit/manifest.json`: commit it with the solution.
 
 Every git command the tool runs in a solution, and what each does to the repository, is listed in
-[dotskit.md, What dotskit runs in git](https://github.com/sawking-tech/DotNetSolutionKit/blob/master/docs/getting-started/dotskit.md#what-dotskit-runs-in-git).
+[tool.md, What dotskit runs in git](https://github.com/sawking-tech/DotNetSolutionKit/blob/master/docs/getting-started/tool.md#the-git-commands-dotskit-runs).
 It never commits the merge, never pushes and never checks out a branch.
 
 What a solution may have to change by hand, release by release, is in
