@@ -20,6 +20,9 @@ internal interface IGit
     /// None outside git.
     /// </summary>
     Task<IReadOnlyList<string>> HiddenChangesAsync(string root, CancellationToken ct);
+
+    /// <summary>Whether the folder is inside a git repository: outside one there is nothing to show or undo a write with.</summary>
+    Task<bool> IsRepositoryAsync(string root, CancellationToken ct);
 }
 
 /// <summary>
@@ -56,6 +59,9 @@ internal sealed class Git(IProcessRunner runner) : IGit
 
     /// <summary>The letter and the space git ls-files -v puts before a path.</summary>
     private const int TagLength = 2;
+
+    public async Task<bool> IsRepositoryAsync(string root, CancellationToken ct) =>
+        (await runner.RunAsync("git", ["rev-parse", "--is-inside-work-tree"], root, ct)).Code == 0;
 
     public async Task<string> PrefixAsync(string root, CancellationToken ct)
     {

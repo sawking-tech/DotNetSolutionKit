@@ -3,7 +3,27 @@ namespace DotsKit.Io;
 internal static class Folders
 {
     /// <summary>The folder of this run: every temporary folder is inside it, and it goes when the run ends.</summary>
-    private static readonly string Run = Path.Combine(RealPath(Path.GetTempPath()), "dotskit", Guid.NewGuid().ToString("N")[..8]);
+    private static readonly string Run = Path.Combine(OwnFolder("runs"), Guid.NewGuid().ToString("N")[..8]);
+
+    /// <summary>
+    /// A folder of the tool's own under the user's local data, made for the user alone on Linux and macOS. Not the
+    /// system's temp: /tmp is shared between the users of a Linux host, and a shared, predictable path would let
+    /// another user plant a cached output, swap a run's files or hold a lock.
+    /// </summary>
+    public static string OwnFolder(string purpose)
+    {
+        var path = Path.Combine(RealPath(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create)), "dotskit", purpose);
+        if (OperatingSystem.IsWindows())
+        {
+            Directory.CreateDirectory(path);
+        }
+        else
+        {
+            Directory.CreateDirectory(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
+
+        return path;
+    }
 
     /// <summary>
     /// The path with every symbolic link on it resolved. On macOS the temp folder is under /var, a link to

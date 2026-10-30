@@ -85,9 +85,21 @@ internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> pa
         return _install.WaitAsync(ct);
     }
 
-    private async Task InstallAsync() =>
-        await runner.RunCheckedAsync("dotnet", ["new", "install", await package(CancellationToken.None), "--force", "--debug:custom-hive", _hive],
-            Path.GetTempPath(), CancellationToken.None);
+    private async Task InstallAsync()
+    {
+        var source = await package(CancellationToken.None);
+        try
+        {
+            await runner.RunCheckedAsync("dotnet", ["new", "install", source, "--force", "--debug:custom-hive", _hive],
+                Path.GetTempPath(), CancellationToken.None);
+        }
+        catch (InvalidOperationException)
+        {
+            // dotnet new reports pages of stderr; what a person needs is the one likely cause and where the releases are.
+            throw new InvalidOperationException($"The template {source} could not be installed: a release of this version may not exist - "
+                + $"name one of {Repository.Url}/releases - or nuget.org is unreachable.");
+        }
+    }
 }
 
 internal sealed class TemplateSource(IProcessRunner runner, ITagArchive tags) : ITemplateSource

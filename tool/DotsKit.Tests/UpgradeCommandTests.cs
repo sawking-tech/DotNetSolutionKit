@@ -23,6 +23,8 @@ internal sealed class UpgradeCommandTests
 
         public IReadOnlyList<string> Hidden { get; init; } = [];
 
+        public bool Repository { get; init; } = true;
+
         /// <summary>What happens to the tree while the plan is built and waits for a yes.</summary>
         public Action? WhilePlanning { get; init; }
 
@@ -35,7 +37,12 @@ internal sealed class UpgradeCommandTests
 
         public UpgradeCommand Command() =>
             new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(), new ReferenceRepair(new RepairWriter(), new Builder()), new Terminal(this), new Git(this)),
-                new Git(this), new Terminal(this), ToolVersion, onSources: false);
+                new Git(this), new NoIgnores(), new Terminal(this), ToolVersion, onSources: false);
+
+        private sealed class NoIgnores : Merging.IIgnoredFiles
+        {
+            public Task<IReadOnlySet<string>> InAsync(string root, CancellationToken ct) => Task.FromResult<IReadOnlySet<string>>(new HashSet<string>());
+        }
 
         private sealed class Planner(Fakes fakes) : IPlanner
         {
@@ -65,6 +72,8 @@ internal sealed class UpgradeCommandTests
                 Task.FromResult(fakes.Heads.Count > 0 ? fakes.Heads.Dequeue() : fakes.Clean ? "head" : null);
 
             public Task<IReadOnlyList<string>> HiddenChangesAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Hidden);
+
+            public Task<bool> IsRepositoryAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Repository);
 
             public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
         }
@@ -187,23 +196,18 @@ internal sealed class UpgradeCommandTests
         var first = new Fakes();
 
         await first.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
-        // The capabilities, between the shared part and the service.
         File.WriteAllText(Path.Combine(root, Layout.ManifestPath), first.Written!.Serialize());
-        var middle = new Fakes();
-        await middle.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
-
-        File.WriteAllText(Path.Combine(root, Layout.ManifestPath), middle.Written!.Serialize());
         var second = new Fakes();
         await second.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
 
-        first.Lines.ShouldContain(l => l.EndsWith(": shared, 1 of 3.", StringComparison.Ordinal));
+        first.Lines.ShouldContain(l => l.EndsWith(": shared, 1 of 2.", StringComparison.Ordinal));
         first.Step!.Part.ShouldBe(UpgradeParts.Shared);
         first.Written!.Template.ShouldBe("2.7.0");
         first.Written.Upgrade!.Done.ShouldBe([UpgradeParts.Shared]);
         first.Lines.ShouldContain("Written; the solution builds.");
         first.Lines.ShouldContain(l => l.Contains("is written: commit it, then the next part", StringComparison.Ordinal));
         second.Step!.Part.ShouldBe("Acme.Shop.Orders");
-        second.Step.Done.ShouldBe([UpgradeParts.Shared, UpgradeParts.Capabilities]);
+        second.Step.Done.ShouldBe([UpgradeParts.Shared]);
         second.Written!.Template.ShouldBe(ToolVersion);
         second.Written.Upgrade.ShouldBeNull();
     }

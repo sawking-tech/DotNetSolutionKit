@@ -16,10 +16,11 @@ namespace DotsKit.Commands;
 /// <param name="planner">Builds the plan: the trees of the template, their merge with the solution and the report.</param>
 /// <param name="execution">Shows the plan, asks, writes it and builds.</param>
 /// <param name="git">Tells whether the solution's working tree is clean, and whether it is at the root of its repository, before anything is written.</param>
+/// <param name="ignored">The files the solution's git ignores: a folder of them, as TestResults, is no part of an upgrade.</param>
 /// <param name="terminal">Says where the solution goes from and to, or that it is there already.</param>
 /// <param name="toolVersion">The version of the tool, where an upgrade goes when --to names no release.</param>
 /// <param name="onSources">The tool runs against the template's sources: it upgrades any release to them.</param>
-internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, IGit git, ITerminal terminal, string toolVersion, bool onSources)
+internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, IGit git, Merging.IIgnoredFiles ignored, ITerminal terminal, string toolVersion, bool onSources)
 {
     public async Task<ExitCode> RunAsync(Options options, string folder, CancellationToken ct)
     {
@@ -98,7 +99,9 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
         await GitPreconditions.CheckAsync(git, root, options, ct);
         var start = await TreeStart.OfAsync(git, root, options, ct);
         var target = current.WithTemplate(upgrade.To) with { Upgrade = null };
-        var files = Folders.RelativeFiles(root).ToList();
+        // What the solution's git ignores is not the solution: a TestResults left by a test run is no part.
+        var leftAlone = await ignored.InAsync(root, ct);
+        var files = Folders.RelativeFiles(root).Where(f => !leftAlone.Contains(f)).ToList();
         IReadOnlyList<string> parts = upgrade.Parts ?? UpgradeParts.In(files, CommonReferences.Read(root, files));
         if (upgrade.Parts is not null && UpgradeParts.In(files).Except(parts).ToList() is [_, ..] appeared)
         {

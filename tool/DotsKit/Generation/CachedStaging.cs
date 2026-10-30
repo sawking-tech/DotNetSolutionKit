@@ -12,7 +12,7 @@ namespace DotsKit.Generation;
 /// </summary>
 internal sealed class CachedStaging(IStaging inner, string toolVersion, Func<string?> sourcesFolder) : IStaging
 {
-    private static readonly string Folder = Path.Combine(Folders.RealPath(Path.GetTempPath()), "dotskit", "outputs");
+    private static readonly string Folder = Folders.OwnFolder("outputs");
 
     /// <summary>How long an output is kept: an upgrade's parts come in one sitting, rarely over days.</summary>
     private static readonly TimeSpan Kept = TimeSpan.FromDays(2);

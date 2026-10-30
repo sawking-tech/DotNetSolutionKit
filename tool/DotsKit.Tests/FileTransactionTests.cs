@@ -21,6 +21,64 @@ internal sealed class FileTransactionTests
         return root;
     }
 
+    [Test]
+    public async Task APathThroughALinkedFolder_IsRefused_AndNothingIsWritten()
+    {
+        var root = Folders.NewTemp("txn-link");
+        var outside = Folders.NewTemp("txn-outside");
+        try
+        {
+            Directory.CreateSymbolicLink(Path.Combine(root, "deploy"), outside);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            Assert.Ignore("creating a symbolic link needs a privilege this machine does not give");
+        }
+
+        var transaction = new FileTransaction(root);
+        transaction.Write("deploy/evil.txt", [1]);
+        transaction.Write("src/ok.txt", [2]);
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => transaction.CommitAsync(() => Task.CompletedTask));
+
+        refused.Message.ShouldContain("deploy/evil.txt leads outside the solution through a link");
+        File.Exists(Path.Combine(outside, "evil.txt")).ShouldBeFalse();
+        File.Exists(Path.Combine(root, "src", "ok.txt")).ShouldBeFalse("the transaction writes all or nothing");
+    }
+
+    [Test]
+    public void ACommittedSymbolicLink_IsCarriedAsALink_AndNeverRead()
+    {
+        var root = Folders.NewTemp("text-link");
+        var secret = Path.Combine(Folders.NewTemp("text-outside"), "credentials.txt");
+        File.WriteAllText(secret, "the secret");
+        try
+        {
+            File.CreateSymbolicLink(Path.Combine(root, "linked.txt"), secret);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            Assert.Ignore("creating a symbolic link needs a privilege this machine does not give");
+        }
+
+        var text = Merging.FileText.Read(root, "linked.txt")!;
+
+        text.IsBinary.ShouldBeTrue();
+        Encoding.UTF8.GetString(text.Raw!).ShouldNotContain("the secret");
+    }
+
+    [Test]
+    public void TheToolsOwnFolders_AreUnderTheUsersLocalData_NotTheSharedTemp()
+    {
+        var folder = Folders.OwnFolder("outputs");
+
+        folder.ShouldStartWith(Folders.RealPath(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)));
+        if (!OperatingSystem.IsWindows())
+        {
+            (File.GetUnixFileMode(folder) & (UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.OtherRead | UnixFileMode.OtherWrite)).ShouldBe(UnixFileMode.None);
+        }
+    }
+
     private static FileTransaction Changes(string root)
     {
         var transaction = new FileTransaction(root);

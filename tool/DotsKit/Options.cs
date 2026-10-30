@@ -17,7 +17,7 @@ internal sealed class Options
           --yes                     write without asking (CI)
           --force                   in a conflict take the template's side; your lines stay in git history
           --no-build                do not build the solution after writing
-          --allow-dirty             run on a working tree with uncommitted changes
+          --allow-dirty             run on a working tree with uncommitted changes; takes --merge files
           --template-version 2.x.y  init: the version a solution was made by, where it does not say
           --to 2.x.y                upgrade: the release to go to, not newer than the tool
           --merge files             merge by the tool and write the files, instead of a git merge of dotskit/template

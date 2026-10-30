@@ -20,6 +20,8 @@ internal sealed class NewCommandTests
 
         public IReadOnlyList<string> Hidden { get; init; } = [];
 
+        public bool Repository { get; init; } = true;
+
         public bool Answer { get; init; }
         public int Planned { get; private set; }
         public int Written { get; private set; }
@@ -53,6 +55,8 @@ internal sealed class NewCommandTests
             public Task<string?> CleanHeadAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Clean ? "head" : null);
 
             public Task<IReadOnlyList<string>> HiddenChangesAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Hidden);
+
+            public Task<bool> IsRepositoryAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Repository);
 
             public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
         }

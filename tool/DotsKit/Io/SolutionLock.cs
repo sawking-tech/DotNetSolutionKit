@@ -11,7 +11,7 @@ namespace DotsKit.Io;
 /// </summary>
 internal static class SolutionLock
 {
-    private static readonly string Folder = Path.Combine(Folders.RealPath(Path.GetTempPath()), "dotskit", "locks");
+    private static readonly string Folder = Folders.OwnFolder("locks");
 
     /// <summary>Hex characters of the path's hash in the lock's name: enough to tell solutions apart.</summary>
     private const int KeyLength = 16;

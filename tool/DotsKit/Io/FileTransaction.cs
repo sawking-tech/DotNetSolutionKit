@@ -12,6 +12,8 @@ internal sealed class FileTransaction(string root)
     private const string OldSuffix = ".dotskit-old";
 
     private readonly Dictionary<string, byte[]?> _pending = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, bool> _checkedFolders = new(PathComparer);
+    private readonly Lazy<string> _realRoot = new(() => Folders.RealPath(root));
     private readonly List<string> _guarded = [];
     private readonly List<string> _createdFolders = [];
 
@@ -196,5 +198,44 @@ internal sealed class FileTransaction(string root)
         }
     }
 
-    private string Full(string relativePath) => Path.Combine(root, relativePath);
+    /// <summary>
+    /// The full path of a file of the plan, refused when a link on its way leads outside the solution: a committed
+    /// symbolic link must not have the transaction write or delete elsewhere under a template file's name.
+    /// </summary>
+    private string Full(string relativePath)
+    {
+        var target = Path.GetFullPath(Path.Combine(root, relativePath));
+        var folder = Path.GetDirectoryName(target)!;
+        if (!_checkedFolders.TryGetValue(folder, out var inside))
+        {
+            _checkedFolders[folder] = inside = IsInside(_realRoot.Value, Folders.RealPath(Existing(folder)));
+        }
+
+        return inside ? target : throw new InvalidOperationException(
+            $"{relativePath} leads outside the solution through a link: nothing of the plan goes there; remove the link and run again.");
+    }
+
+    /// <summary>The deepest folder of the path that exists: the folders a write has yet to create hold no link.</summary>
+    private static string Existing(string folder)
+    {
+        var current = folder;
+        while (!Directory.Exists(current) && Path.GetDirectoryName(current) is { } parent)
+        {
+            current = parent;
+        }
+
+        return current;
+    }
+
+    /// <summary>The folder, with its links resolved, is the root or below it.</summary>
+    private static bool IsInside(string realRoot, string realFolder)
+    {
+        var baseRoot = realRoot.TrimEnd(Path.DirectorySeparatorChar);
+        return realFolder.TrimEnd(Path.DirectorySeparatorChar) is var folder
+            && (string.Equals(folder, baseRoot, Comparison) || folder.StartsWith(baseRoot + Path.DirectorySeparatorChar, Comparison));
+    }
+
+    private static StringComparison Comparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+    private static StringComparer PathComparer => OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
 }
