@@ -196,7 +196,8 @@ Package versions come with an upgrade as far as the manifest lets them:
 | `none` | no change of a package the solution has |
 
 A package in `pinned` stays on that version. A major version of a package comes only with a major version
-of the template. A package new to the solution comes as the template has it. Before the merge, the held
+of the template. A package new to the solution comes as the template has it. Versions required by a flag being
+added count as new to the solution, so the update policy does not hold them back; `pinned` still wins. Before the merge, the held
 versions are written into the template's side, so these lines do not conflict - a version the team raised
 itself does, unless it is pinned; the plan has a line for each
 package that changes or is held - "Npgsql: pinned on 8.0.4, the template brings 8.0.11". When the

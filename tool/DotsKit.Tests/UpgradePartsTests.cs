@@ -124,15 +124,34 @@ internal sealed class UpgradePartsTests
     [Test]
     public void APinHoldsAPackage_AFlagsFileMovesByUpdate()
     {
+        var before = Folders.NewTemp("update-before");
         var next = Folders.NewTemp("update-next");
+        Put(before, Central, Props(("Microsoft.IdentityModel.Tokens", "7.1.2")));
         Put(next, Central, Props(("Microsoft.IdentityModel.Tokens", "7.1.2")));
         Put(next, "src/package-versions/notify-email.props",
             "<Project>\n  <ItemGroup>\n    <PackageVersion Update=\"Microsoft.IdentityModel.Tokens\" Version=\"8.15.0\" />\n  </ItemGroup>\n</Project>\n");
         var policy = new PackagePolicy { Pinned = new() { ["Microsoft.IdentityModel.Tokens"] = "7.1.2" } };
 
-        PackageVersions.Hold(null, next, policy, majorUpgrade: false);
+        PackageVersions.Hold(before, next, policy, majorUpgrade: false);
 
         File.ReadAllText(Path.Combine(next, "src/package-versions/notify-email.props")).ShouldContain("Update=\"Microsoft.IdentityModel.Tokens\" Version=\"7.1.2\"");
+    }
+
+    [Test]
+    public void ANewFlagsFile_TakesTheVersionsItsPackagesNeed()
+    {
+        var before = Folders.NewTemp("new-flag-before");
+        var next = Folders.NewTemp("new-flag-next");
+        Put(before, Central, Props(("Microsoft.IdentityModel.Tokens", "7.7.3"), ("System.IdentityModel.Tokens.Jwt", "7.7.3")));
+        Put(next, Central, Props(("Microsoft.IdentityModel.Tokens", "7.7.3"), ("System.IdentityModel.Tokens.Jwt", "7.7.3")));
+        Put(next, "src/package-versions/notify-email.props",
+            "<Project>\n  <ItemGroup>\n    <PackageVersion Update=\"Microsoft.IdentityModel.Tokens\" Version=\"8.15.0\" />\n    <PackageVersion Update=\"System.IdentityModel.Tokens.Jwt\" Version=\"8.15.0\" />\n  </ItemGroup>\n</Project>\n");
+
+        PackageVersions.Hold(before, next, new PackagePolicy(), majorUpgrade: false);
+
+        var versions = PackageVersions.Read(File.ReadAllText(Path.Combine(next, "src/package-versions/notify-email.props")));
+        versions["Microsoft.IdentityModel.Tokens"].ShouldBe("8.15.0");
+        versions["System.IdentityModel.Tokens.Jwt"].ShouldBe("8.15.0");
     }
 
     [Test]
