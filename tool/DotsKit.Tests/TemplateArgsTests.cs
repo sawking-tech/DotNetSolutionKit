@@ -94,4 +94,28 @@ internal sealed class TemplateArgsTests
         command.AsksForSolution.ShouldBeFalse();
         command.IsOn("Hangfire").ShouldBeTrue();
     }
+
+    [TestCase("Infisical")]
+    [TestCase("Vault")]
+    public void Should_InheritTheSolutionsSecretStore(string store)
+    {
+        var solution = Parse("-N", "Acme", "--" + store, "true", "--Storage", "true");
+
+        var service = Parse("-S", "Billing").WithInfrastructureOf(solution);
+
+        service.IsOn(store).ShouldBeTrue();
+        service.Has("Storage").ShouldBeFalse();
+    }
+
+    [TestCase("Infisical")]
+    [TestCase("Vault")]
+    public void Should_KeepTheServicesOwnSecretStoreChoice(string store)
+    {
+        var solution = Parse("-N", "Acme", "--" + store, "true");
+        var service = Parse("-S", "Billing", "--" + store, "false");
+
+        var inherited = service.WithInfrastructureOf(solution);
+
+        inherited[store].ShouldBe("false");
+    }
 }
