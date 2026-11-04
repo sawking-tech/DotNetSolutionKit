@@ -40,7 +40,8 @@ dotskit upgrade --to 2.3.0                        # in the solution: to an earli
 ```
 
 A service added by `dotskit new` uses the solution's Infisical or Vault configuration without repeating its
-flag. Capabilities of one service, such as `--Storage`, stay specific to that service.
+flag. Capabilities of one service, such as `--Storage`, stay specific to that service. A newly added flag brings
+the dependency versions its code needs.
 
 A solution of an earlier 2.x version is brought to the current one by `dotskit upgrade`: git keeps the team's
 changes where they merge with the template's, and the rest are conflicts to resolve. A solution of v1 is brought
