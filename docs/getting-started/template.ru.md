@@ -26,6 +26,9 @@ dotnet new install /path/to/DotNetSolutionKit/template --force
 dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
 ```
 
+Запуск также пишет `.dotskit/manifest.json` - из чего сгенерировано решение: [инструмент](tool.ru.md#манифест)
+работает по нему. Сервис, сгенерированный в решение позже, в манифест не входит; `dotskit init` принимает его.
+
 Каждый следующий сервис добавляется из корня решения. Шаблон в любой команде отвечает и на второе короткое
 имя, `dotskit`; инструмент с тем же именем добавляет сервис командой `dotskit new` ([dotskit](tool.ru.md)):
 

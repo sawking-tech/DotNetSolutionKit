@@ -31,7 +31,8 @@
         "A file the solution has and its git ignores, such as a local appsettings.Secrets.json, is never written, by either merge; a new one the template adds, as the secrets file of a new service, is written by both.",
         "The template's files are UTF-8 with LF, a line end at the end and no spaces at the ends of lines, a byte order mark only in a solution file.",
         "One code style, owned by the formatters (ADR-007): CI fails a pull request that breaks the bytes of any file or the C# style of the tool; the C# of the template follows.",
-        "The API diff treats a base branch that cannot generate its contracts - older than them, or broken by its own configuration - as no baseline, with a notice in the log; the branch itself still fails when its documents cannot be produced."
+        "The API diff treats a base branch that cannot generate its contracts - older than them, or broken by its own configuration - as no baseline, with a notice in the log; the branch itself still fails when its documents cannot be produced.",
+        "The template writes .dotskit/manifest.json when it generates a solution, so dotskit new and dotskit upgrade work from the first run; dotskit init adds a service the template generated into the solution and says why it was not in the manifest."
       ],
       "ru": {
         "headline": "dotskit обновляет решение любого выпуска так, что код команды собирается.",
@@ -63,7 +64,8 @@
           "Файл, который у решения есть и который игнорирует его git, например локальный appsettings.Secrets.json, не пишет ни одно из слияний; новый такой файл шаблона, как файл секретов нового сервиса, пишут оба.",
           "Файлы шаблона в UTF-8 с LF, переводом строки в конце и без пробелов в конце строк, BOM только у файла решения.",
           "Единый стиль кода, за который отвечают форматтеры (ADR-007): CI роняет PR, который нарушает байты любого файла или стиль C# инструмента; C# шаблона - следом.",
-          "Сравнение API считает базовую ветку, которая не может дать свои контракты - старше их или сломана собственной конфигурацией, - отсутствием baseline с пометкой в логе; сама ветка без своих документов по-прежнему валит проверку."
+          "Сравнение API считает базовую ветку, которая не может дать свои контракты - старше их или сломана собственной конфигурацией, - отсутствием baseline с пометкой в логе; сама ветка без своих документов по-прежнему валит проверку.",
+          "Шаблон пишет .dotskit/manifest.json при генерации решения, поэтому dotskit new и dotskit upgrade работают с первого запуска; dotskit init принимает сервис, добавленный в решение шаблоном, и называет, почему его не было в манифесте."
         ]
       }
     },

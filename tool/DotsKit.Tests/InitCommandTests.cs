@@ -301,14 +301,16 @@ internal sealed class InitCommandTests
     }
 
     [Test]
-    public async Task AServiceTheManifestDoesNotList_IsAdded()
+    public async Task AServiceTheManifestDoesNotList_IsAdded_WithTheReasonItIsMissing()
     {
         var root = Solution();
         await new Fakes().RunAsync(root);
         Service(root, "Acme.Shop.Billing", 5001);
+        var fakes = new Fakes();
 
-        (await new Fakes().RunAsync(root)).ShouldBe(ExitCode.Done);
+        (await fakes.RunAsync(root)).ShouldBe(ExitCode.Done);
 
+        fakes.Lines.ShouldContain("The manifest does not list Billing: the template writes it only when the solution is generated. Each is added as the template made it.");
         var manifest = Manifest.Parse(ManifestOf(root));
         manifest.ServiceArgs.Select(s => s.Service).ShouldBe(["Orders", "Billing"]);
         manifest.FindService("Billing")!.Port.ShouldBe(5001);
