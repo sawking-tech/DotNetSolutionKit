@@ -63,8 +63,13 @@ Build and test the tool:
 
 ```bash
 dotnet build tool/DotsKit/DotsKit.csproj -warnaserror
-dotnet test tool/DotsKit.Tests/DotsKit.Tests.csproj
+dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory!=Chain"
 ```
+
+The filter is the CI's own: the `Chain` scenarios run real `dotnet new` chains for ~20 minutes and spawn
+dozens of processes; the full suite belongs to CI, and a filtered run over the touched fixture is seconds.
+On Windows, Git Bash converts unquoted `/tmp` paths for native tools, but a quoted or computed path is not
+converted — .NET resolves it against the drive as `C:\tmp`. Pass `C:/...` paths or `cd` into the folder.
 
 Run repository checks:
 
@@ -112,6 +117,13 @@ file-byte violations and C# style violations in the tool.
 
 - Verify template changes on a generated solution with every affected flag on and off, `-warnaserror`,
   and passing tests.
+- A parameter's `replaces` rewrites every occurrence of its token, including inside a literal argument
+  name ("--NamespaceRoot" becomes "--Acme"): hold literal names in generated constant symbols and a bool in
+  lowercase through a casing generated symbol. Replacement is a single pass — a value one symbol inserts
+  is not re-scanned by another.
+- A file the template starts writing that the tool also writes (like `.dotskit/manifest.json`) is not the
+  template's file in any comparison: the reproduction check skips what `Layout.Ignored` names, as both
+  merges do, and the merge by files never writes what the solution's git ignores.
 - A flag is whole: `template.json` excludes its files when off, shared-file blocks use one condition, CI
   generates a combination with it, and it has English and Russian documentation. A supplied flag that does
   nothing must say so at generation through a post-action.
@@ -130,7 +142,9 @@ file-byte violations and C# style violations in the tool.
 
 - Create a working branch from `dev` before committing. Never commit or push directly to `dev`; all changes
   reach it through a pull request with green CI. `master` takes release PRs from `dev` and urgent patches.
-  After 3.0, `2.x` is the .NET 8 maintenance line.
+  After 3.0, `2.x` is the .NET 8 maintenance line. The review of a pull request is an agent's local review
+  of the branch against its base before the PR; no approval is requested on GitHub. Green required status
+  checks are the merge gate: a PR with green CI is merged without waiting for a person.
 - A user-visible change updates English and Russian docs, `site/config.js`, README, `docs/roadmap.md`, and
   the current `-rc` entry in `version.json` in the same PR. Only a release changes the version number.
 - The repository is public: never name clients or their products in code, comments, docs or commits.
