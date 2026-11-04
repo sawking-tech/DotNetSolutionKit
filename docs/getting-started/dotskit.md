@@ -30,6 +30,6 @@ The rest of the documentation: [the pages at a glance](../README.md) for archite
 ## The way in
 
 - A new solution: [generating a solution](template.md), then the tool for every service after the first.
-- A solution made with the template alone: `dotskit init` writes its manifest ([the tool](tool.md#a-solution-made-without-dotskit)), and `dotskit upgrade` works from there.
+- A solution made with the template alone carries its manifest since 2.9, and `dotskit upgrade` works from it; an older one gets its manifest from `dotskit init` ([the tool](tool.md#a-solution-made-without-dotskit)).
 - A solution behind the current release: [upgrading a solution](upgrading.md).
 - A team weighing whether to take this on: [what the template gives](what-it-gives.md).

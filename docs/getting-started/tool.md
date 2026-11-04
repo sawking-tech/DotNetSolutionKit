@@ -172,9 +172,9 @@ at, commit or undo.
 arguments of the solution and the arguments of each service. Commit it with the solution: every later
 command rebuilds the base from it.
 
-The manifest keeps a port for each service. The template picks a random free port when `--HttpPort` is not
-given, so the tool picks one once, the first port from 5000 that no service of the solution has, and a
-service keeps its port when a later command adds a flag to it.
+The manifest keeps a port for each service: when `--HttpPort` is not given, the template picks a free port
+and writes it into the manifest, and a service keeps the port when a later command adds a flag to it. A
+service the tool adds gets the first port from 5000 that no service of the solution has.
 
 A flag with a part in `Common` or the root, such as `--Storage`, becomes the solution's when any of its
 services has it. The solution's names, `--Database`, `--Deploy`, `--TestFramework`, `--Agent` and
@@ -185,11 +185,16 @@ gives one of them another value is refused.
 solution's secret store even when the command does not repeat its flag. Capabilities of one service, such as
 `Storage`, `ClickHouse` or `MongoDB`, are not copied from another service.
 
+The template writes the manifest itself when it generates a solution: since 2.9 a solution made by `dotnet new`
+alone carries `.dotskit/manifest.json` from generation, and `dotskit new` and `dotskit upgrade` work from it
+without `dotskit init`. A service generated into the solution afterwards is not in it - the template writes
+the manifest only with `--Solution`; `dotskit init` takes the service in, read from its files.
+
 ## A solution made without dotskit
 
-`dotskit new` works from the manifest. A solution made with the template alone, or before 2.8, has none, and
-`dotskit init` writes it: it reads the solution, checks the reading and writes `.dotskit/manifest.json`, and
-nothing else, after a yes.
+`dotskit new` works from the manifest. The template has written it at generation since 2.9; a solution of an
+earlier version, or assembled from the template's files by hand, has none, and `dotskit init` writes it: it
+reads the solution, checks the reading and writes `.dotskit/manifest.json`, and nothing else, after a yes.
 
 What it reads:
 
@@ -218,7 +223,7 @@ projects. The check installs the template of that version from nuget.org.
 | of an earlier major version than the tool, other than the last release of the previous one | writes nothing, and names the tool of the solution's major |
 | a service of another version than the solution | writes nothing, names the service and its version, and asks for the version to describe the solution by with `--template-version`; with it, the check shows what differs |
 | with a manifest that lists every service | writes nothing: "the manifest is current: 2.8.0, services Orders, Billing" |
-| with a manifest, and a service under `src/services` it does not list | adds the service, read from its files, after the same check |
+| with a manifest, and a service under `src/services` it does not list | adds the service, read from its files, after the same check - the template writes the manifest only with `--Solution`, so a service generated into the solution arrives like this |
 | services, but no `Common` | writes the manifest without the check and says so: the database and the flags read from `Common` are the template's defaults; `dotskit new` takes `Common` for removed by the team and does not add it back |
 | uncommitted changes in git | runs: it writes only `.dotskit/` |
 

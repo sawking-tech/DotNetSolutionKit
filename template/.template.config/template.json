@@ -103,6 +103,7 @@
     "Messaging": {
       "type": "parameter",
       "datatype": "choice",
+      "replaces": "DOTNETSOLUTIONKIT_MESSAGING",
       "defaultValue": "none",
       "choices": [
         { "choice": "none", "description": "No message bus" },
@@ -138,6 +139,7 @@
     "Notify": {
       "type": "parameter",
       "datatype": "choice",
+      "replaces": "DOTNETSOLUTIONKIT_NOTIFY",
       "allowMultipleValues": true,
       "enableQuotelessLiterals": true,
       "defaultValue": "",
@@ -159,6 +161,7 @@
     "TestFramework": {
       "type": "parameter",
       "datatype": "choice",
+      "replaces": "DOTNETSOLUTIONKIT_TESTFRAMEWORK",
       "defaultValue": "nunit",
       "choices": [
         { "choice": "nunit", "description": "NUnit" },
@@ -173,6 +176,7 @@
     "Agent": {
       "type": "parameter",
       "datatype": "choice",
+      "replaces": "DOTNETSOLUTIONKIT_AGENT",
       "defaultValue": "claude",
       "choices": [
         { "choice": "claude", "description": "Claude Code: CLAUDE.md and .claude/skills" },
@@ -212,6 +216,7 @@
     "Deploy": {
       "type": "parameter",
       "datatype": "choice",
+      "replaces": "DOTNETSOLUTIONKIT_DEPLOY",
       "defaultValue": "compose",
       "choices": [
         { "choice": "compose", "description": "docker compose: the infrastructure and a compose file per service" },
@@ -229,6 +234,7 @@
     "Database": {
       "type": "parameter",
       "datatype": "choice",
+      "replaces": "DOTNETSOLUTIONKIT_DATABASE",
       "defaultValue": "postgres",
       "choices": [
         { "choice": "postgres", "description": "PostgreSQL" },
@@ -292,6 +298,147 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Add access rules over a tenant tree stored as materialized paths (IHierarchicalEntity, HierarchyRules)"
+    },
+    "HangfireLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "Hangfire",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_HANGFIRE",
+      "description": "The Hangfire flag as the manifest keeps it: lowercase"
+    },
+    "StorageLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "Storage",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_STORAGE",
+      "description": "The Storage flag as the manifest keeps it: lowercase"
+    },
+    "ClickHouseLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "ClickHouse",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_CLICKHOUSE",
+      "description": "The ClickHouse flag as the manifest keeps it: lowercase"
+    },
+    "MongoDBLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "MongoDB",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_MONGODB",
+      "description": "The MongoDB flag as the manifest keeps it: lowercase"
+    },
+    "AuditLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "Audit",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_AUDIT",
+      "description": "The Audit flag as the manifest keeps it: lowercase"
+    },
+    "InfisicalLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "Infisical",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_INFISICAL",
+      "description": "The Infisical flag as the manifest keeps it: lowercase"
+    },
+    "VaultLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "Vault",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_VAULT",
+      "description": "The Vault flag as the manifest keeps it: lowercase"
+    },
+    "DiffApiLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "DiffApi",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_DIFFAPI",
+      "description": "The DiffApi flag as the manifest keeps it: lowercase"
+    },
+    "GitHubCiCdLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "GitHubCiCd",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_GITHUBCICD",
+      "description": "The GitHubCiCd flag as the manifest keeps it: lowercase"
+    },
+    "FeatureFlagsLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "FeatureFlags",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_FEATUREFLAGS",
+      "description": "The FeatureFlags flag as the manifest keeps it: lowercase"
+    },
+    "HierarchyRulesLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "HierarchyRules",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_HIERARCHYRULES",
+      "description": "The HierarchyRules flag as the manifest keeps it: lowercase"
+    },
+    "ApiGatewayLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "ApiGateway",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_APIGATEWAY",
+      "description": "The ApiGateway flag as the manifest keeps it: lowercase"
+    },
+    "ArgOfNamespaceRoot": {
+      "type": "generated",
+      "generator": "constant",
+      "parameters": { "value": "--NamespaceRoot" },
+      "replaces": "DOTNETSOLUTIONKIT_ARG_NAMESPACE_ROOT",
+      "description": "The manifest keeps the argument's long name apart from the value it replaces"
+    },
+    "ArgOfProductName": {
+      "type": "generated",
+      "generator": "constant",
+      "parameters": { "value": "--ProductName" },
+      "replaces": "DOTNETSOLUTIONKIT_ARG_PRODUCT_NAME",
+      "description": "The manifest keeps the argument's long name apart from the value it replaces"
+    },
+    "ArgOfServiceName": {
+      "type": "generated",
+      "generator": "constant",
+      "parameters": { "value": "--ServiceNameOrCustom" },
+      "replaces": "DOTNETSOLUTIONKIT_ARG_SERVICE_NAME",
+      "description": "The manifest keeps the argument's long name apart from the value it replaces"
     },
     "TemplateVersion": {
       "type": "generated",

@@ -1,0 +1,50 @@
+{
+  "_comment_template": "The version of DotNetSolutionKit the solution is generated with; dotskit upgrade moves it to the tool's",
+  "template": "DOTNETSOLUTIONKIT_TEMPLATE_VERSION",
+  "_comment_solution": "The template's arguments of Common and the root: the names, the database, the deployment, the flags the services share",
+  "solution": [
+    "DOTNETSOLUTIONKIT_ARG_NAMESPACE_ROOT", "NamespaceRoot",
+    "DOTNETSOLUTIONKIT_ARG_PRODUCT_NAME", "ProductName",
+    "--Hangfire", "DOTNETSOLUTIONKIT_HANGFIRE",
+    "--Messaging", "DOTNETSOLUTIONKIT_MESSAGING",
+    "--Storage", "DOTNETSOLUTIONKIT_STORAGE",
+    "--ClickHouse", "DOTNETSOLUTIONKIT_CLICKHOUSE",
+    "--MongoDB", "DOTNETSOLUTIONKIT_MONGODB",
+    "--Audit", "DOTNETSOLUTIONKIT_AUDIT",
+    "--TestFramework", "DOTNETSOLUTIONKIT_TESTFRAMEWORK",
+    "--Agent", "DOTNETSOLUTIONKIT_AGENT",
+    "--Deploy", "DOTNETSOLUTIONKIT_DEPLOY",
+    "--Infisical", "DOTNETSOLUTIONKIT_INFISICAL",
+    "--Database", "DOTNETSOLUTIONKIT_DATABASE",
+    "--Vault", "DOTNETSOLUTIONKIT_VAULT",
+    "--DiffApi", "DOTNETSOLUTIONKIT_DIFFAPI",
+    "--GitHubCiCd", "DOTNETSOLUTIONKIT_GITHUBCICD",
+    "--FeatureFlags", "DOTNETSOLUTIONKIT_FEATUREFLAGS",
+    "--HierarchyRules", "DOTNETSOLUTIONKIT_HIERARCHYRULES"
+//#if (NotifyEmail)
+    , "--Notify", "DOTNETSOLUTIONKIT_NOTIFY"
+//#endif
+  ],
+  "_comment_services": "Each service by its own arguments; dotskit new adds one or joins flags to one",
+  "services": [
+    [
+      "DOTNETSOLUTIONKIT_ARG_SERVICE_NAME", "ServiceNameOrCustom",
+      "--Hangfire", "DOTNETSOLUTIONKIT_HANGFIRE",
+      "--Messaging", "DOTNETSOLUTIONKIT_MESSAGING",
+      "--ApiGateway", "DOTNETSOLUTIONKIT_APIGATEWAY",
+      "--Storage", "DOTNETSOLUTIONKIT_STORAGE",
+      "--ClickHouse", "DOTNETSOLUTIONKIT_CLICKHOUSE",
+      "--MongoDB", "DOTNETSOLUTIONKIT_MONGODB",
+      "--Audit", "DOTNETSOLUTIONKIT_AUDIT",
+      "--Infisical", "DOTNETSOLUTIONKIT_INFISICAL",
+      "--Vault", "DOTNETSOLUTIONKIT_VAULT",
+      "--HttpPort", "5054",
+      "--DiffApi", "DOTNETSOLUTIONKIT_DIFFAPI",
+      "--FeatureFlags", "DOTNETSOLUTIONKIT_FEATUREFLAGS",
+      "--HierarchyRules", "DOTNETSOLUTIONKIT_HIERARCHYRULES"
+//#if (NotifyEmail)
+      , "--Notify", "DOTNETSOLUTIONKIT_NOTIFY"
+//#endif
+    ]
+  ]
+}

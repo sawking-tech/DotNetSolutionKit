@@ -60,7 +60,9 @@ dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
 dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 ```
 
-A solution generated this way is upgraded by `dotskit` after `dotskit init`.
+Since 2.9 a solution generated this way carries its manifest: `dotskit upgrade` and `dotskit new` work from
+the first run. `dotskit init` adds a service generated into the solution this way, and writes the manifest
+itself only for a solution made before 2.9.
 To try the template from a clone: `dotnet new install /path/to/DotNetSolutionKit/template`.
 
 </details>

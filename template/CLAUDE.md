@@ -87,7 +87,7 @@ Migrations: `/ef-migration`. A new service or a flag: `/scaffold-service`.
 ```bash
 # A newer version of the template, with the team's changes kept: dotskit (dotnet tool install -g SawKing.DotsKit.Tool).
 # Without --yes it lists the changes and writes nothing: show them to the user, then run it with --yes on their yes.
-# A clean working tree; a solution without .dotskit/manifest.json runs dotskit init first, the same way.
+# A clean working tree; a solution generated since 2.9 has its manifest, one without .dotskit/manifest.json (made before 2.9 or by hand) runs dotskit init first, the same way.
 dotskit upgrade
 ```
 
