@@ -53,10 +53,12 @@ internal static partial class PackageVersions
         {
             // Through FileText, so the byte order mark the template gives stays.
             var file = FileText.Read(nextDir, path)!;
+            // A flag added now brings the versions its dependencies need: they are new to the solution, not an update of its old package.
+            var newFlagFile = baseDir is not null && path.StartsWith(PerFlag, StringComparison.Ordinal) && !File.Exists(Path.Combine(baseDir, path));
             var rewritten = Rewrite(file.Text, (name, version) =>
             {
                 brought.Add(name);
-                var decision = policy.Decide(name, had.GetValueOrDefault(name), version, majorUpgrade);
+                var decision = policy.Decide(name, newFlagFile ? null : had.GetValueOrDefault(name), version, majorUpgrade);
                 if (decision.Line is not null)
                 {
                     lines.Add($"{name}: {decision.Line}");
