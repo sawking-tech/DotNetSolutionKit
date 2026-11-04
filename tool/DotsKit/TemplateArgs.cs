@@ -65,12 +65,15 @@ internal sealed partial class TemplateArgs
     public static readonly string[] SolutionOnly =
         ["NamespaceRoot", "ProductName", "Database", "Deploy", "TestFramework", "Agent", "GitHubCiCd"];
 
-    /// <summary>
-    /// The bool flags with a part outside a service folder - in Common, the root, deploy - or, as Hangfire, a
-    /// block in a file of the root (.env.example): the solution has one when any of its services has it.
-    /// </summary>
-    private static readonly string[] WidenedFlags =
-        ["Infisical", "Vault", "DiffApi", "FeatureFlags", "HierarchyRules", "Storage", "ClickHouse", "MongoDB", "Audit", "Hangfire"];
+    /// <summary>The secret stores shared by the solution: every service reads its connection settings through them.</summary>
+    private static readonly string[] SolutionInfrastructureFlags = ["Infisical", "Vault"];
+
+    /// <summary>Capabilities that belong to one service, with shared files of the solution widened when any service uses them.</summary>
+    private static readonly string[] ServiceCapabilityFlags =
+        ["DiffApi", "FeatureFlags", "HierarchyRules", "Storage", "ClickHouse", "MongoDB", "Audit", "Hangfire"];
+
+    /// <summary>The flags whose shared files the solution has when any of its services has the capability.</summary>
+    private static readonly string[] WidenedFlags = [.. SolutionInfrastructureFlags, .. ServiceCapabilityFlags];
 
     /// <summary>What says which command made the solution; a manifest keeps neither.</summary>
     private static readonly string[] Mode = [Solution, Minimal];
@@ -220,6 +223,11 @@ internal sealed partial class TemplateArgs
     /// <summary>What of a command belongs to the service: everything but what is the solution's and the mode.</summary>
     public TemplateArgs ServicePart() => Without([.. SolutionOnly, .. Mode]);
 
+    /// <summary>The service with the solution's secret stores filled in where the service states no choice of its own.</summary>
+    public TemplateArgs WithInfrastructureOf(TemplateArgs solution) =>
+        SolutionInfrastructureFlags.Where(solution.Has).Where(flag => !Has(flag))
+            .Aggregate(this, (args, flag) => args.With(flag, solution[flag]!));
+
     /// <summary>
     /// The solution with what a service brings outside its folder: its widened flags, its channels of
     /// <c>--Notify</c>, and its bus where it is stronger than the solution's.
@@ -254,7 +262,7 @@ internal sealed partial class TemplateArgs
 
     /// <summary>
     /// The command that generates a service folder into a solution: the solution's own parameters, then the
-    /// service's. No mode: a service folder is what every version generates by default.
+    /// service's explicit arguments. No mode: a service folder is what every version generates by default.
     /// </summary>
     public static TemplateArgs ForService(TemplateArgs solution, TemplateArgs service) =>
         solution.Without([.. WidenedFlags, Notify, Messaging]).JoinedWith(service.Without(Mode));

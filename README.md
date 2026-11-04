@@ -39,6 +39,9 @@ dotskit upgrade                                   # in the solution: bring it to
 dotskit upgrade --to 2.3.0                        # in the solution: to an earlier release, a step at a time
 ```
 
+A service added by `dotskit new` uses the solution's Infisical or Vault configuration without repeating its
+flag. Capabilities of one service, such as `--Storage`, stay specific to that service.
+
 A solution of an earlier 2.x version is brought to the current one by `dotskit upgrade`: git keeps the team's
 changes where they merge with the template's, and the rest are conflicts to resolve. A solution of v1 is brought
 to 2.0.0 by hand first ([upgrading](docs/getting-started/upgrading.md)).

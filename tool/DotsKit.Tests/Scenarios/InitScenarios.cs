@@ -54,6 +54,20 @@ internal sealed class InitScenarios
     }
 
     [Test]
+    public async Task AServiceAddedToASolutionWithInfisical_GetsTheSecretStore()
+    {
+        var solution = await MadeByTheTemplateAsync(["-N", "Acme", "-P", "Shop", "-S", "Orders", "--Infisical", "true"]);
+        var init = await solution.DotskitAsync("init", "--yes");
+        init.Code.ShouldBe(0, init.Output + init.Error);
+        await solution.CommitAsync("described");
+
+        var added = await solution.DotskitAsync("new", "-S", "Catalog", "--yes");
+
+        added.Code.ShouldBe(0, added.Output + added.Error);
+        solution.Read("src/services/Acme.Shop.Catalog/Acme.Shop.Catalog.API/appsettings.json").ShouldContain("\"Infisical\"");
+    }
+
+    [Test]
     public async Task ASolutionOfOtherChoices_AndAGateway_IsReproducedWhole()
     {
         var solution = await MadeByTheTemplateAsync(
