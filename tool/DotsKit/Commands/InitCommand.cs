@@ -107,7 +107,7 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
     }
 
     /// <summary>The manifest with the services of src/services it does not list; null when it lists them all.</summary>
-    private static Manifest? WithUnlisted(Manifest current, ISolutionFiles files, string prefix, Options options)
+    private Manifest? WithUnlisted(Manifest current, ISolutionFiles files, string prefix, Options options)
     {
         var unlisted = SolutionReader.ServiceFolders(files, prefix)
             .Where(f => current.FindService(SolutionReader.ServiceName(prefix, f)) is null)
@@ -118,7 +118,14 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
         }
 
         RefuseServicesOfOtherVersions(files, prefix, unlisted, current.Template, options);
-        return unlisted.Count == 0 ? null : unlisted.Aggregate(current, (m, f) => m.WithServiceAsItIs(SolutionReader.Service(files, prefix, f)));
+        if (unlisted.Count == 0)
+        {
+            return null;
+        }
+
+        var names = string.Join(", ", unlisted.Select(f => SolutionReader.ServiceName(prefix, f)));
+        terminal.Info($"The manifest does not list {names}: the template writes it only when the solution is generated. Each is added as the template made it.");
+        return unlisted.Aggregate(current, (m, f) => m.WithServiceAsItIs(SolutionReader.Service(files, prefix, f)));
     }
 
     private ExitCode Current(Manifest manifest)

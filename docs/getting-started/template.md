@@ -26,6 +26,10 @@ Pass `--Solution` for it:
 dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
 ```
 
+The run also writes `.dotskit/manifest.json`, what the solution was generated from: the
+[tool](tool.md#manifest) works from it. A service generated into the solution later is not in the manifest;
+`dotskit init` takes it in.
+
 Every further service is added from the solution's root. The template answers to a second short name,
 `dotskit`, in any command; the tool of the same name adds a service by `dotskit new` ([dotskit](tool.md)):
 
