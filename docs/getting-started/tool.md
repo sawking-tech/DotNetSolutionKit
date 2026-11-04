@@ -181,6 +181,10 @@ services has it. The solution's names, `--Database`, `--Deploy`, `--TestFramewor
 `--GitHubCiCd` are set by the first command. A later command takes them from the manifest; a command that
 gives one of them another value is refused.
 
+`Infisical` and `Vault` are infrastructure of the whole solution: a service added by `dotskit new` gets the
+solution's secret store even when the command does not repeat its flag. Capabilities of one service, such as
+`Storage`, `ClickHouse` or `MongoDB`, are not copied from another service.
+
 ## A solution made without dotskit
 
 `dotskit new` works from the manifest. A solution made with the template alone, or before 2.8, has none, and

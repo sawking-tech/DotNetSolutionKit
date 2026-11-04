@@ -25,6 +25,7 @@ internal sealed class NewCommandTests
         public bool Answer { get; init; }
         public int Planned { get; private set; }
         public int Written { get; private set; }
+        public Manifest? Next { get; private set; }
         public List<string> Lines { get; } = [];
 
         public NewCommand Command() =>
@@ -35,6 +36,7 @@ internal sealed class NewCommandTests
             public Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, Merging.MergeMode mode, CancellationToken ct, PartStep? step = null)
             {
                 fakes.Planned++;
+                fakes.Next = next;
                 return Task.FromResult(new Plan(root, next, [], new MembershipChange([], [])));
             }
         }
@@ -155,6 +157,25 @@ internal sealed class NewCommandTests
 
         refused.Message.ShouldContain("Database (postgres)");
         fakes.Planned.ShouldBe(0);
+    }
+
+    [TestCase("Infisical")]
+    [TestCase("Vault")]
+    public async Task Should_KeepTheExistingServicesSecretStoreChoice_When_AddingAnotherCapability(string store)
+    {
+        var root = Solution(ThisVersion);
+        var current = Manifest.Load(root)!;
+        current = current with
+        {
+            Solution = [.. current.Solution, "--" + store, "true"],
+            Services = [["--ServiceNameOrCustom", "Orders", "--" + store, "false"]],
+        };
+        File.WriteAllText(Path.Combine(root, Layout.ManifestPath), current.Serialize());
+        var fakes = new Fakes { Answer = true };
+
+        await fakes.Command().RunAsync(Args("-S", "Orders", "--Storage", "true"), root, CancellationToken.None);
+
+        fakes.Next!.FindService("Orders")![store].ShouldBe("false");
     }
 
     [Test]

@@ -85,7 +85,8 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
         }
 
         RefuseOtherSolutionValues(current, command);
-        return current.WithService(service);
+        var serviceToMerge = current.FindService(service.Service) is null ? service.WithInfrastructureOf(current.SolutionArgs) : service;
+        return current.WithService(serviceToMerge);
     }
 
     /// <summary>A service takes the names, the database and the rest from the solution; a different one would break it.</summary>
