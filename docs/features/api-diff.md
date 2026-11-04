@@ -8,6 +8,12 @@ artifact of the run, and a breaking change fails the check unless it is declared
 
 Nothing is committed: both documents come from the code, so there is no snapshot to go stale.
 
+The branch itself must always produce its documents - that failure fails the check. The base branch is held
+to less: a base older than the contracts has nothing to compare, and a base whose own configuration is
+broken cannot produce them either. Both are treated as no baseline, with a notice in the log, so the pull
+request that brings the fix is not blocked by the very thing it fixes. The next pull request after it
+compares against the fixed base.
+
 ## Generate the documents locally
 
 ```bash
