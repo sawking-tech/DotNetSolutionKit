@@ -62,7 +62,7 @@ internal sealed class TemplateStyleTests
 
     private sealed class FailingMerger : ITextMerger
     {
-        public Task<TextMergeResult> MergeAsync(string solution, string @base, string template, bool preferTemplate, CancellationToken ct) =>
+        public Task<TextMergeResult> MergeAsync(string solution, string @base, string template, bool preferTemplate, bool markBase, CancellationToken ct) =>
             Task.FromResult(new TextMergeResult(string.Empty, 0, "no merge"));
     }
 }

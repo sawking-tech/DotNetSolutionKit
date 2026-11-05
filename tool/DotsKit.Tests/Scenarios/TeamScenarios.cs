@@ -57,18 +57,32 @@ internal sealed class TeamScenarios
     }
 
     [Test]
-    [TestCase("git")]
-    [TestCase("files")]
-    public async Task ANewService_GetsItsLocalSecretsFile_InEitherMerge(string merge)
+    public async Task ANewService_GetsItsLocalSecretsFile_When_GitMergesIt()
     {
         var solution = await Sandbox.SolutionAsync();
         var secrets = $"src/services/{Sandbox.Prefix}.Stock/{Sandbox.Prefix}.Stock.API/appsettings.Secrets.json";
 
-        var added = await solution.DotskitAsync("new", "-S", "Stock", "--merge", merge, "--yes", "--no-build");
+        var added = await solution.DotskitAsync("new", "-S", "Stock", "--yes", "--no-build");
 
         added.Code.ShouldBe((int)ExitCode.Done, added.Output + added.Error);
         File.Exists(Path.Combine(solution.Root, secrets)).ShouldBeTrue();
         (await new ProcessRunner().RunCheckedAsync("git", ["status", "--porcelain"], solution.Root, CancellationToken.None)).ShouldNotContain("appsettings.Secrets.json");
+    }
+
+    [Test]
+    public async Task AnUncommittedFile_UnderAllowDirty_IsCommittedBesideTheRun_AndStaysInTheSolution()
+    {
+        var solution = await Sandbox.SolutionAsync();
+        const string notes = "notes.md";
+        solution.Write(notes, "the team's uncommitted note\n");
+
+        var added = await solution.DotskitAsync("new", "-S", "Stock", "--allow-dirty", "--yes", "--no-build");
+
+        added.Code.ShouldBe((int)ExitCode.Done, added.Output + added.Error);
+        solution.Read(notes).ShouldBe("the team's uncommitted note\n");
+        // The wip commit is below the adoption commits the run writes on top of it.
+        (await new ProcessRunner().RunCheckedAsync("git", ["log", "--format=%s"], solution.Root, CancellationToken.None))
+            .ShouldContain("dotskit: uncommitted changes, taken into the change");
     }
 
     [Test]
@@ -115,14 +129,14 @@ internal sealed class TeamScenarios
     }
 
     [Test]
-    public async Task ALocalSecretTheTemplateChanges_StaysAsTheTeamWroteIt_InTheMergeByFiles()
+    public async Task ALocalSecretTheTemplateChanges_StaysAsTheTeamWroteIt()
     {
         var solution = await Sandbox.SolutionAsync();
         var secrets = $"src/services/{Orders}/{Orders}.API/appsettings.Secrets.json";
         var mine = solution.Read(secrets).Replace("\"DefaultConnection\": \"\"", "\"DefaultConnection\": \"Host=mine\"", StringComparison.Ordinal);
         solution.Write(secrets, mine);
 
-        var changed = await solution.DotskitAsync("new", "-S", "Orders", "--Hangfire", "false", "--merge", "files", "--yes", "--no-build");
+        var changed = await solution.DotskitAsync("new", "-S", "Orders", "--Hangfire", "false", "--yes", "--no-build");
 
         changed.Code.ShouldBe((int)ExitCode.Done, changed.Output + changed.Error);
         solution.Read(secrets).ShouldBe(mine);
@@ -145,25 +159,23 @@ internal sealed class TeamScenarios
         }
     }
 
-    [TestCase(Merging.MergeMode.Git)]
-    [TestCase(Merging.MergeMode.Files)]
-    public async Task FileTheTeamAddedWhereTheTemplateAddsOne_IsAConflict_NotOverwritten(string merge)
+    [Test]
+    public async Task FileTheTeamAddedWhereTheTemplateAddsOne_IsAConflict_NotOverwritten()
     {
         var solution = await Sandbox.SolutionAsync();
         const string mongo = "deploy/compose/infra/mongo.yml";
         solution.Write(mongo, "# the team's own mongo\n");
         await solution.CommitAsync("the team's mongo");
 
-        var added = await solution.DotskitAsync("new", "-S", "Orders", "--MongoDB", "true", "--yes", "--no-build", "--merge", merge);
+        var added = await solution.DotskitAsync("new", "-S", "Orders", "--MongoDB", "true", "--yes", "--no-build");
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         solution.Read(mongo).ShouldContain("# the team's own mongo");
         solution.Read(mongo).ShouldContain(ConflictMarker);
     }
 
-    [TestCase(Merging.MergeMode.Git)]
-    [TestCase(Merging.MergeMode.Files)]
-    public async Task LineTheTeamChangedWhereTheTemplateChangesIt_IsAMarkedConflict_WithExitCodeTwo(string merge)
+    [Test]
+    public async Task LineTheTeamChangedWhereTheTemplateChangesIt_IsAMarkedConflict_WithExitCodeTwo()
     {
         var solution = await Sandbox.SolutionAsync();
         var configuration = $"src/services/{Orders}/{Orders}.API/Setup/ApplicationConfiguration.cs";
@@ -173,7 +185,7 @@ internal sealed class TeamScenarios
         await solution.CommitAsync("the team's note on the bus line");
 
         // The outbox turns this very line into busNeedsDatabase: true.
-        var added = await solution.DotskitAsync("new", "-S", "Orders", "--Messaging", "outbox", "--yes", "--no-build", "--merge", merge);
+        var added = await solution.DotskitAsync("new", "-S", "Orders", "--Messaging", "outbox", "--yes", "--no-build");
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         added.Output.ShouldContain(configuration);
@@ -182,9 +194,8 @@ internal sealed class TeamScenarios
         solution.Read(configuration).ShouldContain("busNeedsDatabase: true);");
     }
 
-    [TestCase(Merging.MergeMode.Git)]
-    [TestCase(Merging.MergeMode.Files)]
-    public async Task LineTheTeamChangedRightBesideWhatTheTemplateAdds_IsAMarkedConflict_NotAMerge(string merge)
+    [Test]
+    public async Task LineTheTeamChangedRightBesideWhatTheTemplateAdds_IsAMarkedConflict_NotAMerge()
     {
         var solution = await Sandbox.SolutionAsync();
         const string env = "deploy/compose/.env.example";
@@ -192,9 +203,9 @@ internal sealed class TeamScenarios
         solution.Write(env, solution.Read(env).Replace("HANGFIRE_DASHBOARD_PASSWORD=", teams));
         await solution.CommitAsync("the team's password line");
 
-        // The template's email block starts on the line right after the team's, with Hangfire on and ClickHouse
-        // off as the sandbox has them: git merge-file takes changes that touch for one place.
-        var added = await solution.DotskitAsync("new", "-S", "Notifications", "--Notify", "email", "--yes", "--no-build", "--merge", merge);
+        // The template's email block starts on the line right after the team's, with Hangfire on and
+        // ClickHouse off as the sandbox has them: git merge-file takes changes that touch for one place.
+        var added = await solution.DotskitAsync("new", "-S", "Notifications", "--Notify", "email", "--yes", "--no-build");
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         added.Output.ShouldContain(env);

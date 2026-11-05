@@ -24,14 +24,14 @@ internal sealed class ThreeWayMergeTests
             return this;
         }
 
-        public async Task<Change?> MergeAsync(bool force = false) =>
-            (await new ThreeWayMerge(new GitMergeFile(new ProcessRunner())).ComputeAsync(Solution, Base, New, force, null, CancellationToken.None)).SingleOrDefault();
+        public async Task<Change?> MergeAsync(bool force = false, bool markBase = false) =>
+            (await new ThreeWayMerge(new GitMergeFile(new ProcessRunner())).ComputeAsync(Solution, Base, New, force, markBase, null, CancellationToken.None)).SingleOrDefault();
     }
 
     /// <summary>A merger that fails as git merge-file does when it cannot merge at all.</summary>
     private sealed class FailingMerger : ITextMerger
     {
-        public Task<TextMergeResult> MergeAsync(string solution, string @base, string template, bool preferTemplate, CancellationToken ct) =>
+        public Task<TextMergeResult> MergeAsync(string solution, string @base, string template, bool preferTemplate, bool markBase, CancellationToken ct) =>
             Task.FromResult(new TextMergeResult(string.Empty, 0, "error: Cannot merge binary files"));
     }
 
@@ -42,7 +42,7 @@ internal sealed class ThreeWayMergeTests
         trees.Put(trees.Base, "a\n").Put(trees.Solution, "a\nsolution\n").Put(trees.New, "a\ntemplate\n");
 
         var refused = await Should.ThrowAsync<InvalidOperationException>(() =>
-            new ThreeWayMerge(new FailingMerger()).ComputeAsync(trees.Solution, trees.Base, trees.New, false, null, CancellationToken.None));
+            new ThreeWayMerge(new FailingMerger()).ComputeAsync(trees.Solution, trees.Base, trees.New, false, false, null, CancellationToken.None));
 
         refused.Message.ShouldContain(File);
     }
@@ -60,7 +60,7 @@ internal sealed class ThreeWayMergeTests
     }
 
     [Test]
-    public async Task Should_MarkAConflict_InTheTemplatesStyle_When_BothChangedOneLine()
+    public async Task Should_MarkAConflict_Plain_When_BothChangedOneLine()
     {
         var trees = new Trees();
         trees.Put(trees.Base, "a\nb", bom: true).Put(trees.Solution, "a\nteam  \n", bom: true).Put(trees.New, "a\ntemplate\n");
@@ -70,6 +70,19 @@ internal sealed class ThreeWayMergeTests
         change.ShouldNotBeNull().Kind.ShouldBe(ChangeKind.Conflict);
         change.Content.ShouldNotBeNull().Bom.ShouldBeFalse();
         change.Content.Text.ShouldContain("team\n=======");
+        change.Content.Text.ShouldNotContain("|||||||");
+    }
+
+    [Test]
+    public async Task Should_MarkAConflict_WithItsBase_When_Zdiff3IsNamed()
+    {
+        var trees = new Trees();
+        trees.Put(trees.Base, "a\nb").Put(trees.Solution, "a\nteam\n").Put(trees.New, "a\ntemplate\n");
+
+        var change = await trees.MergeAsync(markBase: true);
+
+        change.ShouldNotBeNull().Kind.ShouldBe(ChangeKind.Conflict);
+        change.Content!.Text.ShouldContain("team\n||||||| base");
     }
 
     [Test]
@@ -78,7 +91,7 @@ internal sealed class ThreeWayMergeTests
         // A dash and Cyrillic: read by the console's code page they came back as "тАФ".
         const string line = "// a dash — and Cyrillic: проверка\n";
 
-        var merged = await new GitMergeFile(new ProcessRunner()).MergeAsync(line + "team\n", line, "template\n" + line, false, CancellationToken.None);
+        var merged = await new GitMergeFile(new ProcessRunner()).MergeAsync(line + "team\n", line, "template\n" + line, false, false, CancellationToken.None);
 
         merged.Conflicts.ShouldBe(0);
         merged.Text.ShouldBe("template\n" + line + "team\n");
@@ -138,6 +151,22 @@ internal sealed class ThreeWayMergeTests
 
         change!.Kind.ShouldBe(ChangeKind.Conflict);
         change.Content!.Text.ShouldContain("<<<<<<< solution");
+        change.Content.Text.ShouldContain("=======");
+        change.Content.Text.ShouldNotContain("|||||||");
+        change.Content.Text.ShouldContain(">>>>>>> template");
+    }
+
+    [Test]
+    public async Task Should_MarkAConflictWithItsBase_When_TheyChangedTheSameLineAndZdiff3IsNamed()
+    {
+        var t = new Trees();
+        t.Put(t.Base, "1\n2\n3\n").Put(t.Solution, "1\nmine\n3\n").Put(t.New, "1\ntemplate\n3\n");
+
+        var change = await t.MergeAsync(markBase: true);
+
+        change!.Kind.ShouldBe(ChangeKind.Conflict);
+        change.Content!.Text.ShouldContain("<<<<<<< solution");
+        change.Content.Text.ShouldContain("||||||| base");
         change.Content.Text.ShouldContain(">>>>>>> template");
     }
 

@@ -17,10 +17,10 @@ internal sealed class Options
           --yes                     write without asking (CI)
           --force                   in a conflict take the template's side; your lines stay in git history
           --no-build                do not build the solution after writing
-          --allow-dirty             run on a working tree with uncommitted changes; takes --merge files
+          --allow-dirty             new and upgrade: run on a working tree with uncommitted changes, committed beside the run and taken into the merge
           --template-version 2.x.y  init: the version a solution was made by, where it does not say
           --to 2.x.y                upgrade: the release to go to, not newer than the tool
-          --merge files             merge by the tool and write the files, instead of a git merge of dotskit/template
+          --conflict-style zdiff3   mark a conflict with its base (|||||||), for an IDE that reads it; plain is the default
           --all-at-once             upgrade: every part in one merge, instead of the shared files first, then a service at a time
           --part <part>             upgrade: the part this run takes - shared, common/<project>, capabilities or a service folder's last name
         """;
@@ -31,9 +31,12 @@ internal sealed class Options
     private const string AllowDirtyOption = "--allow-dirty";
     private const string TemplateVersionOption = "--template-version";
     private const string ToOption = "--to";
-    private const string MergeOption = "--merge";
+    private const string ConflictStyleOption = "--conflict-style";
     private const string AllAtOnceOption = "--all-at-once";
     private const string PartOption = "--part";
+
+    /// <summary>The value of --conflict-style that marks a conflict with its base, as zdiff3 writes it.</summary>
+    public const string Zdiff3Style = "zdiff3";
 
     public bool Yes { get; private init; }
     public bool Force { get; private init; }
@@ -47,8 +50,9 @@ internal sealed class Options
 
     public string? Part { get; private init; }
 
-    /// <summary>A solution there already is merged by git (dotskit/template), or with --merge files by the tool itself.</summary>
-    public bool ByGit { get; private init; } = true;
+    /// <summary>--conflict-style zdiff3: a conflict is marked with its base, as zdiff3 writes it; plain is the default.</summary>
+    public bool MarkBase { get; private init; }
+
     public List<string> TemplateArgs { get; private init; } = [];
 
     /// <summary>The options of <paramref name="command"/>, refusing one that belongs to another command.</summary>
@@ -75,9 +79,14 @@ internal sealed class Options
             throw new ArgumentException($"{PartOption} takes one part, {AllAtOnceOption} every part: leave out one of them.");
         }
 
-        if (command == "init" && args.Any(a => Is(a, MergeOption)))
+        if (options.AllowDirty && command is not ("upgrade" or "new"))
         {
-            throw new ArgumentException($"{MergeOption} is an option of dotskit new and dotskit upgrade: init merges nothing.");
+            throw new ArgumentException($"{AllowDirtyOption} is an option of dotskit new and dotskit upgrade: init merges nothing.");
+        }
+
+        if (command == "init" && args.Any(a => Is(a, ConflictStyleOption)))
+        {
+            throw new ArgumentException($"{ConflictStyleOption} is an option of dotskit new and dotskit upgrade: init merges nothing.");
         }
 
         return options;
@@ -89,10 +98,10 @@ internal sealed class Options
         var (templateVersion, afterVersion) = Valued(args, TemplateVersionOption);
         var (to, afterTo) = Valued(afterVersion, ToOption);
         var (part, afterPart) = Valued(afterTo, PartOption);
-        var (merge, rest) = Valued(afterPart, MergeOption);
-        if (merge is not null and not (Merging.MergeMode.Git or Merging.MergeMode.Files))
+        var (style, rest) = Valued(afterPart, ConflictStyleOption);
+        if (style is not null and not (Zdiff3Style or "plain"))
         {
-            throw new ArgumentException($"{MergeOption} {merge}: name {Merging.MergeMode.Git} or {Merging.MergeMode.Files}.");
+            throw new ArgumentException($"{ConflictStyleOption} {style}: name plain or {Zdiff3Style}.");
         }
 
         return new Options
@@ -105,7 +114,7 @@ internal sealed class Options
             To = to,
             Part = part,
             AllAtOnce = rest.Any(a => Is(a, AllAtOnceOption)),
-            ByGit = merge != Merging.MergeMode.Files,
+            MarkBase = style == Zdiff3Style,
             TemplateArgs = [.. rest.Where(a => !flags.Any(f => Is(a, f)))],
         };
     }
@@ -121,7 +130,7 @@ internal sealed class Options
 
         if (at + 1 >= args.Count)
         {
-            throw new ArgumentException($"{option} needs a value: {option} {option switch { MergeOption => Merging.MergeMode.Files, PartOption => "Orders", _ => "2.7.0" }}.");
+            throw new ArgumentException($"{option} needs a value: {option} {option switch { PartOption => "Orders", ConflictStyleOption => Zdiff3Style, _ => "2.7.0" }}.");
         }
 
         return (args[at + 1], [.. args.Take(at), .. args.Skip(at + 2)]);

@@ -20,12 +20,12 @@ internal sealed class RollbackScenarios
     {
         var root = await SolutionAsync();
         var merge = new GitTemplateMerge(Runner, Sandbox.Self);
-        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, CancellationToken.None);
+        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, false, CancellationToken.None);
         Write(root, Solution, "All.sln with the template's projects\n");
         await merge.StageAsync(root, [Solution], CancellationToken.None);
 
         (await Should.ThrowAsync<InvalidOperationException>(() =>
-            merge.MergeAsync(root, new(Base(), "1.0.0"), new(Base(), "2.0.0"), false, CancellationToken.None))).Message.ShouldContain("in progress");
+            merge.MergeAsync(root, new(Base(), "1.0.0"), new(Base(), "2.0.0"), false, false, CancellationToken.None))).Message.ShouldContain("in progress");
         await merge.AbortAsync(root, CancellationToken.None);
 
         Read(root, Solution).ShouldBe("the team's own All.sln\n");
@@ -38,7 +38,7 @@ internal sealed class RollbackScenarios
         var root = await SolutionAsync();
         var head = await HeadAsync(root);
         var merge = new GitTemplateMerge(Runner, Sandbox.Self);
-        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, CancellationToken.None);
+        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, false, CancellationToken.None);
 
         await merge.AbortAsync(root, CancellationToken.None);
 
@@ -54,7 +54,7 @@ internal sealed class RollbackScenarios
         var root = await SolutionAsync();
         var head = await HeadAsync(root);
         var merge = new GitTemplateMerge(Runner, Sandbox.Self);
-        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, CancellationToken.None);
+        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, false, CancellationToken.None);
         Write(root, Solution, "All.sln a repair changed and did not stage\n");
 
         await merge.AbortAsync(root, CancellationToken.None);
@@ -70,7 +70,7 @@ internal sealed class RollbackScenarios
         var root = await SolutionAsync();
         var head = await HeadAsync(root);
         var merge = new GitTemplateMerge(Runner, Sandbox.Self);
-        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, CancellationToken.None);
+        await merge.MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, false, CancellationToken.None);
         var lockFile = Path.Combine(root, ".git", "index.lock");
         await File.WriteAllTextAsync(lockFile, "");
 
@@ -92,7 +92,7 @@ internal sealed class RollbackScenarios
         var next = Tree((".gitignore", "appsettings.Secrets.json\n"), (ProgramFile, BaseProgram), (added, "the template's\n"));
 
         var refused = await Should.ThrowAsync<InvalidOperationException>(() =>
-            new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(next, "2.0.0"), false, CancellationToken.None));
+            new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(next, "2.0.0"), false, false, CancellationToken.None));
 
         refused.Message.ShouldContain("changed after the command started");
         (await HeadAsync(root)).ShouldBe(head);
@@ -108,7 +108,7 @@ internal sealed class RollbackScenarios
         Write(root, ProgramFile, "the team's change, saved while the plan waited for a yes\n");
 
         var refused = await Should.ThrowAsync<InvalidOperationException>(() =>
-            new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, CancellationToken.None));
+            new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Base(), "1.0.0"), new(Tree((ProgramFile, NextProgram)), "2.0.0"), false, false, CancellationToken.None));
 
         refused.Message.ShouldContain($"changed after the command started (M {ProgramFile})");
         (await HeadAsync(root)).ShouldBe(head);
@@ -121,8 +121,8 @@ internal sealed class RollbackScenarios
     {
         public IReadOnlySet<string> LeftOut => git.LeftOut;
 
-        public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct) =>
-            git.MergeAsync(root, @base, next, preferTemplate, ct);
+        public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct) =>
+            git.MergeAsync(root, @base, next, preferTemplate, markBase, ct);
 
         public async Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct)
         {
