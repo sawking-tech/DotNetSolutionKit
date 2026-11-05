@@ -142,6 +142,10 @@ file-byte violations and C# style violations in the tool.
 - Definition of done: `template.yml` is green, behaviour tests accompany the change, docs and release notes
   are updated, generated-solution skills are updated where needed (`scaffold-service` first), and an agent
   that knows only the issue and diff reviews the PR.
+- Every commit on `dev` ships green: a red check is a stop, not noise. Find the cause to its root and fix it
+  in the source, not where it surfaced. Never merge or push on top of red, and never restart a failed run
+  without a fix — a bare restart only proves the failure is deterministic. Cancelled, stale or hung runs
+  count as red until explained.
 
 ## Security
 
