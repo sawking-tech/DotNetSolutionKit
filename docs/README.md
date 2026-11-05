@@ -2,7 +2,7 @@
 
 **DotNetSolutionKit (dotskit)** generates a .NET solution to a team's needs - the frame for DDD and Clean Architecture, CI, deployment and tests, with modules and integrations with infrastructure services turned on by flags. `dotskit` adds services to the solution and flags to its services. The generated solution is an ordinary .NET solution the team owns.
 
-`dotskit upgrade` brings the template's later improvements into a generated solution under the team's control and helps the team maintain its solution: a three-way merge with the team's code, where what does not merge is a conflict for the team to resolve.
+`dotskit upgrade` brings the template's later improvements into a generated solution under the team's control and helps the team maintain its solution: a three-way merge with the team's code, where what does not merge is a conflict for the team to resolve, marked with its base so the IDE shows three panes and takes both changes in one click.
 
 What the template gives a solution, at a glance:
 

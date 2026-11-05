@@ -75,12 +75,10 @@ What happens to a file:
 | `Merge` | both changed it, in lines apart | both changes |
 | `Delete` | the template removed a file the team did not change | the file is deleted |
 | `Kept` | one side removed the file and the other changed it, or both changed a binary file | nothing: the solution's file stays |
-| `Conflict` | both changed the same lines, or lines right next to each other | the file with both versions between `<<<<<<< solution` and `>>>>>>> template` |
+| `Conflict` | both changed the same lines, or lines right next to each other | the file with both versions: `<<<<<<< solution`, `=======`, `>>>>>>> template`; with `--conflict-style zdiff3` the base between them too, `||||||| base` |
 
-A file of the solution its git ignores, a local `appsettings.Secrets.json` among them, is never written, in either
-merge. A new file the template adds that the solution's git would ignore, as the secrets file of a new service, is
-written by both: the merge by git, which leaves it off the branch, writes it beside the merge, and `git merge --abort`
-by hand leaves it, as git does not know it. A committed symbolic link is carried as a link and never read, like a
+A file of the solution its git ignores, a local `appsettings.Secrets.json` among them, is never written. A new file the template adds that the solution's git would ignore, as the secrets file of a new service,
+is written beside the merge, and `git merge --abort` puts it back too, as git does not know it. A committed symbolic link is carried as a link and never read, like a
 binary file, and a path that leads outside the solution through a linked folder is refused before anything is
 written: what a link points at never gets into a merged file, and no file of the template is written through it.
 
@@ -109,8 +107,18 @@ git, the same three-way merge:
   that was stopped, the error names the commands that do it by hand;
 - the command commits the template's new output there and runs `git merge --no-ff --no-commit dotskit/template`.
   git takes the template's changes and the team's, follows the files the template moved, and marks the lines
-  both changed for the IDE or `git mergetool`. The merge stays uncommitted: look at it, commit it, or undo it
-  with `git merge --abort`;
+  both changed for the IDE or `git mergetool`: `<<<<<<< solution`, `=======`, `>>>>>>> template`. The IDE reads
+  the base from the index and shows its panes. A file both sides added has no base - the version the solution is
+  upgraded from did not have it - and the base must be a state the file really was in: 'take the base' must give a
+  working file, so it is never a computed intersection of the two sides, which never existed and would break a code
+  file. The index is given the solution's own side as the base: the result starts as the solution's (no changes on
+  the left), and the template's side shows as the one change that overwrites it (on the right). Resolving is a
+  binary choice - approve the proposal and take the template's side, 'accept both' does the same, or keep the
+  solution's file; an upgrade a release at a time, `--to` through the release that introduced the file, gives it a
+  real base and no conflict of this kind. The merge stays uncommitted: look at
+  it, commit it, or undo it with `git merge --abort`;
+- `--conflict-style zdiff3` marks each conflict with its base too, as zdiff3 writes it (`||||||| base`): for
+  an IDE or a reader that takes the base from the file, not the index. Plain is the default;
 - the plan shows the template's own changes: a file it adds, changes or removes;
 - what the solution's git ignores, by any of its `.gitignore` files, a local secret among them, and `All.sln`
   are never in the branch; the manifest and `All.sln` the command writes join the merge, so `git merge --abort`
@@ -121,7 +129,7 @@ git, the same three-way merge:
   file and the template's are first brought to the template's style - no byte order mark, no spaces at the ends
   of lines, a line end at the end - so a change of the style alone conflicts with nothing the team wrote, and the
   merged file has the style. A solution file keeps its byte order mark, and the merged file keeps the line ends
-  of the team's. `--merge files` does the same. A line break of two spaces at the end of a Markdown line is lost
+  of the team's. A line break of two spaces at the end of a Markdown line is lost
   in a file both changed: write it as a backslash. A file with a merge of its own in `.gitattributes`, as one of
   Git LFS, keeps it.
 
@@ -129,16 +137,16 @@ What git then shows: `git log dotskit/template` - what each version of the templ
 `git diff dotskit/template HEAD`, once the merge is committed - the team's own changes over the template of its
 version, and nothing else.
 
-`--merge files` merges by the tool itself, as in the table above, and writes the files with no branch and no
-merge commit. `--allow-dirty` takes `--merge files`: a git merge needs a clean tree. The two merges differ in two
-places. A file one side removed and the other changed is `Kept` by the merge by files, with the reason in the
-plan, and a modify/delete conflict in the merge by git, for the team to decide. The files the template moved are
-paired by the tool in the merge by files - a pair git makes across two services is corrected - and by git itself
-in the merge by git.
+`--allow-dirty` runs the merge on a working tree with uncommitted changes: the changes, untracked files among
+them, are committed by plumbing beside the run - no hook, no checkout - so they take part in the merge as any
+committed side: a conflict of yours with the template is marked like any other, and the commit of the merge has
+them as its parent. A run that fails before the merge stands puts them back uncommitted with
+`git reset --mixed`; `--force` refuses the flag, as it needs the team's lines committed.
 
 ### The git commands dotskit runs
 
-Every git command the tool runs, by what it does to the solution's repository. A list of paths goes to git in
+Every git command the tool runs, by what it does to the solution's repository. The tool needs git 2.35 or newer:
+`--conflict-style zdiff3` uses zdiff3, which 2.35 brought. A list of paths goes to git in
 a file (`--pathspec-from-file`), never on the command line, so a solution of any size fits.
 
 | Does to the repository | Command | What for |
@@ -151,17 +159,19 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git config --path --get core.attributesFile` | the user's global attributes, kept under the merge driver's |
 | | `git ls-files --others --ignored --exclude-standard` | the files the solution's git ignores, never written |
 | | `git diff --name-only --diff-filter=U` | the files left in conflict |
-| | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed |
+| | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed; one with no base, added by both sides, gains the solution's side as its base |
+| | `git update-index --index-info` | the solution's side as the base of a file both sides added, so the IDE opens it with its merge view |
 | | `git diff --no-index -M` | the files the template moved, between two of its outputs outside the repository |
-| | `git merge-file -p`, again with `--theirs` under `--force` | a file merged by `--merge files` and by the merge driver, on copies of the three sides; the first run counts the conflicts `--force` decides |
+| | `git merge-file -p [--zdiff3]`, again with `--theirs` under `--force` | a file merged by the tool's own merge and by the merge driver, on copies of the three sides; `--zdiff3` only with `--conflict-style zdiff3`; the first run counts the conflicts `--force` decides |
 | | `git ls-remote --tags` | the releases of the template, for `init` on a solution that does not say its version |
 | writes objects only, through an index of its own | `git add -A`, `git rm --cached`, `git ls-files`, `git write-tree`, `git commit-tree` | a commit of the template's output; the solution's index and files are not touched |
 | moves the branch `dotskit/template` | `git update-ref refs/heads/dotskit/template` | the commit of the template's new output on the branch, only from the tip read before |
 | commits on the working branch, files unchanged | `git commit-tree -p HEAD -p <base>`, `git update-ref HEAD` | the base adopted, the first time or on another branch, with no commit hook of the team |
-| merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge |
+| commits on the working branch, files unchanged | `git add -A`, `git write-tree`, `git commit-tree -p HEAD`, `git update-ref HEAD` | `--allow-dirty`: the uncommitted changes taken into the merge, the index theirs |
+| merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… [-c merge.conflictstyle=zdiff3] merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge; `merge.conflictstyle=zdiff3` only with `--conflict-style zdiff3` |
 | stages | `git add` | the manifest, `All.sln` and the files the repair changed join the merge |
 | removes from the tree and the index | `git rm -f` | a file the team removed that the template only restyled - line ends, spaces, a byte order mark - stays removed instead of conflicting |
-| undoes a run that failed | `git reset --hard`, `git update-ref` (or `-d`); `git rev-parse --git-path index.lock` when git refuses | the working branch, its tracked files and the branch `dotskit/template` back where they were before the run |
+| undoes a run that failed | `git reset --hard`, `git update-ref` (or `-d`); `git reset --mixed` after an `--allow-dirty` commit; `git rev-parse --git-path index.lock` when git refuses | the working branch, its tracked files and the branch `dotskit/template` back where they were before the run; the uncommitted changes uncommitted again |
 
 The tool never commits the merge, never pushes, and never checks out a branch: the merge is the team's to look
 at, commit or undo.
@@ -232,14 +242,14 @@ projects. The check installs the template of that version from nuget.org.
 | Option | What it does |
 |---|---|
 | `--yes` | writes without asking, for CI |
-| `--force` | resolves a conflict with the template's lines; with `--merge files` the plan names each file it did that in; the team's lines stay in git history, so it needs a clean tree and refuses `--allow-dirty` |
+| `--force` | resolves a conflict with the template's lines; the team's lines stay in git history, so it needs a clean tree and refuses `--allow-dirty` |
 | `--no-build` | does not build the solution after writing |
-| `--allow-dirty` | runs on a working tree with uncommitted changes; takes `--merge files` |
+| `--allow-dirty` | `new` and `upgrade`: runs on a working tree with uncommitted changes, committed beside the run and taken into the merge; a failed run puts them back uncommitted |
 | `--template-version 2.x.y` | `init`: the version the solution was made by, where it does not say it |
 | `--to 2.x.y` | `upgrade`: the release to bring the solution to, not newer than the tool |
+| `--conflict-style zdiff3` | `new` and `upgrade`: a conflict is marked with its base (`\|\|\|\|\|\|\| base`), as zdiff3 writes it; plain is the default |
 | `--all-at-once` | `upgrade`: every part in one merge, instead of the shared files first, then a service folder at a time |
 | `--part <part>` | `upgrade`: the part this run takes, `shared`, `common/<project>`, `capabilities` or a service folder's last name |
-| `--merge files` | `new` and `upgrade`: merge by the tool and write the files, instead of a git merge of `dotskit/template` |
 
 `DOTSKIT_TRACE=1` prints every `dotnet` and `git` call of a command with its time to stderr: what a slow
 command spends its time on.
@@ -257,6 +267,6 @@ command spends its time on.
 - `dotskit new` works in a solution with a manifest: made by `dotskit`, or described by `dotskit init`.
 - `dotskit new` needs a manifest of the tool's version: a solution of an earlier version is brought to it by
   `dotskit upgrade` first.
-- The merge by git needs the solution at the root of its git repository. A solution in a folder of a larger
-  repository is refused it before the plan and takes `--merge files`. The clean working tree is checked over
+- The merge needs the solution at the root of its git repository. A solution in a folder of a larger
+  repository is refused before the plan: move it to its own repository. The clean working tree is checked over
   the whole repository.

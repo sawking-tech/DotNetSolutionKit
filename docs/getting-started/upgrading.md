@@ -47,7 +47,15 @@ What is checked. A solution nobody has changed - the template's own output - goe
 version to any later one with no conflicts and no errors: on a clean solution of `2.0` taken to the current
 version, straight in 12 runs and with a stop at `2.7.0` in 23, every part merged clean, the solution builds and
 its tests pass. On a solution a team has been changing for months the template's side merges the same way, and
-what the team changed in the same lines is a conflict for the team - the tool never guesses there.
+what the team changed in the same lines is a conflict for the team - the tool never guesses there: whoever
+resolves a conflict answers for the file. The IDE shows the team's
+lines, the template's and the base from the index, and taking both changes is one click; `--conflict-style
+zdiff3` marks each conflict with its base in the file, as zdiff3 writes it.
+
+A file the team took from a newer template than the solution is described as is added by both sides: no base
+exists for it. The conflict is resolved by taking one side - the template's or the team's ('accept both' takes
+the template's, the newer version); an upgrade a release at a time, `--to` through the release that introduced the
+file, gives it a real base and no conflict of this kind.
 
 The sections below say how each of these works, what it does not do, and what a solution may still have to
 change by hand.
@@ -104,9 +112,8 @@ fails:
   projects that reference it show their own errors.
 
 The report names, by project, the `using` lines and full names it changed and the references it added; `git diff` shows them. The repair runs after
-the merge is written. The one before the build is a step of the write: in the merge by git a failure or Ctrl+C
-there takes back the run; in the merge by files the files stay written, and the error says so. A write of the
-repair after a build that fails stops the repair, and the report says why. With `--no-build` there is
+the merge is written. The one before the build is a step of the write: a failure or Ctrl+C
+there takes back the run. A write of the repair after a build that fails stops the repair, and the report says why. With `--no-build` there is
 no build and no repair.
 
 ### The versions an upgrade covers
