@@ -163,7 +163,15 @@ jobs:
 
             docker run --rm \
               -v "$baseline:/base.json:ro" -v "$file:/head.json:ro" \
-              tufin/oasdiff breaking /base.json /head.json -f json > "/tmp/api-diff/$service.errors" || true
+              tufin/oasdiff breaking /base.json /head.json -f json > "/tmp/api-diff/$service.errors" 2>"/tmp/api-diff/$service.stderr" || true
+
+            # Findings still write a report; a run that wrote none failed. Failing with it, not past it:
+            # a broken run must not read as "no breaking changes".
+            if ! jq -e 'type == "array"' "/tmp/api-diff/$service.errors" >/dev/null 2>&1; then
+              echo "::error::$service: oasdiff produced no report: $(head -c 300 "/tmp/api-diff/$service.stderr")"
+              failed=1
+              continue
+            fi
 
             # Keep the errors no rule covers; a rule matches on check id, method and path, with "*"
             # standing for any. Everything else about an error - its wording, the media type it names
