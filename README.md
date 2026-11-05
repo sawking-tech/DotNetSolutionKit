@@ -9,14 +9,16 @@ Site: [dotskit.sawking.tech](https://dotskit.sawking.tech/). Documentation, in E
 
 **DotNetSolutionKit (dotskit)** generates a .NET solution to a team's needs - the frame for DDD and Clean Architecture, CI, deployment and tests, with modules and integrations with infrastructure services turned on by flags. It carries no business logic of its own: a monolith, one web service or a high-load set of microservices is written on top, as strictly as the team chooses. `dotskit` adds services to the solution and flags to its services. The generated solution is an ordinary .NET solution the team owns.
 
-`dotskit upgrade` brings the template's later improvements into a generated solution under the team's control and helps the team maintain its solution: a three-way merge with the team's code, where what does not merge is a conflict for the team to resolve, marked with its base so the IDE shows three panes and takes both changes in one click.
+`dotskit upgrade` brings the template's later changes into a generated solution under the team's control:
+a three-way merge with the team's code, where what does not merge is a conflict for the team to resolve;
+the IDE shows the team's lines, the template's and the base, and taking both changes is one click.
 
-No lock-in, and nothing imposed. A generated solution is an ordinary .NET solution: no runtime of the
-template, no package of ours it has to reference, no service to call home. The tool is useful, not required -
+The solution needs nothing of the template at run time: no runtime of ours, no package it has to reference, no
+service to call home. The tool is useful, not required -
 the template works through `dotnet new` alone, and a solution that stops upgrading keeps building and shipping.
 The same goes for the architecture: DDD and Clean Architecture are what the layout is ready for, not rules it
-enforces. A team develops the way it finds right, carries a minimum of files it did not ask for, and can try
-what the template offers whenever it wants to.
+enforces. The files of a capability the team did not choose are not generated, and a flag can be added to a
+service whenever the team wants one.
 
 What it gives a solution in full - the principles, the economics, the cost:
 [what the template gives](docs/getting-started/what-it-gives.md).

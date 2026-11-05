@@ -154,7 +154,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 |---|---|---|
 | nothing, reads | `git status --porcelain` | a clean working tree before writing |
 | | `git rev-parse --show-prefix` | whether the solution is at the root of its repository, for the merge by git |
-| | `git ls-files -v` | files marked `assume-unchanged`: git hides their local changes from `git status`, and a rollback would lose them, so the command is refused |
+| | `git ls-files -v` | files marked `assume-unchanged` or `skip-worktree`: git hides their local changes from `git status`, and a rollback would lose them, so the command is refused |
 | | `git rev-parse` (`HEAD`, `--absolute-git-dir`, `MERGE_HEAD`, the branch, a commit's tree) | where the solution and the branch stand |
 | | `git merge-base --is-ancestor` | whether the working branch has the branch's last commit |
 | | `git config --path --get core.attributesFile` | the user's global attributes, kept under the merge driver's |
@@ -183,9 +183,10 @@ at, commit or undo.
 arguments of the solution and the arguments of each service. Commit it with the solution: every later
 command rebuilds the base from it.
 
-The manifest keeps a port for each service: when `--HttpPort` is not given, the template picks a free port
-and writes it into the manifest, and a service keeps the port when a later command adds a flag to it. A
-service the tool adds gets the first port from 5000 that no service of the solution has.
+The manifest keeps a port for each service: when `--HttpPort` is not given, a port is picked once and
+written into the manifest, and a service keeps its port when a later command adds a flag to it. The tool
+names the first port from 5000 that no service of the solution has; `dotnet new` alone leaves the pick to
+the template.
 
 A flag with a part in `Common` or the root, such as `--Storage`, becomes the solution's when any of its
 services has it. The solution's names, `--Database`, `--Deploy`, `--TestFramework`, `--Agent` and
