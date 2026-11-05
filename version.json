@@ -34,7 +34,9 @@
         "The template's files are UTF-8 with LF, a line end at the end and no spaces at the ends of lines, a byte order mark only in a solution file.",
         "One code style, owned by the formatters (ADR-007): CI fails a pull request that breaks the bytes of any file or the C# style of the tool; the C# of the template follows.",
         "The API diff treats a base branch that cannot generate its contracts - older than them, or broken by its own configuration - as no baseline, with a notice in the log; the branch itself still fails when its documents cannot be produced.",
-        "The template writes .dotskit/manifest.json when it generates a solution, so dotskit new and dotskit upgrade work from the first run; dotskit init adds a service the template generated into the solution and says why it was not in the manifest."
+        "The template writes .dotskit/manifest.json when it generates a solution, so dotskit new and dotskit upgrade work from the first run; dotskit init adds a service the template generated into the solution and says why it was not in the manifest.",
+        "--force follows the template in a file one side removed and the other changed - removed where the template removed it, the template's version where the team removed it - and the plan names it with every file where the team's lines gave way.",
+        "A file the template moved that the team removed stays removed, and the plan names why, like a rename/delete of git's."
       ],
       "ru": {
         "headline": "dotskit обновляет решение любого выпуска так, что код команды собирается.",
@@ -69,7 +71,9 @@
           "Файлы шаблона в UTF-8 с LF, переводом строки в конце и без пробелов в конце строк, BOM только у файла решения.",
           "Единый стиль кода, за который отвечают форматтеры (ADR-007): CI роняет PR, который нарушает байты любого файла или стиль C# инструмента; C# шаблона - следом.",
           "Сравнение API считает базовую ветку, которая не может дать свои контракты - старше их или сломана собственной конфигурацией, - отсутствием baseline с пометкой в логе; сама ветка без своих документов по-прежнему валит проверку.",
-          "Шаблон пишет .dotskit/manifest.json при генерации решения, поэтому dotskit new и dotskit upgrade работают с первого запуска; dotskit init принимает сервис, добавленный в решение шаблоном, и называет, почему его не было в манифесте."
+          "Шаблон пишет .dotskit/manifest.json при генерации решения, поэтому dotskit new и dotskit upgrade работают с первого запуска; dotskit init принимает сервис, добавленный в решение шаблоном, и называет, почему его не было в манифесте.",
+          "--force идёт за шаблоном в файле, который одна сторона удалила, а другая изменила: удаляется там, где удалил шаблон, и берётся версия шаблона там, где удаляла команда; план называет его вместе с каждым файлом, где строки команды уступили.",
+          "Файл, который шаблон перенёс, а команда удалила, остаётся удалённым, и план называет причину - как rename/delete у git."
         ]
       }
     },

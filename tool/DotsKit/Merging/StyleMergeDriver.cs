@@ -58,6 +58,12 @@ internal sealed class StyleMergeDriver(ITextMerger merger)
 
         // The merged text in the line ends of the solution's side, as the tool's own merge writes it.
         await File.WriteAllBytesAsync(args[1], (solution with { Text = LineEndings.Apply(result.Text, LineEndings.Of(solution.Text)) }).ToBytes(), ct);
+        // --force: the merge that started this driver names each file whose conflict took the template's lines.
+        if (flags.Contains(TheirsFlag) && result.Taken > 0
+            && Environment.GetEnvironmentVariable(GitTemplateMerge.TakenReportVariable) is { Length: > 0 } report)
+        {
+            await File.AppendAllTextAsync(report, path + "\n", ct);
+        }
         return result.Conflicts == 0 ? Merged : Conflicted;
     }
 
