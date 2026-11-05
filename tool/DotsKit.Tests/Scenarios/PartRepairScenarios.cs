@@ -11,7 +11,7 @@ namespace DotsKit.Tests.Scenarios;
 /// An upgrade over a type of Common the template moved to another namespace: a part at a time, the part of Common
 /// repairs the usings of every project of the solution, the team's code and the service's files of the template
 /// alike, and the service's own part later keeps that repair rather than writing over it; all at once, the one run
-/// repairs them; in either merge. The real
+/// repairs them. The real
 /// planner, writer, git and repair run; the template's outputs are folders the test writes.
 /// The scenarios of this folder and what each file checks: README.md beside this file.
 /// </summary>
@@ -47,17 +47,15 @@ internal sealed class PartRepairScenarios
 
     private static readonly ProcessRunner Runner = new();
 
-    [TestCase(MergeMode.Git, false)]
-    [TestCase(MergeMode.Files, false)]
-    [TestCase(MergeMode.Git, true)]
-    [TestCase(MergeMode.Files, true)]
-    public async Task ThePartOfCommon_RepairsTheUsingsOfTheService_AndTheServicesPartKeepsThem(string merge, bool allAtOnce)
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task ThePartOfCommon_RepairsTheUsingsOfTheService_AndTheServicesPartKeepsThem(bool allAtOnce)
     {
         var root = await SolutionAsync();
         var lines = new List<string>();
         var parts = new List<ExitCode>();
         var repaired = new List<bool>();
-        string[] args = allAtOnce ? ["--yes", "--merge", merge, "--all-at-once"] : ["--yes", "--merge", merge];
+        string[] args = allAtOnce ? ["--yes", "--all-at-once"] : ["--yes"];
 
         // shared, common/Acme.Shop.Common, capabilities, then Acme.Shop.Orders, or every part at once; the team commits each run.
         for (var run = 0; run < (allAtOnce ? 1 : 4); run++)
@@ -71,7 +69,7 @@ internal sealed class PartRepairScenarios
         repaired.ShouldBe(allAtOnce ? [true] : [false, true, true, true]);
         // By git, the tip each part leaves on dotskit/template is the base of the next: the team's branch gets one adoption, the first.
         (await Runner.RunCheckedAsync("git", ["log", "--format=%s"], root, CancellationToken.None)).Split('\n')
-            .Count(s => s.StartsWith("dotskit: the solution is of the template", StringComparison.Ordinal)).ShouldBe(merge == MergeMode.Git ? 1 : 0);
+            .Count(s => s.StartsWith("dotskit: the solution is of the template", StringComparison.Ordinal)).ShouldBe(1);
         Exists(root, OldEvent).ShouldBeFalse();
         Manifest.Load(root)!.Template.ShouldBe(To);
         Read(root, TemplatesOrder).ShouldBe(string.Format(OrderOf, NewNamespace, Property));
@@ -82,9 +80,8 @@ internal sealed class PartRepairScenarios
         lines.ShouldContain($"  Acme.Shop.Orders.Domain: using {OldNamespace} -> {NewNamespace}{(allAtOnce ? "; reference to Acme.Shop.Common" : "")}");
     }
 
-    [TestCase(MergeMode.Git)]
-    [TestCase(MergeMode.Files)]
-    public async Task TheLastPartLeftInConflict_KeepsTheUpgradeOpen_AndTheRunAfterTheResolutionFinishesIt(string merge)
+    [Test]
+    public async Task TheLastPartLeftInConflict_KeepsTheUpgradeOpen_AndTheRunAfterTheResolutionFinishesIt()
     {
         var root = await SolutionAsync();
         // The team renamed the property the next template renames too: the service's part, the last, conflicts.
@@ -96,7 +93,7 @@ internal sealed class PartRepairScenarios
 
         for (var run = 0; run < 3; run++)
         {
-            codes.Add(await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes", "--merge", merge]), root, CancellationToken.None));
+            codes.Add(await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None));
             if (run < 2)
             {
                 await CommitAsync(root, $"part {run + 1}");
@@ -106,7 +103,7 @@ internal sealed class PartRepairScenarios
         var open = Manifest.Load(root)!;
         Put(root, TemplatesOrder, string.Format(OrderOf, NewNamespace, "Previous"));
         await CommitAsync(root, "the conflict resolved");
-        var finished = await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes", "--merge", merge]), root, CancellationToken.None);
+        var finished = await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None);
 
         codes.ShouldBe([ExitCode.Done, ExitCode.Done, ExitCode.Conflicts]);
         open.Template.ShouldBe(From);
@@ -119,9 +116,8 @@ internal sealed class PartRepairScenarios
         lines.ShouldContain(l => l.StartsWith("Finishing the upgrade from the template 2.7.0 to 2.9.0", StringComparison.Ordinal));
     }
 
-    [TestCase(MergeMode.Git)]
-    [TestCase(MergeMode.Files)]
-    public async Task AServiceFileTheTemplateChangesBeyondTheUsing_MergesCleanAfterThePartOfCommonRepairedIt(string merge)
+    [Test]
+    public async Task AServiceFileTheTemplateChangesBeyondTheUsing_MergesCleanAfterThePartOfCommonRepairedIt()
     {
         var root = await SolutionAsync();
         var lines = new List<string>();
@@ -130,7 +126,7 @@ internal sealed class PartRepairScenarios
 
         for (var run = 0; run < 4; run++)
         {
-            codes.Add(await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes", "--merge", merge]), root, CancellationToken.None));
+            codes.Add(await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None));
             await CommitAsync(root, $"part {run + 1}");
         }
 
@@ -139,9 +135,8 @@ internal sealed class PartRepairScenarios
         Read(root, TemplatesOrder).ShouldBe(OtherUsing + string.Format(OrderOf, NewNamespace, Property));
     }
 
-    [TestCase(MergeMode.Git)]
-    [TestCase(MergeMode.Files)]
-    public async Task AProjectTheTemplateAddsToCommon_IsAPartOfItsOwn_AndTheTypeMovedThereIsFollowed(string merge)
+    [Test]
+    public async Task AProjectTheTemplateAddsToCommon_IsAPartOfItsOwn_AndTheTypeMovedThereIsFollowed()
     {
         var root = await SolutionAsync();
         var lines = new List<string>();
@@ -153,7 +148,7 @@ internal sealed class PartRepairScenarios
         // shared, the new common/Acme.Shop.Common.Domain the event goes to, then common/Acme.Shop.Common it leaves, capabilities, Acme.Shop.Orders.
         for (var run = 0; run < 5; run++)
         {
-            codes.Add(await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes", "--merge", merge]), root, CancellationToken.None));
+            codes.Add(await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None));
             await CommitAsync(root, $"part {run + 1}");
             arrived.Add(Exists(root, MovedEvent));
             repaired.Add(Read(root, TeamsRefund).Contains(NewNamespace, StringComparison.Ordinal));
@@ -170,9 +165,8 @@ internal sealed class PartRepairScenarios
         Read(root, OrdersProject).Split("Acme.Shop.Common.Domain.csproj").Length.ShouldBe(2, "one reference to the new project, not two");
     }
 
-    [TestCase(MergeMode.Git)]
-    [TestCase(MergeMode.Files)]
-    public async Task AFileTheTemplateMovesToAnotherProjectOfCommon_TakesTheTeamsChange_AcrossTheParts(string merge)
+    [Test]
+    public async Task AFileTheTemplateMovesToAnotherProjectOfCommon_TakesTheTeamsChange_AcrossTheParts()
     {
         var root = await SolutionAsync();
         Put(root, RulesProject, Project);
@@ -185,7 +179,7 @@ internal sealed class PartRepairScenarios
         // shared, common/Acme.Shop.Common, common/Acme.Shop.Common.Domain the file goes to, common/Acme.Shop.Common.Application it leaves, capabilities, Acme.Shop.Orders.
         for (var run = 0; run < 6; run++)
         {
-            codes.Add(await Upgrade(lines, new MovingRules()).RunAsync(Options.Parse("upgrade", ["--yes", "--merge", merge]), root, CancellationToken.None));
+            codes.Add(await Upgrade(lines, new MovingRules()).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None));
             await CommitAsync(root, $"part {run + 1}");
         }
 

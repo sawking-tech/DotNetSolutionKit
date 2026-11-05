@@ -337,7 +337,7 @@ internal sealed class UpgradePartsTests
         Put(after, "src/capabilities/X.cs", "template\na\nb\nc\nd\ne\n");
         var renames = new Dictionary<string, string> { ["src/capabilities/X.cs"] = "src/common/X.cs" };
 
-        var changes = await new ThreeWayMerge(new GitMergeFile(new ProcessRunner())).ComputeAsync(solution, before, after, false, renames, CancellationToken.None);
+        var changes = await new ThreeWayMerge(new GitMergeFile(new ProcessRunner())).ComputeAsync(solution, before, after, false, false, renames, CancellationToken.None);
 
         var moved = changes.Single(c => c.Path == "src/capabilities/X.cs");
         moved.Kind.ShouldBe(ChangeKind.Merge);

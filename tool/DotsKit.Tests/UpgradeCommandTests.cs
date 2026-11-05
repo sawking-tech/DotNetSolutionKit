@@ -76,6 +76,12 @@ internal sealed class UpgradeCommandTests
             public Task<bool> IsRepositoryAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Repository);
 
             public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
+
+            public Task<(string Commit, string Previous)?> CommitUncommittedAsync(string root, string message, CancellationToken ct) => Task.FromResult<(string, string)?>(null);
+
+            public Task UncommitAsync(string root, string commit, CancellationToken ct) => Task.CompletedTask;
+
+            public Task<bool> MergeInProgressAsync(string root, CancellationToken ct) => Task.FromResult(false);
         }
 
         private sealed class Builder : IBuilder
@@ -172,7 +178,7 @@ internal sealed class UpgradeCommandTests
         var fakes = new Fakes { Clean = false };
 
         (await Should.ThrowAsync<ArgumentException>(() =>
-            fakes.Command().RunAsync(Options.Parse(["--yes", "--allow-dirty", "--merge", "files", "--force"]), Solution("2.7.0"), CancellationToken.None)))
+            fakes.Command().RunAsync(Options.Parse(["--yes", "--allow-dirty", "--force"]), Solution("2.7.0"), CancellationToken.None)))
             .Message.ShouldContain("--force needs a clean tree");
         fakes.Next.ShouldBeNull();
     }
@@ -233,7 +239,7 @@ internal sealed class UpgradeCommandTests
         var program = Path.Combine(Layout.ServicesOf(root), "Acme.Shop.Orders", "Program.cs");
         var saved = new Fakes { WhilePlanning = () => File.WriteAllText(program, "// saved in the IDE while the plan waited") };
         var untouched = new Fakes();
-        var dirty = Options.Parse(["--yes", "--allow-dirty", "--merge", "files", "--all-at-once"]);
+        var dirty = Options.Parse(["--yes", "--allow-dirty", "--all-at-once"]);
 
         var refused = await Should.ThrowAsync<InvalidOperationException>(() => saved.Command().RunAsync(dirty, root, CancellationToken.None));
         await untouched.Command().RunAsync(dirty, root, CancellationToken.None);
@@ -265,15 +271,12 @@ internal sealed class UpgradeCommandTests
     }
 
     [Test]
-    public async Task ASolutionInAFolderOfItsRepository_IsRefusedTheMergeByGit_AndTakesTheMergeByFiles()
+    public async Task ASolutionInAFolderOfItsRepository_IsRefusedTheMerge_BeforeAPlan()
     {
         var refused = new Fakes { Prefix = "backend/" };
-        var byFiles = new Fakes { Prefix = "backend/" };
 
         (await Should.ThrowAsync<InvalidOperationException>(() => refused.RunAsync(Solution("2.7.0")))).Message.ShouldContain("in backend of its git repository");
-        await byFiles.Command().RunAsync(Options.Parse(["--yes", "--merge", "files"]), Solution("2.7.0"), CancellationToken.None);
 
         refused.Next.ShouldBeNull();
-        byFiles.Next.ShouldNotBeNull();
     }
 }

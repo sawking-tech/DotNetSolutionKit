@@ -34,10 +34,40 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
         }
 
         var current = root is null ? null : await LoadCheckedAsync(root, options, ct);
-        var start = root is null ? TreeStart.None : await TreeStart.OfAsync(git, root, options, ct);
-        var next = Next(current, command);
-        var plan = await planner.BuildAsync(root ?? folder, current, next, new Merging.MergeMode(options.ByGit, options.Force), ct);
-        return await execution.RunAsync(plan, options, start, ct);
+        if (root is null)
+        {
+            var startNone = TreeStart.None;
+            var plan = await planner.BuildAsync(folder, null, Next(null, command), new Merging.MergeMode(options.Force, options.MarkBase), ct);
+            return await execution.RunAsync(plan, options, startNone, ct);
+        }
+
+        // Adding to a solution is a merge like an upgrade: --allow-dirty takes the uncommitted changes in, the same way.
+        var taken = options.AllowDirty
+            ? await git.CommitUncommittedAsync(root, "dotskit: uncommitted changes, taken into the change", ct)
+            : null;
+        try
+        {
+            var start = await TreeStart.OfAsync(git, root, options, ct);
+            var plan = await planner.BuildAsync(root, current, Next(current, command), new Merging.MergeMode(options.Force, options.MarkBase), ct);
+            return await execution.RunAsync(plan, options, start, ct);
+        }
+        catch (Exception failure)
+        {
+            if (taken is { } uncommitted && !await git.MergeInProgressAsync(root, ct))
+            {
+                try
+                {
+                    await git.UncommitAsync(root, uncommitted.Previous, ct);
+                }
+                catch (Exception uncommit)
+                {
+                    throw new InvalidOperationException(
+                        $"{failure.Message} The uncommitted changes are left committed as {uncommitted.Commit[..7]}: run git reset --mixed {uncommitted.Previous} to put them back uncommitted.", uncommit);
+                }
+            }
+
+            throw;
+        }
     }
 
     /// <summary>

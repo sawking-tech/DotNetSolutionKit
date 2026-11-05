@@ -61,6 +61,12 @@ internal sealed class NewCommandTests
             public Task<bool> IsRepositoryAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Repository);
 
             public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
+
+            public Task<(string Commit, string Previous)?> CommitUncommittedAsync(string root, string message, CancellationToken ct) => Task.FromResult<(string, string)?>(null);
+
+            public Task UncommitAsync(string root, string commit, CancellationToken ct) => Task.CompletedTask;
+
+            public Task<bool> MergeInProgressAsync(string root, CancellationToken ct) => Task.FromResult(false);
         }
 
         private sealed class Builder : IBuilder
@@ -116,13 +122,13 @@ internal sealed class NewCommandTests
     }
 
     [Test]
-    public async Task AServiceAddedToASolutionInAFolderOfItsRepository_IsRefusedTheMergeByGit_BeforeAPlan()
+    public async Task AServiceAddedToASolutionInAFolderOfItsRepository_IsRefusedTheMerge_BeforeAPlan()
     {
         var fakes = new Fakes { Prefix = "backend/" };
 
         var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Args("-S", "Billing"), Solution(ThisVersion), CancellationToken.None));
 
-        refused.Message.ShouldContain("--merge files");
+        refused.Message.ShouldContain("own repository");
         fakes.Planned.ShouldBe(0);
     }
 

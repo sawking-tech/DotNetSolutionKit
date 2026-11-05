@@ -11,19 +11,20 @@ internal sealed record TextMergeResult(string Text, int Conflicts, string? Failu
 /// <summary>Merges two texts changed from one base; texts come and go with LF line endings.</summary>
 internal interface ITextMerger
 {
-    Task<TextMergeResult> MergeAsync(string solution, string @base, string template, bool preferTemplate, CancellationToken ct);
+    Task<TextMergeResult> MergeAsync(string solution, string @base, string template, bool preferTemplate, bool markBase, CancellationToken ct);
 }
 
 /// <summary>
-/// <c>git merge-file</c>: conflicts are marked &lt;&lt;&lt;&lt;&lt;&lt;&lt; solution / &gt;&gt;&gt;&gt;&gt;&gt;&gt; template.
-/// Every git command here is listed in docs/getting-started/tool.md, "What dotskit runs in git": a command added
-/// or changed here goes there too.
+/// <c>git merge-file</c>: a conflict is marked &lt;&lt;&lt;&lt;&lt;&lt;&lt; solution / &gt;&gt;&gt;&gt;&gt;&gt;&gt; template; with
+/// <c>--zdiff3</c> (--conflict-style zdiff3) the base of a conflict sits between its sides, &lt;||||||| base, for an
+/// IDE that reads it. Every git command here is listed in docs/getting-started/tool.md, "What dotskit runs in git":
+/// a command added or changed here goes there too.
 /// </summary>
 internal sealed class GitMergeFile(IProcessRunner runner) : ITextMerger
 {
     private const int MaxConflicts = 127;
 
-    public async Task<TextMergeResult> MergeAsync(string solution, string @base, string template, bool preferTemplate, CancellationToken ct)
+    public async Task<TextMergeResult> MergeAsync(string solution, string @base, string template, bool preferTemplate, bool markBase, CancellationToken ct)
     {
         var work = Folders.NewTemp("merge");
         var files = new[] { ("solution", solution), ("base", @base), ("template", template) }
@@ -33,7 +34,7 @@ internal sealed class GitMergeFile(IProcessRunner runner) : ITextMerger
             await File.WriteAllTextAsync(file.Path, file.Text, ct);
         }
 
-        string[] args = ["merge-file", "-p", .. files.SelectMany(f => new[] { "-L", f.Label }), .. files.Select(f => f.Path)];
+        string[] args = ["merge-file", "-p", .. markBase ? new[] { "--zdiff3" } : [], .. files.SelectMany(f => new[] { "-L", f.Label }), .. files.Select(f => f.Path)];
         var result = await runner.RunAsync("git", args, work, ct);
         // git merge-file exits with the number of conflicts, at most 127; above that it could not merge at all
         // (255), and its empty output must not be taken for the file.
