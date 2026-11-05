@@ -32,6 +32,12 @@ internal sealed class ThreeWayMerge(ITextMerger merger)
             paths.Remove(from);
             changes.AddRange(await MoveAsync(solution, baseDir!, newDir, from, to, preferTemplate, markBase, ct));
         }
+        foreach (var (to, from) in Lost(solution, baseDir, renames))
+        {
+            paths.Remove(to);
+            paths.Remove(from);
+            changes.Add(new Change(to, ChangeKind.Kept, null, $"moved from {from} by the template, removed from the solution: left removed"));
+        }
         foreach (var path in paths)
         {
             var decision = MergeRule.Decide(path, FileText.Read(baseDir, path), FileText.Read(newDir, path), FileText.Read(solution, path));
@@ -53,6 +59,15 @@ internal sealed class ThreeWayMerge(ITextMerger merger)
     private static IEnumerable<KeyValuePair<string, string>> Moves(string solution, IReadOnlyDictionary<string, string>? renames) =>
         (renames ?? new Dictionary<string, string>())
             .Where(r => File.Exists(Path.Combine(solution, r.Value)) && !File.Exists(Path.Combine(solution, r.Key)))
+            .OrderBy(r => r.Key, StringComparer.Ordinal);
+
+    /// <summary>The moves the solution does not follow: it has neither side and the base had the file - the team removed it.</summary>
+    private static IEnumerable<KeyValuePair<string, string>> Lost(string solution, string? baseDir, IReadOnlyDictionary<string, string>? renames) =>
+        (renames ?? new Dictionary<string, string>())
+            .Where(r => baseDir is not null
+                && !File.Exists(Path.Combine(solution, r.Value))
+                && !File.Exists(Path.Combine(solution, r.Key))
+                && FileText.Read(baseDir, r.Value) is not null)
             .OrderBy(r => r.Key, StringComparer.Ordinal);
 
     /// <summary>
