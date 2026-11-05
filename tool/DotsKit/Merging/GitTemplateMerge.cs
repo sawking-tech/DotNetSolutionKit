@@ -7,9 +7,10 @@ internal interface IGitMerge
 {
     /// <summary>
     /// Brings the <paramref name="next"/> output into the working branch over the <paramref name="base"/> one, and
-    /// returns the files left in conflict.
+    /// returns the files left in conflict. <paramref name="markBase"/> marks a conflict with its base, as zdiff3
+    /// writes it (--conflict-style zdiff3); plain is the default.
     /// </summary>
-    Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct);
+    Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct);
 
     /// <summary>Adds the files the tool wrote beside the merge to it, so <c>git merge --abort</c> puts them back too.</summary>
     Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct);
@@ -58,7 +59,11 @@ internal sealed record TemplateCommit(string Tree, string Version);
 /// in the branch.
 /// A file both sides changed is merged by <see cref="StyleMergeDriver"/>, given to this one merge by <c>-c</c> and an
 /// attributes file of its own: the solution's config and files are not touched. The solution's .gitattributes wins
-/// over that file, so a file with a merge of its own, as one of Git LFS, keeps it.
+/// over that file, so a file with a merge of its own, as one of Git LFS, keeps it. A conflict is marked plain,
+/// &lt;&lt;&lt;&lt;&lt;&lt;&lt; solution / ======= / &gt;&gt;&gt;&gt;&gt;&gt;&gt; template; --conflict-style zdiff3 marks it with
+/// its base too, as zdiff3 writes it: the driver runs <c>git merge-file --zdiff3</c> and the merge carries
+/// <c>merge.conflictstyle=zdiff3</c> for a file git merges without the driver. A file both sides added gets the
+/// solution's side as its base in the index, so an IDE opens it with its merge view instead of raw text.
 /// Every git command this class and <see cref="GitClient"/> run is listed in docs/getting-started/tool.md, "What
 /// dotskit runs in git", by what it does to the repository: a command added or changed here goes there too.
 /// </summary>
@@ -77,6 +82,9 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     /// <summary>--force: a line both sides changed takes the template's.</summary>
     private static readonly string[] TheirsOption = ["-X", "theirs"];
 
+    /// <summary>--conflict-style zdiff3: a conflict a driver or git marks itself carries its base, as zdiff3 writes it.</summary>
+    private const string ConflictStyle = "merge.conflictstyle=zdiff3";
+
     private readonly GitClient _git = new(runner);
 
     /// <summary>The working branch's commit and the branch's tip before this run, put back by <see cref="AbortAsync"/>.</summary>
@@ -84,7 +92,7 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
 
     public IReadOnlySet<string> LeftOut { get; private set; } = new HashSet<string>();
 
-    public async Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
+    public async Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct)
     {
         await RefuseAMergeInProgressAsync(root, ct);
         await RefuseAChangedTreeAsync(root, ct);
@@ -92,7 +100,7 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         LeftOut = new HashSet<string>();
         try
         {
-            return await MergeOverAsync(root, _before.Head, _before.Tip, @base, next, preferTemplate, ct);
+            return await MergeOverAsync(root, _before.Head, _before.Tip, @base, next, preferTemplate, markBase, ct);
         }
         catch (Exception failure)
         {
@@ -101,19 +109,21 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         }
     }
 
-    private async Task<IReadOnlyList<string>> MergeOverAsync(string root, string head, string? tip, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct)
+    private async Task<IReadOnlyList<string>> MergeOverAsync(string root, string head, string? tip, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct)
     {
         var baseCommit = await KnownBaseAsync(root, head, tip, @base, ct);
         var nextCommit = await CommitAsync(root, next.Tree, baseCommit, $"dotskit: the template {next.Version}", ct);
         // Moved only from the tip read above: a commit another run put there in between is not lost (empty: no branch yet).
         await runner.RunCheckedAsync("git", ["update-ref", BranchRef, nextCommit, tip ?? ""], root, ct);
         var merge = await runner.RunAsync("git",
-            [.. await DriverConfigAsync(root, preferTemplate, ct), "merge", "--no-ff", "--no-commit", .. preferTemplate ? TheirsOption : [], Branch], root, ct);
+            [.. await DriverConfigAsync(root, preferTemplate, markBase, ct), "merge", "--no-ff", "--no-commit", .. preferTemplate ? TheirsOption : [], Branch], root, ct);
         var conflicts = await PathsAsync(root, ["diff", "--name-only", "-z", "--diff-filter=U"], null, ct);
         if (merge.Code != 0 && conflicts.Count == 0)
         {
             throw new InvalidOperationException($"git could not merge {Branch}: {FirstLine(merge)} Nothing is merged: the commit and the branch of this run are put back.");
         }
+
+        await GiveBothAddedABaseAsync(root, ct);
 
         // A conflict with no stage 2 is a file the solution's side removed: git ls-files -u lists the stages of each.
         var ours = (await PathsAsync(root, ["ls-files", "-u", "-z"], null, ct))
@@ -121,6 +131,31 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         var restyled = conflicts.Where(p => !ours.Contains(p) && OnlyRestyled(p, @base.Tree, next.Tree)).ToList();
         await _git.RemoveAsync(root, restyled, ct);
         return [.. conflicts.Except(restyled, StringComparer.Ordinal)];
+    }
+
+    /// <summary>
+    /// A file both sides added has no base, and an IDE opens it as raw text with no merge view. The solution's side
+    /// as the base gives the IDE its three panes: the result starts as the solution's own, and the template's side
+    /// shows as the change that overwrites it. The merge is done when this runs; the base feeds the IDE alone, and a
+    /// resolution or <c>git merge --abort</c> is the same as for any other conflict.
+    /// </summary>
+    private async Task GiveBothAddedABaseAsync(string root, CancellationToken ct)
+    {
+        var unmerged = (await PathsAsync(root, ["ls-files", "-u", "-z"], null, ct))
+            .Select(e => e.Split('\t', 2)).Where(e => e.Length == 2)
+            .Select(e => (Sides: e[0].Split(' ', 3), Path: e[1]))
+            .ToList();
+        var bothAdded = unmerged.Where(e => e.Sides[2] is "2"
+            && unmerged.Any(o => o.Path == e.Path && o.Sides[2] is "3")
+            && !unmerged.Any(o => o.Path == e.Path && o.Sides[2] is "1")).ToList();
+        if (bothAdded.Count == 0)
+        {
+            return;
+        }
+
+        // The solution's side, mode and blob, as the base: one line per file for git update-index --index-info.
+        var lines = bothAdded.Select(e => $"{e.Sides[0]} {e.Sides[1]} 1\t{e.Path}");
+        await runner.RunCheckedAsync("git", ["update-index", "--index-info"], root, ct, input: string.Join('\n', lines) + "\n");
     }
 
     /// <summary>
@@ -173,23 +208,25 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     private sealed record Before(string Head, string? Tip);
 
     /// <summary>
-    /// The options that give this merge <see cref="StyleMergeDriver"/>: an attributes file with the user's global
-    /// attributes, then every path to the driver - the lowest place git reads attributes from, under the solution's
-    /// own. -X theirs does not reach a driver, so the driver is told in its own words. git quotes %O, %A, %B and %P
-    /// for the shell itself, so a path with a space comes whole and a quote around one would become part of it.
+    /// The options that give this merge <see cref="StyleMergeDriver"/>, and, with --conflict-style zdiff3, mark a
+    /// conflict git writes itself with its base: an attributes file with the user's global attributes, then every
+    /// path to the driver - the lowest place git reads attributes from, under the solution's own. -X theirs does not
+    /// reach a driver, so the driver is told in its own words. git quotes %O, %A, %B and %P for the shell itself, so
+    /// a path with a space comes whole and a quote around one would become part of it.
     /// </summary>
-    private async Task<string[]> DriverConfigAsync(string root, bool preferTemplate, CancellationToken ct)
+    private async Task<string[]> DriverConfigAsync(string root, bool preferTemplate, bool markBase, CancellationToken ct)
     {
         var attributes = Path.Combine(Folders.NewTemp("attributes"), "attributes");
         var global = await GlobalAttributesAsync(root, ct);
         await File.WriteAllTextAsync(attributes, (global is null ? "" : await File.ReadAllTextAsync(global, ct) + "\n") + $"* merge={Driver}\n", ct);
-        var command = $"{self} {StyleMergeDriver.Command} %O %A %B %P{(preferTemplate ? " " + StyleMergeDriver.TheirsFlag : "")}";
+        var command = $"{self} {StyleMergeDriver.Command} %O %A %B %P{(preferTemplate ? " " + StyleMergeDriver.TheirsFlag : "")}{(markBase ? " " + StyleMergeDriver.Zdiff3Flag : "")}";
         return ["-c",
             $"core.attributesFile={attributes.Replace('\\', '/')}",
             "-c",
             $"merge.{Driver}.name=dotskit, the three sides in the template's style",
             "-c",
-            $"merge.{Driver}.driver={command}"];
+            $"merge.{Driver}.driver={command}",
+            .. markBase ? new[] { "-c", ConflictStyle } : []];
     }
 
     /// <summary>The user's global attributes file, as git finds it: core.attributesFile, else git/attributes of the XDG config.</summary>

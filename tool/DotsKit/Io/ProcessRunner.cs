@@ -12,17 +12,18 @@ internal interface IProcessRunner
     /// <param name="workingDirectory">The folder the program runs in.</param>
     /// <param name="ct">Cancels the run and ends the process.</param>
     /// <param name="environment">Variables set for this run only, such as git's GIT_INDEX_FILE.</param>
+    /// <param name="input">What the program reads from its standard input, when it takes one: small, as git's update-index --index-info lines are.</param>
     Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
-        IReadOnlyDictionary<string, string>? environment = null);
+        IReadOnlyDictionary<string, string>? environment = null, string? input = null);
 }
 
 internal static class ProcessRunnerExtensions
 {
     /// <summary>Runs a program that must succeed, and returns what it printed.</summary>
     public static async Task<string> RunCheckedAsync(this IProcessRunner runner, string program, IReadOnlyList<string> args,
-        string workingDirectory, CancellationToken ct, IReadOnlyDictionary<string, string>? environment = null)
+        string workingDirectory, CancellationToken ct, IReadOnlyDictionary<string, string>? environment = null, string? input = null)
     {
-        var result = await runner.RunAsync(program, args, workingDirectory, ct, environment);
+        var result = await runner.RunAsync(program, args, workingDirectory, ct, environment, input);
         if (result.Code != 0)
         {
             throw new InvalidOperationException($"{program} {string.Join(' ', args)} exited with {result.Code}:\n{Why(result)}");
@@ -49,13 +50,14 @@ internal sealed class ProcessRunner : IProcessRunner
     private static readonly System.Text.Encoding Utf8 = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
     public async Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
-        IReadOnlyDictionary<string, string>? environment = null)
+        IReadOnlyDictionary<string, string>? environment = null, string? input = null)
     {
         var start = new ProcessStartInfo(program)
         {
             WorkingDirectory = workingDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            RedirectStandardInput = input is not null,
             // git prints a file's text as its bytes, UTF-8; read by the console's code page (866 on a Russian
             // Windows) every non-ASCII character of a merged file would be written back broken.
             StandardOutputEncoding = Utf8,
@@ -81,9 +83,13 @@ internal sealed class ProcessRunner : IProcessRunner
         using var process = Process.Start(start) ?? throw new InvalidOperationException($"Could not start {program}");
         var output = process.StandardOutput.ReadToEndAsync(ct);
         var error = process.StandardError.ReadToEndAsync(ct);
+        // The input goes before the waits: what the tool feeds is small (git's update-index --index-info lines),
+        // the child reads it to its end before it answers, and nothing deadlocks on a full pipe.
+        var writing = input is null ? Task.CompletedTask : WriteInputAsync(process, input, ct);
         try
         {
             await process.WaitForExitAsync(ct);
+            await writing;
         }
         catch (OperationCanceledException)
         {
@@ -94,6 +100,12 @@ internal sealed class ProcessRunner : IProcessRunner
         var result = new ProcessResult(process.ExitCode, await output, await error);
         Trace(program, args, clock.Elapsed);
         return result;
+    }
+
+    private static async Task WriteInputAsync(Process process, string input, CancellationToken ct)
+    {
+        await process.StandardInput.WriteAsync(input.AsMemory(), ct);
+        process.StandardInput.Close();
     }
 
     /// <summary>

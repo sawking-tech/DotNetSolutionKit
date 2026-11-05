@@ -13,7 +13,7 @@ namespace DotsKit.Tests.Scenarios;
 [Parallelizable(ParallelScope.All)]
 internal sealed class SolutionProjectsScenarios
 {
-    private const string Conflict = "<Project>\n<<<<<<< solution\n  <PropertyGroup><A>team</A></PropertyGroup>\n=======\n  <PropertyGroup><A>template</A></PropertyGroup>\n>>>>>>> template\n</Project>\n";
+    private const string Conflict = "<Project>\n<<<<<<< solution\n  <PropertyGroup><A>team</A></PropertyGroup>\n||||||| base\n  <PropertyGroup><A>base</A></PropertyGroup>\n=======\n  <PropertyGroup><A>template</A></PropertyGroup>\n>>>>>>> template\n</Project>\n";
 
     private const string EmptySolution =
         "\nMicrosoft Visual Studio Solution File, Format Version 12.00\n# Visual Studio Version 17\nVisualStudioVersion = 17.0.31903.59\nMinimumVisualStudioVersion = 10.0.40219.1\nGlobal\nEndGlobal\n";

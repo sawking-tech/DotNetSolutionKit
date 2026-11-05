@@ -22,13 +22,13 @@ internal sealed class GitModeTests
     }
 
     [Test]
-    public void ASolutionThereAlready_IsMergedByGit_UnlessMergeFilesIsNamed()
+    public void AConflictIsMarkedPlain_ByDefault_AndWithItsBaseWhenZdiff3IsNamed()
     {
-        Options.Parse("upgrade", ["--yes"]).ByGit.ShouldBeTrue();
-        Options.Parse("upgrade", ["--merge", "files"]).ByGit.ShouldBeFalse();
-        Options.Parse("new", ["-S", "Billing", "--merge", "git"]).ByGit.ShouldBeTrue();
-        Should.Throw<ArgumentException>(() => Options.Parse("upgrade", ["--merge", "svn"])).Message.ShouldContain("name git or files");
-        Should.Throw<ArgumentException>(() => Options.Parse("init", ["--merge", "files"])).Message.ShouldContain("init merges nothing");
+        Options.Parse("upgrade", ["--yes"]).MarkBase.ShouldBeFalse();
+        Options.Parse("upgrade", ["--conflict-style", "zdiff3"]).MarkBase.ShouldBeTrue();
+        Options.Parse("upgrade", ["--conflict-style", "plain"]).MarkBase.ShouldBeFalse();
+        Should.Throw<ArgumentException>(() => Options.Parse("upgrade", ["--conflict-style", "diff3"])).Message.ShouldContain("name plain or zdiff3");
+        Should.Throw<ArgumentException>(() => Options.Parse("init", ["--conflict-style", "zdiff3"])).Message.ShouldContain("init merges nothing");
     }
 
     [Test]
@@ -98,12 +98,41 @@ internal sealed class GitModeTests
         (await new Git(runner).PrefixAsync(root, CancellationToken.None)).ShouldBeEmpty();
     }
 
+    [Test]
+    public async Task UncommittedChanges_AreCommittedBesideTheRun_AndPutBackUncommitted()
+    {
+        var runner = new ProcessRunner();
+        var root = Folders.NewTemp("uncommitted");
+        Directory.CreateDirectory(Path.Combine(root, "src"));
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "a.cs"), "a\n");
+        await runner.RunCheckedAsync("git", ["init", "-q"], root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["add", "-A"], root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["commit", "-q", "-m", "base"], root, CancellationToken.None);
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "a.cs"), "a\ndirty\n");
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "new.cs"), "new\n");
+        var git = new Git(runner);
+
+        var taken = await git.CommitUncommittedAsync(root, "dotskit: uncommitted changes, taken into the upgrade", CancellationToken.None);
+
+        taken.ShouldNotBeNull();
+        (await git.IsCleanAsync(root, CancellationToken.None)).ShouldBeTrue();
+        (await runner.RunCheckedAsync("git", ["log", "-1", "--format=%s"], root, CancellationToken.None)).Trim()
+            .ShouldBe("dotskit: uncommitted changes, taken into the upgrade");
+        (await runner.RunCheckedAsync("git", ["show", "--format=", "--name-only", "HEAD"], root, CancellationToken.None)).ShouldContain("src/new.cs");
+
+        await git.UncommitAsync(root, taken.Value.Previous, CancellationToken.None);
+
+        (await git.IsCleanAsync(root, CancellationToken.None)).ShouldBeFalse();
+        (await System.IO.File.ReadAllTextAsync(Path.Combine(root, "src", "a.cs"))).ShouldContain("dirty");
+        (await runner.RunCheckedAsync("git", ["status", "--porcelain"], root, CancellationToken.None)).ShouldContain("?? src/new.cs");
+    }
+
     /// <summary>A merge by git that merges nothing and names the files of the next output it left off the branch.</summary>
     private sealed class LeavingOut(params string[] leftOut) : IGitMerge
     {
         public IReadOnlySet<string> LeftOut { get; } = leftOut.ToHashSet();
 
-        public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, CancellationToken ct) =>
+        public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct) =>
             Task.FromResult<IReadOnlyList<string>>([]);
 
         public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) => Task.CompletedTask;

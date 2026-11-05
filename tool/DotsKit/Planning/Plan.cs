@@ -11,9 +11,10 @@ namespace DotsKit.Planning;
 /// <param name="Packages">What changes in the package versions and what the solution's policy holds, a line each.</param>
 /// <param name="Types">Where the types of the template live in the next version and where the ones it moved went; null for a new solution.</param>
 /// <param name="PreferTemplate">--force: git takes the template's side in a conflict.</param>
+/// <param name="MarkBase">--conflict-style zdiff3: a conflict is marked with its base; plain is the default.</param>
 /// <param name="ByGit">
 /// The two outputs git merges into the solution (<see cref="GitTemplateMerge"/>); <paramref name="Changes"/> then names the
-/// template's own changes. Null when the tool writes <paramref name="Changes"/> itself.
+/// template's own changes. Null when the tool writes <paramref name="Changes"/> itself: a new solution, or the finish of an upgrade.
 /// </param>
 /// <param name="OnConflicts">
 /// The manifest written instead of <paramref name="Next"/> when the merge leaves conflicts: the last part of an upgrade a
@@ -29,8 +30,9 @@ namespace DotsKit.Planning;
 /// by the build's errors leaves them to their part.
 /// </param>
 internal sealed record Plan(string Root, Manifest Next, IReadOnlyList<Change> Changes, MembershipChange Membership, IReadOnlyList<string>? Packages = null,
-    TypeMap? Types = null, (TemplateCommit Base, TemplateCommit Next)? ByGit = null, bool PreferTemplate = false, Manifest? OnConflicts = null,
-    IReadOnlyList<string>? Parts = null, IReadOnlySet<string>? Waiting = null, string? BaseTree = null, string? NextTree = null)
+    TypeMap? Types = null, (TemplateCommit Base, TemplateCommit Next)? ByGit = null, bool PreferTemplate = false, bool MarkBase = false,
+    Manifest? OnConflicts = null, IReadOnlyList<string>? Parts = null, IReadOnlySet<string>? Waiting = null, string? BaseTree = null,
+    string? NextTree = null)
 {
     /// <summary>The manifest the solution has once the plan is written, by whether the merge left conflicts.</summary>
     public Manifest Written(bool conflicts) => conflicts && OnConflicts is { } open ? open : Next;

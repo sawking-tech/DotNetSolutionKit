@@ -1,6 +1,5 @@
 using DotsKit.Generation;
 using DotsKit.Io;
-using DotsKit.Merging;
 
 namespace DotsKit.Tests.Scenarios;
 
@@ -60,19 +59,18 @@ internal sealed class ChainScenarios
         return solution;
     }
 
-    [TestCase(MergeMode.Git)]
-    [TestCase(MergeMode.Files)]
-    public async Task ASolutionOfTheFirstRelease_IsUpgradedAReleaseAtATime_AndBuildsAfterEveryStep(string merge)
+    [Test]
+    public async Task ASolutionOfTheFirstRelease_IsUpgradedAReleaseAtATime_AndBuildsAfterEveryStep()
     {
         var solution = await SolutionOfTheFirstReleaseAsync();
 
         foreach (var release in Releases)
         {
-            var step = await solution.DotskitAsync("upgrade", "--to", release, "--yes", "--all-at-once", "--merge", merge);
+            var step = await solution.DotskitAsync("upgrade", "--to", release, "--yes", "--all-at-once");
             step.Code.ShouldBe(0, $"{First} -> {release}:\n{step.Output}{step.Error}");
             await solution.CommitAsync($"upgraded to {release}");
         }
-        var last = await solution.DotskitAsync("upgrade", "--yes", "--all-at-once", "--merge", merge);
+        var last = await solution.DotskitAsync("upgrade", "--yes", "--all-at-once");
 
         last.Code.ShouldBe(0, last.Output + last.Error);
         solution.Read(TeamFile).ShouldContain("public sealed class OrderAudit");

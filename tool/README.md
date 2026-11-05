@@ -42,8 +42,7 @@ Every command shows the files it will change and why, and asks before writing; `
 An upgrade goes a part a run - the shared files first, then a service at a time - and each run merges by git,
 repairs the usings and references the new version asks for, builds the solution and leaves the merge for the
 team to commit. A conflict stays in the files for the IDE or `git mergetool`, and the command exits with 2;
-a run that fails is taken back by git. `--merge files` writes the files directly instead, all or none, with
-conflicts marked `<<<<<<< solution` / `>>>>>>> template`.
+a run that fails is taken back by git.
 
 What a solution was made from is kept in `.dotskit/manifest.json`: commit it with the solution.
 

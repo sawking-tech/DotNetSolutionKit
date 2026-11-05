@@ -25,7 +25,7 @@ internal sealed class StyleScenarios
         var @base = Folders.NewTemp("git-merge-tree");
         WriteWithBom(@base, ProgramFile, "a  \nb");
 
-        var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(@base, "2.8.0"), new(Tree((ProgramFile, "a\nb\n")), "2.9.0"), false,
+        var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(@base, "2.8.0"), new(Tree((ProgramFile, "a\nb\n")), "2.9.0"), false, false,
             CancellationToken.None);
 
         conflicts.ShouldBeEmpty();
@@ -46,7 +46,7 @@ internal sealed class StyleScenarios
         WriteWithBom(@base, solutionFile, "a\nb\n");
         WriteWithBom(next, solutionFile, "template\na\nb\n");
 
-        var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(@base, "2.8.0"), new(next, "2.9.0"), false, CancellationToken.None);
+        var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(@base, "2.8.0"), new(next, "2.9.0"), false, false, CancellationToken.None);
 
         conflicts.ShouldBeEmpty();
         Read(root, solutionFile).ShouldBe("template\na\nb\nteam\n");
@@ -64,7 +64,7 @@ internal sealed class StyleScenarios
         await Git(root, "commit", "-q", "-m", "the solution");
 
         var conflicts = await new GitTemplateMerge(Runner, Sandbox.Self).MergeAsync(root, new(Tree((ProgramFile, "a  \nb\n")), "2.8.0"),
-            new(Tree((ProgramFile, "template\na\nb\n")), "2.9.0"), false, CancellationToken.None);
+            new(Tree((ProgramFile, "template\na\nb\n")), "2.9.0"), false, false, CancellationToken.None);
 
         conflicts.ShouldBeEmpty();
         File.ReadAllText(Path.Combine(root, ProgramFile)).ShouldBe("template\r\na\r\nb\r\nteam\r\n");

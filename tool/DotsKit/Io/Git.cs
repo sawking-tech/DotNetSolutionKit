@@ -23,6 +23,19 @@ internal interface IGit
 
     /// <summary>Whether the folder is inside a git repository: outside one there is nothing to show or undo a write with.</summary>
     Task<bool> IsRepositoryAsync(string root, CancellationToken ct);
+
+    /// <summary>
+    /// --allow-dirty: the uncommitted changes, untracked files among them, committed by plumbing on top of HEAD - no
+    /// hook, no checkout - so a merge can run on them and they take part in it as any committed side. Null when the
+    /// tree is clean; the commit's parent is where <c>git reset --mixed</c> puts the changes back uncommitted.
+    /// </summary>
+    Task<(string Commit, string Previous)?> CommitUncommittedAsync(string root, string message, CancellationToken ct);
+
+    /// <summary>--allow-dirty, undone: the branch back at <paramref name="commit"/>, the changes it held uncommitted again.</summary>
+    Task UncommitAsync(string root, string commit, CancellationToken ct);
+
+    /// <summary>Whether a merge is open: its undo keeps uncommitted changes committed, and they are not put back.</summary>
+    Task<bool> MergeInProgressAsync(string root, CancellationToken ct);
 }
 
 /// <summary>
@@ -74,4 +87,27 @@ internal sealed class Git(IProcessRunner runner) : IGit
         var prefix = await runner.RunAsync("git", ["rev-parse", "--show-prefix"], root, ct);
         return prefix.Code == 0 ? prefix.Output.Trim() : "";
     }
+
+    public async Task<(string Commit, string Previous)?> CommitUncommittedAsync(string root, string message, CancellationToken ct)
+    {
+        if (await IsCleanAsync(root, ct))
+        {
+            return null;
+        }
+
+        var previous = (await runner.RunCheckedAsync("git", ["rev-parse", "HEAD"], root, ct)).Trim();
+        // The solution's own index: what it holds becomes the commit's tree, so after update-ref the tree is clean
+        // and a merge can run on it. What git ignores is not added, as in every other step.
+        await runner.RunCheckedAsync("git", ["add", "-A", "--", "."], root, ct);
+        var tree = (await runner.RunCheckedAsync("git", ["write-tree"], root, ct)).Trim();
+        var commit = (await runner.RunCheckedAsync("git", ["commit-tree", tree, "-p", previous, "-m", message], root, ct)).Trim();
+        await runner.RunCheckedAsync("git", ["update-ref", "HEAD", commit, previous], root, ct);
+        return (commit, previous);
+    }
+
+    public async Task UncommitAsync(string root, string commit, CancellationToken ct) =>
+        await runner.RunCheckedAsync("git", ["reset", "--mixed", commit], root, ct);
+
+    public async Task<bool> MergeInProgressAsync(string root, CancellationToken ct) =>
+        (await runner.RunAsync("git", ["rev-parse", "-q", "--verify", "MERGE_HEAD"], root, ct)).Code == 0;
 }

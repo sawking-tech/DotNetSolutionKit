@@ -28,7 +28,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         IReadOnlyList<string> conflicts;
         if (plan.ByGit is var (@base, next))
         {
-            conflicts = await git.MergeAsync(plan.Root, @base, next, plan.PreferTemplate, ct);
+            conflicts = await git.MergeAsync(plan.Root, @base, next, plan.PreferTemplate, plan.MarkBase, ct);
             AddWhatTheBranchLeftOut(plan, transaction);
         }
         else
@@ -69,7 +69,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     }
 
     /// <summary>
-    /// The repair of the merge by files, which runs once its files are written: a repair that stops, by an error or a
+    /// The repair of a write the tool made itself, which runs once its files are written: a repair that stops, by an error or a
     /// cancel, says that the files are written, as no undo follows it.
     /// </summary>
     private async Task<IReadOnlyList<Repair>> RepairWrittenAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct)
@@ -137,8 +137,8 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
 
     /// <summary>
     /// A file the template adds that the merge left off the branch (<see cref="IGitMerge.LeftOut"/>): one the
-    /// solution's git ignores, as the secrets file of a new service. The merge by files writes it, so the merge by git
-    /// does too, beside the merge; a file of that name the team has already stays as it is.
+    /// solution's git ignores, as the secrets file of a new service. The tool's own merge writes it, so the merge by
+    /// git does too, beside the merge; a file of that name the team has already stays as it is.
     /// </summary>
     private void AddWhatTheBranchLeftOut(Plan plan, FileTransaction transaction)
     {
