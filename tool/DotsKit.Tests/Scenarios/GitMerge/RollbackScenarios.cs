@@ -121,6 +121,8 @@ internal sealed class RollbackScenarios
     {
         public IReadOnlySet<string> LeftOut => git.LeftOut;
 
+        public IReadOnlyList<string> Taken => git.Taken;
+
         public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct) =>
             git.MergeAsync(root, @base, next, preferTemplate, markBase, ct);
 

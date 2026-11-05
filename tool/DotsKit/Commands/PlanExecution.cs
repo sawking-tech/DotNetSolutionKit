@@ -28,6 +28,14 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
 
         var written = await writer.WriteAsync(plan, ct);
         ShowRepairs("before the build, for the namespaces the template gave up", written.Repaired);
+        if (written.Taken.Count > 0)
+        {
+            terminal.Info($"By --force, the template's side took over in {written.Taken.Count} file(s):");
+            foreach (var path in written.Taken)
+            {
+                terminal.Info($"  {path}");
+            }
+        }
         var conflicts = written.Conflicts.Count > 0;
         var code = conflicts ? Conflicts(plan, written.Conflicts) : await BuildAsync(plan, options, ct);
         if (plan.Written(conflicts).Upgrade is { } upgrade)

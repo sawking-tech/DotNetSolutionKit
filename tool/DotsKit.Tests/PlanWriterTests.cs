@@ -34,6 +34,8 @@ internal sealed class PlanWriterTests
     {
         public IReadOnlySet<string> LeftOut { get; } = new HashSet<string>();
 
+        public IReadOnlyList<string> Taken => [];
+
         public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct) =>
             throw new InvalidOperationException("the merge by files reached git");
 

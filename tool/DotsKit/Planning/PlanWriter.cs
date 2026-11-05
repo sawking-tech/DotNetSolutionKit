@@ -14,10 +14,10 @@ internal interface IPlanWriter
     Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct);
 }
 
-/// <summary>The files left in conflict, and the repairs before the build that changed a file.</summary>
-internal sealed record WriteResult(IReadOnlyList<string> Conflicts, IReadOnlyList<Repair> Repaired)
+/// <summary>The files left in conflict, the files --force took the template's side in, and the repairs before the build that changed a file.</summary>
+internal sealed record WriteResult(IReadOnlyList<string> Conflicts, IReadOnlyList<Repair> Repaired, IReadOnlyList<string> Taken)
 {
-    public static readonly WriteResult Nothing = new([], []);
+    public static readonly WriteResult Nothing = new([], [], []);
 }
 
 internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, ReferenceRepair repair) : IPlanWriter
@@ -49,9 +49,9 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         if (plan.ByGit is null)
         {
             await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
-            return new(conflicts, await RepairWrittenAsync(plan, conflicts, ct));
+            return new(conflicts, await RepairWrittenAsync(plan, conflicts, ct), []);
         }
-        return new(conflicts, await WriteBesideTheMergeAsync(plan, transaction, conflicts, SolutionFile(plan.Root), ct));
+        return new(conflicts, await WriteBesideTheMergeAsync(plan, transaction, conflicts, SolutionFile(plan.Root), ct), git.Taken);
     }
 
     /// <summary>
