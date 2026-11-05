@@ -132,6 +132,8 @@ internal sealed class GitModeTests
     {
         public IReadOnlySet<string> LeftOut { get; } = leftOut.ToHashSet();
 
+        public IReadOnlyList<string> Taken => [];
+
         public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct) =>
             Task.FromResult<IReadOnlyList<string>>([]);
 

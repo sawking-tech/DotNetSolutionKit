@@ -185,4 +185,49 @@ internal sealed class MergeScenarios
         left.Contains(removed).ShouldBe(conflicts);
         File.Exists(Path.Combine(root, removed)).ShouldBe(conflicts);
     }
+
+    [Test]
+    public async Task AFileTheTemplateRemoved_TheTeamChanged_FollowsTheTemplate_When_Force_AndIsNamed()
+    {
+        var root = await SolutionAsync();
+        var merge = new GitTemplateMerge(Runner, Sandbox.Self);
+
+        var conflicts = await merge.MergeAsync(root, new(Base(), "1.0.0"),
+            new(Tree((Solution, "the template's All.sln\n")), "2.0.0"), true, false, CancellationToken.None);
+
+        conflicts.ShouldBeEmpty();
+        File.Exists(Path.Combine(root, ProgramFile)).ShouldBeFalse();
+        merge.Taken.ShouldBe([ProgramFile]);
+    }
+
+    [Test]
+    public async Task AFileTheTeamRemoved_TheTemplateChanged_FollowsTheTemplate_When_Force_AndIsNamed()
+    {
+        var root = await SolutionAsync();
+        File.Delete(Path.Combine(root, ProgramFile));
+        await Git(root, "add", "-A");
+        await Git(root, "commit", "-q", "-m", "the team removed the file");
+        var merge = new GitTemplateMerge(Runner, Sandbox.Self);
+
+        var conflicts = await merge.MergeAsync(root, new(Base(), "1.0.0"),
+            new(Tree((ProgramFile, NextProgram), (Solution, "the template's All.sln\n")), "2.0.0"), true, false, CancellationToken.None);
+
+        conflicts.ShouldBeEmpty();
+        Read(root, ProgramFile).ShouldBe(NextProgram);
+        merge.Taken.ShouldBe([ProgramFile]);
+    }
+
+    [Test]
+    public async Task ALinesTheTeamWrote_GiveWayToTheTemplate_When_Force_AndTheFileIsNamed()
+    {
+        var root = await SolutionAsync();
+        var merge = new GitTemplateMerge(Runner, Sandbox.Self);
+
+        var conflicts = await merge.MergeAsync(root, new(Base(), "1.0.0"),
+            new(Tree((ProgramFile, "a\nb\nc\nd\ne\ntemplate\n"), (Solution, "the template's All.sln\n")), "2.0.0"), true, false, CancellationToken.None);
+
+        conflicts.ShouldBeEmpty();
+        Read(root, ProgramFile).ShouldBe("a\nb\nc\nd\ne\ntemplate\n");
+        merge.Taken.ShouldBe([ProgramFile]);
+    }
 }

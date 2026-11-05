@@ -123,8 +123,9 @@ git, the same three-way merge:
 - what the solution's git ignores, by any of its `.gitignore` files, a local secret among them, and `All.sln`
   are never in the branch; the manifest and `All.sln` the command writes join the merge, so `git merge --abort`
   puts them back too;
-- `--force` merges with `-X theirs`: a line both changed takes the template's; a file one side removed and the
-  other changed stays a conflict;
+- `--force` merges with `-X theirs`: a line both changed takes the template's, and the plan names each file where
+  the team's lines gave way; a file one side removed and the other changed follows the template too - removed where
+  the template removed it, the template's version where the team removed it - and the plan names it with them;
 - a file both changed is merged by a merge driver of dotskit, given to this one merge only: the base, the team's
   file and the template's are first brought to the template's style - no byte order mark, no spaces at the ends
   of lines, a line end at the end - so a change of the style alone conflicts with nothing the team wrote, and the
@@ -159,7 +160,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git config --path --get core.attributesFile` | the user's global attributes, kept under the merge driver's |
 | | `git ls-files --others --ignored --exclude-standard` | the files the solution's git ignores, never written |
 | | `git diff --name-only --diff-filter=U` | the files left in conflict |
-| | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed; one with no base, added by both sides, gains the solution's side as its base |
+| | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed; one with no side of the template's, under `--force`, is resolved with the template's removal; one with no base, added by both sides, gains the solution's side as its base |
 | | `git update-index --index-info` | the solution's side as the base of a file both sides added, so the IDE opens it with its merge view |
 | | `git diff --no-index -M` | the files the template moved, between two of its outputs outside the repository |
 | | `git merge-file -p [--zdiff3]`, again with `--theirs` under `--force` | a file merged by the tool's own merge and by the merge driver, on copies of the three sides; `--zdiff3` only with `--conflict-style zdiff3`; the first run counts the conflicts `--force` decides |
@@ -168,9 +169,9 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | moves the branch `dotskit/template` | `git update-ref refs/heads/dotskit/template` | the commit of the template's new output on the branch, only from the tip read before |
 | commits on the working branch, files unchanged | `git commit-tree -p HEAD -p <base>`, `git update-ref HEAD` | the base adopted, the first time or on another branch, with no commit hook of the team |
 | commits on the working branch, files unchanged | `git add -A`, `git write-tree`, `git commit-tree -p HEAD`, `git update-ref HEAD` | `--allow-dirty`: the uncommitted changes taken into the merge, the index theirs |
-| merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… [-c merge.conflictstyle=zdiff3] merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge; `merge.conflictstyle=zdiff3` only with `--conflict-style zdiff3` |
-| stages | `git add` | the manifest, `All.sln` and the files the repair changed join the merge |
-| removes from the tree and the index | `git rm -f` | a file the team removed that the template only restyled - line ends, spaces, a byte order mark - stays removed instead of conflicting |
+| merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… [-c merge.conflictstyle=zdiff3] merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge; `merge.conflictstyle=zdiff3` only with `--conflict-style zdiff3`; under `--force` the driver names through `DOTSKIT_TAKEN_REPORT` each file whose conflict took the template's lines, and the plan lists them |
+| stages | `git add` | the manifest, `All.sln` and the files the repair changed join the merge; under `--force`, `git checkout --theirs` with it resolves a file the solution removed, the template changed, with the template's version |
+| removes from the tree and the index | `git rm -f` | a file the team removed that the template only restyled - line ends, spaces, a byte order mark - stays removed instead of conflicting; under `--force`, a file the team changed that the template removed goes with the template |
 | undoes a run that failed | `git reset --hard`, `git update-ref` (or `-d`); `git reset --mixed` after an `--allow-dirty` commit; `git rev-parse --git-path index.lock` when git refuses | the working branch, its tracked files and the branch `dotskit/template` back where they were before the run; the uncommitted changes uncommitted again |
 
 The tool never commits the merge, never pushes, and never checks out a branch: the merge is the team's to look

@@ -23,6 +23,12 @@ internal interface IGitMerge
     /// new one of them, as the secrets file of a new service, the writer adds beside the merge.
     /// </summary>
     IReadOnlySet<string> LeftOut { get; }
+
+    /// <summary>
+    /// --force: the files whose team's lines gave way to the template's - a delete/modify resolved for the template's
+    /// side, or a conflict the merge took the template's lines in. Named for the plan, never written.
+    /// </summary>
+    IReadOnlyList<string> Taken { get; }
 }
 
 internal static class GitMergeExtensions
@@ -85,6 +91,9 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     /// <summary>--conflict-style zdiff3: a conflict a driver or git marks itself carries its base, as zdiff3 writes it.</summary>
     private const string ConflictStyle = "merge.conflictstyle=zdiff3";
 
+    /// <summary>--force: the merge driver, a process git starts, names here each file whose conflict took the template's lines.</summary>
+    public const string TakenReportVariable = "DOTSKIT_TAKEN_REPORT";
+
     private readonly GitClient _git = new(runner);
 
     /// <summary>The working branch's commit and the branch's tip before this run, put back by <see cref="AbortAsync"/>.</summary>
@@ -92,12 +101,15 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
 
     public IReadOnlySet<string> LeftOut { get; private set; } = new HashSet<string>();
 
+    public IReadOnlyList<string> Taken { get; private set; } = [];
+
     public async Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct)
     {
         await RefuseAMergeInProgressAsync(root, ct);
         await RefuseAChangedTreeAsync(root, ct);
         _before = new((await runner.RunCheckedAsync("git", ["rev-parse", "HEAD"], root, ct)).Trim(), await TipAsync(root, ct));
         LeftOut = new HashSet<string>();
+        Taken = [];
         try
         {
             return await MergeOverAsync(root, _before.Head, _before.Tip, @base, next, preferTemplate, markBase, ct);
@@ -115,13 +127,20 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         var nextCommit = await CommitAsync(root, next.Tree, baseCommit, $"dotskit: the template {next.Version}", ct);
         // Moved only from the tip read above: a commit another run put there in between is not lost (empty: no branch yet).
         await runner.RunCheckedAsync("git", ["update-ref", BranchRef, nextCommit, tip ?? ""], root, ct);
+        // --force: the driver, a process git starts, names the files whose conflicts took the template's lines through a report.
+        var takenReport = preferTemplate ? Path.Combine(Folders.NewTemp("taken-report"), "taken.txt") : null;
         var merge = await runner.RunAsync("git",
-            [.. await DriverConfigAsync(root, preferTemplate, markBase, ct), "merge", "--no-ff", "--no-commit", .. preferTemplate ? TheirsOption : [], Branch], root, ct);
+            [.. await DriverConfigAsync(root, preferTemplate, markBase, ct), "merge", "--no-ff", "--no-commit", .. preferTemplate ? TheirsOption : [], Branch], root, ct,
+            environment: takenReport is null ? null : new Dictionary<string, string> { [TakenReportVariable] = takenReport });
         var conflicts = await PathsAsync(root, ["diff", "--name-only", "-z", "--diff-filter=U"], null, ct);
         if (merge.Code != 0 && conflicts.Count == 0)
         {
             throw new InvalidOperationException($"git could not merge {Branch}: {FirstLine(merge)} Nothing is merged: the commit and the branch of this run are put back.");
         }
+
+        var takenFromReport = takenReport is not null && File.Exists(takenReport)
+            ? File.ReadAllLines(takenReport).Where(l => l.Length > 0).ToHashSet(StringComparer.Ordinal)
+            : [];
 
         await GiveBothAddedABaseAsync(root, ct);
 
@@ -129,8 +148,44 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         var ours = (await PathsAsync(root, ["ls-files", "-u", "-z"], null, ct))
             .Select(e => e.Split('\t', 2)).Where(e => e.Length == 2 && e[0].EndsWith(" 2", StringComparison.Ordinal)).Select(e => e[1]).ToHashSet(StringComparer.Ordinal);
         var restyled = conflicts.Where(p => !ours.Contains(p) && OnlyRestyled(p, @base.Tree, next.Tree)).ToList();
+        // --force: a delete/modify conflict follows the template too; -X theirs does not touch it.
+        var resolvedByForce = preferTemplate ? await ResolveDeletedAsync(root, [.. conflicts.Except(restyled, StringComparer.Ordinal)], ct) : [];
         await _git.RemoveAsync(root, restyled, ct);
-        return [.. conflicts.Except(restyled, StringComparer.Ordinal)];
+        Taken = [.. takenFromReport.Concat(resolvedByForce).Distinct().OrderBy(p => p, StringComparer.Ordinal)];
+        return [.. conflicts.Except(restyled, StringComparer.Ordinal).Except(resolvedByForce)];
+    }
+
+    /// <summary>
+    /// --force: a file one side of the merge removed, resolved for the template's side. Where the template removed it,
+    /// the file goes; where the solution removed it, the template's version comes. Named in <see cref="Taken"/>.
+    /// </summary>
+    private async Task<IReadOnlyList<string>> ResolveDeletedAsync(string root, IReadOnlyList<string> conflicts, CancellationToken ct)
+    {
+        var stages = (await PathsAsync(root, ["ls-files", "-u", "-z"], null, ct))
+            .Select(e => e.Split('\t', 2)).Where(e => e.Length == 2)
+            .Select(e => (Stage: e[0].Split(' ', 3)[2], Path: e[1]))
+            .GroupBy(e => e.Path, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Select(e => e.Stage).ToHashSet(), StringComparer.Ordinal);
+        List<string> resolved = [];
+        foreach (var path in conflicts)
+        {
+            if (!stages.TryGetValue(path, out var have))
+            {
+                continue;
+            }
+            if (!have.Contains("2") && have.Contains("3"))
+            {
+                await runner.RunCheckedAsync("git", ["checkout", "--theirs", "--", path], root, ct);
+                await runner.RunCheckedAsync("git", ["add", "--", path], root, ct);
+                resolved.Add(path);
+            }
+            else if (have.Contains("2") && !have.Contains("3"))
+            {
+                await runner.RunCheckedAsync("git", ["rm", "-q", "-f", "--", path], root, ct);
+                resolved.Add(path);
+            }
+        }
+        return resolved;
     }
 
     /// <summary>
