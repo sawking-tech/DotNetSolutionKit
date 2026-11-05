@@ -45,10 +45,12 @@ jobs:
             echo "Only the documentation and the site are touched: the checks of the template and the tool are skipped."
           fi
 
+  # The heavy jobs never carry `if:` of their own: a skipped job writes no check run, and a required status
+  # check that never reports blocks the merge of a docs-only pull request. Every step below the guard one
+  # is gated instead, so on docs the job succeeds in a minute and the required checks are satisfied.
   generate:
     name: ${{ matrix.name }}
     needs: scope
-    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -102,22 +104,30 @@ jobs:
             agent: none
 
     steps:
+      - name: Nothing to build
+        if: needs.scope.outputs.code == 'false'
+        run: echo "Only the documentation and the site are touched; the steps below are skipped."
       - uses: actions/checkout@v7
+        if: needs.scope.outputs.code == 'true'
 
       - uses: actions/setup-dotnet@v6
+        if: needs.scope.outputs.code == 'true'
         with:
           dotnet-version: 8.0.x
 
       - uses: actions/cache@v6
+        if: needs.scope.outputs.code == 'true'
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('template/**/*.csproj', 'template/**/Directory.Packages.props', 'template/src/package-versions/*.props') }}
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: Install the template from this commit
+        if: needs.scope.outputs.code == 'true'
         run: dotnet new install ./template
 
       - name: Generate
+        if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}
         run: |
           mkdir solution && cd solution
@@ -135,11 +145,13 @@ jobs:
 
       # Every field of a JSON file left empty on purpose says what goes there (docs/adr/006).
       - name: JSON metadata keys
+        if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
         run: python3 "$GITHUB_WORKSPACE/scripts/check-json-metadata.py" .
 
       # The files that carry the template's authorship carry it, and the solution says it comes from the sources.
       - name: Authorship and version
+        if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
         run: bash "$GITHUB_WORKSPACE/scripts/check-authorship.sh" . source
 
@@ -147,18 +159,20 @@ jobs:
       # project file: a generated service has no business code, so nothing else would notice a layer that
       # cannot see what that code needs.
       - name: A service's first code
-        if: matrix.layers
+        if: needs.scope.outputs.code == 'true' && matrix.layers
         working-directory: ${{ runner.temp }}/solution
         run: bash "$GITHUB_WORKSPACE/scripts/check-service-layers.sh" . "${{ matrix.layers }}"
 
       # The rules and skills for an AI agent are in the format --Agent chose, and only in it.
       - name: Agent rules and skills
+        if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
         run: bash "$GITHUB_WORKSPACE/scripts/check-agent-files.sh" . "${{ matrix.agent || 'claude' }}"
 
       # The generated secret scan checks only the commits a push brings in, so the first push of a new
       # solution scans everything: a value in the template that looks like a secret fails a team's first push.
       - name: Secret scan of the whole solution
+        if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
         run: |
           curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz \
@@ -167,17 +181,19 @@ jobs:
 
       # A warning fails the build here: a team's first build of a generated solution shows none.
       - name: Build
+        if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
         run: dotnet build src/services/*.All.sln --configuration Release -warnaserror
 
       - name: Unit tests
+        if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
         run: dotnet test src/services/*.All.sln --configuration Release --no-build --filter "TestCategory!=Integration"
 
       # What api-diff.yml runs on a pull request of the generated solution: a contract per service, and
       # none for the gateway.
       - name: API contracts
-        if: matrix.schemas
+        if: needs.scope.outputs.code == 'true' && matrix.schemas
         working-directory: ${{ runner.temp }}/solution
         run: |
           bash scripts/generate-api-schemas.sh
@@ -193,7 +209,7 @@ jobs:
       # same steps. The solution is put in a repository with main and a pull request on top of it, the
       # way GitHub checks one out.
       - name: The shipped workflows
-        if: matrix.integration
+        if: needs.scope.outputs.code == 'true' && matrix.integration
         working-directory: ${{ runner.temp }}/solution
         run: |
           commit() { git -c user.name=ci -c user.email=ci@example.com commit -q "$@"; }
@@ -222,14 +238,19 @@ jobs:
   package:
     name: Installed from the package
     needs: scope
-    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-24.04
     steps:
+      - name: Nothing to build
+        if: needs.scope.outputs.code == 'false'
+        run: echo "Only the documentation and the site are touched; the steps below are skipped."
       - uses: actions/checkout@v7
+        if: needs.scope.outputs.code == 'true'
       - uses: actions/setup-dotnet@v6
+        if: needs.scope.outputs.code == 'true'
         with:
           dotnet-version: 8.0.x
       - name: Pack, install, generate, build
+        if: needs.scope.outputs.code == 'true'
         run: |
           dotnet pack DotNetSolutionKit.Templates.csproj --configuration Release -o "$RUNNER_TEMP/package"
           dotnet new install "$RUNNER_TEMP"/package/*.nupkg
@@ -245,6 +266,7 @@ jobs:
 
       # The tool is released beside the template, of the same version: it installs from its package and says it.
       - name: The tool installs from its package
+        if: needs.scope.outputs.code == 'true'
         run: |
           dotnet pack tool/DotsKit --configuration Release -o "$RUNNER_TEMP/tool-package"
           version=$(jq -r .version version.json)
@@ -254,6 +276,7 @@ jobs:
 
       # The template wrote the manifest at generation: the tool reads it as its own, no dotskit init.
       - name: The template-written manifest is the tool's own
+        if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
         run: |
           version=$(jq -r .version "$GITHUB_WORKSPACE/version.json")
@@ -261,6 +284,7 @@ jobs:
 
       # A service generated by another major version than the solution's does not build, and says why.
       - name: A service of another major version does not build
+        if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
         run: |
           version=$(jq -r .version "$GITHUB_WORKSPACE/version.json")
@@ -277,14 +301,19 @@ jobs:
   service-adds-itself-windows:
     name: A service adds itself to All.sln on Windows
     needs: scope
-    if: needs.scope.outputs.code == 'true'
     runs-on: windows-2022
     steps:
+      - name: Nothing to build
+        if: needs.scope.outputs.code == 'false'
+        run: echo "Only the documentation and the site are touched; the steps below are skipped."
       - uses: actions/checkout@v7
+        if: needs.scope.outputs.code == 'true'
       - uses: actions/setup-dotnet@v6
+        if: needs.scope.outputs.code == 'true'
         with:
           dotnet-version: 8.0.x
       - name: A solution, a dotted service and a gateway into it
+        if: needs.scope.outputs.code == 'true'
         shell: pwsh
         run: |
           dotnet new install ./template
@@ -305,32 +334,39 @@ jobs:
   tool:
     name: dotskit on ${{ matrix.os }}
     needs: scope
-    if: needs.scope.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, windows-2022, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Nothing to build
+        if: needs.scope.outputs.code == 'false'
+        run: echo "Only the documentation and the site are touched; the steps below are skipped."
       - uses: actions/checkout@v7
+        if: needs.scope.outputs.code == 'true'
       - uses: actions/setup-dotnet@v6
+        if: needs.scope.outputs.code == 'true'
         with:
           dotnet-version: 8.0.x
       - name: Git for the scenarios
+        if: needs.scope.outputs.code == 'true'
         shell: bash
         run: |
           git config --global user.name "dotskit scenarios"
           git config --global user.email "scenarios@dotskit.invalid"
           git config --global core.longpaths true
       - name: Build
+        if: needs.scope.outputs.code == 'true'
         run: dotnet build tool/DotsKit.Tests -warnaserror
       # The rules of .editorconfig an SDK 8 build does not run, IDE0130 among them, and the layout; one OS is enough.
       - name: Style
-        if: matrix.os == 'ubuntu-24.04'
+        if: needs.scope.outputs.code == 'true' && matrix.os == 'ubuntu-24.04'
         run: |
           dotnet format tool/DotsKit/DotsKit.csproj --verify-no-changes
           dotnet format tool/DotsKit.Tests/DotsKit.Tests.csproj --verify-no-changes
       - name: Test
+        if: needs.scope.outputs.code == 'true'
         run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory!=Chain"
 
   # A solution of 1.0.0 upgraded by dotskit a release at a time to the template's sources, building after every
@@ -338,21 +374,28 @@ jobs:
   chain:
     name: dotskit upgrades from 1.0.0
     needs: scope
-    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     steps:
+      - name: Nothing to build
+        if: needs.scope.outputs.code == 'false'
+        run: echo "Only the documentation and the site are touched; the steps below are skipped."
       - uses: actions/checkout@v7
+        if: needs.scope.outputs.code == 'true'
       - uses: actions/setup-dotnet@v6
+        if: needs.scope.outputs.code == 'true'
         with:
           dotnet-version: 8.0.x
       - name: Git for the scenarios
+        if: needs.scope.outputs.code == 'true'
         run: |
           git config --global user.name "dotskit scenarios"
           git config --global user.email "scenarios@dotskit.invalid"
       - name: Build
+        if: needs.scope.outputs.code == 'true'
         run: dotnet build tool/DotsKit.Tests -warnaserror
       - name: Test
+        if: needs.scope.outputs.code == 'true'
         run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory=Chain"
 
   # A link to a section of a document names a heading of it, in the language of the linking document.
