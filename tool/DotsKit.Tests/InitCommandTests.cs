@@ -13,6 +13,16 @@ namespace DotsKit.Tests;
 [Parallelizable(ParallelScope.All)]
 internal sealed class InitCommandTests
 {
+    [Test]
+    public void Should_TakeAllowDirtyAsANoOp_ForScriptsThatPassTheSameFlagsToEveryCommand()
+    {
+        // A script that dotskit new, dotskit init and dotskit upgrade runs with one flag set breaks
+        // on a refusal of a flag that merges nothing here.
+        var options = Options.Parse("init", ["--allow-dirty"]);
+
+        options.AllowDirty.ShouldBeTrue();
+    }
+
     private const string ToolVersion = "2.8.0";
     private const string Orders = "Acme.Shop.Orders";
 
