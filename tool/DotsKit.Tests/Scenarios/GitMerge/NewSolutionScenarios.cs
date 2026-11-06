@@ -84,38 +84,9 @@ internal sealed class NewSolutionScenarios
         // The adopt commit on HEAD and the template's base commit are mechanical, made where git knows no
         // committer, as on a fresh runner. The merge itself stays uncommitted, as after any run.
         (await isolated.RunCheckedAsync("git", ["log", "-1", "--format=%an"], root, CancellationToken.None)).Trim()
-            .ShouldBe("dotskit");
+            .ShouldBe(Io.Git.FallbackUserName);
         (await isolated.RunCheckedAsync("git", ["log", "-1", "--format=%an", "dotskit/template"], root, CancellationToken.None)).Trim()
-            .ShouldBe("dotskit");
-    }
-
-    /// <summary>A runner under which git sees no global or system config: a repository with nothing configured has no identity.</summary>
-    private sealed class WithoutGitIdentity(IProcessRunner inner) : IProcessRunner
-    {
-        private static readonly IReadOnlyDictionary<string, string> Isolated =
-            new Dictionary<string, string> { ["GIT_CONFIG_GLOBAL"] = EmptyGlobalConfig(), ["GIT_CONFIG_NOSYSTEM"] = "1" };
-
-        public async Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
-            IReadOnlyDictionary<string, string>? environment = null, string? input = null)
-        {
-            var merged = new Dictionary<string, string>(Isolated);
-            if (environment is not null)
-            {
-                foreach (var (key, value) in environment)
-                {
-                    merged[key] = value;
-                }
-            }
-
-            return await inner.RunAsync(program, args, workingDirectory, ct, merged, input);
-        }
-
-        private static string EmptyGlobalConfig()
-        {
-            var path = Path.Combine(Folders.NewTemp("git-config"), "global");
-            File.WriteAllText(path, "");
-            return path;
-        }
+            .ShouldBe(Io.Git.FallbackUserName);
     }
 
     /// <summary>The template's output for a new solution: a file of its own and one the team's copy of differs from.</summary>

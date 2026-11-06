@@ -51,17 +51,28 @@ internal sealed class Git(IProcessRunner runner) : IGit
     internal const string FallbackUserEmail = "dotskit@sawking.tech";
 
     /// <summary>
-    /// The -c user.name/-c user.email for a plumbing commit: none when git already knows the author, so the
-    /// team's identity is kept; the tool's own when it does not, so the commit is not refused.
+    /// The -c user.name/-c user.email for a plumbing commit: none for the half git already knows, so the team's
+    /// identity is kept; the tool's own for the half it does not, so the commit is not refused. An empty value
+    /// counts as unknown: git would refuse the commit with it, the same as with none.
     /// </summary>
     internal static async Task<string[]> IdentityArgsAsync(IProcessRunner runner, string root, CancellationToken ct)
     {
         var name = await runner.RunAsync("git", ["config", "user.name"], root, ct);
         var email = await runner.RunAsync("git", ["config", "user.email"], root, ct);
-        return name.Code == 0 && email.Code == 0
-            ? []
-            : ["-c", $"user.name={FallbackUserName}", "-c", $"user.email={FallbackUserEmail}"];
+        List<string>? args = null;
+        if (name.Code != 0 || string.IsNullOrWhiteSpace(name.Output))
+        {
+            args = ["-c", $"user.name={FallbackUserName}"];
+        }
+
+        if (email.Code != 0 || string.IsNullOrWhiteSpace(email.Output))
+        {
+            (args ??= []).AddRange(["-c", $"user.email={FallbackUserEmail}"]);
+        }
+
+        return args is null ? [] : [.. args];
     }
+
     public async Task<bool> IsCleanAsync(string root, CancellationToken ct)
     {
         var status = await runner.RunAsync("git", ["status", "--porcelain"], root, ct);

@@ -148,33 +148,26 @@ internal sealed class GitModeTests
             .ShouldBe(Git.FallbackUserName);
     }
 
-    /// <summary>A runner under which git sees no global or system config: a repository with nothing configured has no identity.</summary>
-    private sealed class WithoutGitIdentity(IProcessRunner inner) : IProcessRunner
+    [Test]
+    public async Task UncommittedChanges_WithHalfOfGitIdentity_KeepTheConfiguredHalf()
     {
-        private static readonly IReadOnlyDictionary<string, string> Isolated =
-            new Dictionary<string, string> { ["GIT_CONFIG_GLOBAL"] = EmptyGlobalConfig(), ["GIT_CONFIG_NOSYSTEM"] = "1" };
+        var runner = new WithoutGitIdentity(new ProcessRunner());
+        var root = Folders.NewTemp("uncommitted-half-identity");
+        Directory.CreateDirectory(Path.Combine(root, "src"));
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "a.cs"), "a\n");
+        await runner.RunCheckedAsync("git", ["init", "-q"], root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["add", "-A"], root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["-c", "user.name=team", "-c", "user.email=team@example.com", "commit", "-q", "-m", "base"], root, CancellationToken.None);
+        // The team configures a name only; a blank value counts as none, the same as a missing one.
+        await runner.RunCheckedAsync("git", ["config", "user.name", "team"], root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["config", "user.email", ""], root, CancellationToken.None);
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "a.cs"), "a\ndirty\n");
 
-        public async Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
-            IReadOnlyDictionary<string, string>? environment = null, string? input = null)
-        {
-            var merged = new Dictionary<string, string>(Isolated);
-            if (environment is not null)
-            {
-                foreach (var (key, value) in environment)
-                {
-                    merged[key] = value;
-                }
-            }
+        await new Git(runner).CommitUncommittedAsync(root, "dotskit: uncommitted changes, taken into the upgrade", CancellationToken.None);
 
-            return await inner.RunAsync(program, args, workingDirectory, ct, merged, input);
-        }
-
-        private static string EmptyGlobalConfig()
-        {
-            var path = Path.Combine(Folders.NewTemp("git-config"), "global");
-            System.IO.File.WriteAllText(path, "");
-            return path;
-        }
+        var author = await runner.RunCheckedAsync("git", ["log", "-1", "--format=%an %ae"], root, CancellationToken.None);
+        // The configured name stays; only the missing half falls back to the tool.
+        author.Trim().ShouldBe($"team {Git.FallbackUserEmail}");
     }
 
     /// <summary>A merge by git that merges nothing and names the files of the next output it left off the branch.</summary>
