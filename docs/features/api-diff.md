@@ -2,17 +2,20 @@
 
 Generated with `--DiffApi`, off by default. Pass it with `--Solution`, and to each service generated later.
 
-On every pull request, CI generates the OpenAPI document of each service on both sides, the branch and its
-base, and compares them with [oasdiff](https://github.com/oasdiff/oasdiff). The changes go into an
-artifact of the run, and a breaking change fails the check unless it is declared.
+On every pull request, CI generates the OpenAPI document of each service twice: from the pull request's
+branch and from the branch it targets (usually `main`). [oasdiff](https://github.com/oasdiff/oasdiff)
+compares the two. The report goes into an artifact of the run, and a breaking change fails the check
+unless it is declared.
 
-Nothing is committed: both documents come from the code, so there is no snapshot to go stale.
+Nothing is committed: both documents are generated from code during the run, so no snapshot can go stale.
 
-The branch itself must always produce its documents - that failure fails the check. The base branch is held
-to less: a base older than the contracts has nothing to compare, and a base whose own configuration is
-broken cannot produce them either. Both are treated as no baseline, with a notice in the log, so the pull
-request that brings the fix is not blocked by the very thing it fixes. The next pull request after it
-compares against the fixed base.
+The pull request's own branch is always strict: if its documents cannot be generated, the check fails.
+
+The target branch gets an exception, with a cost. Sometimes the target has no documents to compare
+against: it comes from a version older than the contracts, or its schema generation is broken. The check
+then prints a notice naming the service and the reason, and passes - otherwise the pull request that
+repairs the generation could never merge, blocked by the very break it fixes. The cost: until that repair
+lands, no pull request is compared, and the notice in the log is the only sign of it.
 
 ## Generate the documents locally
 
