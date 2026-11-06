@@ -5,7 +5,7 @@ using DotsKit.Solutions;
 
 namespace DotsKit.Tests;
 
-/// <summary>What the writer of a plan says when a step after the write stops: the merge by files has no undo after it.</summary>
+/// <summary>What the writer of a plan says when a step after the write stops: the tool's own write has no undo after it.</summary>
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
 internal sealed class PlanWriterTests
@@ -29,7 +29,7 @@ internal sealed class PlanWriterTests
         public Task<ProcessResult> BuildAsync(string root, CancellationToken ct) => Task.FromResult(new ProcessResult(0, "", ""));
     }
 
-    /// <summary>The merge by files never reaches git.</summary>
+    /// <summary>The tool's own write never reaches git.</summary>
     private sealed class NoGit : IGitMerge
     {
         public IReadOnlySet<string> LeftOut { get; } = new HashSet<string>();
@@ -37,7 +37,7 @@ internal sealed class PlanWriterTests
         public IReadOnlyList<string> Taken => [];
 
         public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct) =>
-            throw new InvalidOperationException("the merge by files reached git");
+            throw new InvalidOperationException("the tool's own write reached git");
 
         public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) => Task.CompletedTask;
 

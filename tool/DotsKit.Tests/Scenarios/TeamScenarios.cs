@@ -13,7 +13,7 @@ namespace DotsKit.Tests.Scenarios;
 [Parallelizable(ParallelScope.All)]
 internal sealed class TeamScenarios
 {
-    /// <summary>A conflict as both merges mark it: the tool labels its sides solution and template, git HEAD and dotskit/template.</summary>
+    /// <summary>A conflict as the merge marks it: the tool labels its sides solution and template, git HEAD and dotskit/template.</summary>
     private const string ConflictMarker = "<<<<<<< ";
 
     private const string Orders = $"{Sandbox.Prefix}.Orders";

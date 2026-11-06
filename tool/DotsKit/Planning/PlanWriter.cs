@@ -38,7 +38,8 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
                 Add(transaction, change);
             }
 
-            conflicts = [.. plan.Changes.Where(c => c.Kind == ChangeKind.Conflict).Select(c => c.Path)];
+            // The tool's own write never merges: nothing it writes can stay in conflict.
+            conflicts = [];
         }
         transaction.Write(Layout.ManifestPath, System.Text.Encoding.UTF8.GetBytes(plan.Written(conflicts.Count > 0).Serialize()));
         if (!plan.Membership.IsEmpty)
@@ -122,7 +123,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         }
     }
 
-    /// <summary>A conflict with no content - a file one side removed and the other changed - stays as it is.</summary>
+    /// <summary>A deletion carries no content; everything else the plan carries is written as it is.</summary>
     private static void Add(FileTransaction transaction, Change change)
     {
         if (change.Kind == ChangeKind.Delete)
@@ -137,8 +138,8 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
 
     /// <summary>
     /// A file the template adds that the merge left off the branch (<see cref="IGitMerge.LeftOut"/>): one the
-    /// solution's git ignores, as the secrets file of a new service. The tool's own merge writes it, so the merge by
-    /// git does too, beside the merge; a file of that name the team has already stays as it is.
+    /// solution's git ignores, as the secrets file of a new service. The tool writes it beside the merge; a file
+    /// of that name the team has already stays as it is.
     /// </summary>
     private void AddWhatTheBranchLeftOut(Plan plan, FileTransaction transaction)
     {

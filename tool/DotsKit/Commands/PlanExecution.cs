@@ -37,7 +37,7 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
             }
         }
         var conflicts = written.Conflicts.Count > 0;
-        var code = conflicts ? Conflicts(plan, written.Conflicts) : await BuildAsync(plan, options, ct);
+        var code = conflicts ? Conflicts(written.Conflicts) : await BuildAsync(plan, options, ct);
         if (plan.Written(conflicts).Upgrade is { } upgrade)
         {
             terminal.Info((conflicts, plan.OnConflicts is not null) switch
@@ -66,13 +66,8 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         }
     }
 
-    private ExitCode Conflicts(Plan plan, IReadOnlyList<string> conflicts)
+    private ExitCode Conflicts(IReadOnlyList<string> conflicts)
     {
-        if (plan.ByGit is null)
-        {
-            terminal.Info("Written. Resolve the conflicts marked <<<<<<< solution / >>>>>>> template, then build.");
-            return ExitCode.Conflicts;
-        }
         terminal.Info($"Merged by git, not committed; {conflicts.Count} file(s) in conflict:");
         foreach (var path in conflicts)
         {

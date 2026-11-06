@@ -14,7 +14,7 @@ namespace DotsKit.Planning;
 /// <param name="MarkBase">--conflict-style zdiff3: a conflict is marked with its base; plain is the default.</param>
 /// <param name="ByGit">
 /// The two outputs git merges into the solution (<see cref="GitTemplateMerge"/>); <paramref name="Changes"/> then names the
-/// template's own changes. Null when the tool writes <paramref name="Changes"/> itself: a new solution, or the finish of an upgrade.
+/// template's own changes. Null when the tool writes <paramref name="Changes"/> itself: a new solution in an empty folder.
 /// </param>
 /// <param name="OnConflicts">
 /// The manifest written instead of <paramref name="Next"/> when the merge leaves conflicts: the last part of an upgrade a

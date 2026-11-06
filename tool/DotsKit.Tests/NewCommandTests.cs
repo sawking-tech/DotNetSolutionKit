@@ -25,6 +25,7 @@ internal sealed class NewCommandTests
         public bool Answer { get; init; }
         public int Planned { get; private set; }
         public int Written { get; private set; }
+        public int TakenUncommitted { get; private set; }
         public Manifest? Next { get; private set; }
         public List<string> Lines { get; } = [];
 
@@ -62,7 +63,11 @@ internal sealed class NewCommandTests
 
             public Task<string> PrefixAsync(string root, CancellationToken ct) => Task.FromResult(fakes.Prefix);
 
-            public Task<(string Commit, string Previous)?> CommitUncommittedAsync(string root, string message, CancellationToken ct) => Task.FromResult<(string, string)?>(null);
+            public Task<(string Commit, string Previous)?> CommitUncommittedAsync(string root, string message, CancellationToken ct)
+            {
+                fakes.TakenUncommitted++;
+                return Task.FromResult<(string, string)?>(fakes.Clean ? null : ("taken", "head"));
+            }
 
             public Task UncommitAsync(string root, string commit, CancellationToken ct) => Task.CompletedTask;
 
@@ -194,6 +199,48 @@ internal sealed class NewCommandTests
         await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Args("-N", "Acme", "-S", "Orders"), folder, CancellationToken.None));
 
         fakes.Planned.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task Should_RefuseANewSolutionBesideFiles_When_TheFolderHasNoRepository_NamingHowToMakeOne()
+    {
+        var folder = Folders.NewTemp("new-command");
+        File.WriteAllText(Path.Combine(folder, "notes.txt"), "the team's");
+        var fakes = new Fakes { Repository = false };
+
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Args("-N", "Acme", "-S", "Orders"), folder, CancellationToken.None));
+
+        refused.Message.ShouldContain("git init");
+        refused.Message.ShouldContain("gitleaks");
+        fakes.Planned.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task Should_MergeANewSolutionBesideFiles_ByGit_When_TheFolderIsARepositoryWithACleanTree()
+    {
+        var folder = Folders.NewTemp("new-command");
+        File.WriteAllText(Path.Combine(folder, "notes.txt"), "the team's");
+        var fakes = new Fakes { Answer = true };
+
+        var code = await fakes.Command().RunAsync(Args("-N", "Acme", "-S", "Orders"), folder, CancellationToken.None);
+
+        code.ShouldBe(ExitCode.Done);
+        fakes.Planned.ShouldBe(1);
+        fakes.Written.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Should_TakeUncommittedChanges_BesideFiles_When_AllowDirtyIsNamed()
+    {
+        var folder = Folders.NewTemp("new-command");
+        File.WriteAllText(Path.Combine(folder, "notes.txt"), "the team's");
+        var fakes = new Fakes { Clean = false, Answer = true };
+
+        var code = await fakes.Command().RunAsync(Args("-N", "Acme", "-S", "Orders", "--allow-dirty"), folder, CancellationToken.None);
+
+        code.ShouldBe(ExitCode.Done);
+        fakes.TakenUncommitted.ShouldBe(1);
+        fakes.Planned.ShouldBe(1);
     }
 
     [Test]
