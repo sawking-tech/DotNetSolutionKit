@@ -247,7 +247,7 @@ projects. The check installs the template of that version from nuget.org.
 | `--yes` | writes without asking, for CI |
 | `--force` | resolves a conflict with the template's lines; the team's lines stay in git history, so it needs a clean tree and refuses `--allow-dirty` |
 | `--no-build` | does not build the solution after writing |
-| `--allow-dirty` | `new` and `upgrade`: runs on a working tree with uncommitted changes, committed beside the run and taken into the merge; a failed run puts them back uncommitted |
+| `--allow-dirty` | `new` and `upgrade`: runs on a working tree with uncommitted changes, committed beside the run and taken into the merge; a failed run puts them back uncommitted; `init` takes it as a no-op, for scripts that pass one flag set to every command |
 | `--template-version 2.x.y` | `init`: the version the solution was made by, where it does not say it |
 | `--to 2.x.y` | `upgrade`: the release to bring the solution to, not newer than the tool |
 | `--conflict-style zdiff3` | `new` and `upgrade`: a conflict is marked with its base (`\|\|\|\|\|\|\| base`), as zdiff3 writes it; plain is the default |
