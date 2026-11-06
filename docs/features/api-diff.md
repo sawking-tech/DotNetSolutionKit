@@ -30,9 +30,10 @@ services' documents and has no contract of its own.
 
 ## Declare a breaking change
 
-`oasdiff` sees two documents and nothing else. When a change it reports as breaking is intended, for
-example a path leaving the document while its route keeps answering, declare it in
-`.github/api-diff-ignore/<service>.txt`, one line per finding, with the reason above it:
+The recommended way to break the API is the deprecation cycle: mark the path deprecated, release that, and
+remove it in a later release - the check does not stand in that way. Declare a finding in
+`.github/api-diff-ignore/<service>.txt` only for what the cycle does not cover: a path that has left the
+document while its route keeps answering, for example. One line per finding, with the reason above it:
 
 ```
 # The legacy export left the document; the route still answers until 2.0.
@@ -48,9 +49,6 @@ path.
 A line applies only while `version.json` holds its version. Once the version is raised, the base branch
 already has the change and the line could only hide a later regression on the same path, so it stops
 applying by itself.
-
-A path that is really going away is a breaking change for its callers: deprecate it, release that, and
-remove it in a later release, rather than declaring it here.
 
 ## What runs where
 
