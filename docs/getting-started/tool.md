@@ -159,6 +159,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git rev-parse` (`HEAD`, `--absolute-git-dir`, `MERGE_HEAD`, the branch, a commit's tree) | where the solution and the branch stand |
 | | `git merge-base --is-ancestor` | whether the working branch has the branch's last commit |
 | | `git config --path --get core.attributesFile` | the user's global attributes, kept under the merge driver's |
+| | `git config user.name`, `git config user.email` | whether git knows the committer: the mechanical commits keep the team's identity when it does; when it does not, as on a fresh runner, they are made as dotskit |
 | | `git ls-files --others --ignored --exclude-standard` | the files the solution's git ignores, never written |
 | | `git diff --name-only --diff-filter=U` | the files left in conflict |
 | | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed; one with no side of the template's, under `--force`, is resolved with the template's removal; one with no base, added by both sides, gains the solution's side as its base |

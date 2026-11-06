@@ -62,6 +62,62 @@ internal sealed class NewSolutionScenarios
         Read(root, "notes.md").ShouldBe("the team's notes\n");
     }
 
+    [Test]
+    public async Task ARepositoryWithoutGitIdentity_MergesWithMechanicalCommitsAuthoredByDotskit()
+    {
+        var isolated = new WithoutGitIdentity(Runner);
+        var root = Folders.NewTemp("new-solution");
+        Write(root, "notes.md", "the team's notes\n");
+        await Git(root, "init", "-q");
+        await Git(root, "add", "-A");
+        await isolated.RunCheckedAsync("git", ["-c", "user.name=team", "-c", "user.email=team@example.com", "commit", "-q", "-m", "the team's files"], root, CancellationToken.None);
+
+        var plan = await Planner().BuildAsync(root, null, Next(), new MergeMode(false, false), CancellationToken.None);
+
+        if (plan.ByGit is not { } byGit)
+        {
+            throw new InvalidOperationException("beside files, a new solution merges by git");
+        }
+
+        await new GitTemplateMerge(isolated, Sandbox.Self).MergeAsync(root, byGit.Base, byGit.Next, false, false, CancellationToken.None);
+
+        // The adopt commit on HEAD and the template's base commit are mechanical, made where git knows no
+        // committer, as on a fresh runner. The merge itself stays uncommitted, as after any run.
+        (await isolated.RunCheckedAsync("git", ["log", "-1", "--format=%an"], root, CancellationToken.None)).Trim()
+            .ShouldBe("dotskit");
+        (await isolated.RunCheckedAsync("git", ["log", "-1", "--format=%an", "dotskit/template"], root, CancellationToken.None)).Trim()
+            .ShouldBe("dotskit");
+    }
+
+    /// <summary>A runner under which git sees no global or system config: a repository with nothing configured has no identity.</summary>
+    private sealed class WithoutGitIdentity(IProcessRunner inner) : IProcessRunner
+    {
+        private static readonly IReadOnlyDictionary<string, string> Isolated =
+            new Dictionary<string, string> { ["GIT_CONFIG_GLOBAL"] = EmptyGlobalConfig(), ["GIT_CONFIG_NOSYSTEM"] = "1" };
+
+        public async Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
+            IReadOnlyDictionary<string, string>? environment = null, string? input = null)
+        {
+            var merged = new Dictionary<string, string>(Isolated);
+            if (environment is not null)
+            {
+                foreach (var (key, value) in environment)
+                {
+                    merged[key] = value;
+                }
+            }
+
+            return await inner.RunAsync(program, args, workingDirectory, ct, merged, input);
+        }
+
+        private static string EmptyGlobalConfig()
+        {
+            var path = Path.Combine(Folders.NewTemp("git-config"), "global");
+            File.WriteAllText(path, "");
+            return path;
+        }
+    }
+
     /// <summary>The template's output for a new solution: a file of its own and one the team's copy of differs from.</summary>
     private sealed class FixedOutput : IStaging
     {
