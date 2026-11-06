@@ -3,7 +3,7 @@ namespace DotsKit.Merging;
 /// <summary>
 /// The merge driver git runs for a file both the solution and the template changed, in the merge of
 /// <see cref="GitTemplateMerge"/>: <c>dotskit merge-driver %O %A %B %P</c>. It brings the three sides to
-/// <see cref="TemplateStyle"/> and merges them as the tool's own merge does, so a change of the template's style alone
+/// <see cref="TemplateStyle"/> and merges them by the same rule, so a change of the template's style alone
 /// conflicts with nothing the team wrote, in either mode. The result goes into %A, the solution's side, as git asks;
 /// a conflict is marked in it and the exit code says there is one, and git lists the file as unmerged for the IDE.
 /// A driver, and not <c>git merge -X renormalize</c> with a clean filter, which was tried on 29.10.2026 and merges
@@ -56,7 +56,7 @@ internal sealed class StyleMergeDriver(ITextMerger merger)
                 $"git could not merge {path}: {result.Failure}. The file holds the solution's side: take the template's with git checkout --theirs -- {path}, or merge it by hand.");
         }
 
-        // The merged text in the line ends of the solution's side, as the tool's own merge writes it.
+        // The merged text in the line ends of the solution's side, as the tool writes it.
         await File.WriteAllBytesAsync(args[1], (solution with { Text = LineEndings.Apply(result.Text, LineEndings.Of(solution.Text)) }).ToBytes(), ct);
         // --force: the merge that started this driver names each file whose conflict took the template's lines.
         if (flags.Contains(TheirsFlag) && result.Taken > 0

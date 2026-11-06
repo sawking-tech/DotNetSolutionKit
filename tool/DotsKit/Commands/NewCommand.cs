@@ -28,28 +28,45 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
         }
 
         var root = SolutionRoot.Find(folder);
-        if (root is null)
+        var empty = root is null && SolutionRoot.IsEmpty(folder);
+        if (root is null && !empty)
         {
-            await RefuseFilesOutsideGitAsync(folder, options, ct);
+            await RequireAGitRepoAsync(folder, ct);
+            await GitPreconditions.CheckAsync(git, folder, options, ct);
         }
 
         var current = root is null ? null : await LoadCheckedAsync(root, options, ct);
         if (root is null)
         {
-            var startNone = TreeStart.None;
-            var plan = await planner.BuildAsync(folder, null, Next(null, command), new Merging.MergeMode(options.Force, options.MarkBase), ct);
-            return await execution.RunAsync(plan, options, startNone, ct);
+            // An empty folder takes the plain write, with nothing to take in; beside files, git merges like an upgrade.
+            return empty
+                ? await RunAsync(folder, null, command, options, TreeStart.None, ct)
+                : await TakingUncommittedAsync(folder, null, command, options, ct);
         }
 
         // Adding to a solution is a merge like an upgrade: --allow-dirty takes the uncommitted changes in, the same way.
+        return await TakingUncommittedAsync(root, current, command, options, ct);
+    }
+
+    private async Task<ExitCode> RunAsync(string root, Manifest? current, TemplateArgs command, Options options, TreeStart start, CancellationToken ct)
+    {
+        var plan = await planner.BuildAsync(root, current, Next(current, command), new Merging.MergeMode(options.Force, options.MarkBase), ct);
+        return await execution.RunAsync(plan, options, start, ct);
+    }
+
+    /// <summary>
+    /// --allow-dirty: the uncommitted changes committed by plumbing beside the run, so the merge runs on them; a run
+    /// that fails before the merge stands puts them back uncommitted with git reset --mixed, an open merge keeps them.
+    /// </summary>
+    private async Task<ExitCode> TakingUncommittedAsync(string root, Manifest? current, TemplateArgs command, Options options, CancellationToken ct)
+    {
         var taken = options.AllowDirty
             ? await git.CommitUncommittedAsync(root, "dotskit: uncommitted changes, taken into the change", ct)
             : null;
         try
         {
             var start = await TreeStart.OfAsync(git, root, options, ct);
-            var plan = await planner.BuildAsync(root, current, Next(current, command), new Merging.MergeMode(options.Force, options.MarkBase), ct);
-            return await execution.RunAsync(plan, options, start, ct);
+            return await RunAsync(root, current, command, options, start, ct);
         }
         catch (Exception failure)
         {
@@ -71,15 +88,18 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
     }
 
     /// <summary>
-    /// A new solution goes into an empty folder, or beside files a clean git tree holds: what the tool writes over
-    /// them must be possible to see and undo.
+    /// A new solution beside files merges by git, and git must see and keep the whole folder: a repository the
+    /// files are committed in. The tool never commits for the team - the first commit is theirs.
     /// </summary>
-    private async Task RefuseFilesOutsideGitAsync(string folder, Options options, CancellationToken ct)
+    private async Task RequireAGitRepoAsync(string folder, CancellationToken ct)
     {
-        if (!SolutionRoot.IsEmpty(folder) && !options.AllowDirty && !await git.IsCleanAsync(folder, ct))
+        if (await git.IsRepositoryAsync(folder, ct))
         {
-            throw new InvalidOperationException("The folder has files outside a clean git tree: make the solution in an empty folder, or commit what is here first (--allow-dirty to go on).");
+            return;
         }
+
+        throw new InvalidOperationException("The folder has files and merging needs git: move what must never reach history out (or list it in .gitignore), "
+            + "then git init, a hook against secrets (gitleaks protect), git add -A and git commit - and run the command again. An empty folder needs no git at all.");
     }
 
     /// <summary>The manifest of a solution to add to: there, of this version, and the tree clean.</summary>
