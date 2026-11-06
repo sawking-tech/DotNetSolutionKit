@@ -122,8 +122,8 @@ file-byte violations and C# style violations in the tool.
   lowercase through a casing generated symbol. Replacement is a single pass — a value one symbol inserts
   is not re-scanned by another.
 - A file the template starts writing that the tool also writes (like `.dotskit/manifest.json`) is not the
-  template's file in any comparison: the reproduction check skips what `Layout.Ignored` names, as both
-  merges do, and the merge by files never writes what the solution's git ignores.
+  template's file in any comparison: the reproduction check skips what `Layout.Ignored` names, as the merge
+  does, and the merge never writes what the solution's git ignores.
 - A flag is whole: `template.json` excludes its files when off, shared-file blocks use one condition, CI
   generates a combination with it, and it has English and Russian documentation. A supplied flag that does
   nothing must say so at generation through a post-action.
@@ -167,6 +167,6 @@ file-byte violations and C# style violations in the tool.
 - Never write secrets to files. Keep them in Infisical or HashiCorp Vault and in memory; read settings on
   each use where they may change without redeployment.
 - `dotskit` never commits a merge, pushes or checks out a branch. A failed upgrade is reverted with
-  `git reset --hard`. Neither merge writes files ignored by the solution's git.
+  `git reset --hard`. The merge never writes files ignored by the solution's git.
 - CI uses minimal permissions. nuget.org publishing uses Trusted Publishing without stored keys. A NuGet
   version can be unlisted, not deleted.
