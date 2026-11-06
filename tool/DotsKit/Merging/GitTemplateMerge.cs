@@ -129,8 +129,11 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         await runner.RunCheckedAsync("git", ["update-ref", BranchRef, nextCommit, tip ?? ""], root, ct);
         // --force: the driver, a process git starts, names the files whose conflicts took the template's lines through a report.
         var takenReport = preferTemplate ? Path.Combine(Folders.NewTemp("taken-report"), "taken.txt") : null;
+        // git merge asks for the committer before it merges, though the commit it would make is deferred: the
+        // identity the team's git has, the tool's own where there is none.
+        var identity = await Git.IdentityArgsAsync(runner, root, ct);
         var merge = await runner.RunAsync("git",
-            [.. await DriverConfigAsync(root, preferTemplate, markBase, ct), "merge", "--no-ff", "--no-commit", .. preferTemplate ? TheirsOption : [], Branch], root, ct,
+            [.. identity, .. await DriverConfigAsync(root, preferTemplate, markBase, ct), "merge", "--no-ff", "--no-commit", .. preferTemplate ? TheirsOption : [], Branch], root, ct,
             environment: takenReport is null ? null : new Dictionary<string, string> { [TakenReportVariable] = takenReport });
         var conflicts = await PathsAsync(root, ["diff", "--name-only", "-z", "--diff-filter=U"], null, ct);
         if (merge.Code != 0 && conflicts.Count == 0)
@@ -345,7 +348,8 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
     private async Task AdoptAsync(string root, string head, string commit, string message, CancellationToken ct)
     {
         var tree = (await runner.RunCheckedAsync("git", ["rev-parse", head + "^{tree}"], root, ct)).Trim();
-        var merge = (await runner.RunCheckedAsync("git", ["commit-tree", tree, "-p", head, "-p", commit, "-m", message], root, ct)).Trim();
+        var identity = await Git.IdentityArgsAsync(runner, root, ct);
+        var merge = (await runner.RunCheckedAsync("git", [.. identity, "commit-tree", tree, "-p", head, "-p", commit, "-m", message], root, ct)).Trim();
         await runner.RunCheckedAsync("git", ["update-ref", "-m", message, "HEAD", merge, head], root, ct);
     }
 
@@ -357,8 +361,11 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         return await CommitTreeAsync(root, tree, parent, message, ct);
     }
 
-    private async Task<string> CommitTreeAsync(string root, string tree, string? parent, string message, CancellationToken ct) =>
-        (await runner.RunCheckedAsync("git", ["commit-tree", tree, .. parent is null ? [] : new[] { "-p", parent }, "-m", message], root, ct)).Trim();
+    private async Task<string> CommitTreeAsync(string root, string tree, string? parent, string message, CancellationToken ct)
+    {
+        var identity = await Git.IdentityArgsAsync(runner, root, ct);
+        return (await runner.RunCheckedAsync("git", [.. identity, "commit-tree", tree, .. parent is null ? [] : new[] { "-p", parent }, "-m", message], root, ct)).Trim();
+    }
 
     /// <summary>
     /// The tree of a folder the template generated, written by an index of its own: the solution's own index and
