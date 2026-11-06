@@ -117,6 +117,10 @@ file-byte violations and C# style violations in the tool.
 
 - Verify template changes on a generated solution with every affected flag on and off, `-warnaserror`,
   and passing tests.
+- A change to what a command writes or merges (`new`, `upgrade`, the staging, the manifest) rehearses on
+  the Samples generator before the pull request merges: `generate.sh` there builds the tool from the same
+  ref and runs it with `--allow-dirty`, so a broken dev breaks the `full-dev` branch on its next
+  regeneration. Checking after the merge is an obituary, not a gate.
 - A parameter's `replaces` rewrites every occurrence of its token, including inside a literal argument
   name ("--NamespaceRoot" becomes "--Acme"): hold literal names in generated constant symbols and a bool in
   lowercase through a casing generated symbol. Replacement is a single pass — a value one symbol inserts
