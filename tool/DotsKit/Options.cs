@@ -17,7 +17,7 @@ internal sealed class Options
           --yes                     write without asking (CI)
           --force                   in a conflict take the template's side; your lines stay in git history
           --no-build                do not build the solution after writing
-          --allow-dirty             new and upgrade: run on a working tree with uncommitted changes, committed beside the run and taken into the merge
+          --allow-dirty             new, upgrade, init (a no-op): run on a working tree with uncommitted changes, committed beside the run and taken into the merge
           --template-version 2.x.y  init: the version a solution was made by, where it does not say
           --to 2.x.y                upgrade: the release to go to, not newer than the tool
           --conflict-style zdiff3   mark a conflict with its base (|||||||), for an IDE that reads it; plain is the default
@@ -79,9 +79,9 @@ internal sealed class Options
             throw new ArgumentException($"{PartOption} takes one part, {AllAtOnceOption} every part: leave out one of them.");
         }
 
-        if (options.AllowDirty && command is not ("upgrade" or "new"))
+        if (options.AllowDirty && command is not ("upgrade" or "new" or "init"))
         {
-            throw new ArgumentException($"{AllowDirtyOption} is an option of dotskit new and dotskit upgrade: init merges nothing.");
+            throw new ArgumentException($"{AllowDirtyOption} is an option of dotskit new, dotskit upgrade and dotskit init.");
         }
 
         if (command == "init" && args.Any(a => Is(a, ConflictStyleOption)))
