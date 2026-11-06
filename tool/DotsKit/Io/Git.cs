@@ -44,6 +44,24 @@ internal interface IGit
 /// </summary>
 internal sealed class Git(IProcessRunner runner) : IGit
 {
+    /// <summary>The author of a mechanical commit when git knows no identity, as on a fresh runner.</summary>
+    internal const string FallbackUserName = "dotskit";
+
+    /// <summary>The address of <see cref="FallbackUserName"/>: the tool's own, no person's.</summary>
+    internal const string FallbackUserEmail = "dotskit@sawking.tech";
+
+    /// <summary>
+    /// The -c user.name/-c user.email for a plumbing commit: none when git already knows the author, so the
+    /// team's identity is kept; the tool's own when it does not, so the commit is not refused.
+    /// </summary>
+    internal static async Task<string[]> IdentityArgsAsync(IProcessRunner runner, string root, CancellationToken ct)
+    {
+        var name = await runner.RunAsync("git", ["config", "user.name"], root, ct);
+        var email = await runner.RunAsync("git", ["config", "user.email"], root, ct);
+        return name.Code == 0 && email.Code == 0
+            ? []
+            : ["-c", $"user.name={FallbackUserName}", "-c", $"user.email={FallbackUserEmail}"];
+    }
     public async Task<bool> IsCleanAsync(string root, CancellationToken ct)
     {
         var status = await runner.RunAsync("git", ["status", "--porcelain"], root, ct);
@@ -100,7 +118,8 @@ internal sealed class Git(IProcessRunner runner) : IGit
         // and a merge can run on it. What git ignores is not added, as in every other step.
         await runner.RunCheckedAsync("git", ["add", "-A", "--", "."], root, ct);
         var tree = (await runner.RunCheckedAsync("git", ["write-tree"], root, ct)).Trim();
-        var commit = (await runner.RunCheckedAsync("git", ["commit-tree", tree, "-p", previous, "-m", message], root, ct)).Trim();
+        var identity = await IdentityArgsAsync(runner, root, ct);
+        var commit = (await runner.RunCheckedAsync("git", [.. identity, "commit-tree", tree, "-p", previous, "-m", message], root, ct)).Trim();
         await runner.RunCheckedAsync("git", ["update-ref", "HEAD", commit, previous], root, ct);
         return (commit, previous);
     }

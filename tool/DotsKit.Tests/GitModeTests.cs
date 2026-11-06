@@ -127,6 +127,56 @@ internal sealed class GitModeTests
         (await runner.RunCheckedAsync("git", ["status", "--porcelain"], root, CancellationToken.None)).ShouldContain("?? src/new.cs");
     }
 
+    [Test]
+    public async Task UncommittedChanges_WithoutGitIdentity_AreCommittedAsDotskit()
+    {
+        var runner = new WithoutGitIdentity(new ProcessRunner());
+        var root = Folders.NewTemp("uncommitted-no-identity");
+        Directory.CreateDirectory(Path.Combine(root, "src"));
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "a.cs"), "a\n");
+        await runner.RunCheckedAsync("git", ["init", "-q"], root, CancellationToken.None);
+        await runner.RunCheckedAsync("git", ["add", "-A"], root, CancellationToken.None);
+        // The team's commit carries its identity for one command only, the way generate.sh commits: git still
+        // knows no committer, as on a fresh runner.
+        await runner.RunCheckedAsync("git", ["-c", "user.name=team", "-c", "user.email=team@example.com", "commit", "-q", "-m", "base"], root, CancellationToken.None);
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "a.cs"), "a\ndirty\n");
+
+        var taken = await new Git(runner).CommitUncommittedAsync(root, "dotskit: uncommitted changes, taken into the upgrade", CancellationToken.None);
+
+        taken.ShouldNotBeNull();
+        (await runner.RunCheckedAsync("git", ["log", "-1", "--format=%an"], root, CancellationToken.None)).Trim()
+            .ShouldBe(Git.FallbackUserName);
+    }
+
+    /// <summary>A runner under which git sees no global or system config: a repository with nothing configured has no identity.</summary>
+    private sealed class WithoutGitIdentity(IProcessRunner inner) : IProcessRunner
+    {
+        private static readonly IReadOnlyDictionary<string, string> Isolated =
+            new Dictionary<string, string> { ["GIT_CONFIG_GLOBAL"] = EmptyGlobalConfig(), ["GIT_CONFIG_NOSYSTEM"] = "1" };
+
+        public async Task<ProcessResult> RunAsync(string program, IReadOnlyList<string> args, string workingDirectory, CancellationToken ct,
+            IReadOnlyDictionary<string, string>? environment = null, string? input = null)
+        {
+            var merged = new Dictionary<string, string>(Isolated);
+            if (environment is not null)
+            {
+                foreach (var (key, value) in environment)
+                {
+                    merged[key] = value;
+                }
+            }
+
+            return await inner.RunAsync(program, args, workingDirectory, ct, merged, input);
+        }
+
+        private static string EmptyGlobalConfig()
+        {
+            var path = Path.Combine(Folders.NewTemp("git-config"), "global");
+            System.IO.File.WriteAllText(path, "");
+            return path;
+        }
+    }
+
     /// <summary>A merge by git that merges nothing and names the files of the next output it left off the branch.</summary>
     private sealed class LeavingOut(params string[] leftOut) : IGitMerge
     {
