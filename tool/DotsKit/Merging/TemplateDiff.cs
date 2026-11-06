@@ -4,13 +4,14 @@ namespace DotsKit.Merging;
 
 /// <summary>
 /// What the template changes between two of its outputs, a file each: what a merge by git brings, shown before it
-/// runs. The solution's side is git's to merge, so the plan names the template's change only.
+/// runs. The solution's side is git's to merge, so the plan names the template's change only. A null base
+/// means nothing came before: every file of the next output is new.
 /// </summary>
 internal static class TemplateDiff
 {
-    public static List<Change> Of(string baseDir, string nextDir) =>
-        [.. new SortedSet<string>(Folders.RelativeFiles(baseDir).Concat(Folders.RelativeFiles(nextDir)), StringComparer.Ordinal)
-            .Select(path => Decide(path, FileText.Read(baseDir, path), FileText.Read(nextDir, path)))
+    public static List<Change> Of(string? baseDir, string nextDir) =>
+        [.. new SortedSet<string>((baseDir is null ? [] : Folders.RelativeFiles(baseDir)).Concat(Folders.RelativeFiles(nextDir)), StringComparer.Ordinal)
+            .Select(path => Decide(path, baseDir is null ? null : FileText.Read(baseDir, path), FileText.Read(nextDir, path)))
             .OfType<Change>()];
 
     /// <summary>Pure: a file of the two outputs, or nothing when the template left it as it was.</summary>

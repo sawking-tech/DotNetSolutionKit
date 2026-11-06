@@ -8,7 +8,7 @@ namespace DotsKit.Planning;
 
 /// <summary>
 /// Builds a plan: what the template gave the solution (the base, from the current manifest), what it gives now
-/// (from the next one), and the three-way merge of the two with the solution's own files. The solution's package
+/// (from the next one), and git's merge of the two with the solution's own files. The solution's package
 /// policy is put into the template's side first, and the files the template moved are followed.
 /// </summary>
 internal interface IPlanner
@@ -16,12 +16,12 @@ internal interface IPlanner
     Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, MergeMode mode, CancellationToken ct, PartStep? step = null);
 }
 
-internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionProjects projects, IRenames renames, IIgnoredFiles ignored, ReferenceRepair repair) : IPlanner
+internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRenames renames, IIgnoredFiles ignored, ReferenceRepair repair) : IPlanner
 {
     /// <param name="root">The solution's root, or the folder a new solution is made in.</param>
     /// <param name="current">The solution's manifest; null when there is no solution yet, and the base is empty.</param>
     /// <param name="next">The manifest the solution will have.</param>
-    /// <param name="mode">How the files are merged: by git or by the tool, and whether a conflict takes the template's side.</param>
+    /// <param name="mode">How git merges: whether a conflict takes the template's side, and how a conflict is marked.</param>
     /// <param name="ct">Cancels the plan.</param>
     /// <param name="step">
     /// A step of an upgrade a part at a time: the base takes the next output of the parts merged before, the target
@@ -30,10 +30,8 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
     public async Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, MergeMode mode, CancellationToken ct, PartStep? step = null)
     {
         // The two trees do not depend on each other: generated side by side.
-        var baseTree = current is null ? Task.FromResult<string?>(null) : BaseAsync(current, ct);
-        var nextTree = staging.BuildAsync(next, withSolutionFile: current is null, ct);
-        var baseDir = await baseTree;
-        var nextDir = await nextTree;
+        var baseDir = current is null ? null : await BaseAsync(current, ct);
+        var nextDir = await staging.BuildAsync(next, withSolutionFile: current is null, ct);
         // The types the template moves are read from the whole outputs: a part's repair follows the moves of every part.
         var types = baseDir is null ? null : TypeMap.Between(TypeIndex.Read(baseDir), TypeIndex.Read(nextDir));
         IReadOnlyList<string>? parts = null;
@@ -72,30 +70,31 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
         }
 
         var packages = PackageVersions.Hold(baseDir, nextDir, next.Packages, TemplateVersions.IsMajorStep(current?.Template, next.Template));
-        var byGit = current is not null;
-        var changes = byGit ? TemplateDiff.Of(baseDir!, nextDir) : await MergeAsync(root, baseDir, nextDir, mode, ct);
+        // A new solution in an empty folder is unpacked, not merged. Beside files it merges by git, like an upgrade:
+        // an empty tree then stands for what the template gave before.
+        var byGit = current is not null || !SolutionRoot.IsEmpty(root);
+        var baseTree = baseDir ?? (byGit ? Folders.NewTemp("empty-base") : null);
+        IReadOnlyList<Change> changes;
+        if (byGit)
+        {
+            changes = TemplateDiff.Of(baseTree, nextDir);
+        }
+        else
+        {
+            var leftAlone = await ignored.InAsync(root, ct);
+            changes = [.. TemplateDiff.Of(null, nextDir).Where(c => !leftAlone.Contains(c.Path))];
+        }
         if (current is null)
         {
-            return new Plan(root, next, changes, new MembershipChange([], []), packages);
+            return new Plan(root, next, changes, new MembershipChange([], []), packages,
+                ByGit: byGit ? (new TemplateCommit(baseTree!, "a new solution"), new TemplateCommit(nextDir, next.Template)) : null,
+                PreferTemplate: mode.PreferTemplate, MarkBase: mode.MarkBase, NextTree: nextDir);
         }
 
         var membership = await MembershipAsync(root, baseDir!, nextDir, ct);
         return new Plan(root, next, [.. changes.Where(c => !IsSolutionFile(c.Path))], membership, packages, types,
-            byGit ? (new TemplateCommit(baseDir!, current!.Template), new TemplateCommit(nextDir, next.Template)) : null, mode.PreferTemplate, mode.MarkBase,
+            (new TemplateCommit(baseDir!, current!.Template), new TemplateCommit(nextDir, next.Template)), mode.PreferTemplate, mode.MarkBase,
             Parts: parts, Waiting: waiting, BaseTree: baseDir, NextTree: nextDir);
-    }
-
-    /// <summary>
-    /// The tool's own merge, for a new solution: the files the template moved are followed, then each file is
-    /// decided and merged. A file of the solution its git ignores is left as it is. An upgrade never reaches this:
-    /// it merges by git, and its finish merges the next output with itself, which writes nothing.
-    /// </summary>
-    private async Task<List<Change>> MergeAsync(string root, string? baseDir, string nextDir, MergeMode mode, CancellationToken ct)
-    {
-        var moved = baseDir is null ? null : await renames.FindAsync(baseDir, nextDir, ct);
-        var changes = await merge.ComputeAsync(root, baseDir, nextDir, mode.PreferTemplate, mode.MarkBase, moved, ct);
-        var leftAlone = await ignored.InAsync(root, ct);
-        return [.. changes.Where(c => !leftAlone.Contains(c.Path))];
     }
 
     /// <summary>

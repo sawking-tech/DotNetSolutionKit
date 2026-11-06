@@ -327,46 +327,6 @@ internal sealed class UpgradePartsTests
     }
 
     [Test]
-    public async Task AFileTheTemplateMoved_TakesTheTeamsChangeToItsNewPath()
-    {
-        var solution = Folders.NewTemp("m-solution");
-        var before = Folders.NewTemp("m-base");
-        var after = Folders.NewTemp("m-next");
-        Put(before, "src/common/X.cs", "a\nb\nc\nd\ne\n");
-        Put(solution, "src/common/X.cs", "a\nb\nc\nd\ne\nteam\n");
-        Put(after, "src/capabilities/X.cs", "template\na\nb\nc\nd\ne\n");
-        var renames = new Dictionary<string, string> { ["src/capabilities/X.cs"] = "src/common/X.cs" };
-
-        var changes = await new ThreeWayMerge(new GitMergeFile(new ProcessRunner())).ComputeAsync(solution, before, after, false, false, renames, CancellationToken.None);
-
-        var moved = changes.Single(c => c.Path == "src/capabilities/X.cs");
-        moved.Kind.ShouldBe(ChangeKind.Merge);
-        moved.Content!.Text.ShouldBe("template\na\nb\nc\nd\ne\nteam\n");
-        moved.Reason.ShouldStartWith("moved from src/common/X.cs");
-        changes.Single(c => c.Path == "src/common/X.cs").Kind.ShouldBe(ChangeKind.Delete);
-    }
-
-    [Test]
-    public async Task AFileTheTemplateMoved_ButTheTeamRemoved_StaysRemovedAndIsNamedInThePlan()
-    {
-        var solution = Folders.NewTemp("m-solution");
-        var before = Folders.NewTemp("m-base");
-        var after = Folders.NewTemp("m-next");
-        Put(before, "src/common/X.cs", "a\nb\nc\nd\ne\n");
-        Put(after, "src/capabilities/X.cs", "a\nb\nc\nd\ne\ntemplate\n");
-        var renames = new Dictionary<string, string> { ["src/capabilities/X.cs"] = "src/common/X.cs" };
-        // The solution has neither path: the team removed the file the template moved.
-
-        var changes = await new ThreeWayMerge(new GitMergeFile(new ProcessRunner())).ComputeAsync(solution, before, after, false, false, renames, CancellationToken.None);
-
-        // The file stays removed; the plan names why, like a rename/delete of git's.
-        changes.ShouldBe([
-            new Change("src/capabilities/X.cs", ChangeKind.Kept, null, "moved from src/common/X.cs by the template, removed from the solution: left removed"),
-        ]);
-        File.Exists(Path.Combine(solution, "src/capabilities/X.cs")).ShouldBeFalse();
-    }
-
-    [Test]
     public void TheBuildsErrors_AreListedOncePerProject()
     {
         const string output = """

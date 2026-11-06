@@ -183,7 +183,7 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
     {
         terminal.Info($"Finishing the upgrade from the template {current.Template} to {upgrade.To}: every part is merged; the usings are repaired and the solution builds.");
         var target = current.WithTemplate(upgrade.To) with { Upgrade = null };
-        // Every part merged: the two trees of the step are the next output, and the tool's own merge has nothing to write but the manifest.
+        // Every part merged: the two trees of the step are the next output, and the merge has nothing to write but the manifest.
         var plan = await planner.BuildAsync(root, current with { Upgrade = null }, target, new Merging.MergeMode(options.Force, options.MarkBase), ct,
             new PartStep(upgrade.Done.ToHashSet(StringComparer.Ordinal), Part: "", parts));
         return await execution.RunAsync(plan with { Next = target }, options, start, ct);
