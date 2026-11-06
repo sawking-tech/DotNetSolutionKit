@@ -86,8 +86,9 @@ internal sealed class Planner(IStaging staging, ThreeWayMerge merge, ISolutionPr
     }
 
     /// <summary>
-    /// The tool's own merge, for a new solution and for the finish of an upgrade: the files the template moved are
-    /// followed, then each file is decided and merged. A file of the solution its git ignores is left as it is.
+    /// The tool's own merge, for a new solution: the files the template moved are followed, then each file is
+    /// decided and merged. A file of the solution its git ignores is left as it is. An upgrade never reaches this:
+    /// it merges by git, and its finish merges the next output with itself, which writes nothing.
     /// </summary>
     private async Task<List<Change>> MergeAsync(string root, string? baseDir, string nextDir, MergeMode mode, CancellationToken ct)
     {
