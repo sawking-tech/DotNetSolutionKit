@@ -45,8 +45,10 @@ The template's parameters are passed as they are, in short or long form, in any 
 
 ## The steps of a command
 
-1. Checks the folder. A new solution goes into an empty folder or next to files in a clean git working
-   tree. A solution to add to needs `.dotskit/manifest.json` of the tool's version and a clean working tree.
+1. Checks the folder. A new solution goes into an empty folder, or beside files a git repository holds with a
+   clean working tree - the files committed by the team itself, for the merge there is git's job and the tool
+   never commits for the team. A solution to add to needs `.dotskit/manifest.json` of the tool's version and a
+   clean working tree.
    One command runs in a solution at a time: a second one, started while the first works, says so and changes
    nothing; the lock goes with the process that holds it, even a killed one.
 2. Generates in a temporary folder what the template gives for the solution before the command (the base)
@@ -66,16 +68,15 @@ The template's parameters are passed as they are, in short or long form, in any 
    the unclean tree until it is cleaned up with git.
 6. Builds `All.sln`.
 
-What happens to a file:
+What happens to a file the plan names:
 
 | In the plan | When | What is written |
 |---|---|---|
 | `Add` | the template adds a file the solution does not have | the template's file |
 | `Update` | the team did not change the file | the template's new file, with the line endings of the solution's |
-| `Merge` | both changed it, in lines apart | both changes |
 | `Delete` | the template removed a file the team did not change | the file is deleted |
-| `Kept` | one side removed the file and the other changed it, or both changed a binary file | nothing: the solution's file stays |
-| `Conflict` | both changed the same lines, or lines right next to each other | the file with both versions: `<<<<<<< solution`, `=======`, `>>>>>>> template`; with `--conflict-style zdiff3` the base between them too, `||||||| base` |
+
+What a file the team changed becomes is git's to merge, [below](#merged-by-git).
 
 A file of the solution its git ignores, a local `appsettings.Secrets.json` among them, is never written. A new file the template adds that the solution's git would ignore, as the secrets file of a new service,
 is written beside the merge, and `git merge --abort` puts it back too, as git does not know it. A committed symbolic link is carried as a link and never read, like a
@@ -163,7 +164,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed; one with no side of the template's, under `--force`, is resolved with the template's removal; one with no base, added by both sides, gains the solution's side as its base |
 | | `git update-index --index-info` | the solution's side as the base of a file both sides added, so the IDE opens it with its merge view |
 | | `git diff --no-index -M` | the files the template moved, between two of its outputs outside the repository |
-| | `git merge-file -p [--zdiff3]`, again with `--theirs` under `--force` | a file merged by the tool's own merge and by the merge driver, on copies of the three sides; `--zdiff3` only with `--conflict-style zdiff3`; the first run counts the conflicts `--force` decides |
+| | `git merge-file -p [--zdiff3]`, again with `--theirs` under `--force` | a file merged by the merge driver, on copies of the three sides; `--zdiff3` only with `--conflict-style zdiff3`; under `--force` the first run counts the conflicts the second decides, for the report of the files the team's lines gave way in |
 | | `git ls-remote --tags` | the releases of the template, for `init` on a solution that does not say its version |
 | writes objects only, through an index of its own | `git add -A`, `git rm --cached`, `git ls-files`, `git write-tree`, `git commit-tree` | a commit of the template's output; the solution's index and files are not touched |
 | moves the branch `dotskit/template` | `git update-ref refs/heads/dotskit/template` | the commit of the template's new output on the branch, only from the tip read before |

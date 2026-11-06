@@ -48,8 +48,8 @@ does, and they stay at `warning` in the tool.
 The style of the template's files changes only by the pack of tools: `scripts/check-style.py --fix` for the bytes and
 `dotnet format` with the root `.editorconfig`. A version of the template is, in its style, the pack applied to the
 version before it, so `dotskit upgrade` can apply the same pack to the team's side and the change of style meets
-nothing. Its first part is in place: both merges of `dotskit` bring the three sides of a file to the bytes of the
-style before they merge.
+nothing. Its first part is in place: the merge of `dotskit` brings the three sides of a file to the bytes of the
+style before it merges, by the merge driver it gives to git.
 
 ## Where the rules come from
 
