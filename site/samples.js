@@ -138,10 +138,13 @@ const fmtDuration = (s) => {
   return m ? T(`${m} min ${r} s`, `${m} мин ${r} с`) : T(`${r} s`, `${r} с`);
 };
 
-// a release links to its page, a commit of the template's master to the commit
+// a release links to its page, a commit of the template's master to the commit, a version a commit
+// works toward - 2.10.0-rc between releases - is plain text: no page names it yet
 const versionLink = (version) => /^v\d/.test(version)
   ? `<a href="${TEMPLATE_GH}/releases/tag/${esc(version)}">${esc(version)}</a>`
-  : `<a href="${TEMPLATE_GH}/commit/${esc(version)}">${esc(version.slice(0, 7))}</a>`;
+  : /^[0-9a-f]{7,40}$/.test(version)
+    ? `<a href="${TEMPLATE_GH}/commit/${esc(version)}">${esc(version.slice(0, 7))}</a>`
+    : esc(version);
 const result = (run) => `<span class="result ${run.conclusion === "success" ? "ok" : "bad"}">${run.conclusion === "success" ? STR.passed : STR.failedRun}</span>`;
 // a stroke the size of a value that is not here yet, inside the element that will hold it
 const ph = (w) => `<i class="sk sk-t" style="width:${w}"></i>`;
