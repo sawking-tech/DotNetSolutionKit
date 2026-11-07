@@ -115,6 +115,9 @@ internal sealed class Git(IProcessRunner runner) : IGit
     /// <summary>The letter and the space git ls-files -v puts before a path.</summary>
     private const int TagLength = 2;
 
+    /// <summary>The files of git's merge state, removed the way git commit removes them once the merge is committed.</summary>
+    private static readonly string[] MergeStateFiles = ["MERGE_HEAD", "MERGE_MODE", "MERGE_MSG"];
+
     public async Task<bool> IsRepositoryAsync(string root, CancellationToken ct) =>
         (await runner.RunAsync("git", ["rev-parse", "--is-inside-work-tree"], root, ct)).Code == 0;
 
@@ -160,7 +163,7 @@ internal sealed class Git(IProcessRunner runner) : IGit
         // A commit by plumbing does not conclude the merge: its state files stay and the next merge would be refused,
         // so they go the way git commit removes them.
         var gitDir = (await runner.RunCheckedAsync("git", ["rev-parse", "--absolute-git-dir"], root, ct)).Trim();
-        foreach (var state in new[] { "MERGE_HEAD", "MERGE_MODE", "MERGE_MSG" })
+        foreach (var state in MergeStateFiles)
         {
             var file = Path.Combine(gitDir, state);
             if (File.Exists(file))

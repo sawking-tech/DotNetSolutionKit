@@ -11,7 +11,7 @@ The template is versioned with git tags, by semantic versioning.
 From 2.9 `dotskit upgrade` brings a solution of a 2.x release to the current one, and git keeps the team's
 changes where they merge with the template's; the rest are conflicts to resolve. First `dotskit init
 --template-version` with the release the solution was made by (`dotskit init` alone names the closest one), then
-`dotskit upgrade`, a part a run. Inside one major version that goes from the first release of the major to any
+`dotskit upgrade`, a part at a time, the run stopping at conflicts. Inside one major version that goes from the first release of the major to any
 later one; `--to` stops at a release between, for a team that wants to build and test the solution there first
 ([above](#the-course-of-an-upgrade)). A solution
 of v1 is brought to `v2.0.0` by hand first, [below](#a-solution-of-v1). The sections below are the same changes
@@ -38,7 +38,7 @@ What an upgrade does, from the plain to what a team would otherwise do by hand:
 | One command | `dotskit upgrade`, from where the solution stands to the tool's version of the template |
 | A part at a time | the shared files, then each project of `Common`, then a service at a time, each part committed before the next: the conflicts of one layer at a time, not of the whole distance |
 | Any distance inside a major | from the first release of the major to any later one; `--to 2.x.y` stops at a release between, for a team that wants to build and test there first |
-| An ordinary git merge | the template's output is a branch, `dotskit/template`, and the merge is `git merge`: the IDE, `git mergetool` and `git merge --abort` work as always, and the merge is the team's to commit |
+| An ordinary git merge | the template's output is a branch, `dotskit/template`, and the merge is `git merge`: the IDE, `git mergetool` and `git merge --abort` work as always, and the merge is the team's to commit - except an upgrade a part at a time, whose run commits each part before the next |
 | Undone by git | a run that fails is taken back by `git reset --hard` to the commit it started from, and the branch goes back where it was |
 | **The usings and the namespaces of moved types** | a type the template moved to another project or namespace is followed into the team's own code: its `using` is replaced, its full name gets the new namespace, and the project gets the reference - 419 such edits on one real solution, none of them by hand |
 | **The references and the versions** | the references between the template's projects, the package versions of central package management and the projects of `All.sln` are brought to what the new version has |
@@ -142,7 +142,7 @@ time, so a step is a part, not the whole distance.
 
 ```bash
 dotskit upgrade --to 2.7.0   # the parts of 2.7.0 in one run, until the manifest says 2.7.0; build and test there
-dotskit upgrade              # then the parts of the tool's version, a run each
+dotskit upgrade              # then the parts of the tool's version in one run each
 ```
 
 An upgrade takes the parts one after another in a single run, so the team resolves the conflicts of one part

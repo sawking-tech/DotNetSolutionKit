@@ -222,7 +222,7 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
             var done = step.Written(conflicts: true).Upgrade?.Done ?? upgrade.Done;
             var left = all.Count(p => !done.Contains(p));
             terminal.Info(left == 0
-                ? $"Conflicts in {part}, the last part of the upgrade to {upgrade.To}: resolve them, commit, then dotskit upgrade --continue finishes the upgrade."
+                ? $"Conflicts in {part}, the last part of the upgrade to {upgrade.To}: resolve them, commit, then dotskit upgrade --continue repairs the usings, builds and finishes the upgrade."
                 : $"Conflicts in {part}: {left} of {all.Count} part(s) of the upgrade to {upgrade.To} left - resolve them, commit, then continue with dotskit upgrade --continue.");
             return (ExitCode.Conflicts, null);
         }

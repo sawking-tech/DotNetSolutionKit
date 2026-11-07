@@ -271,7 +271,7 @@ come from their tags on GitHub, and `DOTSKIT_TEMPLATE_SOURCE` still stands the s
 |---|---|
 | `0` | written, and the solution builds; with `--no-build`, written |
 | `1` | refused or failed, with the reason on one line; nothing was written because the answer was not yes; or written, and the build fails or was cancelled |
-| `2` | an upgrade stopped at the conflicts of a part: resolve them, commit, then continue with `dotskit upgrade --continue` |
+| `2` | written with conflicts: resolve them, commit; an upgrade goes on from where it stopped, `dotskit upgrade --continue` |
 
 ## Limits of this version
 
