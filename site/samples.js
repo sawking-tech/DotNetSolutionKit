@@ -453,7 +453,7 @@ function dayCard(c) {
     <div class="dc-head">${head}</div>
     <dl>
       <dt>${STR.from}</dt><dd>${versionLink(r.version)}${c.release ? ` <span class="dc-new">${STR.newRelease}</span>` : ""}</dd>
-      <dt>${STR.testsTitle}</dt><dd>${r.tests.passed} ${STR.of} ${r.tests.total}</dd>
+      <dt>${STR.testsTitle}</dt><dd>${r.tests ? `${r.tests.passed} ${STR.of} ${r.tests.total}` : "-"}</dd>
       <dt>${STR.linesTitle}</dt><dd>${fmtPct(r.coverage?.line)}</dd>
       <dt>${STR.branchesTitle}</dt><dd>${fmtPct(r.coverage?.branch)}</dd>
     </dl>
@@ -594,7 +594,8 @@ function renderMeters(reports) {
   const run = lastRun(reports[0]), before = reports[1] && lastRun(reports[1]);
   const history = [...reports].reverse().map(lastRun);
   const delta = (pick) => (before && pick(run) != null && pick(before) != null ? pick(run) - pick(before) : null);
-  const t = run.tests;
+  // a failed Regenerate or Secret scan of old reports has no tests or coverage, only its red conclusion
+  const t = run.tests ?? { passed: 0, total: 0, failed: 0 };
   const tests = `${t.passed} <small>${STR.of} ${t.total}</small>${t.failed ? ` <small class="bad">${STR.failedTests(t.failed)}</small>` : ""}`;
   return `<div class="meters">
       ${meter(STR.testsTitle, tests, t.total ? t.passed / t.total : 0, null, [], t.total ? t.failed / t.total : 0)}
@@ -610,7 +611,8 @@ function renderReleases(reports) {
   return `<div class="table-scroll"><table>${tableHead()}
       <tbody>${reports.map((report) => {
         const r = lastRun(report);
-        return `<tr data-version="${esc(report.version)}"><td>${versionLink(report.version)}</td><td>${result(r)}</td><td>${r.tests.passed} / ${r.tests.total}</td>
+        const tests = r.tests ? `${r.tests.passed} / ${r.tests.total}` : "-";
+        return `<tr data-version="${esc(report.version)}"><td>${versionLink(report.version)}</td><td>${result(r)}</td><td>${tests}</td>
           <td>${fmtPct(r.coverage?.line)}</td><td>${fmtPct(r.coverage?.branch)}</td><td>${report.runs.length}</td>
           <td><a href="${esc(r.url)}">${fmtDate(r.started)}</a></td></tr>`;
       }).join("")}</tbody>
