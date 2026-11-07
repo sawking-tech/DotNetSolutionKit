@@ -38,13 +38,14 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         }
         var conflicts = written.Conflicts.Count > 0;
         var code = conflicts ? Conflicts(written.Conflicts) : await BuildAsync(plan, options, ct);
-        if (plan.Written(conflicts).Upgrade is { } upgrade)
+        if (!conflicts && plan.Next.Upgrade is { } upgrade)
         {
-            terminal.Info((conflicts, plan.OnConflicts is not null) switch
+            // Conflicts keep the upgrade open: the command's own line names what is left and how the upgrade goes on.
+            terminal.Info((options.Part is not null, code) switch
             {
-                (true, true) => $"The last part of the upgrade to {upgrade.To}: resolve its conflicts and commit, then dotskit upgrade repairs the usings, builds and finishes the upgrade.",
-                (true, false) => $"A part of the upgrade to {upgrade.To}: resolve its conflicts and commit, then the next part, dotskit upgrade.",
-                _ => $"A part of the upgrade to {upgrade.To} is written: commit it, then the next part, dotskit upgrade.",
+                (true, _) => $"A part of the upgrade to {upgrade.To} is written: commit it, then the next part, dotskit upgrade.",
+                (_, ExitCode.Done) => $"A part of the upgrade to {upgrade.To} is written; the tool commits it and takes the next part.",
+                _ => $"A part of the upgrade to {upgrade.To} is written, and the build fails: fix the build, commit the part, then dotskit upgrade --continue takes the next part.",
             });
         }
 

@@ -28,7 +28,18 @@ internal sealed class UpgradeCommandTests
         /// <summary>What happens to the tree while the plan is built and waits for a yes.</summary>
         public Action? WhilePlanning { get; init; }
 
+        /// <summary>The build of a written part fails, as a team's code the merge broke would.</summary>
+        public bool BuildFails { get; init; }
+
         public PartStep? Step { get; set; }
+
+        public List<PartStep?> Steps { get; } = [];
+
+        /// <summary>The files the writer leaves in conflict; null writes a clean merge.</summary>
+        public IReadOnlyList<string>? Conflicts { get; init; }
+
+        /// <summary>The messages the parts were committed with, in order.</summary>
+        public List<string> Commits { get; } = [];
 
         public Manifest? Written { get; set; }
 
@@ -36,7 +47,7 @@ internal sealed class UpgradeCommandTests
         public List<string> Lines { get; } = [];
 
         public UpgradeCommand Command() =>
-            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(), new ReferenceRepair(new RepairWriter(), new Builder()), new Terminal(this), new Git(this)),
+            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(this), new ReferenceRepair(new RepairWriter(), new Builder(this)), new Terminal(this), new Git(this)),
                 new Git(this), new NoIgnores(), new Terminal(this), ToolVersion, onSources: false);
 
         private sealed class NoIgnores : Merging.IIgnoredFiles
@@ -50,6 +61,7 @@ internal sealed class UpgradeCommandTests
             {
                 fakes.Next = next;
                 fakes.Step = step;
+                fakes.Steps.Add(step);
                 fakes.WhilePlanning?.Invoke();
                 return Task.FromResult(new Plan(root, next, [], new MembershipChange([], [])));
             }
@@ -59,8 +71,11 @@ internal sealed class UpgradeCommandTests
         {
             public Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct)
             {
-                fakes.Written = plan.Next;
-                return Task.FromResult(WriteResult.Nothing);
+                var written = plan.Written(fakes.Conflicts is not null);
+                fakes.Written = written;
+                Directory.CreateDirectory(Path.Combine(plan.Root, ".dotskit"));
+                File.WriteAllText(Path.Combine(plan.Root, Layout.ManifestPath), written.Serialize());
+                return Task.FromResult(fakes.Conflicts is { } conflicts ? new WriteResult(conflicts, [], []) : WriteResult.Nothing);
             }
         }
 
@@ -82,11 +97,17 @@ internal sealed class UpgradeCommandTests
             public Task UncommitAsync(string root, string commit, CancellationToken ct) => Task.CompletedTask;
 
             public Task<bool> MergeInProgressAsync(string root, CancellationToken ct) => Task.FromResult(false);
+
+            public Task CommitAsync(string root, string message, CancellationToken ct)
+            {
+                fakes.Commits.Add(message);
+                return Task.CompletedTask;
+            }
         }
 
-        private sealed class Builder : IBuilder
+        private sealed class Builder(Fakes fakes) : IBuilder
         {
-            public Task<ProcessResult> BuildAsync(string root, CancellationToken ct) => Task.FromResult(new ProcessResult(0, "", ""));
+            public Task<ProcessResult> BuildAsync(string root, CancellationToken ct) => Task.FromResult(fakes.BuildFails ? new ProcessResult(1, "", "error") : new ProcessResult(0, "", ""));
         }
 
         private sealed class Terminal(Fakes fakes) : ITerminal
@@ -199,23 +220,76 @@ internal sealed class UpgradeCommandTests
     public async Task AnUpgrade_TakesTheSharedPartFirst_ThenTheService_AndTheLastMovesTheVersion()
     {
         var root = Solution("2.7.0");
-        var first = new Fakes();
+        var fakes = new Fakes();
 
-        await first.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
-        File.WriteAllText(Path.Combine(root, Layout.ManifestPath), first.Written!.Serialize());
-        var second = new Fakes();
-        await second.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None);
+        (await fakes.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None)).ShouldBe(ExitCode.Done);
 
-        first.Lines.ShouldContain(l => l.EndsWith(": shared, 1 of 2.", StringComparison.Ordinal));
-        first.Step!.Part.ShouldBe(UpgradeParts.Shared);
-        first.Written!.Template.ShouldBe("2.7.0");
-        first.Written.Upgrade!.Done.ShouldBe([UpgradeParts.Shared]);
-        first.Lines.ShouldContain("Written; the solution builds.");
-        first.Lines.ShouldContain(l => l.Contains("is written: commit it, then the next part", StringComparison.Ordinal));
-        second.Step!.Part.ShouldBe("Acme.Shop.Orders");
-        second.Step.Done.ShouldBe([UpgradeParts.Shared]);
-        second.Written!.Template.ShouldBe(ToolVersion);
-        second.Written.Upgrade.ShouldBeNull();
+        fakes.Steps.Select(s => s!.Part).ShouldBe([UpgradeParts.Shared, "Acme.Shop.Orders"]);
+        fakes.Lines.ShouldContain(l => l.EndsWith(": shared, 1 of 2.", StringComparison.Ordinal));
+        fakes.Lines.ShouldContain(l => l.EndsWith(": Acme.Shop.Orders, 2 of 2, the last.", StringComparison.Ordinal));
+        fakes.Commits.ShouldBe([$"dotskit: the upgrade to {ToolVersion}, part {UpgradeParts.Shared}", $"dotskit: the upgrade to {ToolVersion}, part Acme.Shop.Orders"]);
+        var merged = Manifest.Load(root)!;
+        merged.Template.ShouldBe(ToolVersion);
+        merged.Upgrade.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task AnUpgrade_StopsAtTheFirstPartInConflict_NamesWhatIsLeftAndHowItGoesOn()
+    {
+        var root = Solution("2.7.0");
+        var fakes = new Fakes { Conflicts = ["src/services/Acme.Shop.Orders/Program.cs"] };
+
+        (await fakes.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None)).ShouldBe(ExitCode.Conflicts);
+
+        fakes.Steps.ShouldHaveSingleItem();
+        fakes.Commits.ShouldBeEmpty();
+        fakes.Lines.ShouldContain($"Conflicts in {UpgradeParts.Shared}: 1 of 2 part(s) of the upgrade to {ToolVersion} left - resolve them, commit, then continue with dotskit upgrade --continue.");
+        // The conflicts keep the upgrade open, with the part counted as merged once they are resolved.
+        var open = Manifest.Load(root)!.Upgrade!;
+        open.To.ShouldBe(ToolVersion);
+        open.Done.ShouldBe([UpgradeParts.Shared]);
+        open.Parts.ShouldBe([UpgradeParts.Shared, "Acme.Shop.Orders"]);
+    }
+
+    [Test]
+    public async Task AnUpgradeConflictsInItsLastPart_SaysTheRunAfterTheResolutionFinishesIt()
+    {
+        var root = Solution("2.7.0");
+        var manifest = Manifest.Load(root)! with { Upgrade = new UpgradeInProgress { To = ToolVersion, Done = [UpgradeParts.Shared] } };
+        File.WriteAllText(Path.Combine(root, Layout.ManifestPath), manifest.Serialize());
+        var fakes = new Fakes { Conflicts = ["src/services/Acme.Shop.Orders/Program.cs"] };
+
+        (await fakes.Command().RunAsync(Options.Parse(["--yes", "--continue"]), root, CancellationToken.None)).ShouldBe(ExitCode.Conflicts);
+
+        fakes.Lines.ShouldContain($"Conflicts in Acme.Shop.Orders, the last part of the upgrade to {ToolVersion}: resolve them, commit, then dotskit upgrade --continue repairs the usings, builds and finishes the upgrade.");
+    }
+
+    [Test]
+    public async Task APartWhoseBuildFails_IsNotCommitted_AndNamesHowToGoOn()
+    {
+        var root = Solution("2.7.0");
+        var fakes = new Fakes { BuildFails = true };
+
+        (await fakes.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None)).ShouldBe(ExitCode.Failed);
+
+        fakes.Steps.ShouldHaveSingleItem();
+        fakes.Commits.ShouldBeEmpty();
+        fakes.Lines.ShouldContain($"A part of the upgrade to {ToolVersion} is written, and the build fails: fix the build, commit the part, then dotskit upgrade --continue takes the next part.");
+    }
+
+    [Test]
+    public async Task ContinueWithoutAnUpgradeInProgress_IsRefused()
+    {
+        (await Should.ThrowAsync<InvalidOperationException>(() =>
+            new Fakes().Command().RunAsync(Options.Parse(["--yes", "--continue"]), Solution("2.7.0"), CancellationToken.None)))
+            .Message.ShouldContain("No upgrade is in progress");
+    }
+
+    [Test]
+    public async Task Continue_IsAnOptionOfUpgradeOnly()
+    {
+        (await Should.ThrowAsync<ArgumentException>(() => Task.Run(() => Options.Parse("new", ["--continue"]))))
+            .Message.ShouldContain("dotskit upgrade");
     }
 
     [Test]

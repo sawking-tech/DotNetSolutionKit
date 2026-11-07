@@ -141,6 +141,8 @@ internal sealed class TemplateSource(IProcessRunner runner, ITagArchive tags) : 
             return Task.FromResult(SourcesFolder ?? throw new InvalidOperationException($"The solution was generated from the template's sources: set {SourcesVariable} to their folder."));
         }
 
-        return TemplateVersions.IsPublished(version) ? Task.FromResult($"{PackageId}::{version}") : tags.FolderOfAsync(version, ct);
+        return TemplateVersions.IsPublished(version)
+            ? Task.FromResult(TemplatePackages.PackageOrNuGet(TemplatePackages.Folder, PackageId, version))
+            : tags.FolderOfAsync(version, ct);
     }
 }
