@@ -125,9 +125,10 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
     /// An upgrade a part at a time: the template's next output of the parts merged before and this one, merged over
     /// its output of the parts before. Each part written and built is committed and the next one follows in this run,
     /// until the merge of a part leaves conflicts: then the run stops, one line says how much is left and how it goes
-    /// on (<c>dotskit upgrade --continue</c>), and the manifest keeps the part, so the run after the resolution takes
-    /// the next one. The last part moves the version, unless it leaves conflicts: then the run after their resolution
-    /// finishes the upgrade.
+    /// on (<c>dotskit upgrade --continue</c>), and the manifest keeps the part out of Done, so it names only the
+    /// parts whose merge is committed: the run after the resolution takes the part again, and Done takes it once its
+    /// merge is committed. The last part moves the version, unless it leaves conflicts: then the run after their
+    /// resolution finishes the upgrade.
     /// </summary>
     private async Task<ExitCode> NextPartAsync(string root, Manifest current, UpgradeInProgress upgrade, Options options, CancellationToken ct)
     {
@@ -167,11 +168,13 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
                     return code;
                 }
 
-                // The part stands: commit it, so the next part merges over it, and read what the step wrote.
-                await git.CommitAsync(root, merged is { } part
+                // The part stands: commit it, so the next part merges over it, and read what the step wrote. The commit
+                // the part ends the upgrade with says so: a part left in conflict and resolved is taken again, and its
+                // second run moves the version, not the finish step.
+                current = Manifest.Load(root)!;
+                await git.CommitAsync(root, merged is { } part && current.Upgrade is not null
                     ? $"dotskit: the upgrade to {upgrade.To}, part {part}"
                     : $"dotskit: the upgrade to {upgrade.To}, finished", ct);
-                current = Manifest.Load(root)!;
                 if (current.Upgrade is not { } next)
                 {
                     return ExitCode.Done;
@@ -214,14 +217,13 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
         var step = plan with
         {
             Next = current.WithPartMerged(upgrade.To, part, last, all),
-            OnConflicts = last ? current.WithPartMerged(upgrade.To, part, last: false, all) : null,
+            OnConflicts = current.WithPartInConflict(upgrade.To, all),
         };
         var code = await execution.RunAsync(step, options, start, ct);
         if (code == ExitCode.Conflicts)
         {
-            var done = step.Written(conflicts: true).Upgrade?.Done ?? upgrade.Done;
-            var left = all.Count(p => !done.Contains(p));
-            terminal.Info(left == 0
+            var left = all.Count(p => !upgrade.Done.Contains(p));
+            terminal.Info(last
                 ? $"Conflicts in {part}, the last part of the upgrade to {upgrade.To}: resolve them, commit, then dotskit upgrade --continue repairs the usings, builds and finishes the upgrade."
                 : $"Conflicts in {part}: {left} of {all.Count} part(s) of the upgrade to {upgrade.To} left - resolve them, commit, then continue with dotskit upgrade --continue.");
             return (ExitCode.Conflicts, null);

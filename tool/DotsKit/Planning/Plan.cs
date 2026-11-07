@@ -17,8 +17,9 @@ namespace DotsKit.Planning;
 /// template's own changes. Null when the tool writes <paramref name="Changes"/> itself: a new solution in an empty folder.
 /// </param>
 /// <param name="OnConflicts">
-/// The manifest written instead of <paramref name="Next"/> when the merge leaves conflicts: the last part of an upgrade a
-/// part at a time keeps the upgrade open, so the run after the resolution repairs the usings, builds and moves the version.
+/// The manifest written instead of <paramref name="Next"/> when the merge leaves conflicts: an upgrade a part at a
+/// time keeps its in-flight part out of Done, so the manifest names only the parts whose merge is committed; the run
+/// after the resolution takes the part again.
 /// </param>
 /// <param name="Parts">
 /// Every part of an upgrade a part at a time in its order, from the solution and the template's next output together.

@@ -155,6 +155,22 @@ internal sealed class UpgradeByPartTests
         done.Serialize().ShouldNotContain("upgrade\"");
     }
 
+    [Test]
+    public void TheManifestOfAStoppedPart_KeepsItOutOfDone_UntilItsMergeIsCommitted()
+    {
+        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "Acme"], Services = [["--ServiceNameOrCustom", "Orders"]] };
+
+        string[] parts = [UpgradeParts.Shared, "common/Acme.Shop.Common.Domain", Orders];
+        var between = Manifest.Parse(manifest.WithPartMerged("2.7.0", UpgradeParts.Shared, last: false, parts).Serialize());
+        var stopped = Manifest.Parse(between.WithPartInConflict("2.7.0", parts).Serialize());
+
+        stopped.Template.ShouldBe("2.0.0");
+        stopped.Upgrade!.To.ShouldBe("2.7.0");
+        stopped.Upgrade.Parts.ShouldBe(parts);
+        stopped.Upgrade.Done.ShouldBe([UpgradeParts.Shared], "the part in conflict is no part of Done until its merge is committed");
+        stopped.Serialize().ShouldContain("\"_comment_upgrade\"");
+    }
+
     private static string Tree(params (string Path, string Text)[] files)
     {
         var root = Folders.NewTemp("parts");
