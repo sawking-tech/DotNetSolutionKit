@@ -112,6 +112,7 @@ mindmap
 - [ADR-005: Как тестируется сервис](adr/005-testing-a-service.md)
 - [ADR-006: ключи метаданных в JSON](adr/006-json-metadata-key-convention.md)
 - [ADR-007: единый стиль кода, за который отвечают форматтеры](adr/007-code-style.md)
+- [ADR-008: нет атрибуции ИИ в коммите — нигде и никогда](adr/008-no-ai-attribution-in-history.md)
 
 ## [Дорожная карта](roadmap.md)
 

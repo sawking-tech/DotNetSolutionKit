@@ -112,6 +112,7 @@ Where the template departs from a common practice, and why.
 - [ADR-005: How a service is tested](adr/005-testing-a-service.md)
 - [ADR-006: JSON metadata keys](adr/006-json-metadata-key-convention.md)
 - [ADR-007: One code style, owned by the formatters](adr/007-code-style.md)
+- [ADR-008: No AI attribution in a commit — anywhere, ever](adr/008-no-ai-attribution-in-history.md)
 
 ## [Roadmap](roadmap.md)
 

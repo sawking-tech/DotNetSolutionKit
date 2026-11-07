@@ -145,6 +145,14 @@ file-byte violations and C# style violations in the tool.
   After 3.0, `2.x` is the .NET 8 maintenance line. The review of a pull request is an agent's local review
   of the branch against its base before the PR; no approval is requested on GitHub. Green required status
   checks are the merge gate: a PR with green CI is merged without waiting for a person.
+- The history of `dev` and `master` is append-only. A repair that rewrites published commits happens only
+  by ADR-008's way: recreate the offending commits onto the parent of the first one and rebase the
+  descendants with `git rebase --onto`; ancestors stay untouched. `git filter-branch` is forbidden for
+  this — it strips GPG signatures and rehashes every descendant, and every release tag moves. Before any
+  push of a rewritten branch: every commit below the rewritten range keeps its SHA, and
+  `git diff <backup>..<branch>` is empty.
+- A push of a tag runs the release workflow. Release tags move only in a release; a repair that re-points
+  tags names the failed release runs it causes in its plan.
 - A user-visible change updates English and Russian docs, `site/config.js`, README, `docs/roadmap.md`, and
   the current `-rc` entry in `version.json` in the same PR. Only a release changes the version number.
 - The repository is public: never name clients or their products in code, comments, docs or commits.
