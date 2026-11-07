@@ -34,6 +34,13 @@ internal interface IGit
     /// <summary>--allow-dirty, undone: the branch back at <paramref name="commit"/>, the changes it held uncommitted again.</summary>
     Task UncommitAsync(string root, string commit, CancellationToken ct);
 
+    /// <summary>
+    /// Commits what the tree holds - the merge and the manifest a step of an upgrade wrote - by plumbing on top of
+    /// HEAD: no hook, no checkout, the team's identity kept where git knows it. A continuous upgrade takes the next
+    /// part over this commit.
+    /// </summary>
+    Task CommitAsync(string root, string message, CancellationToken ct);
+
     /// <summary>Whether a merge is open: its undo keeps uncommitted changes committed, and they are not put back.</summary>
     Task<bool> MergeInProgressAsync(string root, CancellationToken ct);
 }
@@ -137,6 +144,31 @@ internal sealed class Git(IProcessRunner runner) : IGit
 
     public async Task UncommitAsync(string root, string commit, CancellationToken ct) =>
         await runner.RunCheckedAsync("git", ["reset", "--mixed", commit], root, ct);
+
+    public async Task CommitAsync(string root, string message, CancellationToken ct)
+    {
+        var previous = (await runner.RunCheckedAsync("git", ["rev-parse", "HEAD"], root, ct)).Trim();
+        // The commit concludes the merge git staged with --no-commit: it keeps MERGE_HEAD as the second parent, the
+        // way git commit does, so the branch's tip stays the known base of the next part.
+        var mergeHead = await runner.RunAsync("git", ["rev-parse", "-q", "--verify", "MERGE_HEAD"], root, ct);
+        await runner.RunCheckedAsync("git", ["add", "-A", "--", "."], root, ct);
+        var tree = (await runner.RunCheckedAsync("git", ["write-tree"], root, ct)).Trim();
+        var identity = await IdentityArgsAsync(runner, root, ct);
+        string[] parents = mergeHead.Code == 0 ? ["-p", previous, "-p", mergeHead.Output.Trim()] : ["-p", previous];
+        var commit = (await runner.RunCheckedAsync("git", [.. identity, "commit-tree", tree, .. parents, "-m", message], root, ct)).Trim();
+        await runner.RunCheckedAsync("git", ["update-ref", "HEAD", commit, previous], root, ct);
+        // A commit by plumbing does not conclude the merge: its state files stay and the next merge would be refused,
+        // so they go the way git commit removes them.
+        var gitDir = (await runner.RunCheckedAsync("git", ["rev-parse", "--absolute-git-dir"], root, ct)).Trim();
+        foreach (var state in new[] { "MERGE_HEAD", "MERGE_MODE", "MERGE_MSG" })
+        {
+            var file = Path.Combine(gitDir, state);
+            if (File.Exists(file))
+            {
+                File.Delete(file);
+            }
+        }
+    }
 
     public async Task<bool> MergeInProgressAsync(string root, CancellationToken ct) =>
         (await runner.RunAsync("git", ["rev-parse", "-q", "--verify", "MERGE_HEAD"], root, ct)).Code == 0;

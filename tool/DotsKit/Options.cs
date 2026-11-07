@@ -10,7 +10,8 @@ internal sealed class Options
           dotskit new -S Billing --Storage true             in a solution: add a service; it takes the solution's names
           dotskit new -S Orders --MongoDB true              in a solution: add a flag to a service it has
           dotskit init                                      in a solution made without dotskit: describe it in its manifest
-          dotskit upgrade                                   in a solution: bring it to this version of the template
+          dotskit upgrade                                   in a solution: bring it to this version of the template, a part at a time until its conflicts
+          dotskit upgrade --continue                        in a solution: continue the upgrade stopped at its conflicts
           dotskit upgrade --to 2.3.0                        in a solution: bring it to an earlier release, a step at a time
 
         Every command shows what it will change and asks before writing.
@@ -22,6 +23,7 @@ internal sealed class Options
           --to 2.x.y                upgrade: the release to go to, not newer than the tool
           --conflict-style zdiff3   mark a conflict with its base (|||||||), for an IDE that reads it; plain is the default
           --all-at-once             upgrade: every part in one merge, instead of the shared files first, then a service at a time
+          --continue                upgrade: continue the upgrade stopped at its conflicts
           --part <part>             upgrade: the part this run takes - shared, common/<project>, capabilities or a service folder's last name
         """;
 
@@ -34,6 +36,7 @@ internal sealed class Options
     private const string ConflictStyleOption = "--conflict-style";
     private const string AllAtOnceOption = "--all-at-once";
     private const string PartOption = "--part";
+    private const string ContinueOption = "--continue";
 
     /// <summary>The value of --conflict-style that marks a conflict with its base, as zdiff3 writes it.</summary>
     public const string Zdiff3Style = "zdiff3";
@@ -49,6 +52,9 @@ internal sealed class Options
     public bool AllAtOnce { get; private init; }
 
     public string? Part { get; private init; }
+
+    /// <summary>--continue: the upgrade goes on from the part that stopped at its conflicts, as the manifest records it.</summary>
+    public bool Continue { get; private init; }
 
     /// <summary>--conflict-style zdiff3: a conflict is marked with its base, as zdiff3 writes it; plain is the default.</summary>
     public bool MarkBase { get; private init; }
@@ -69,9 +75,9 @@ internal sealed class Options
             throw new ArgumentException($"{ToOption} is an option of dotskit upgrade.");
         }
 
-        if ((options.AllAtOnce || options.Part is not null) && command != "upgrade")
+        if ((options.AllAtOnce || options.Part is not null || options.Continue) && command != "upgrade")
         {
-            throw new ArgumentException($"{AllAtOnceOption} and {PartOption} are options of dotskit upgrade.");
+            throw new ArgumentException($"{AllAtOnceOption}, {PartOption} and {ContinueOption} are options of dotskit upgrade.");
         }
 
         if (options.AllAtOnce && options.Part is not null)
@@ -94,7 +100,7 @@ internal sealed class Options
 
     public static Options Parse(IReadOnlyList<string> args)
     {
-        string[] flags = [YesOption, ForceOption, NoBuildOption, AllowDirtyOption, AllAtOnceOption];
+        string[] flags = [YesOption, ForceOption, NoBuildOption, AllowDirtyOption, AllAtOnceOption, ContinueOption];
         var (templateVersion, afterVersion) = Valued(args, TemplateVersionOption);
         var (to, afterTo) = Valued(afterVersion, ToOption);
         var (part, afterPart) = Valued(afterTo, PartOption);
@@ -114,6 +120,7 @@ internal sealed class Options
             To = to,
             Part = part,
             AllAtOnce = rest.Any(a => Is(a, AllAtOnceOption)),
+            Continue = rest.Any(a => Is(a, ContinueOption)),
             MarkBase = style == Zdiff3Style,
             TemplateArgs = [.. rest.Where(a => !flags.Any(f => Is(a, f)))],
         };

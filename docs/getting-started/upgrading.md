@@ -36,7 +36,7 @@ What an upgrade does, from the plain to what a team would otherwise do by hand:
 | | What an upgrade does |
 |---|---|
 | One command | `dotskit upgrade`, from where the solution stands to the tool's version of the template |
-| A part a run | the shared files, then each project of `Common`, then a service at a time: the conflicts of one layer at a time, not of the whole distance |
+| A part at a time | the shared files, then each project of `Common`, then a service at a time, each part committed before the next: the conflicts of one layer at a time, not of the whole distance |
 | Any distance inside a major | from the first release of the major to any later one; `--to 2.x.y` stops at a release between, for a team that wants to build and test there first |
 | An ordinary git merge | the template's output is a branch, `dotskit/template`, and the merge is `git merge`: the IDE, `git mergetool` and `git merge --abort` work as always, and the merge is the team's to commit |
 | Undone by git | a run that fails is taken back by `git reset --hard` to the commit it started from, and the branch goes back where it was |
@@ -141,27 +141,30 @@ to build the solution and run its tests on that release before going on. Either 
 time, so a step is a part, not the whole distance.
 
 ```bash
-dotskit upgrade --to 2.7.0   # a part of 2.7.0 a run, until the manifest says 2.7.0; build and test there
+dotskit upgrade --to 2.7.0   # the parts of 2.7.0 in one run, until the manifest says 2.7.0; build and test there
 dotskit upgrade              # then the parts of the tool's version, a run each
 ```
 
-An upgrade goes one part a run, so the team resolves the conflicts of one part before the next: first the
+An upgrade takes the parts one after another in a single run, so the team resolves the conflicts of one part
+before the next: first the
 shared parts - the root with `deploy` and the scripts, then the files of `src/common` and each of its projects, a
 project before those that reference it, then `src/capabilities` - then a service folder at a time, in order. A
 project the template adds to `src/common` is a part of its own, after those it references; the first run takes
 the parts and the manifest keeps them. A package the template drops keeps its version while a project of the
-parts left, or of the team's own, references it. A folder of the team's own is a part too, which merges nothing. Each run is the same merge, of the template's new files
+parts left, or of the team's own, references it. A folder of the team's own is a part too, which merges nothing. Each step is the same merge, of the template's new files
 for the parts merged so far and this one over its files for the parts before. After the merge the run repairs the
 usings and project references of the types the template moved between the parts merged so far, in every project
 of the solution, and names them by project; a type that goes to a part not yet merged waits for it, and the usings
 of its namespace stay. Then the solution builds, and its errors repair the team's files, leaving the template's
 files of a part not merged yet to that part; a service whose files of the template wait for their part may
-fail until it, and the build names it. The manifest keeps the release and the parts merged, and the next
-`dotskit upgrade` takes the next part; `--part Orders` names one, after the shared parts. A part is committed
-before the next; the last one moves the manifest to the release, and `dotskit new` waits until then. When the
-last part leaves conflicts, the upgrade stays open: once they are resolved and committed, `dotskit upgrade`
-changes no file of the template, repairs the usings of the whole upgrade, builds and moves the manifest.
-`--all-at-once` merges every part in one run. The template's output for a version is generated once and kept
+fail until it, and the build names it. The manifest keeps the release and the parts merged. A part the run
+finishes is committed by the tool, so the next part merges over it; `--part Orders` names one part and stops
+after it. When the merge of a part leaves conflicts, the run stops and says how many parts are left: resolve
+them, commit, and `dotskit upgrade --continue` takes the next part. The last part moves the manifest to the
+release, and `dotskit new` waits until then. When the last part leaves conflicts, the upgrade stays open: once
+they are resolved and committed, `dotskit upgrade --continue` changes no file of the template, repairs the usings
+of the whole upgrade, builds and moves the manifest.
+`--all-at-once` merges every part in one run and leaves the merge for the team to commit. The template's output for a version is generated once and kept
 in the tool's folder under the user's local application data (`dotskit/outputs`) for two days, so a part after the first skips the generation.
 
 ### Speed
@@ -182,9 +185,9 @@ On the two production solutions above a part took 30 to 37 seconds, the whole di
 machine time, and the generation ran twice instead of dozens of times.
 
 ```bash
-dotskit upgrade --to 2.7.0               # the shared part; resolve, commit
-dotskit upgrade                          # the next part; resolve, commit
-dotskit upgrade --part Billing           # the service named
+dotskit upgrade --to 2.7.0               # the parts of 2.7.0; the run stops at the first in conflict
+dotskit upgrade --continue               # after they are resolved and committed: the next parts
+dotskit upgrade --part Billing           # one named part, then a stop
 dotskit upgrade --to 2.7.0 --all-at-once # or every part in one merge
 ```
 
