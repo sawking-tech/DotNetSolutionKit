@@ -85,7 +85,6 @@ internal sealed class PartRepairScenarios
         Put(root, TemplatesOrder, string.Format(OrderOf, OldNamespace, "Latest"));
         await CommitAsync(root, "the team's name");
         var lines = new List<string>();
-        var codes = new List<ExitCode>();
         var outputs = new Outputs(NextProperty: "Previous");
 
         // One run commits the shared parts and the part of Common and stops at the service's part, the last, in conflict.
@@ -113,11 +112,7 @@ internal sealed class PartRepairScenarios
         var root = await SolutionAsync();
         var lines = new List<string>();
         var outputs = new Outputs(NextAddsAUsing: true);
-        var codes = new List<ExitCode>();
-
-        codes.Add(await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None));
-
-        codes.ShouldAllBe(code => code == ExitCode.Done);
+        (await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None)).ShouldBe(ExitCode.Done);
         Manifest.Load(root)!.Template.ShouldBe(To);
         Read(root, TemplatesOrder).ShouldBe(OtherUsing + string.Format(OrderOf, NewNamespace, Property));
     }
@@ -128,12 +123,8 @@ internal sealed class PartRepairScenarios
         var root = await SolutionAsync();
         var lines = new List<string>();
         var outputs = new Outputs(NextMovesToANewProject: true);
-        var codes = new List<ExitCode>();
-
         // shared, the new common/Acme.Shop.Common.Domain the event goes to, then common/Acme.Shop.Common it leaves, capabilities, Acme.Shop.Orders.
-        codes.Add(await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None));
-
-        codes.ShouldAllBe(code => code == ExitCode.Done);
+        (await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None)).ShouldBe(ExitCode.Done);
         lines.ShouldContain(l => l.EndsWith(": shared, 1 of 4.", StringComparison.Ordinal), "the count takes the project the template adds");
         Exists(root, MovedEvent).ShouldBeTrue();
         Read(root, TeamsRefund).Contains(NewNamespace, StringComparison.Ordinal).ShouldBeTrue();
@@ -153,12 +144,8 @@ internal sealed class PartRepairScenarios
         Put(root, RulesInApplication, RulesOf(TeamsLine));
         await CommitAsync(root, "the team's rule");
         var lines = new List<string>();
-        var codes = new List<ExitCode>();
-
         // shared, common/Acme.Shop.Common, common/Acme.Shop.Common.Domain the file goes to, common/Acme.Shop.Common.Application it leaves, capabilities, Acme.Shop.Orders.
-        codes.Add(await Upgrade(lines, new MovingRules()).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None));
-
-        codes.ShouldAllBe(code => code == ExitCode.Done);
+        (await Upgrade(lines, new MovingRules()).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None)).ShouldBe(ExitCode.Done);
         Manifest.Load(root)!.Template.ShouldBe(To);
         Exists(root, RulesInApplication).ShouldBeFalse();
         Read(root, RulesInDomain).ShouldContain(TeamsLine);
