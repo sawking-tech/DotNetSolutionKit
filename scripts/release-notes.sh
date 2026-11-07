@@ -20,8 +20,11 @@ jq -r --arg v "$version" '
 ' version.json
 
 upgrading="https://github.com/${GITHUB_REPOSITORY:-sawking-tech/DotNetSolutionKit}/blob/v$version/docs/getting-started/upgrading.md"
+roadmap="https://github.com/${GITHUB_REPOSITORY:-sawking-tech/DotNetSolutionKit}/blob/dev/docs/roadmap.md"
 if [ "$format" = plain ]; then
     printf '\nHow to update a solution generated from an earlier version: %s\n' "$upgrading"
+    printf 'Where the template goes next: %s\n' "$roadmap"
 else
     printf '\nHow to update a solution generated from an earlier version: [upgrading](%s).\n' "$upgrading"
+    printf 'Where the template goes next: [the roadmap](%s).\n' "$roadmap"
 fi
