@@ -1,53 +1,27 @@
 {
-  "version": "2.9.0-rc",
+  "version": "2.9.0",
   "releaseNotes": {
-    "2.9.0-rc": {
-      "headline": "dotskit upgrades a solution of any release and keeps the team's code building.",
+    "2.9.0": {
+      "headline": "dotskit upgrade brings a solution of any 2.x release to the current one and leaves it building.",
       "highlights": [
-        "dotskit upgrade takes a solution of any release (from 2.0.0 on) straight to the current one in a single leap, fixing every namespace on its own. --to is needed only to stop at a particular release in between, or at a boundary of major versions, where the crossing goes a step at a time.",
-        "The references and usings of the types the template moved are repaired, from the text before the build and by the build after it.",
-        "The merge runs by git through the branch dotskit/template, with a conflict resolved in the IDE.",
-        "A conflict is marked plain; --conflict-style zdiff3 marks it with its base too, as zdiff3 writes it, for an IDE that reads the base from the file.",
-        "An upgrade step takes 51 s instead of 114 s.",
-        "dotskit init checks a solution that does not say its version against the last patch of each minor before 2.7 and names the closest; it writes nothing until the version is given.",
-        "dotskit new gives every service the solution's Infisical or Vault, while capabilities of another service stay its own.",
-        "A newly added flag brings the dependency versions its code needs, without the update policy holding them back.",
-        "dotskit upgrade names the minor versions it crosses and links upgrading.md on GitHub, whose sections for these versions say what a solution may have to change by hand.",
-        "Two dotskit commands in one solution do not run at once: the second says so and changes nothing.",
-        "A project the team took out of All.sln stays out: an upgrade adds only the projects the template added.",
-        "dotskit init on a solution of 1.x names the way to 2.0.0: the code brought to it by hand, then described as 2.0.0 and upgraded by dotskit.",
-        "--force refuses --allow-dirty: the team's lines it replaces stay in git history only when they are committed.",
-        "dotskit upgrade goes one part a run - the shared files first, then a service folder at a time - so a team resolves the conflicts of one part before the next; each part repairs the usings and references in every project, names them by project and builds; the manifest keeps the parts merged; --all-at-once merges every part in one run.",
-        "A file the solution has and its git ignores, such as a local appsettings.Secrets.json, is never written; a new one the template adds, as the secrets file of a new service, the tool writes beside the merge.",
-        "The API diff treats a base branch that cannot generate its contracts - older than them, or broken by its own configuration - as no baseline, with a notice in the log; the branch itself still fails when its documents cannot be produced.",
-        "The template writes .dotskit/manifest.json when it generates a solution, so dotskit new and dotskit upgrade work from the first run; dotskit init adds a service the template generated into the solution and says why it was not in the manifest.",
-        "--force follows the template in a file one side removed and the other changed - removed where the template removed it, the template's version where the team removed it - and the plan names it with every file where the team's lines gave way.",
-        "A file the template moved that the team removed stays removed, and the plan names why, like a rename/delete of git's.",
-        "A new solution goes into an empty folder, or merges by git beside files a repository holds committed: the tool never commits for the team; a folder with files and no repository names how to make one, a hook against secrets first."
+        "From any release since 2.0.0 one leap takes a solution to the current; --to stops at a release on the way, and a boundary of major versions crosses a step at a time.",
+        "A solution the team has not touched where the template owns the files upgrades without a single conflict: the merge settles silently, the way a git merge of branches does.",
+        "The merge runs by git on the branch dotskit/template: what conflicts is left in the files for the IDE or git mergetool, resolved the way the team resolves any merge, a part at a time, with the team's lines kept; --conflict-style zdiff3 adds the base of a file.",
+        "After the merge the solution builds: the references and usings of the types the template moved are repaired - from the text before the build, by the build after it.",
+        "An upgrade goes a part a run - the shared files first, then a service at a time, so the team resolves one part before the next; --all-at-once merges everything in one run. A step takes 51 s instead of 114 s.",
+        "The template writes .dotskit/manifest.json when it generates a solution, so dotskit new and dotskit upgrade work from the first run; dotskit init names the version of a solution made by the template alone, and the way from 1.x through 2.0.0.",
+        "--force follows the template and names every file where the team's lines gave way; it refuses --allow-dirty. A file the solution's git ignores is never written; a project the team took out of All.sln stays out."
       ],
       "ru": {
-        "headline": "dotskit обновляет решение любого выпуска так, что код команды собирается.",
+        "headline": "dotskit upgrade приводит решение любого выпуска 2.x к текущему - и оставляет его собирающимся.",
         "highlights": [
-          "dotskit upgrade сквозным прыжком обновляет решение любого выпуска (начиная с 2.0.0) сразу до актуальной версии, автоматически исправляя все пространства имён. Флаг --to нужен, только чтобы остановиться на конкретном промежуточном релизе, или на границе мажорных версий, где переход идёт по шагам.",
-          "Ссылки и using типов, которые шаблон перенёс, чинятся: по тексту до сборки и по ошибкам сборки после.",
-          "Слияние идёт через git, по ветке dotskit/template, конфликт разрешается в IDE.",
-          "Конфликт помечается просто; --conflict-style zdiff3 помечает его ещё и с его базой, как пишет zdiff3, - для IDE, которая читает базу из файла.",
-          "Шаг обновления занимает 51 с вместо 114 с.",
-          "dotskit init сверяет решение, которое не называет свою версию, с последним патчем каждого минора до 2.7 и называет ближайший; пишет только после того, как версию назвали.",
-          "dotskit new даёт каждому сервису Infisical или Vault решения, а возможности другого сервиса остаются только у него.",
-          "Добавляемый флаг приносит версии зависимостей, нужные его коду, без задержки политикой обновления.",
-          "dotskit upgrade называет минорные версии, через которые проходит, и даёт ссылку на upgrading.md на GitHub: его разделы для этих версий говорят, что решению, возможно, придётся поменять руками.",
-          "Две команды dotskit в одном решении не идут одновременно: вторая говорит об этом и ничего не меняет.",
-          "Проект, который команда убрала из All.sln, не возвращается: обновление добавляет только проекты, которые добавил шаблон.",
-          "dotskit init на решении 1.x называет путь к 2.0.0: код приводится к нему руками, затем решение описывается как 2.0.0 и обновляется dotskit.",
-          "--force отказывает вместе с --allow-dirty: строки команды, которые он заменяет, остаются в истории git, только если они закоммичены.",
-          "dotskit upgrade идёт по одной части за запуск - сначала общие файлы, затем по папке сервиса, - чтобы команда разрешала конфликты одной части до следующей; каждая часть чинит using и ссылки во всех проектах, перечисляет их по проектам и собирает решение; манифест помнит слитые части; --all-at-once сливает все части за один запуск.",
-          "Файл решения, который игнорирует его git, в том числе локальный appsettings.Secrets.json, не пишется; новый такой файл шаблона, как файл секретов нового сервиса, инструмент пишет рядом со слиянием.",
-          "Сравнение API считает базовую ветку, которая не может дать свои контракты - старше их или сломана собственной конфигурацией, - отсутствием baseline с пометкой в логе; сама ветка без своих документов по-прежнему валит проверку.",
-          "Шаблон пишет .dotskit/manifest.json при генерации решения, поэтому dotskit new и dotskit upgrade работают с первого запуска; dotskit init принимает сервис, добавленный в решение шаблоном, и называет, почему его не было в манифесте.",
-          "--force идёт за шаблоном в файле, который одна сторона удалила, а другая изменила: удаляется там, где удалил шаблон, и берётся версия шаблона там, где удаляла команда; план называет его вместе с каждым файлом, где строки команды уступили.",
-          "Файл, который шаблон перенёс, а команда удалила, остаётся удалённым, и план называет причину - как rename/delete у git.",
-          "Новое решение создаётся в пустой папке или сливается через git рядом с файлами, которые держит закоммиченный репозиторий: инструмент не коммитит за команду; папка с файлами без репозитория называет, как его создать, - сначала хук против секретов."
+          "С любого выпуска начиная с 2.0.0 один скачок ведёт решение к текущему; --to останавливается на промежуточном выпуске, а граница мажорных версий переходит по шагам.",
+          "Решение, где команда не трогала файлы шаблона, обновляется без единого конфликта: слияние проходит молча, как git-мерж веток.",
+          "Слияние ведёт git на ветке dotskit/template: конфликт остаётся в файлах для IDE или git mergetool и решается так же, как любой мерж, - часть за частью, со строками команды; --conflict-style zdiff3 добавляет базу файла.",
+          "После слияния решение собирается: ссылки и using типов, которые перенёс шаблон, чинятся - по тексту до сборки и сборкой после неё.",
+          "Обновление идёт частями - сначала общие файлы, потом сервис за сервисом, чтобы команда разбирала одну часть до следующей; --all-at-once сливает всё за один запуск. Шаг занимает 51 с вместо 114 с.",
+          "Шаблон пишет .dotskit/manifest.json при генерации решения, поэтому dotskit new и dotskit upgrade работают с первого запуска; dotskit init называет версию решения, сделанного одним шаблоном, и путь с 1.x через 2.0.0.",
+          "--force идёт за шаблоном и называет каждый файл, где уступили строки команды; отказывается от --allow-dirty. Файл, который игнорирует git решения, не пишется никогда; проект, вытащенный командой из All.sln, остаётся вытащенным."
         ]
       }
     },

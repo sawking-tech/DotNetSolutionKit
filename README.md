@@ -111,13 +111,16 @@ Details, dotted names and running locally:
 ## Documentation
 
 Everything else is in [docs](docs/README.md): the architecture, each feature, operations, the decisions
-behind the parts that depart from common practice, and the roadmap. The
+behind the parts that depart from common practice, and the
+[roadmap](docs/roadmap.md) — version 4 on .NET 10 is next there. The
 [site](https://dotskit.sawking.tech/docs.html) shows the same documents with a menu and rendered diagrams, in
 English and Russian.
 
 What each version brings: [version.json](version.json) and the
 [releases](https://github.com/sawking-tech/DotNetSolutionKit/releases). How versions are made:
 [contributing](CONTRIBUTING.md).
+
+If the template saves you time, support it with a star: it helps others find it.
 
 ## License
 

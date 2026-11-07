@@ -8,7 +8,7 @@ It provides ready-to-use architectural building blocks, modules, and integration
 
 ## Install and generate
 
-The recommended way is the template's command-line tool,
+The strongly recommended way is the template's command-line tool,
 [SawKing.DotsKit.Tool](https://www.nuget.org/packages/SawKing.DotsKit.Tool): it generates a solution, adds
 services and flags to it, and upgrades it to a newer version of the template, keeping the team's changes by
 a three-way merge.
@@ -24,6 +24,10 @@ dotskit upgrade                                    # bring a solution to the too
 [dotskit](https://dotskit.sawking.tech/docs.html#dotskit) in the documentation.
 
 ## The template alone
+
+Starting with the template alone is fine: if a solution was made with it, that is not a
+problem — `dotskit init` describes it in a manifest, and from then on `dotskit upgrade` brings it to a new
+version of the template like any other solution.
 
 ```bash
 dotnet new install SawKing.DotNetSolutionKit
@@ -81,6 +85,22 @@ Do not apply version 2 with `--force` over a solution generated from version 1: 
 package management and the shape of error responses changed. What changed and how to carry it over:
 [versions of the template](https://dotskit.sawking.tech/docs.html#upgrading). What each release brings:
 [releases](https://github.com/sawking-tech/DotNetSolutionKit/releases).
+
+## Stay current
+
+The template keeps moving: capabilities land in minor releases, and version 4 on .NET 10 is already on
+[the roadmap](https://github.com/sawking-tech/DotNetSolutionKit/blob/dev/docs/roadmap.md). A generated
+solution stays with it by one habit — `dotskit upgrade` after each release: the merge runs by git, and a
+solution the team has not touched in the template's files upgrades without a single conflict. A solution
+left behind upgrades the same way, from any release since 2.0.0 in one leap.
+
+## Follow and support
+
+Follow where the template goes: [the roadmap](https://github.com/sawking-tech/DotNetSolutionKit/blob/dev/docs/roadmap.md).
+If the template saves you time, support it with a star — the
+[template](https://github.com/sawking-tech/DotNetSolutionKit) and the
+[Samples](https://github.com/sawking-tech/DotNetSolutionKit.Samples) repository that lives the life of a
+product on it: both are checked by CI on every change.
 
 ## Source and license
 

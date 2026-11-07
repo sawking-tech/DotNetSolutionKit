@@ -41,8 +41,8 @@ dotskit upgrade --to 2.3.0
 Every command shows the files it will change and why, and asks before writing; `--yes` writes without asking.
 An upgrade goes a part a run - the shared files first, then a service at a time - and each run merges by git,
 repairs the usings and references the new version asks for, builds the solution and leaves the merge for the
-team to commit. A conflict stays in the files for the IDE or `git mergetool`, and the command exits with 2;
-a run that fails is taken back by git.
+team to commit. Where the team and the template changed the same file, the conflict opens in the usual IDE
+windows or `git mergetool`, a part at a time, with the team's lines kept; a run that fails is taken back by git.
 
 What a solution was made from is kept in `.dotskit/manifest.json`: commit it with the solution.
 
@@ -55,3 +55,11 @@ What a solution may have to change by hand, release by release, is in
 `dotskit upgrade` names its sections for the versions it crosses.
 
 The template works without the tool; this package is the way to keep a solution up with it.
+
+## Stay current
+
+A solution stays with the template by one habit - `dotskit upgrade` after each release; version 4 on .NET 10
+is already on [the roadmap](https://github.com/sawking-tech/DotNetSolutionKit/blob/dev/docs/roadmap.md), and
+an upgrade from any release since 2.0.0 is one leap. Follow where the template goes, and if it saves you
+time, support it with a star: [DotNetSolutionKit](https://github.com/sawking-tech/DotNetSolutionKit) and the
+[Samples](https://github.com/sawking-tech/DotNetSolutionKit.Samples) checked by CI on every change.

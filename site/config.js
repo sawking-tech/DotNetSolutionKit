@@ -72,6 +72,7 @@ window.SITE = {
       ["adr-005", "docs/adr/005-testing-a-service", ["ADR-005: How a service is tested", "ADR-005: как тестируется сервис"], true],
       ["adr-006", "docs/adr/006-json-metadata-key-convention", ["ADR-006: JSON metadata keys", "ADR-006: ключи метаданных в JSON"], true],
       ["adr-007", "docs/adr/007-code-style", ["ADR-007: One code style, owned by the formatters", "ADR-007: единый стиль кода, за который отвечают форматтеры"], true],
+      ["adr-008", "docs/adr/008-no-ai-attribution-in-history", ["ADR-008: No AI attribution in a commit — anywhere, ever", "ADR-008: нет атрибуции ИИ в коммите — нигде и никогда"], true],
     ]},
   ],
 };
