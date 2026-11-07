@@ -1,6 +1,18 @@
 {
-  "version": "2.9.0",
+  "version": "2.10.0-rc",
   "releaseNotes": {
+    "2.10.0-rc": {
+      "headline": "",
+      "highlights": [
+        ""
+      ],
+      "ru": {
+        "headline": "",
+        "highlights": [
+          ""
+        ]
+      }
+    },
     "2.9.0": {
       "headline": "dotskit upgrade brings a solution of any 2.x release to the current one and leaves it building.",
       "highlights": [
