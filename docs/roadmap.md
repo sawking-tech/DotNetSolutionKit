@@ -21,7 +21,7 @@ gantt
     v2.8 dotskit new, init and upgrade; a service adds itself to All.sln; MongoDB, email, read-only containers, coverage on demand :done, s10, after s9, 4000ms
 
     section Now
-    2.9 - dotskit upgrade adds the project references and using lines of types the template moved (#117) :active, s32, after s10, 1500ms
+    2.9 - dotskit upgrade adds the project references and using lines of types the template moved (#117) :done, s32, after s10, 1500ms
     template.yml starts every generated service and waits for it to be healthy (#107) :s33, after s10, 500ms
     bluegreen.sh says what is missing when a solution has no service to deploy (#103) :s34, after s33, 300ms
     a table of flags - what a flag requires, excludes or gives with another (#113) :s35, after s34, 500ms

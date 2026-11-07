@@ -1,77 +1,96 @@
 ---
 name: release
-description: Выпуск версии шаблона DotNetSolutionKit - проверка бампа в dev, PR dev -> master в конце спринта, публикация, проверка GitHub-релиза, nuget.org, сайта и Samples. Применять только когда Володя говорит выпустить, зарелизить или выложить в NuGet; мерж в master = релиз.
+description: Выпуск версии шаблона DotNetSolutionKit - проверка условий, чеклист текстов и метаданных, PR dev -> master в конце спринта, тег, публикация, проверка по существу nuget.org, GitHub-релиза, GitHub Packages, сайта и Samples. Применять только когда Володя говорит выпустить, зарелизить или выложить в NuGet; мерж в master = релиз.
 ---
 
 # Релиз шаблона
 
-**Мерж в master = релиз.** Что пришло в `master`, публикуется: артефакты, GitHub-релиз, пакет на nuget.org и
-GitHub Packages, пересборка Samples. Версия в `master` без публикации - сломанное состояние: master называет
+**Мерж в `master` = релиз.** Что пришло в `master`, публикуется: артефакты, GitHub-релиз, пакеты на nuget.org
+и GitHub Packages, пересборка Samples. Версия в `master` без публикации - сломанное состояние: master называет
 себя версией, которой нигде нет. Поэтому мерж в `master` - только этим скиллом и только по слову Володи
-(память version-bump-is-release).
+(память version-bump-is-release). Опубликованное не правится: nuget.org не перерендеривает readme и заметки,
+метаданные версии не меняются - ошибку текста исправляет только следующая версия. Поэтому все проверки ниже -
+ДО тега.
 
 Схема версий (Володя 05.10, trunk-based, `dev` - trunk, `master` - последний выпуск):
 
 | Где | Версия | Заметки |
 |---|---|---|
-| `master` | последний выпуск, `2.7.0` | запись `2.7.0` |
-| `dev` | следующий минор с меткой, `2.8.0-rc` | одна запись `2.8.0-rc`, каждое видимое изменение дописывает в неё пункт |
-| выпуск | `2.8.0-rc` -> `2.8.0` в `dev`, перемотка `master` | запись переименовывается, сводить нечего |
-| ломающее изменение | `3.0.0-rc` | путь в upgrading |
-| хотфикс, `dev` можно выпускать (новое за флагами) | фикс в `dev`, выпуск `dev` | в запись `dev` |
-| хотфикс, `dev` выпускать нельзя | фикс в `master`, `2.7.1`, выпуск, затем `master` -> `dev` (promote.yml, reconcile) | своя запись `2.7.1` |
+| `master` | последний выпуск | запись версии |
+| `dev` | следующий минор с меткой, `X.Y.0-rc` | одна запись `-rc`, каждое видимое изменение дописывает в неё пункт |
+| выпуск | снять метку в `dev` (`X.Y.0-rc` -> `X.Y.0`), перемотка `master` | запись переименовывается, сводить нечего |
+| ломающее изменение | `X.0.0-rc` | путь в upgrading |
+| хотфикс, `dev` можно выпускать | фикс в `dev`, выпуск `dev` | в запись `dev` |
+| хотфикс, `dev` выпускать нельзя | фикс в `master`, патч, выпуск, затем `master` -> `dev` (reconcile) | своя запись патча |
 
-Минор при выпуске растёт ровно на один; патч - только хотфикс, поднимать его без серьёзной причины не нужно;
-пропуски патчей допустимы. Версии с меткой нигде не публикуются: ни nuget.org, ни сайт их не показывают.
-PR в `dev` ничего не публикуют, мелкие допустимы; пока идут проверки - связанное в один PR или параллельные
-PR (память pr-granularity).
+Минор при выпуске растёт ровно на один; патч - только хотфикс. Версии с меткой нигде не публикуются.
 
-## 0. Условия выпуска - все, иначе PR выпуска не открывать
+## 0. Условия выпуска - каждое проверено делом, иначе не начинать
 
-- Внутри: `template.yml` зелёный на последнем коммите `dev`.
-- Снаружи: `full-dev` в Samples пересобран из этого коммита (`gh workflow run regenerate.yml -R
-  sawking-tech/DotNetSolutionKit.Samples --ref full -f force=true`, проверить `template-version` ветки
-  full-dev = SHA коммита `dev`), его CI на GitHub зелёный.
-- Скилл шаблона в решении под выпуск: `template/.claude/skills/scaffold-service/SKILL.md` - единственное
-  место в сгенерированном решении, которое знает про шаблон. Флаги, команды `dotskit` и шаги в нём сверены
-  с этой версией. `template/CLAUDE.md` про шаблон не говорит: флаги, генерация и обновление - только в скилле.
-- Пачка закончена: пункты плана этого выпуска закрыты, в `dev` нет начатого и недоделанного.
-- Флаги Samples под версию: в `.samples/variants.json` на ветке `full` у каждой ветки, которой нужны флаги
-  этого выпуска, есть запись `generate` с `since` не выше выпускаемой версии и с этими флагами. Свериться с
-  флагами, которые добавил выпуск (`git diff v<прошлая>..dev -- template/.template.config/template.json`).
-  Без записи ветки релиза пересоберутся из новой версии со старыми флагами. Старые записи удалять по желанию,
-  выбор от них не зависит.
-- Флаг не дописывается во все команды подряд. Сначала решить, куда он ложится по смыслу. Один сервис может
-  просто взять флаг себе: `--MongoDB` - это строка в команде Orders. Другому флагу нужна отдельная генерация
-  шаблона: `--Notify email` - это сервис-владелец уведомлений, третья команда `-S Notifications` с шиной,
-  которая принимает `SendEmailCommandV1` от остальных. Проверить по доке флага, что он требует (шина,
-  секреты, другой флаг), и собрать вариант так, как его собрал бы пользователь шаблона.
+- [ ] **template.yml зелёный на tip `dev`.** Проверка: `gh run list --branch dev --limit 1 --json workflowName,conclusion --jq '.[] | select(.workflowName=="Template")'`.
+- [ ] **full-dev пересобран из tip `dev`, его CI зелёный.** Проверка: `git show origin/full-dev:template-version` == `git rev-parse origin/dev`; `gh run list -R sawking-tech/DotNetSolutionKit.Samples --branch full-dev --limit 3` все success. Если нет: `gh workflow run regenerate.yml -R sawking-tech/DotNetSolutionKit.Samples --ref full -f force=true` и дождаться.
+- [ ] **Скилл шаблона в решении под выпуск**: `template/.claude/skills/scaffold-service/SKILL.md` сверен с этой версией (флаги, команды `dotskit`, шаги). Это единственное место в сгенерированном решении, которое знает про шаблон.
+- [ ] **Пачка закончена**: пункты плана этого выпуска закрыты, в `dev` нет начатого и недоделанного.
+- [ ] **Флаги под версию**: `git diff v<прошлая>..dev -- template/.template.config/template.json` - если появились новые флаги, у каждой ветки Samples, которой они нужны, запись `generate` в `.samples/variants.json` на ветке `full` с `since` не выше выпуска. Без записи ветка пересоберётся из новой версии со старыми флагами.
+- [ ] **Чеклист раздела 1 проткнут целиком** - он и есть PR выпуска, и PR принимается только при всех [x].
 
-Публикацию делает `.github/workflows/release.yml` по тегу `v<version>`: GitHub-релиз с заметками, `.nupkg`
-в релизе, пакеты `SawKing.DotsKit.Tool` и `SawKing.DotNetSolutionKit` на nuget.org. Он откажется, если тег не на `master`, если на его
-коммите не прошёл `template.yml` или если тег не совпадает с `version` в `version.json`. Руками остаются
-шаги ниже. Версию на nuget.org нельзя удалить, только скрыть, поэтому порядок не нарушать.
+## 1. Чеклист текстов и метаданных - проткнуть ДО мержа, каждый пункт командой
 
-## 1. Версия в dev перед слиянием - только по слову Володи
+PR выпуска не принимать, пока не все пункты отмечены. Каждый пропуск здесь - опубликованная ошибка.
 
-- В `dev` снять метку: `2.8.0-rc` -> `2.8.0`, запись заметок переименовать так же. Номер подтверждает Володя.
-- Заметки - по разделу «Заметки к выпуску» ниже. Сверить с `git log v<прошлая>..dev`: всё, ради чего
-  меняется номер, есть; остальное не перечисляется. Текст через text-edit, показать Володе до коммита.
-- Всё, что описывает шаблон снаружи, - под выпуск: README, roadmap (EN, RU: строка версии `:done`), главная
-  сайта (`index.html`: `<meta name="description">`, og и twitter, JSON-LD, «Что вы получаете»), страница пакета
-  (`Description` и `PackageTags` в `DotNetSolutionKit.Templates.csproj`, `nuget/README.md`) называют то, что выпуск приносит (2.7.0 вышла с описанием «on PostgreSQL» без SQL Server и
-  Vault). Метаданные выпущенной версии на nuget.org не правятся, поэтому - в `dev` до выпуска, проверка
-  `dotnet pack` и `unzip -p <nupkg> '*.nuspec'`.
-- `nuget/README.md` в примере установки конкретной версии (`dotnet new install SawKing.DotNetSolutionKit::X.Y.Z`)
-  называет выпускаемую версию: строку поднимают при каждом выпуске (2.9.0 вышла со строкой `::2.8.0` - строка
-  не поднималась начиная с 2.8). Проверка делом: в README собранного nupkg версия совпадает с выпускаемой.
-- Затем `promote.yml` (source `dev`, target `master`).
-- После выпуска - коммит в `dev`: следующий `-rc` и пустая запись под него.
-- Линии: `master` - текущая мажорная; `2.x` после перехода на .NET 10 - .NET 8 до 10.11.2026
-  (память template-versioning). Патч для .NET 8 - PR в ветку `2.x`, тег с неё.
-- Утверждение в заметках о поведении (обновление, совместимость) проверить делом до коммита: заметка про
-  обновление 2.6.1 -> 2.6.2 оказалась неверной для установки из файла и была исправлена только после
-  проверки в отдельном каталоге шаблонов (`--debug:custom-hive`).
+- [ ] **version.json**: `"version"` без `-rc`; запись `releaseNotes` с этой версией есть; `headline` и `highlights` на английском; `ru` с тем же числом пунктов.
+      Проверка: `jq -r .version version.json` и `jq '.releaseNotes["X.Y.0"] | {en: (.highlights|length), ru: (.ru.highlights|length)}' version.json`.
+- [ ] **Заметки - по разделу «Заметки к выпуску» ниже.** Сверить с `git log v<прошлая>..dev`: всё, ради чего меняется номер, есть; остальное не перечисляется. Текст через text-edit, показать Володе до коммита.
+- [ ] **nuget/README.md**: пример установки конкретной версии называет выпуск: `grep "::X.Y.Z" nuget/README.md` находит строку. (2.9.0 вышла со строкой `::2.8.0` - строка не поднималась начиная с 2.8; с 2.9 это пункт чеклиста.)
+- [ ] **tool/README.md**: секция Stay current (роадмап, звезда обоих репо), кросс-ссылка на пакет шаблона. Проверка: `grep -c "Stay current\|star" tool/README.md`.
+- [ ] **README.md**: прямая ссылка на `docs/roadmap.md`, призыв поставить звезду. Проверка: `grep -c "roadmap.md" README.md`.
+- [ ] **index.html**: `<meta name="description">`, og и twitter, JSON-LD и «Что вы получаете» называют то, что выпуск приносит (проверить глазами diff); роадмап и звезда - ссылками. (2.7.0 вышла с описанием «on PostgreSQL» без SQL Server и Vault.)
+- [ ] **Страница пакета**: `Description` и `PackageTags` в `DotNetSolutionKit.Templates.csproj` и в csproj тулзы называют выпуск.
+- [ ] **roadmap.md и roadmap.ru.md**: строка версии переведена в `:done`. Проверка: `grep ":done" docs/roadmap.md docs/roadmap.ru.md` в части этой версии.
+- [ ] **Пакет собран и прочитан изнутри ДО тега**:
+      `rm -rf /c/t/pack-check && dotnet pack DotNetSolutionKit.Templates.csproj -c Release -o /c/t/pack-check`
+      - в `.nuspec` `<releaseNotes>` - текст заметок, не ссылка;
+      - README внутри nupkg - новый (`unzip -p /c/t/pack-check/SawKing.DotNetSolutionKit.X.Y.0.nupkg README.md | grep -c "Stay current|strongly recommended"`);
+      - версия в примере установки внутри nupkg == выпуск (`... | grep "::X.Y.0"`).
+- [ ] **Заметки релиза прочитаны глазами**: `bash scripts/release-notes.sh X.Y.0 plain` и `... markdown` - обе строки футера на месте (upgrading и roadmap).
+- [ ] **Сайт собирается**: `python scripts/build-site.py /c/t/site-check` - без ошибок, в выводе новая версия.
+- [ ] **style и якоря**: `python scripts/check-style.py` и `python scripts/check-doc-anchors.py` - чисто.
+
+## 2. Мерж и тег
+
+- PR выпуска зелёный (все проверки `template.yml`), мерж squash или rebase, история линейная.
+- Перемотка `master` := tip `dev`: `git push --force origin $(git rev-parse origin/dev):refs/heads/master` (защита master на время вырубает Володя; геометрический ff часто невозможен - master разошёлся).
+- Тег сразу после перемотки: `git push origin <sha-tip-dev>:refs/tags/vX.Y.0`. Пуш тега - триггер release.yml и больше ничем не ставится; ruleset `release-tags-are-immutable` запрещает двигать существующие теги `v*`.
+- `dev` должен уже нести метку снятой версии; после выпуска - коммит в `dev`: следующий `-rc` и пустая запись под него.
+- Линии: `master` - текущая мажорная; `2.x` после перехода на .NET 10 - .NET 8 до 10.11.2026. Патч .NET 8 - PR в `2.x`, тег с неё.
+- Утверждение в заметках о поведении (обновление, совместимость) проверить делом до коммита: заметка про обновление 2.6.1 -> 2.6.2 оказалась неверной для установки из файла и была исправлена только после проверки в отдельном каталоге шаблонов (`--debug:custom-hive`).
+
+## 3. Проверка по существу, не по зелёному значку
+
+Выпуск не закончен, пока всё ниже не подтверждено командами.
+
+- [ ] `gh run list --workflow release.yml --limit 1` - success; шаги «A short-lived key for nuget.org» и «Publish to nuget.org» выполнены.
+- [ ] GitHub-релиз: заголовок `vX.Y.0: <headline>`; приложены ОБА `.nupkg` (`gh release view vX.Y.0 --json assets`). Ты просил: пакеты в GitHub-релизе и в GitHub Packages - проверять оба.
+- [ ] GitHub Packages: `gh api "orgs/sawking-tech/packages?package_type=nuget"` - оба пакета, видимость Public. Если 403 у релиза: настройки пакета -> Manage Actions access -> DotNetSolutionKit с ролью Write (только UI).
+- [ ] nuget.org после индексации (до получаса): `curl -s https://api.nuget.org/v3-flatcontainer/sawking.dotnetsolutionkit/index.json` содержит версию; `.../X.Y.0/readme` и `.../X.Y.0/icon` - 200; страница пакета показывает README и Release Notes с новым текстом.
+- [ ] Установка по ID в отдельном каталоге шаблонов заменяет прошлую версию: `dotnet new install SawKing.DotNetSolutionKit::X.Y.0 --debug:custom-hive /c/t/hive-check` и `dotnet new list DotNetSolutionKit --debug:custom-hive /c/t/hive-check` - один шаблон.
+- [ ] Samples: `gh workflow run regenerate.yml -R sawking-tech/DotNetSolutionKit.Samples --ref full`; ветки пересобраны из новой версии, их CI и отчёты зелёные, страница dnsk.sawking.tech/samples.html показывает новую версию.
+- [ ] Сайт: `curl -s https://dotskit.sawking.tech/version.json` - новая версия; главная называет выпуск.
+
+## 4. Публикация на nuget.org
+
+С 2.8 ключа в секретах нет: release.yml получает ключ на час через Trusted Publishing (`NuGet/login`, профиль
+`sawking.tech`) после проверок и до тега. Политика на nuget.org - профиль `sawking.tech`, Trusted Publishing:
+репозиторий `sawking-tech/DotNetSolutionKit`, файл `release.yml`, без environment, `SawKing.*`. Обмен не прошёл -
+релиз встаёт до тега: сверить политику (статус Active, имя файла), затем запустить `promote.yml` заново. Если
+nuget.org не принимает токен запуска по метке (`pull_request_target`) - запустить `promote.yml` руками
+(`workflow_dispatch`).
+
+## Если что-то пошло не так
+
+- Тег не на том коммите и релиз не начался: переместить тег нельзя (ruleset `release-tags-are-immutable`) - только новый номер. Защита от этого - пункты чеклиста ДО тега.
+- GitHub-релиз создан, а push на nuget.org упал: перезапустить упавший прогон release.yml (`gh run rerun <id> --failed`); `--skip-duplicate` пропустит уже выложенное.
+- Заметки к выпуску на nuget.org - текст версии из version.json (после правки package-page; до неё там была только ссылка на GitHub-релиз). Проверить `unzip -p <nupkg> '*.nuspec'`: в `<releaseNotes>` текст, не ссылка.
 
 ## Заметки к выпуску: формат и принципы
 
@@ -83,85 +102,17 @@ GitHub-релиз и nuget.org. Это не аудит и не лог - полн
   не инженеру не значит «для дурака».
 - Только существенное - то, что реально меняло номер версии. Остальное - бонус, его не перечисляют.
 - Пункт - заголовок изменения, без деталей: «Improved the API gateway.» Детали - в коммитах и доке, шаги
-  обновления - в upgrading; кому надо, раскопает. Вбивать людям знания, о которых они не просили, незачем.
+  обновления - в upgrading; кому надо, раскопает.
 - Каждый пункт - одна фраза о пользе для того, кто обновляется, с позитивом: что теперь есть или работает,
-  а не что убрали или чинили. В какой-то степени это маркетинг. Без крайностей: ни полотна, ни разжёвывания.
-- `headline` - главное в версии, одной фразой. `highlights` по весу, столько, сколько стоит: можно пять и
-  шесть, но каждый пункт должен этого стоить (Володя 05.10: «в этом смысл»).
-- У каждой версии рядом с английскими `headline` и `highlights` - русские в `ru` (`{"headline": ..., "highlights": [...]}`),
-  столько же пунктов: их показывает блок «Что нового» на сайте, когда страница по-русски. Без `ru` русская
-  страница молча покажет английский. GitHub-релиз и nuget.org берут только английские.
+  а не что убрали или чинили.
+- `headline` - главное в версии, одной фразой. `highlights` по весу: можно пять и шесть, но каждый пункт
+  должен этого стоить (Володя 05.10: «в этом смысл»).
+- У каждой версии рядом с английскими `headline` и `highlights` - русские в `ru`, столько же пунктов: их
+  показывает блок «Что нового» на сайте, когда страница по-русски. Без `ru` русская страница молча покажет
+  английский. GitHub-релиз и nuget.org берут только английские.
 - Несовместимое изменение называется прямо, одним пунктом со ссылкой на раздел в
-  `docs/getting-started/upgrading.md`; шаги обновления (пересоздать контейнер, удалить файл, поменять
-  настройку) живут там, не в заметках.
+  `docs/getting-started/upgrading.md`; шаги обновления живут там, не в заметках.
 
 Образец - лента release notes Anthropic (platform.claude.com/docs/en/release-notes): один-пять пунктов на
-дату, пункт начинается с того, что пользователь теперь может или что для него изменилось, мелких
-исправлений нет, у несовместимого - что делать.
-
-## 2. Мерж
-
-- PR зелёный (все проверки `template.yml`, сейчас 13), мерж rebase или squash, история линейная.
-- `git checkout master && git pull --ff-only`, убедиться: `jq -r .version version.json` - нужная версия.
-
-## 3. Тег и публикация
-
-После мержа в `master` release.yml сам ставит тег `v<version>`, ждёт `template.yml` на этом коммите (до 40
-минут) и публикует. Пока автотег не смержен (ci/dev-branch), тег ставится руками сразу после мержа:
-
-```bash
-git tag v<version> && git push origin v<version>
-```
-
-Бамп в master без тега - то самое сломанное состояние.
-
-Пуш тега `v*` - триггер release.yml: любой push тега (включая force и перестановку) дёргает релизный
-прогон. Вне выпуска теги не пушат и не двигают вовсе. Прогон от чужого тега падает на гварде
-(коммит не на `master`) - это защита, а не поломка; каждый такой прогон объясняют в плане, а не
-молчат о нём (ADR-008 - пример ремонта, который переставляет теги и знает про эти прогоны).
-
-Срочный патч выпущенной версии: ветка от `master`, PR в `master` с патч-версией, затем тот же коммит в
-`dev`. Патч .NET 8 - PR в `2.x`.
-
-## 4. Проверка по существу, не по зелёному значку
-
-Выпуск не закончен, пока всё ниже не подтверждено: бамп обязывает к артефактам и публикации.
-
-- `gh run list --workflow release.yml --limit 1` - успех, шаги «A short-lived key for nuget.org» и
-  «Publish to nuget.org» выполнены.
-- GitHub-релиз: заголовок `v<version>: <headline>`, приложен `SawKing.DotNetSolutionKit.<version>.nupkg`.
-- Шаг «Publish to GitHub Packages» выполнен: пакет в https://github.com/orgs/sawking-tech/packages
-  (видимость Public). Если 403 - у репо нет записи в пакет: настройки пакета -> Manage Actions access ->
-  DotNetSolutionKit с ролью Write или «Inherit access from source repository»; API для этого нет, только UI.
-- nuget.org после индексации (до получаса):
-  `curl -s https://api.nuget.org/v3-flatcontainer/sawking.dotnetsolutionkit/index.json` содержит версию;
-  `.../<version>/readme` и `.../<version>/icon` отдают 200; страница
-  https://www.nuget.org/packages/SawKing.DotNetSolutionKit показывает README пакета (nuget/README.md) с
-  рабочими ссылками на dnsk.sawking.tech и иконку.
-- Установка по ID в отдельном каталоге шаблонов заменяет прошлую версию:
-  `dotnet new install SawKing.DotNetSolutionKit::<version> --debug:custom-hive <tmp>` и `dotnet new list
-  DotNetSolutionKit` - один шаблон.
-- Samples: Regenerate раз в сутки сам увидит релиз; чтобы не ждать -
-  `gh workflow run regenerate.yml -R sawking-tech/DotNetSolutionKit.Samples --ref full`; ветки пересобраны из
-  новой версии, их CI и отчёты зелёные, страница dnsk.sawking.tech/samples.html показывает новую версию.
-
-## 5. Публикация на nuget.org
-
-С 2.8 ключа в секретах нет: release.yml получает ключ на час через Trusted Publishing (`NuGet/login`,
-профиль `sawking.tech`) после проверок и до тега. Политика на nuget.org - профиль `sawking.tech`, Trusted
-Publishing: репозиторий `sawking-tech/DotNetSolutionKit`, файл `release.yml`, без environment, `SawKing.*`.
-Обмен не прошёл - релиз встаёт до тега: сверить политику (статус Active, имя файла), затем запустить
-`promote.yml` заново. Если nuget.org не принимает токен запуска по метке (`pull_request_target`) -
-запустить `promote.yml` руками (`workflow_dispatch`).
-
-## Если что-то пошло не так
-
-- Тег не на том коммите и релиз не начался: удалить тег (`git push origin :refs/tags/v<version>`), поставить
-  заново на правильный коммит `master`.
-- GitHub-релиз создан, а push на nuget.org упал: перезапустить упавший прогон release.yml
-  (`gh run rerun <id> --failed`); `--skip-duplicate` пропустит уже выложенное.
-- Заметки к выпуску на nuget.org - текст версии из version.json (после правки package-page; до неё там была
-  только ссылка на GitHub-релиз). Проверить `unzip -p <nupkg> '*.nuspec'`: в `<releaseNotes>` текст, не ссылка.
-- Метаданные опубликованной версии (README, иконка, описание) на nuget.org не правятся - только новой
-  версией. Поэтому `nuget/README.md`, иконку и поля пакета в `DotNetSolutionKit.Templates.csproj`
-  проверять `dotnet pack` до тега: `unzip -p <nupkg> '*.nuspec'`.
+дату, пункт начинается с того, что пользователь теперь может или что для него изменилось, мелких исправлений
+нет, у несовместимого - что делать.
