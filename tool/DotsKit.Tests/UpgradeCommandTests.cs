@@ -227,7 +227,7 @@ internal sealed class UpgradeCommandTests
         fakes.Steps.Select(s => s!.Part).ShouldBe([UpgradeParts.Shared, "Acme.Shop.Orders"]);
         fakes.Lines.ShouldContain(l => l.EndsWith(": shared, 1 of 2.", StringComparison.Ordinal));
         fakes.Lines.ShouldContain(l => l.EndsWith(": Acme.Shop.Orders, 2 of 2, the last.", StringComparison.Ordinal));
-        fakes.Commits.ShouldBe([$"dotskit: the upgrade to {ToolVersion}, part {UpgradeParts.Shared}", $"dotskit: the upgrade to {ToolVersion}, part Acme.Shop.Orders"]);
+        fakes.Commits.ShouldBe([$"dotskit: the upgrade to {ToolVersion}, part {UpgradeParts.Shared}", $"dotskit: the upgrade to {ToolVersion}, finished"]);
         var merged = Manifest.Load(root)!;
         merged.Template.ShouldBe(ToolVersion);
         merged.Upgrade.ShouldBeNull();
@@ -243,11 +243,11 @@ internal sealed class UpgradeCommandTests
 
         fakes.Steps.ShouldHaveSingleItem();
         fakes.Commits.ShouldBeEmpty();
-        fakes.Lines.ShouldContain($"Conflicts in {UpgradeParts.Shared}: 1 of 2 part(s) of the upgrade to {ToolVersion} left - resolve them, commit, then continue with dotskit upgrade --continue.");
-        // The conflicts keep the upgrade open, with the part counted as merged once they are resolved.
+        fakes.Lines.ShouldContain($"Conflicts in {UpgradeParts.Shared}: 2 of 2 part(s) of the upgrade to {ToolVersion} left - resolve them, commit, then continue with dotskit upgrade --continue.");
+        // The conflicts keep the upgrade open, and the in-flight part is no part of Done until its merge is committed.
         var open = Manifest.Load(root)!.Upgrade!;
         open.To.ShouldBe(ToolVersion);
-        open.Done.ShouldBe([UpgradeParts.Shared]);
+        open.Done.ShouldBeEmpty();
         open.Parts.ShouldBe([UpgradeParts.Shared, "Acme.Shop.Orders"]);
     }
 
@@ -262,6 +262,8 @@ internal sealed class UpgradeCommandTests
         (await fakes.Command().RunAsync(Options.Parse(["--yes", "--continue"]), root, CancellationToken.None)).ShouldBe(ExitCode.Conflicts);
 
         fakes.Lines.ShouldContain($"Conflicts in Acme.Shop.Orders, the last part of the upgrade to {ToolVersion}: resolve them, commit, then dotskit upgrade --continue repairs the usings, builds and finishes the upgrade.");
+        // The last part counts as merged only once its merge is committed: the stop leaves it out of Done.
+        Manifest.Load(root)!.Upgrade!.Done.ShouldBe([UpgradeParts.Shared]);
     }
 
     [Test]

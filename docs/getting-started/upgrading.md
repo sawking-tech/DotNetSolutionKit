@@ -157,10 +157,11 @@ usings and project references of the types the template moved between the parts 
 of the solution, and names them by project; a type that goes to a part not yet merged waits for it, and the usings
 of its namespace stay. Then the solution builds, and its errors repair the team's files, leaving the template's
 files of a part not merged yet to that part; a service whose files of the template wait for their part may
-fail until it, and the build names it. The manifest keeps the release and the parts merged. A part the run
+fail until it, and the build names it. The manifest keeps the release and the parts merged, and a part
+joins them only once its merge is committed: a stop on conflicts never counts the part in flight. A part the run
 finishes is committed by the tool, so the next part merges over it; `--part Orders` names one part and stops
 after it. When the merge of a part leaves conflicts, the run stops and says how many parts are left: resolve
-them, commit, and `dotskit upgrade --continue` takes the next part. The last part moves the manifest to the
+them, commit, and `dotskit upgrade --continue` takes the part again - its merge stands - and the next one. The last part moves the manifest to the
 release, and `dotskit new` waits until then. When the last part leaves conflicts, the upgrade stays open: once
 they are resolved and committed, `dotskit upgrade --continue` changes no file of the template, repairs the usings
 of the whole upgrade, builds and moves the manifest.

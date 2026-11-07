@@ -33,6 +33,8 @@ internal sealed class PartRepairScenarios
     private const string TeamsRefund = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Refund.cs";
 
     private const string Project = "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n";
+    private const string TeamProject = "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>\n  </PropertyGroup>\n</Project>\n";
+    private const string NextProject = "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n    <LangVersion>latest</LangVersion>\n  </PropertyGroup>\n</Project>\n";
     private const string EmptySolution = "Microsoft Visual Studio Solution File, Format Version 12.00\nGlobal\nEndGlobal\n";
     private const string EventOf = "namespace {0};\n\npublic sealed class DomainEvent;\n";
     private const string OrderOf = "using {0};\n\nnamespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{{\n    public DomainEvent? {1} {{ get; set; }}\n}}\n";
@@ -78,6 +80,36 @@ internal sealed class PartRepairScenarios
     }
 
     [Test]
+    public async Task APartInConflict_IsNoPartOfDone_UntilItsMergeIsCommitted()
+    {
+        var root = await SolutionAsync();
+        // The team set warnings as errors in the project of Common, and the next template edits it too: the part of
+        // Common, not the last, conflicts.
+        Put(root, CommonProject, TeamProject);
+        await CommitAsync(root, "the team's project");
+        var lines = new List<string>();
+        var outputs = new Outputs(NextChangesCommonProject: true);
+
+        // The run commits the shared part and stops at the part of Common in conflict.
+        var stopped = await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--yes"]), root, CancellationToken.None);
+
+        stopped.ShouldBe(ExitCode.Conflicts);
+        // The stopped run names only the parts whose merge is committed: the conflicted part waits outside Done.
+        var open = Manifest.Load(root)!;
+        open.Upgrade!.Done.ShouldBe([UpgradeParts.Shared]);
+        open.Upgrade.Parts.ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common", "Acme.Shop.Orders"]);
+        lines.ShouldContain(l => l.Contains("Conflicts in common/Acme.Shop.Common: 2 of 3 part(s) of the upgrade to 2.9.0 left", StringComparison.Ordinal));
+
+        Put(root, CommonProject, NextProject);
+        await CommitAsync(root, "the conflict resolved");
+        var finished = await Upgrade(lines, outputs).RunAsync(Options.Parse("upgrade", ["--continue"]), root, CancellationToken.None);
+
+        finished.ShouldBe(ExitCode.Done);
+        Manifest.Load(root)!.Template.ShouldBe(To);
+        Read(root, CommonProject).ShouldBe(NextProject);
+    }
+
+    [Test]
     public async Task TheLastPartLeftInConflict_KeepsTheUpgradeOpen_AndTheRunAfterTheResolutionFinishesIt()
     {
         var root = await SolutionAsync();
@@ -97,13 +129,17 @@ internal sealed class PartRepairScenarios
 
         stopped.ShouldBe(ExitCode.Conflicts);
         open.Template.ShouldBe(From);
-        open.Upgrade!.Done.Count.ShouldBe(3);
+        // The conflicted part counts as merged only once its merge is committed: Done names the parts before it.
+        open.Upgrade!.Done.ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common"]);
         lines.ShouldContain(l => l.Contains("then dotskit upgrade --continue repairs the usings, builds and finishes the upgrade", StringComparison.Ordinal));
         finished.ShouldBe(ExitCode.Done);
         Manifest.Load(root)!.Template.ShouldBe(To);
         Manifest.Load(root)!.Upgrade.ShouldBeNull();
         Read(root, TeamsRefund).ShouldBe(string.Format(RefundOf, NewNamespace));
-        lines.ShouldContain(l => l.StartsWith("Finishing the upgrade from the template 2.7.0 to 2.9.0", StringComparison.Ordinal));
+        // The run after the resolution takes the part again: its merge stands, so the run commits it and the upgrade is over.
+        lines.ShouldContain(l => l.EndsWith(": Acme.Shop.Orders, 3 of 3, the last.", StringComparison.Ordinal));
+        (await Runner.RunCheckedAsync("git", ["log", "--format=%s"], root, CancellationToken.None)).Split('\n')
+            .ShouldContain("dotskit: the upgrade to 2.9.0, finished");
     }
 
     [Test]
@@ -232,13 +268,14 @@ internal sealed class PartRepairScenarios
     /// <param name="NextProperty">The name 2.9.0 gives the property of Order.</param>
     /// <param name="NextAddsAUsing">2.9.0 also adds a using of its own to Order.cs, beside the one of the moved event.</param>
     /// <param name="NextMovesToANewProject">2.9.0 moves the event to a project it adds to Common, and Orders references it.</param>
-    private sealed record Outputs(string NextProperty = Property, bool NextAddsAUsing = false, bool NextMovesToANewProject = false) : IStaging
+    /// <param name="NextChangesCommonProject">2.9.0 also edits the project of Common, beside the move of the event.</param>
+    private sealed record Outputs(string NextProperty = Property, bool NextAddsAUsing = false, bool NextMovesToANewProject = false, bool NextChangesCommonProject = false) : IStaging
     {
         public Task<string> BuildAsync(Manifest manifest, bool withSolutionFile, CancellationToken ct)
         {
             var next = manifest.Template == To;
             var root = Folders.NewTemp("part-repair-output");
-            Put(root, CommonProject, Project);
+            Put(root, CommonProject, next && NextChangesCommonProject ? NextProject : Project);
             if (!next)
             {
                 Put(root, OldEvent, string.Format(EventOf, OldNamespace));
