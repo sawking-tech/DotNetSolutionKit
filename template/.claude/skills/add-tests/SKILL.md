@@ -122,12 +122,12 @@ the post-commit phase for one event.
 ## Search, the bus, the user
 
 - A service that searches with `ICaseInsensitiveSearch` gets `InMemoryCaseInsensitiveSearch` from
-  `Common.Tests.Stubs` in a service test. Never a hand-made mock or `string.Contains`: the stub takes its
+  `NamespaceRoot.ProductName.Framework.Testing.Stubs` in a service test. Never a hand-made mock or `string.Contains`: the stub takes its
   pattern from the database implementation itself, so it escapes `%`, `_` and the escape character and
   matches as the database does; a `Contains` mock passes patterns the database answers differently.
 - An integration test registers the production implementation, never the stub: the point of the test is
   the SQL.
-- Messages sent through `IMessageBus` are checked with `RecordingMessageBus` from `Common.Tests.Stubs`.
+- Messages sent through `IMessageBus` are checked with `RecordingMessageBus` from `NamespaceRoot.ProductName.Framework.Testing.Stubs`.
 - The actor and the time come from `TestDomainExecutionContext`, `UserContextMock` and `TimeProviderMock`.
 
 ## Integration tests - only what the in-memory provider cannot show

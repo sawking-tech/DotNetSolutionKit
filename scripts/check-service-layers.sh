@@ -91,7 +91,8 @@ using $root.Common.Contracts.LayerProbe;
 using $root.Common.Domain.Context;
 using $root.Common.Exceptions;
 using $root.Common.Tests;
-using $root.Common.Tests.Stubs;
+using $root.Framework.Testing;
+using $root.Framework.Testing.Stubs;
 using $root.$service.Application.LayerProbe;
 
 namespace $root.$service.Tests.Tests.LayerProbe;
