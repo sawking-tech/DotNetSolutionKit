@@ -19,6 +19,7 @@
     <ItemGroup>
         <ProjectReference Include="..\NamespaceRoot.ProductName.Capabilities.Notifications\NamespaceRoot.ProductName.Capabilities.Notifications.csproj" />
         <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Testing\NamespaceRoot.ProductName.Common.Testing.csproj" />
+        <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj" />
     </ItemGroup>
 
 </Project>

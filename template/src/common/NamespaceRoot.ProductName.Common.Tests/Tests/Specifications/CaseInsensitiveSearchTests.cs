@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Specifications;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Specifications;
 

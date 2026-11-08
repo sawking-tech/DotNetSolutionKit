@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using NamespaceRoot.ProductName.Common.Application.Auditing;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Stubs;
+namespace NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 /// <summary>
 /// Records nothing, for suites whose subject is not the journal.

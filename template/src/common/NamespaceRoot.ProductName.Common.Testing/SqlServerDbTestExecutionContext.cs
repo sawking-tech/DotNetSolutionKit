@@ -1,5 +1,6 @@
 // Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
 
+using NamespaceRoot.ProductName.Framework.Testing;
 using System.Collections.Concurrent;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;

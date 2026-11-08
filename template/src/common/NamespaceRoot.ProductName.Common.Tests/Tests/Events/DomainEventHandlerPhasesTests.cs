@@ -1,8 +1,8 @@
-using NamespaceRoot.ProductName.Common.Application.Events.Handlers;
+using NamespaceRoot.ProductName.Framework.DomainEvents.Handlers;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Domain.Events;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Events;

@@ -1,6 +1,6 @@
 using NamespaceRoot.ProductName.Common.Domain.Events;
 
-namespace NamespaceRoot.ProductName.Common.Application.Events;
+namespace NamespaceRoot.ProductName.Framework.DomainEvents;
 
 /// <summary>
 /// Scoped storage for domain events that are awaiting transaction completion.

@@ -1,7 +1,7 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Rules;
+namespace NamespaceRoot.ProductName.Framework.Testing.Rules;
 
 /// <summary>
 /// Finds a token in what a controller action returns: a property named like one, at any depth.

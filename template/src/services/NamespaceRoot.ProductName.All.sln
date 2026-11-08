@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceNameOrCustom", "ServiceNameOrCustom", "{121B974B-9C00-47EC-8961-469C6E1596EB}"
 EndProject
@@ -27,6 +27,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Common.Tests", "..\common\NamespaceRoot.ProductName.Common.Tests\NamespaceRoot.ProductName.Common.Tests.csproj", "{D2016742-96FB-46A4-9009-8878906D8C1A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Common.Testing", "..\common\NamespaceRoot.ProductName.Common.Testing\NamespaceRoot.ProductName.Common.Testing.csproj", "{24601F4D-DA7F-473A-B8EF-61BF575793D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.DomainEvents", "..\framework\NamespaceRoot.ProductName.Framework.DomainEvents\NamespaceRoot.ProductName.Framework.DomainEvents.csproj", "{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.Testing", "..\framework\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj", "{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}"
 EndProject
 #if (NotifyEmail)
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Notifications", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Notifications\NamespaceRoot.ProductName.Capabilities.Notifications.csproj", "{6F1C2B8E-3D4A-4E57-9B21-0C7A5E3D9F10}"
@@ -206,6 +210,30 @@ Global
 		{24601F4D-DA7F-473A-B8EF-61BF575793D8}.Release|x64.Build.0 = Release|Any CPU
 		{24601F4D-DA7F-473A-B8EF-61BF575793D8}.Release|x86.ActiveCfg = Release|Any CPU
 		{24601F4D-DA7F-473A-B8EF-61BF575793D8}.Release|x86.Build.0 = Release|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Debug|Any CPU|x64.ActiveCfg = Debug|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Debug|Any CPU|x64.Build.0 = Debug|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Debug|Any CPU|x86.ActiveCfg = Debug|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Debug|Any CPU|x86.Build.0 = Debug|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Release|Any CPU|x64.ActiveCfg = Release|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Release|Any CPU|x64.Build.0 = Release|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Release|Any CPU|x86.ActiveCfg = Release|Any CPU
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Release|Any CPU|x86.Build.0 = Release|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Debug|Any CPU|x64.ActiveCfg = Debug|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Debug|Any CPU|x64.Build.0 = Debug|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Debug|Any CPU|x86.ActiveCfg = Debug|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Debug|Any CPU|x86.Build.0 = Debug|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Release|Any CPU|x64.ActiveCfg = Release|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Release|Any CPU|x64.Build.0 = Release|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Release|Any CPU|x86.ActiveCfg = Release|Any CPU
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}.Release|Any CPU|x86.Build.0 = Release|Any CPU
 #if (NotifyEmail)
 		{6F1C2B8E-3D4A-4E57-9B21-0C7A5E3D9F10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6F1C2B8E-3D4A-4E57-9B21-0C7A5E3D9F10}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -327,6 +355,8 @@ Global
 		{1D315BA6-E9DA-41B3-9083-F154C08FCC49} = {8519937F-6A2B-4441-9591-06640B035553}
 		{D2016742-96FB-46A4-9009-8878906D8C1A} = {8519937F-6A2B-4441-9591-06640B035553}
 		{24601F4D-DA7F-473A-B8EF-61BF575793D8} = {8519937F-6A2B-4441-9591-06640B035553}
+		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48} = {8519937F-6A2B-4441-9591-06640B035553}
+		{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59} = {8519937F-6A2B-4441-9591-06640B035553}
 #if (NotifyEmail)
 		{6F1C2B8E-3D4A-4E57-9B21-0C7A5E3D9F10} = {8519937F-6A2B-4441-9591-06640B035553}
 		{8A2D4C61-5B7E-4F93-A1C8-2E6B9D0F3A47} = {8519937F-6A2B-4441-9591-06640B035553}
