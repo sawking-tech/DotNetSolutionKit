@@ -72,6 +72,8 @@ internal sealed class NewCommandTests
             public Task UncommitAsync(string root, string commit, CancellationToken ct) => Task.CompletedTask;
 
             public Task<bool> MergeInProgressAsync(string root, CancellationToken ct) => Task.FromResult(false);
+
+            public Task CommitAsync(string root, string message, CancellationToken ct) => Task.CompletedTask;
         }
 
         private sealed class Builder : IBuilder
