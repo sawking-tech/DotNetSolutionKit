@@ -138,10 +138,13 @@ const fmtDuration = (s) => {
   return m ? T(`${m} min ${r} s`, `${m} мин ${r} с`) : T(`${r} s`, `${r} с`);
 };
 
-// a release links to its page, a commit of the template's master to the commit
+// a release links to its page, a commit of the template's master to the commit, a version a commit
+// works toward - 2.10.0-rc between releases - is plain text: no page names it yet
 const versionLink = (version) => /^v\d/.test(version)
   ? `<a href="${TEMPLATE_GH}/releases/tag/${esc(version)}">${esc(version)}</a>`
-  : `<a href="${TEMPLATE_GH}/commit/${esc(version)}">${esc(version.slice(0, 7))}</a>`;
+  : /^[0-9a-f]{7,40}$/.test(version)
+    ? `<a href="${TEMPLATE_GH}/commit/${esc(version)}">${esc(version.slice(0, 7))}</a>`
+    : esc(version);
 const result = (run) => `<span class="result ${run.conclusion === "success" ? "ok" : "bad"}">${run.conclusion === "success" ? STR.passed : STR.failedRun}</span>`;
 // a stroke the size of a value that is not here yet, inside the element that will hold it
 const ph = (w) => `<i class="sk sk-t" style="width:${w}"></i>`;
@@ -453,7 +456,7 @@ function dayCard(c) {
     <div class="dc-head">${head}</div>
     <dl>
       <dt>${STR.from}</dt><dd>${versionLink(r.version)}${c.release ? ` <span class="dc-new">${STR.newRelease}</span>` : ""}</dd>
-      <dt>${STR.testsTitle}</dt><dd>${r.tests.passed} ${STR.of} ${r.tests.total}</dd>
+      <dt>${STR.testsTitle}</dt><dd>${r.tests ? `${r.tests.passed} ${STR.of} ${r.tests.total}` : "-"}</dd>
       <dt>${STR.linesTitle}</dt><dd>${fmtPct(r.coverage?.line)}</dd>
       <dt>${STR.branchesTitle}</dt><dd>${fmtPct(r.coverage?.branch)}</dd>
     </dl>
@@ -514,12 +517,15 @@ function leaveCard() {
   }, CARD.waitMs);
 }
 
-// a day the branch was regenerated on lights its row in the table of releases
+// a day the branch was regenerated on turns the window of releases to its version and lights its row
 function markRelease(version) {
-  const row = document.querySelector(`#doc tr[data-version="${CSS.escape(version)}"]`);
+  const key = version.replace(/^v/, "");
+  const item = document.querySelector(`#doc .releases__item[data-version="${CSS.escape(key)}"]`);
+  if (!item || !releaseView) return;
+  releaseView.to(item, true);
+  const row = item.querySelector("tbody tr");
   if (!row) return;
   row.classList.remove("lit"); void row.offsetWidth; row.classList.add("lit");
-  row.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 }
 
 const HOVER = matchMedia("(hover: hover)");
@@ -550,10 +556,8 @@ addEventListener("resize", () => { if (pinned) placeCard(pinned); });
 
 /* ==== THE OVERVIEW: THE FRAME ====
    The overview of a sample before its data: its own headings, the empty grid, the measures with their
-   titles and the table with its head. The values are strokes until they come, so nothing moves when
-   they do. */
-const tableHead = () => `<thead><tr><th>${STR.release}</th><th>${STR.result}</th><th>${STR.tests}</th><th>${STR.lines}</th><th>${STR.branches}</th><th>${STR.runs}</th><th>${STR.date}</th></tr></thead>`;
-
+   titles and the window of releases with its head. The values are strokes until they come, so nothing
+   moves when they do. */
 function renderFrame(name) {
   const meterFrame = (title) => `<div class="meter"><div class="meter-title">${title}</div>
     <div class="meter-value">${ph(FRAME.meter)}</div><div class="meter-bar"></div></div>`;
@@ -564,8 +568,7 @@ function renderFrame(name) {
     <h3>${STR.lastRun}</h3>
     <div class="run-head">${ph(FRAME.runHead)}</div>
     <div class="meters">${meterFrame(STR.testsTitle)}${meterFrame(STR.linesTitle)}${meterFrame(STR.branchesTitle)}</div>
-    <h3>${STR.releases}</h3>
-    <div class="table-scroll"><table>${tableHead()}<tbody><tr>${FRAME.row.map((w) => `<td>${ph(w)}</td>`).join("")}</tr></tbody></table></div>`;
+    ${releaseWindow(`<table class="releases__item"><tbody><tr>${FRAME.row.map((w) => `<td>${ph(w)}</td>`).join("")}</tr></tbody></table>`)}`;
 }
 
 /* ==== THE OVERVIEW: THE MEASURES ====
@@ -594,7 +597,8 @@ function renderMeters(reports) {
   const run = lastRun(reports[0]), before = reports[1] && lastRun(reports[1]);
   const history = [...reports].reverse().map(lastRun);
   const delta = (pick) => (before && pick(run) != null && pick(before) != null ? pick(run) - pick(before) : null);
-  const t = run.tests;
+  // a failed Regenerate or Secret scan of old reports has no tests or coverage, only its red conclusion
+  const t = run.tests ?? { passed: 0, total: 0, failed: 0 };
   const tests = `${t.passed} <small>${STR.of} ${t.total}</small>${t.failed ? ` <small class="bad">${STR.failedTests(t.failed)}</small>` : ""}`;
   return `<div class="meters">
       ${meter(STR.testsTitle, tests, t.total ? t.passed / t.total : 0, null, [], t.total ? t.failed / t.total : 0)}
@@ -603,18 +607,101 @@ function renderMeters(reports) {
     </div>`;
 }
 
-/* ==== THE OVERVIEW: THE SHEET ====
-   A sample with its data: the description, the grid, the last run and its measures, the table of
-   releases. The same elements as the frame, in the same order. */
+/* ==== THE OVERVIEW: THE WINDOW OF RELEASES ====
+   The same window the home page keeps its release notes in (site/version-window.js): a version at the
+   top, the next one blurred at the edge, the buttons step one version, the fields move the window to
+   a key that exists. Here a version is a row of the sheet - generated from, result, tests, lines,
+   branches, runs, last run - with the head of the columns over it, so the version in focus labels
+   itself. Keys are the versions of the template's reports: "v2.9.0", a commit of master (a hash),
+   "2.10.0-rc" between releases. Two fields share the one mask, each for its alphabet: the version
+   field takes the numeric form, without the "v"; beside it the commit field takes a hash part by
+   part, for the branches a commit works toward (full-dev, the lifecycle of a tag branch). A row is
+   of one kind, so while nothing is typed the field of the top row's kind holds its key and the
+   other stands empty. */
+const releaseColumns = () => [STR.release, STR.result, STR.tests, STR.lines, STR.branches, STR.runs, STR.date];
+// a report key of a commit the template was built from, as resolved from a tag by the samples' report
+const SHA_KEY = /^[0-9a-f]{7,40}$/;
+
+function releaseWindow(body, hashes = null) {
+  const commit = hashes ? `
+    <div class="releases__find releases__commit" role="group" aria-label="Commit">
+      <p class="releases__hint" role="status"></p>
+      <span aria-hidden="true">#</span><input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="7" aria-label="Commit" disabled>
+    </div>` : "";
+  return `<div class="releases">
+    <h2>${STR.releases}</h2>
+    <div class="releases__find" role="group" aria-label="Version">
+      <p class="releases__hint" role="status"></p>
+      <span aria-hidden="true">v</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Major" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Minor" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Patch" disabled>
+    </div>${commit}
+    <button class="releases__up" type="button" disabled><span aria-hidden="true">▲</span><span class="releases__say">${T("Newer", "Новее")}</span></button>
+    <button class="releases__down" type="button" disabled><span aria-hidden="true">▼</span><span class="releases__say">${T("Older", "Старше")}</span></button>
+    <div class="releases__list" tabindex="0" aria-label="Versions">${body}</div>
+  </div>`;
+}
+
+function releaseItem(report) {
+  const r = lastRun(report);
+  const key = report.version.replace(/^v/, "");
+  // the commit a release's tag was cut from, resolved by the samples' report; the field's form is 7 hex
+  const from = SHA_KEY.test(report.templateCommit ?? "") ? report.templateCommit.slice(0, 7) : "";
+  const tests = r.tests ? `${r.tests.passed} / ${r.tests.total}` : "-";
+  return `<table class="releases__item" data-version="${esc(key)}"${from ? ` data-commit="${esc(from)}"` : ""}>
+      <thead><tr>${releaseColumns().map((title) => `<th>${title}</th>`).join("")}</tr></thead>
+      <tbody><tr><td>${versionLink(report.version)}</td><td>${result(r)}</td><td>${tests}</td>
+        <td>${fmtPct(r.coverage?.line)}</td><td>${fmtPct(r.coverage?.branch)}</td><td>${report.runs.length}</td>
+        <td><a href="${esc(r.url)}">${fmtDate(r.started)}</a></td></tr></tbody>
+    </table>`;
+}
+
 function renderReleases(reports) {
-  return `<div class="table-scroll"><table>${tableHead()}
-      <tbody>${reports.map((report) => {
-        const r = lastRun(report);
-        return `<tr data-version="${esc(report.version)}"><td>${versionLink(report.version)}</td><td>${result(r)}</td><td>${r.tests.passed} / ${r.tests.total}</td>
-          <td>${fmtPct(r.coverage?.line)}</td><td>${fmtPct(r.coverage?.branch)}</td><td>${report.runs.length}</td>
-          <td><a href="${esc(r.url)}">${fmtDate(r.started)}</a></td></tr>`;
-      }).join("")}</tbody>
-    </table></div>`;
+  const hashes = reports.map((report) => report.version).filter((version) => SHA_KEY.test(version));
+  return releaseWindow(reports.map(releaseItem).join(""), hashes.length ? hashes : null);
+}
+
+// the window of the sheet now, for markRelease to turn to a version
+let releaseView = null;
+
+// the shared mechanics wired to the drawn items: the buttons and a scroll keep the fields, the
+// fields and the buttons move the window. Both fields are the one mask with its alphabet: the
+// version field takes v-releases and -rc as typed, the commit field - hashes in their 7-hex form,
+// never more. A row at the top fills its own kind's field; the other stands empty, except that a
+// release row carries the commit its tag was cut from (the report's templateCommit) and a row
+// between releases greys the nearest previous version into the version field's placeholders - a
+// hint, not a value, so a teleport or a focus never takes it
+function mountReleases(root, reports) {
+  const box = root.querySelector(".releases");
+  if (!box || !reports.length) return;
+  const list = box.querySelector(".releases__list");
+  const { scrollWindow, versionField } = window.VersionWindow;
+  const numeric = (version) => /^\d+\.\d+\.\d+/.test(version);
+  const typed = reports.map((report) => report.version.replace(/^v/, "")).filter(numeric);
+  const hashes = reports.map((report) => report.version).filter((version) => SHA_KEY.test(version));
+  const newestParts = typed[0]?.split(".") ?? ["0", "0", "0"];
+  const fieldParts = [...box.querySelectorAll('.releases__find:not(.releases__commit) input')];
+  const fillPlaceholders = (key) => key.split(".").forEach((value, i) => { if (fieldParts[i]) fieldParts[i].placeholder = value; });
+  let field, commit;
+  releaseView = scrollWindow(list, box.querySelector(".releases__up"), box.querySelector(".releases__down"), (version) => {
+    const item = [...list.children].find((own) => own.dataset.version === version);
+    if (SHA_KEY.test(version)) {
+      commit.show(version);
+      field.clear();
+      // the nearest release before this commit: where the branch stood when it moved to it
+      let prev = item?.previousElementSibling;
+      while (prev && !numeric(prev.dataset.version)) prev = prev.previousElementSibling;
+      fillPlaceholders(prev?.dataset.version ?? newestParts.join("."));
+    } else if (numeric(version)) {
+      field.show(version);
+      fillPlaceholders(newestParts.join("."));
+      commit.show(item?.dataset.commit ?? "");
+    }
+  });
+  field = versionField(fieldParts, list, typed, releaseView.to);
+  commit = hashes.length
+    ? versionField([...box.querySelectorAll(".releases__commit input")], list, hashes, releaseView.to,
+        { strip: /[^0-9a-f]/g, cut: (key) => [key.slice(0, 7)], spell: (key) => key[0].slice(0, 7) })
+    : { show() {}, clear() {} };
+  releaseView.edges();
 }
 
 function renderBranch(branch) {
@@ -629,7 +716,6 @@ function renderBranch(branch) {
     <div class="run-head">${result(run)}<span>${fmtDate(run.started)}</span><span>${fmtDuration(run.seconds)}</span>
       <a href="${esc(run.url)}">${STR.run}</a></div>
     ${renderMeters(reports)}
-    <h3>${STR.releases}</h3>
     ${renderReleases(reports)}`;
 }
 
@@ -638,6 +724,7 @@ function renderOverview() {
   doc.classList.remove("busy");
   hideCard();
   doc.innerHTML = `<h1>${STR.title}</h1><p>${STR.intro}</p>${branch ? renderBranch(branch) : renderFrame(state.branch)}`;
+  mountReleases(doc, branch?.reports ?? []);
   scrollDaysToToday(doc);
   document.title = `${state.branch} - samples - ${window.SITE.name}`;
 }

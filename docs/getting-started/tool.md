@@ -171,13 +171,14 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | moves the branch `dotskit/template` | `git update-ref refs/heads/dotskit/template` | the commit of the template's new output on the branch, only from the tip read before |
 | commits on the working branch, files unchanged | `git commit-tree -p HEAD -p <base>`, `git update-ref HEAD` | the base adopted, the first time or on another branch, with no commit hook of the team |
 | commits on the working branch, files unchanged | `git add -A`, `git write-tree`, `git commit-tree -p HEAD`, `git update-ref HEAD` | `--allow-dirty`: the uncommitted changes taken into the merge, the index theirs |
+| commits on the working branch, the merge of a part | `git add -A`, `git write-tree`, `git commit-tree -p HEAD -p MERGE_HEAD`, `git update-ref HEAD` | an upgrade a part at a time: each part written and built is committed with the merge as its second parent, so the next part merges over it |
 | merges into the working tree, uncommitted | `git -c core.attributesFile=… -c merge.dotskit.driver=… [-c merge.conflictstyle=zdiff3] merge --no-ff --no-commit dotskit/template`, with `-X theirs` under `--force` | the template's change merged with the team's, by the merge driver `dotskit merge-driver` given to this one merge; `merge.conflictstyle=zdiff3` only with `--conflict-style zdiff3`; under `--force` the driver names through `DOTSKIT_TAKEN_REPORT` each file whose conflict took the template's lines, and the plan lists them |
 | stages | `git add` | the manifest, `All.sln` and the files the repair changed join the merge; under `--force`, `git checkout --theirs` with it resolves a file the solution removed, the template changed, with the template's version |
 | removes from the tree and the index | `git rm -f` | a file the team removed that the template only restyled - line ends, spaces, a byte order mark - stays removed instead of conflicting; under `--force`, a file the team changed that the template removed goes with the template |
 | undoes a run that failed | `git reset --hard`, `git update-ref` (or `-d`); `git reset --mixed` after an `--allow-dirty` commit; `git rev-parse --git-path index.lock` when git refuses | the working branch, its tracked files and the branch `dotskit/template` back where they were before the run; the uncommitted changes uncommitted again |
 
-The tool never commits the merge, never pushes, and never checks out a branch: the merge is the team's to look
-at, commit or undo.
+Except the part an upgrade commits before the next, the tool never commits the merge, never pushes and never
+checks out a branch: the merge is the team's to look at, commit or undo.
 
 ## Manifest
 
@@ -253,10 +254,16 @@ projects. The check installs the template of that version from nuget.org.
 | `--to 2.x.y` | `upgrade`: the release to bring the solution to, not newer than the tool |
 | `--conflict-style zdiff3` | `new` and `upgrade`: a conflict is marked with its base (`\|\|\|\|\|\|\| base`), as zdiff3 writes it; plain is the default |
 | `--all-at-once` | `upgrade`: every part in one merge, instead of the shared files first, then a service folder at a time |
-| `--part <part>` | `upgrade`: the part this run takes, `shared`, `common/<project>`, `capabilities` or a service folder's last name |
+| `--continue` | `upgrade`: continue the upgrade stopped at its conflicts, as the manifest records it; refused when no upgrade is in progress |
+| `--part <part>` | `upgrade`: the one part this run takes, `shared`, `common/<project>`, `capabilities` or a service folder's last name; without it, the run takes every part, a conflict stopping it |
 
 `DOTSKIT_TRACE=1` prints every `dotnet` and `git` call of a command with its time to stderr: what a slow
 command spends its time on.
+
+`DOTSKIT_TEMPLATE_PACKAGES=<folder>` installs the template's package from a folder of nupkg files instead of
+nuget.org: for an offline machine or a build not published yet. The folder must hold
+`SawKing.DotNetSolutionKit.<version>.nupkg` of the version a command needs; releases before nuget.org still
+come from their tags on GitHub, and `DOTSKIT_TEMPLATE_SOURCE` still stands the sources folder in for a version.
 
 ## Exit codes
 
@@ -264,7 +271,7 @@ command spends its time on.
 |---|---|
 | `0` | written, and the solution builds; with `--no-build`, written |
 | `1` | refused or failed, with the reason on one line; nothing was written because the answer was not yes; or written, and the build fails or was cancelled |
-| `2` | written with conflicts: resolve them, then build |
+| `2` | written with conflicts: resolve them, commit; an upgrade goes on from where it stopped, `dotskit upgrade --continue` |
 
 ## Limits of this version
 

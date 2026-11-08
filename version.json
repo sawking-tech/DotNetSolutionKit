@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "version": "2.10.0-rc",
   "releaseNotes": {
     "2.10.0-rc": {
@@ -10,6 +11,23 @@
         "headline": "",
         "highlights": [
           ""
+=======
+  "version": "2.9.1",
+  "releaseNotes": {
+    "2.9.1": {
+      "headline": "dotskit upgrade takes the parts one run after another and stops at conflicts; --continue resumes.",
+      "highlights": [
+        "dotskit upgrade walks every part of the upgrade in one run, committing each, and stops at a part in conflict: resolve it the way any merge is resolved, then dotskit upgrade --continue finishes; the run names what is left.",
+        "When a build fails mid-upgrade the message no longer promises a commit that did not happen: it names what is left and the remedy - fix the build and continue with dotskit upgrade --continue.",
+        "DOTSKIT_TEMPLATE_PACKAGES names a folder of nupkg files the tool installs the template from instead of nuget.org - for CI and machines without the registry; the default stays nuget.org."
+      ],
+      "ru": {
+        "headline": "dotskit upgrade проходит части одним запуском и останавливается на конфликтах; --continue продолжает.",
+        "highlights": [
+          "dotskit upgrade проходит все части обновления в одном запуске, коммитит каждую и останавливается на конфликтующей: разрешите её, как любой мерж, затем dotskit upgrade --continue доводит обновление; запуск называет, что осталось.",
+          "При упавшей посреди обновления сборке сообщение больше не обещает коммит, которого не было: оно называет, что осталось, и способ восстановления - почините сборку и продолжите тем же dotskit upgrade --continue.",
+          "DOTSKIT_TEMPLATE_PACKAGES называет папку с nupkg-файлами, из которой тулза ставит шаблон вместо nuget.org - для CI и машин без реестра; по умолчанию остаётся nuget.org."
+>>>>>>> origin/dev
         ]
       }
     },
