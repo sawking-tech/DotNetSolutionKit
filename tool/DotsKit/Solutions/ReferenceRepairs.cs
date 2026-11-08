@@ -192,7 +192,7 @@ internal static partial class ReferenceRepairs
         // using to add. A file that can reach the old namespace no other way may mean a type of its own: it is
         // left to a person.
         var moves = map.Moves.Where(m => m.To.Name == name && Reaches(area, m.To)
-            && (m.From.Namespace is { } from && (usings.Contains(from) || declared.Any(d => d == from || d.StartsWith(from + ".", StringComparison.Ordinal)))))
+            && m.From.Namespace is { } from && (usings.Contains(from) || declared.Any(d => d == from || d.StartsWith(from + ".", StringComparison.Ordinal))))
             .Select(m => m.To).Distinct().ToList();
         var own = moves.Where(h => TypeMap.AreaOf(h.Project) == area).ToList();
         return (own.Count > 0 ? own : moves) is [var home]
