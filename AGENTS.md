@@ -182,3 +182,6 @@ file-byte violations and C# style violations in the tool.
   `git reset --hard`. The merge never writes files ignored by the solution's git.
 - CI uses minimal permissions. nuget.org publishing uses Trusted Publishing without stored keys. A NuGet
   version can be unlisted, not deleted.
+
+## Plan-first (закон сессий)
+Работа строго по plan.kdl: 1) пункт в плане (`plan.mjs add`), 2) уточнение why/how/done_when, 3) приоритизация позицией, 4) `plan.mjs take` - и только потом действия. Хотфикс без пункта плана запрещен, без исключений "мелочи". Отметка прогресса: plan.mjs done + check.
