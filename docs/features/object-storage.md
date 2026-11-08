@@ -1,7 +1,8 @@
 # Object storage
 
-`--Storage` adds S3-compatible object storage to `Common` and registers it in the service: files a
-service keeps outside its database, such as documents, images, generated PDFs.
+`--Storage` adds a project `Capabilities.Storage` to `src/capabilities` with S3-compatible object
+storage and registers it in the service: files a service keeps outside its database, such as
+documents, images, generated PDFs.
 
 ```csharp
 public class InvoiceFiles(IS3ObjectStorage storage)

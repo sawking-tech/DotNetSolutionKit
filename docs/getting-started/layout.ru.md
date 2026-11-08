@@ -23,7 +23,7 @@ acme-shop/
 │   │   ├── Acme.Shop.Common.Web/              хост: конвейер, ошибки, Swagger, аутентификация
 │   │   ├── Acme.Shop.Common.Testing/          тестовая оснастка, без тестового фреймворка
 │   │   └── Acme.Shop.Common.Tests/            тесты Common
-│   ├── capabilities/              проект на флаг: Capabilities.Mongo, Capabilities.Notifications
+│   ├── capabilities/              проект на флаг: Capabilities.Mongo, Capabilities.ClickHouse, Capabilities.Storage, Capabilities.Notifications
 │   └── services/
 │       ├── Acme.Shop.All.sln      все проекты решения
 │       └── Acme.Shop.Orders/      один сервис, четыре проекта (ниже)

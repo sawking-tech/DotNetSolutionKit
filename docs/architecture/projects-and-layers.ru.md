@@ -24,6 +24,9 @@ flowchart BT
         CN["Capabilities.Notifications, with --Notify email"]
         CM["Capabilities.Mongo, with --MongoDB"] --> C
         CM --> CC
+        CCH["Capabilities.ClickHouse, with --ClickHouse"] --> C
+        CCH --> CC
+        CS["Capabilities.Storage, with --Storage"] --> C
     end
     subgraph service ["src/services/#lt;Service#gt;"]
         D["#lt;Service#gt;"] --> C
@@ -63,6 +66,10 @@ flowchart BT
 | `Capabilities.Notifications.Tests` | Тесты почты | `Capabilities.Notifications`, `Common.Testing` |
 | `Capabilities.Mongo` | MongoDB `--MongoDB`: хранилище, его настройки, проверка здоровья. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
 | `Capabilities.Mongo.Tests` | Тесты MongoDB | `Capabilities.Mongo`, `Common`, `Common.Testing` |
+| `Capabilities.ClickHouse` | ClickHouse флага `--ClickHouse`: подключения, страж схемы, проверка готовности. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
+| `Capabilities.ClickHouse.Tests` | Тесты ClickHouse | `Capabilities.ClickHouse`, `Common`, `Common.Testing` |
+| `Capabilities.Storage` | Объектное хранилище флага `--Storage`: `IS3ObjectStorage`, его настройки, null-заглушка. На него ссылается сервис с флагом, поэтому AWS SDK есть только у этого сервиса | `Common` |
+| `Capabilities.Storage.Tests` | Тесты объектного хранилища | `Capabilities.Storage`, `Common`, `Common.Testing` |
 
 ## Сервис
 
