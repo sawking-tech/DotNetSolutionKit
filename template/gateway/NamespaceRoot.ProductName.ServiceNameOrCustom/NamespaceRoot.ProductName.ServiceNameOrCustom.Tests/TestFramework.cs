@@ -6,6 +6,7 @@ global using NUnit.Framework;
 global using Shouldly;
 using System.Runtime.CompilerServices;
 using NamespaceRoot.ProductName.Common.Tests;
+using NamespaceRoot.ProductName.Framework.Testing;
 //#if (TestFramework == "xunit")
 using Xunit.v3;
 //#endif

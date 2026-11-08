@@ -51,7 +51,7 @@ The pipeline also covers what the simple versions get wrong:
   instead of disappearing.
 
 Details of each phase and its rules are in
-[Events/Readme.md](../../template/src/common/NamespaceRoot.ProductName.Common.Application/Events/Readme.md).
+[Events/Readme.md](../../template/src/framework/NamespaceRoot.ProductName.Framework.DomainEvents/Readme.md).
 
 ## Alternatives considered
 

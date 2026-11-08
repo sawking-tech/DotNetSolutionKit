@@ -18,11 +18,12 @@ src/
 ├── common/                         # shared by every service
 │   ├── NamespaceRoot.ProductName.Common                 # domain kernel: Entity, AggregateRoot, events, specifications, exceptions
 │   ├── NamespaceRoot.ProductName.Common.Contracts       # what crosses a service boundary: routes, requests, responses, bus messages
-│   ├── NamespaceRoot.ProductName.Common.Application     # domain event pipeline, idempotency, permissions, messaging abstractions
+│   ├── NamespaceRoot.ProductName.Common.Application     # idempotency, permissions, messaging abstractions
 │   ├── NamespaceRoot.ProductName.Common.Infrastructure  # EF Core base classes, interceptors, repositories, schema guard, MassTransit
 │   ├── NamespaceRoot.ProductName.Common.Web             # web pipeline: errors, validation, Swagger, authentication, permissions
 │   └── NamespaceRoot.ProductName.Common.Testing         # test infrastructure for the services' tests
 ├── capabilities/                   # a project per capability the solution uses (email, MongoDB), referenced by the services that use it
+├── framework/                      # the systems of work, always on, package candidates: three-phase domain events, the portable testing harness
 └── services/
     ├── NamespaceRoot.ProductName.All.sln                # every project; the entry point
     └── NamespaceRoot.ProductName.<Service>/
