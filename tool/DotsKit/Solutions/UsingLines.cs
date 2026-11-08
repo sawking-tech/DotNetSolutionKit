@@ -38,6 +38,13 @@ internal static partial class UsingLines
 
         var last = lines.FindLastIndex(l => AnyUsing().IsMatch(l));
         lines.Insert(last + 1, $"using {ns};");
+
+        // The style of the template's own edits: the usings stand apart from what follows them.
+        if (lines.ElementAtOrDefault(last + 2) is { Length: > 0 })
+        {
+            lines.Insert(last + 2, "");
+        }
+
         return LineEndings.Apply(string.Join('\n', lines), newline);
     }
 
