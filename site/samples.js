@@ -627,7 +627,7 @@ function releaseWindow(body, hashes = null) {
   const commit = hashes ? `
     <div class="releases__find releases__commit" role="group" aria-label="Commit">
       <p class="releases__hint" role="status"></p>
-      <span aria-hidden="true">#</span><input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Commit" disabled>
+      <span aria-hidden="true">#</span><input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="7" aria-label="Commit" disabled>
     </div>` : "";
   return `<div class="releases">
     <div class="releases__find" role="group" aria-label="Version">
@@ -643,8 +643,10 @@ function releaseWindow(body, hashes = null) {
 function releaseItem(report) {
   const r = lastRun(report);
   const key = report.version.replace(/^v/, "");
+  // the commit a release's tag was cut from, resolved by the samples' report; the field's form is 7 hex
+  const from = SHA_KEY.test(report.templateCommit ?? "") ? report.templateCommit.slice(0, 7) : "";
   const tests = r.tests ? `${r.tests.passed} / ${r.tests.total}` : "-";
-  return `<table class="releases__item" data-version="${esc(key)}">
+  return `<table class="releases__item" data-version="${esc(key)}"${from ? ` data-commit="${esc(from)}"` : ""}>
       <thead><tr>${releaseColumns().map((title) => `<th>${title}</th>`).join("")}</tr></thead>
       <tbody><tr><td>${versionLink(report.version)}</td><td>${result(r)}</td><td>${tests}</td>
         <td>${fmtPct(r.coverage?.line)}</td><td>${fmtPct(r.coverage?.branch)}</td><td>${report.runs.length}</td>
@@ -662,25 +664,42 @@ let releaseView = null;
 
 // the shared mechanics wired to the drawn items: the buttons and a scroll keep the fields, the
 // fields and the buttons move the window. Both fields are the one mask with its alphabet: the
-// version field takes v-releases and -rc as typed, the commit field - hashes; a row at the top
-// fills its own kind's field and empties the other, until a reader types there
+// version field takes v-releases and -rc as typed, the commit field - hashes in their 7-hex form,
+// never more. A row at the top fills its own kind's field; the other stands empty, except that a
+// release row carries the commit its tag was cut from (the report's templateCommit) and a row
+// between releases greys the nearest previous version into the version field's placeholders - a
+// hint, not a value, so a teleport or a focus never takes it
 function mountReleases(root, reports) {
   const box = root.querySelector(".releases");
   if (!box || !reports.length) return;
   const list = box.querySelector(".releases__list");
   const { scrollWindow, versionField } = window.VersionWindow;
   const numeric = (version) => /^\d+\.\d+\.\d+/.test(version);
-  const typed = reports.map((report) => report.version.replace(/^v/, ""));
+  const typed = reports.map((report) => report.version.replace(/^v/, "")).filter(numeric);
   const hashes = reports.map((report) => report.version).filter((version) => SHA_KEY.test(version));
+  const newestParts = typed[0]?.split(".") ?? ["0", "0", "0"];
+  const fieldParts = [...box.querySelectorAll('.releases__find:not(.releases__commit) input')];
+  const fillPlaceholders = (key) => key.split(".").forEach((value, i) => { if (fieldParts[i]) fieldParts[i].placeholder = value; });
   let field, commit;
   releaseView = scrollWindow(list, box.querySelector(".releases__up"), box.querySelector(".releases__down"), (version) => {
-    if (SHA_KEY.test(version)) { commit.show(version); field.clear(); }
-    else if (numeric(version)) { field.show(version); commit.clear(); }
+    const item = [...list.children].find((own) => own.dataset.version === version);
+    if (SHA_KEY.test(version)) {
+      commit.show(version);
+      field.clear();
+      // the nearest release before this commit: where the branch stood when it moved to it
+      let prev = item?.previousElementSibling;
+      while (prev && !numeric(prev.dataset.version)) prev = prev.previousElementSibling;
+      fillPlaceholders(prev?.dataset.version ?? newestParts.join("."));
+    } else if (numeric(version)) {
+      field.show(version);
+      fillPlaceholders(newestParts.join("."));
+      commit.show(item?.dataset.commit ?? "");
+    }
   });
-  field = versionField([...box.querySelectorAll('.releases__find:not(.releases__commit) input')], list, typed.filter(numeric), releaseView.to);
+  field = versionField(fieldParts, list, typed, releaseView.to);
   commit = hashes.length
     ? versionField([...box.querySelectorAll(".releases__commit input")], list, hashes, releaseView.to,
-        { strip: /[^0-9a-f]/g, cut: (key) => [key], spell: (key) => key[0] })
+        { strip: /[^0-9a-f]/g, cut: (key) => [key.slice(0, 7)], spell: (key) => key[0].slice(0, 7) })
     : { show() {}, clear() {} };
   releaseView.edges();
 }

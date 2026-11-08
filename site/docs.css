@@ -56,13 +56,15 @@
 .doc .releases { grid-template-columns: 1fr auto auto auto auto; grid-template-areas: "title find commit up down" "list list list list list"; }
 .doc .releases > h3 { grid-area: title; margin: 0; }
 .doc .releases__commit { grid-area: commit; }
-.doc .releases__commit input { width: 14ch; text-align: left; }
-.doc .releases__list { height: 11rem; }
+.doc .releases__commit input { width: 9ch; text-align: left; }
+/* six rows read in the window, as the home page's does */
+.doc .releases__list { height: 30rem; }
 .doc .releases__item { display: table; width: 100%; margin: 0 0 1.9rem; overflow: visible; border-collapse: collapse; }
-.doc .releases__item th { padding: 0 0.9rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; }
-.doc .releases__item td { padding: 0.3rem 0.9rem 0.6rem 0; }
+/* values sit at the centre of their cells, as the home page's digest reads */
+.doc .releases__item th { padding: 0 0.9rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; text-align: center; }
+.doc .releases__item td { padding: 0.3rem 0.9rem 0.6rem 0; text-align: center; }
 @media (max-width: 480px) {
   /* the phone layout of site.css gives the window three columns; the commit pill takes its own row */
   .doc .releases { grid-template-columns: 1fr auto auto; grid-template-areas: "title find up" "commit commit commit" "list list list" "down down down"; }
-  .doc .releases__list { height: 13rem; }
+  .doc .releases__list { height: 30rem; }
 }
