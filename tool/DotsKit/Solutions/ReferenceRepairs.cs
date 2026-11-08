@@ -84,6 +84,12 @@ internal static partial class ReferenceRepairs
     private const string TypeNotFound = "CS0246";
     private const string NotInNamespace = "CS0234";
 
+    /// <summary>A name used in a body that does not resolve: MSBuild writes CS0103, while a signature writes CS0246.</summary>
+    private const string NameNotInContext = "CS0103";
+
+    /// <summary>An extension method no receiver type has: MSBuild names the receiver first, the method second.</summary>
+    private const string NoExtensionMethod = "CS1061";
+
     /// <summary>A name MSBuild quotes in an error: single quotes in English, double in other locales; the generics follow.</summary>
     [GeneratedRegex(@"['""](?<name>[\w.]+)(<[^'""]*>)?['""]")]
     private static partial Regex QuotedName();
@@ -127,7 +133,7 @@ internal static partial class ReferenceRepairs
 
     private static IEnumerable<Repair> Of(BuildError error, TypeMap map, string root, Func<string, string> textOf)
     {
-        if (error.Code is not (TypeNotFound or NotInNamespace))
+        if (error.Code is not (TypeNotFound or NotInNamespace or NameNotInContext or NoExtensionMethod))
         {
             return [];
         }
@@ -140,8 +146,10 @@ internal static partial class ReferenceRepairs
         }
 
         var area = TypeMap.AreaOf(Relative(root, error.Project));
-        var name = quoted[0].Groups["name"].Value;
-        var missing = quoted.Count > 1 ? $"{quoted[1].Groups["name"].Value}.{name}" : name;
+        var name = error.Code == NoExtensionMethod
+            ? quoted.Count > 1 ? quoted[1].Groups["name"].Value : quoted[0].Groups["name"].Value
+            : quoted[0].Groups["name"].Value;
+        var missing = quoted.Count > 1 && error.Code != NoExtensionMethod ? $"{quoted[1].Groups["name"].Value}.{name}" : name;
         var text = textOf(error.File);
         var usings = UsingLines.Of(text);
         var given = usings
@@ -154,7 +162,7 @@ internal static partial class ReferenceRepairs
             return given.SelectMany(g => ForGivenUp(error.File, error.Project, g.Using, g.Moves, root, text));
         }
 
-        return error.Code == TypeNotFound ? ForType(error, name, area, map, usings, UsingLines.Declared(text), root) : [];
+        return error.Code == NotInNamespace ? [] : ForType(error, name, area, map, usings, UsingLines.Declared(text), root);
     }
 
     /// <summary>

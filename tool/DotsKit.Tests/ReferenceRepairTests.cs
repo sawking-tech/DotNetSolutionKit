@@ -104,6 +104,23 @@ internal sealed class ReferenceRepairTests
     }
 
     [Test]
+    public void AnExtensionMethodThatMoved_IsFollowedByItsName()
+    {
+        // MSBuild names the receiver first, the method second, in the machine's locale.
+        var extensions = TypeMap.Between(
+            TypeIndex.Of([(Common, "namespace Acme.Shop.Common.Tests;\npublic static class Setup\n{\n    public static IServiceCollection AddDomainEvents(this IServiceCollection services) => services;\n}\n")]),
+            TypeIndex.Of([(Framework, "namespace Acme.Shop.Framework.Testing;\npublic static class Setup\n{\n    public static IServiceCollection AddDomainEvents(this IServiceCollection services) => services;\n}\n")]));
+        var services = Path.Combine(Root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.API/Acme.Shop.Orders.API.csproj");
+
+        var repairs = ReferenceRepairs.Decide(
+            [new BuildError(OrderFile, "CS1061", "\"IServiceCollection\" не содержит определения \"AddDomainEvents\"", services)],
+            extensions, Root, _ => "namespace Acme.Shop.Common.Tests.Integration;\npublic class Endpoint\n{\n}\n");
+
+        repairs.ShouldBe([new AddUsing(OrderFile, "Acme.Shop.Framework.Testing"),
+            new AddReference(Path.GetFullPath(services), Path.GetFullPath(Path.Combine(Root, Framework)))]);
+    }
+
+    [Test]
     public void AUsingOfAGivenUpNamespace_IsReplaced_AndTheProjectItsTypesWentToIsReferenced()
     {
         var repairs = ReferenceRepairs.Decide(

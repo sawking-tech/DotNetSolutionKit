@@ -38,6 +38,10 @@ internal sealed partial class TypeIndex
             .Select(file => (Relative(root, project), File.ReadAllText(file)))));
     }
 
+    /// <summary>An extension method reads as a name the repair can follow the way it follows a type: <c>public static X Name(this ...)</c>.</summary>
+    [GeneratedRegex(@"^\s*public\s+static\s+(?!class\s|partial\s+class\s)[\w.<>,\[\]?]+\s+(?<name>\w+)\s*\(\s*this\s+", RegexOptions.Multiline)]
+    private static partial Regex ExtensionMethod();
+
     /// <summary>The index of sources given as the project each belongs to and its text.</summary>
     public static TypeIndex Of(IEnumerable<(string Project, string Text)> sources) =>
         new(sources.SelectMany(s => TypesOf(s.Project, s.Text)));
@@ -54,7 +58,8 @@ internal sealed partial class TypeIndex
             return [];
         }
 
-        return PublicType().Matches(text).Select(m => new TypeHome(m.Groups["name"].Value, ns.Groups["name"].Value, project));
+        return PublicType().Matches(text).Select(m => new TypeHome(m.Groups["name"].Value, ns.Groups["name"].Value, project))
+            .Concat(ExtensionMethod().Matches(text).Select(m => new TypeHome(m.Groups["name"].Value, ns.Groups["name"].Value, project)));
     }
 
     /// <summary>The sources of a project: its folder and below, without a folder of another project inside it.</summary>

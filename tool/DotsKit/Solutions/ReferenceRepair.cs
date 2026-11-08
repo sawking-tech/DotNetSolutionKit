@@ -123,12 +123,22 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
     /// <param name="map">The types the template moved between the solution's version and the next.</param>
     /// <param name="conflicts">The files left in conflict, relative to the root.</param>
     /// <param name="ct">Cancels the repair; what is written stays for git to show.</param>
-    public async Task<IReadOnlyList<Repair>> BeforeBuildAsync(string root, TypeMap map, IReadOnlyList<string> conflicts, CancellationToken ct)
+    /// <param name="ofThisStepOnly">Whether a file is of a part this step merges or one merged before; files of the parts
+    /// not merged yet are left to their own step, so the two sides of a later merge never carry two repairs of one file.</param>
+    public async Task<IReadOnlyList<Repair>> BeforeBuildAsync(string root, TypeMap map, IReadOnlyList<string> conflicts, CancellationToken ct, Func<string, bool>? ofThisStepOnly = null)
     {
         var left = conflicts.Select(c => Path.GetFullPath(Path.Combine(root, c))).ToHashSet(PathComparer);
-        var repairs = ReferenceRepairs.FromText(SourceFiles(root).Where(f => !left.Contains(f.File) && !left.Contains(f.Project)), map, root);
+        var files = SourceFiles(root).Where(f => !left.Contains(f.File) && !left.Contains(f.Project));
+        if (ofThisStepOnly is not null)
+        {
+            files = files.Where(f => ofThisStepOnly(Relative(root, f.File)));
+        }
+
+        var repairs = ReferenceRepairs.FromText(files, map, root);
         return repairs.Count == 0 ? [] : await writer.ApplyAsync(repairs, ct);
     }
+
+    private static string Relative(string root, string path) => Path.GetRelativePath(root, path).Replace('\\', '/');
 
     private static StringComparer PathComparer => OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
 
