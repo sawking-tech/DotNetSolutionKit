@@ -629,7 +629,7 @@ function releaseWindow(body, hashes = null) {
       <span aria-hidden="true">#</span><input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="7" aria-label="Commit" disabled>
     </div>` : "";
   return `<div class="releases">
-    <h3>${STR.releases}</h3>
+    <h2>${STR.releases}</h2>
     <div class="releases__find" role="group" aria-label="Version">
       <p class="releases__hint" role="status"></p>
       <span aria-hidden="true">v</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Major" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Minor" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Patch" disabled>
