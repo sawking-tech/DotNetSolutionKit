@@ -84,8 +84,9 @@ internal static partial class ReferenceRepairs
     private const string TypeNotFound = "CS0246";
     private const string NotInNamespace = "CS0234";
 
-    [GeneratedRegex(@"^The type or namespace name '(?<name>[\w.]+)(<[^']*>)?'( does not exist in the namespace '(?<ns>[\w.]+)')?")]
-    private static partial Regex Missing();
+    /// <summary>A name MSBuild quotes in an error: single quotes in English, double in other locales; the generics follow.</summary>
+    [GeneratedRegex(@"['""](?<name>[\w.]+)(<[^'""]*>)?['""]")]
+    private static partial Regex QuotedName();
 
     /// <param name="errors">The errors of the build that failed.</param>
     /// <param name="map">The types the template moved between the solution's version and the next.</param>
@@ -126,14 +127,21 @@ internal static partial class ReferenceRepairs
 
     private static IEnumerable<Repair> Of(BuildError error, TypeMap map, string root, Func<string, string> textOf)
     {
-        if (error.Code is not (TypeNotFound or NotInNamespace) || Missing().Match(error.Message) is not { Success: true } m)
+        if (error.Code is not (TypeNotFound or NotInNamespace))
+        {
+            return [];
+        }
+
+        // MSBuild writes the message in the locale of its machine: the type is the first quoted name, its namespace the second.
+        var quoted = QuotedName().Matches(error.Message);
+        if (quoted.Count == 0)
         {
             return [];
         }
 
         var area = TypeMap.AreaOf(Relative(root, error.Project));
-        var name = m.Groups["name"].Value;
-        var missing = m.Groups["ns"].Success ? $"{m.Groups["ns"].Value}.{name}" : name;
+        var name = quoted[0].Groups["name"].Value;
+        var missing = quoted.Count > 1 ? $"{quoted[1].Groups["name"].Value}.{name}" : name;
         var text = textOf(error.File);
         var usings = UsingLines.Of(text);
         var given = usings
@@ -146,7 +154,7 @@ internal static partial class ReferenceRepairs
             return given.SelectMany(g => ForGivenUp(error.File, error.Project, g.Using, g.Moves, root, text));
         }
 
-        return error.Code == TypeNotFound ? ForType(error, name, area, usings, map, root) : [];
+        return error.Code == TypeNotFound ? ForType(error, name, area, map, usings, UsingLines.Declared(text), root) : [];
     }
 
     /// <summary>
@@ -168,9 +176,16 @@ internal static partial class ReferenceRepairs
     /// move out of a namespace the file uses counts: the file found the type there before, and a type of the team's
     /// that has a template's name is not the template's.
     /// </summary>
-    private static IEnumerable<Repair> ForType(BuildError error, string name, string? area, IReadOnlyList<string> usings, TypeMap map, string root)
+    private static IEnumerable<Repair> ForType(BuildError error, string name, string? area, TypeMap map, IReadOnlyList<string> usings, IReadOnlyList<string> declared, string root)
     {
-        var moves = map.Moves.Where(m => m.To.Name == name && Reaches(area, m.To) && usings.Contains(m.From.Namespace)).Select(m => m.To).Distinct().ToList();
+        // The error is the evidence the file names the type. The file need not have a using of the old namespace:
+        // C# resolves a name from the namespace the file declares and its parents, so a type of the old namespace
+        // is visible with no using from the namespace itself or one nested in it - then the name alone decides the
+        // using to add. A file that can reach the old namespace no other way may mean a type of its own: it is
+        // left to a person.
+        var moves = map.Moves.Where(m => m.To.Name == name && Reaches(area, m.To)
+            && (m.From.Namespace is { } from && (usings.Contains(from) || declared.Any(d => d == from || d.StartsWith(from + ".", StringComparison.Ordinal)))))
+            .Select(m => m.To).Distinct().ToList();
         var own = moves.Where(h => TypeMap.AreaOf(h.Project) == area).ToList();
         return (own.Count > 0 ? own : moves) is [var home]
             ? [new AddUsing(error.File, home.Namespace), .. References(error.Project, [home.Project], root)]
