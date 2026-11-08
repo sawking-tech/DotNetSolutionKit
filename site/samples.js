@@ -40,7 +40,6 @@ const CARD = {
 };
 // The samples change at most once a day, when they are regenerated; a copy younger than this is drawn without
 // asking the network, an older one is drawn and checked behind it.
-const CACHE_FRESH_MS = 60 * 60 * 1000;
 const HIGHLIGHT_MAX_CHARS = 300000;   // a larger file is shown plain: highlighting it holds up a phone
 const HLJS = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0";
 const SPARK = { w: 100, h: 24, pad: 2 };
@@ -834,20 +833,6 @@ function route() {
   else renderOverview();
 }
 
-/* ==== NEWER DATA ====
-   Data that came behind a copy already on the page does not redraw it under the reader's hand: a veil
-   and a note say it is here, and OK draws it. */
-function offerUpdate(fresh) {
-  const note = el("update");
-  note.querySelector("button").onclick = () => {
-    note.close();
-    state.data.clear(); loading.clear(); state.filled.clear();
-    useCache(fresh);
-    route();
-  };
-  note.showModal();
-}
-
 /* ==== THE START ====
    With a copy in the browser the page is drawn from it at once, and checked behind it when the copy is
    old. Without one, the frame of the sample the address names is on the sheet before anything is
@@ -860,11 +845,16 @@ async function start() {
   if (copy) {
     useCache(copy);
     route();
-    if (Date.now() - copy.at < CACHE_FRESH_MS) return;
+    // the copy is a first paint and an offline fallback, not what the page stands on: fresh data is
+    // always asked for behind it and redraws the page on its own when it differs
     try {
       const fresh = await fetchCopy();
       writeCache(fresh);
-      if (!sameData(fresh, copy)) offerUpdate(fresh);
+      if (!sameData(fresh, copy)) {
+        state.data.clear(); loading.clear(); state.filled.clear();
+        useCache(fresh);
+        route();
+      }
     } catch { /* offline: the copy stays on the page */ }
     return;
   }
