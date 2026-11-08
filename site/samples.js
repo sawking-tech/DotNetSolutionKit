@@ -568,7 +568,6 @@ function renderFrame(name) {
     <h3>${STR.lastRun}</h3>
     <div class="run-head">${ph(FRAME.runHead)}</div>
     <div class="meters">${meterFrame(STR.testsTitle)}${meterFrame(STR.linesTitle)}${meterFrame(STR.branchesTitle)}</div>
-    <h3>${STR.releases}</h3>
     ${releaseWindow(`<table class="releases__item"><tbody><tr>${FRAME.row.map((w) => `<td>${ph(w)}</td>`).join("")}</tr></tbody></table>`)}`;
 }
 
@@ -630,6 +629,7 @@ function releaseWindow(body, hashes = null) {
       <span aria-hidden="true">#</span><input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="7" aria-label="Commit" disabled>
     </div>` : "";
   return `<div class="releases">
+    <h2>${STR.releases}</h2>
     <div class="releases__find" role="group" aria-label="Version">
       <p class="releases__hint" role="status"></p>
       <span aria-hidden="true">v</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Major" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Minor" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Patch" disabled>
@@ -716,7 +716,6 @@ function renderBranch(branch) {
     <div class="run-head">${result(run)}<span>${fmtDate(run.started)}</span><span>${fmtDuration(run.seconds)}</span>
       <a href="${esc(run.url)}">${STR.run}</a></div>
     ${renderMeters(reports)}
-    <h3>${STR.releases}</h3>
     ${renderReleases(reports)}`;
 }
 

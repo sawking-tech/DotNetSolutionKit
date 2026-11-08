@@ -54,26 +54,35 @@
    column widths (in ems of the item's size), so a narrow screen shrinks the whole table, cells wrap
    their words, and the lines of all rows stand strictly one under another. */
 .doc .releases { grid-template-columns: 1fr auto auto auto auto; grid-template-areas: "title commit find up down" "list list list list list"; }
-.doc .releases > h3 { grid-area: title; margin: 0; }
+.doc .releases > h2, .doc .releases > h3 { grid-area: title; margin: 0; }
 .doc .releases__commit { grid-area: commit; }
 .doc .releases__commit input { width: 9ch; text-align: left; }
 /* six rows read in the window, as the home page's does */
-.doc .releases__list { height: 30rem; }
+.doc .releases__list { height: 23rem; }
 /* one column measure for every row: fixed layout over the shared widths, long words wrap, no line
    of any row pushes the table wider than the window */
-.doc .releases__item { display: table; width: 100%; table-layout: fixed; margin: 0 0 1.9rem; overflow: visible; border-collapse: collapse; }
-.doc .releases__item th { padding: 0 0.6rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; text-align: center; overflow-wrap: anywhere; }
-.doc .releases__item td { padding: 0.3rem 0.6rem 0.6rem 0; text-align: center; overflow-wrap: anywhere; }
-.doc .releases__item th:nth-child(2) { width: 4.4em; }
-.doc .releases__item th:nth-child(3) { width: 4.2em; }
-.doc .releases__item th:nth-child(4) { width: 3.8em; }
-.doc .releases__item th:nth-child(5) { width: 4.2em; }
-.doc .releases__item th:nth-child(6) { width: 1.6em; }
-.doc .releases__item th:nth-child(7) { width: 5.8em; }
+.doc .releases__item { display: table; width: 100%; table-layout: fixed; margin: 0 0 1.1rem; overflow: visible; border-collapse: collapse; }
+.doc .releases__item th { padding: 0 0.6rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; text-align: center; white-space: nowrap; }
+.doc .releases__item td { padding: 0.3rem 0.6rem 0.6rem 0; text-align: center; white-space: nowrap; }
+.doc .releases__item th:nth-child(1) { width: 23%; }
+.doc .releases__item th:nth-child(2) { width: 13%; }
+.doc .releases__item th:nth-child(3) { width: 16%; }
+.doc .releases__item th:nth-child(4) { width: 12%; }
+.doc .releases__item th:nth-child(5) { width: 13%; }
+.doc .releases__item th:nth-child(6) { width: 8%; }
+.doc .releases__item th:nth-child(7) { width: 15%; }
+/* a narrow screen keeps the table whole: the widths above are ems of the item's size, so one smaller
+   size shrinks every column and the row; headers may take a second line, values never scroll sideways */
+@media (max-width: 640px) {
+  .doc .releases__item { font-size: 0.72rem; }
+  .doc .releases__item th { font-size: 0.66rem; white-space: normal; }
+  .doc .releases__item td { padding: 0.2rem 0.3rem 0.35rem 0; white-space: normal; }
+  .doc .releases__list { height: 20rem; }
+}
 @media (max-width: 480px) {
   /* the phone layout of site.css gives the window three columns; the pills take a row each */
   .doc .releases { grid-template-columns: 1fr auto auto; grid-template-areas: "title commit up" "find find find" "list list list" "down down down"; }
-  .doc .releases__list { height: 30rem; }
+  .doc .releases__list { height: 23rem; }
   .doc .releases__item { font-size: 0.8rem; }
   .doc .releases__item th { font-size: 0.68rem; }
 }
