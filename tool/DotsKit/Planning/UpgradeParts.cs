@@ -43,20 +43,27 @@ internal static class UpgradeParts
     public static bool IsShared(string part) => part is Shared or Capabilities or Common || part.StartsWith(CommonProject, StringComparison.Ordinal);
 
     /// <summary>
-    /// The parts of a tree in the order they go: shared, Common's own files, Common's projects - a project before
-    /// those that reference it, so a type the template moves down to a project others reference arrives there before
-    /// it leaves the old one - then the capabilities, which use Common, then the service folders.
+    /// The parts of a tree in the order they go: shared, Common's own files, then Common's projects and the
+    /// capabilities in the order of what they reference - a project before those that reference it, so a type the
+    /// template moves down to a project others reference arrives there before it leaves the old one. The
+    /// capabilities use Common, so by default they go after its projects; a type the template moves between a
+    /// project of Common and the capabilities puts its target before its source. Then the service folders.
     /// </summary>
     /// <param name="paths">The files of the tree, relative to its root.</param>
-    /// <param name="references">The parts of Common each part of Common references; none given, Common's projects go by layer.</param>
+    /// <param name="references">The parts each shared part references; none given, Common's projects go by layer and the capabilities after them.</param>
     public static IReadOnlyList<string> In(IEnumerable<string> paths, IReadOnlyDictionary<string, IReadOnlySet<string>>? references = null)
     {
         var found = paths.Select(Of).Distinct(StringComparer.Ordinal).ToList();
         var projects = found.Where(p => p.StartsWith(CommonProject, StringComparison.Ordinal)).OrderBy(LayerOf).ThenBy(p => p, StringComparer.Ordinal).ToList();
         // Only the parts the tree has: most solutions have no src/capabilities, and a part that merges nothing would
         // still ask for a yes, build the solution and need a commit of the manifest alone.
+        if (found.Contains(Capabilities))
+        {
+            projects.Add(Capabilities);
+        }
+
         return [Shared, .. found.Contains(Common) ? [Common] : Array.Empty<string>(), .. DependenciesFirst(projects, references ?? new Dictionary<string, IReadOnlySet<string>>()),
-            .. found.Contains(Capabilities) ? [Capabilities] : Array.Empty<string>(), .. found.Where(p => !IsShared(p)).Order(StringComparer.Ordinal)];
+            .. found.Where(p => !IsShared(p)).Order(StringComparer.Ordinal)];
     }
 
     /// <summary>
@@ -75,6 +82,12 @@ internal static class UpgradeParts
 
     /// <summary>The part of Common a project file of the solution is, when it is one: common/&lt;project&gt;.</summary>
     public static string? CommonPartOf(string projectPath) => Of(projectPath) is var part && part.StartsWith(CommonProject, StringComparison.Ordinal) ? part : null;
+
+    /// <summary>
+    /// The part a project of the shared code takes part in the order with: a project of Common as common/&lt;project&gt;,
+    /// else the capabilities when the project is one of theirs; null for a project of a service or the shared part itself.
+    /// </summary>
+    public static string? OrderablePartOf(string projectPath) => CommonPartOf(projectPath) ?? (Of(projectPath) == Capabilities ? Capabilities : null);
 
     /// <summary>
     /// The parts in an order where each comes after those it references, the first by layer among the ready; parts

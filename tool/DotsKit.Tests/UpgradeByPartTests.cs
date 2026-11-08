@@ -21,6 +21,10 @@ internal sealed class UpgradeByPartTests
         UpgradeParts.Of("src/Directory.Packages.props").ShouldBe(UpgradeParts.Shared);
         UpgradeParts.Of("src/services/Acme.Shop.All.sln").ShouldBe(UpgradeParts.Shared);
         UpgradeParts.Of("deploy/compose/compose.yml").ShouldBe(UpgradeParts.Shared);
+        UpgradeParts.OrderablePartOf("src/common/Acme.Shop.Common.Infrastructure/Acme.Shop.Common.Infrastructure.csproj").ShouldBe("common/Acme.Shop.Common.Infrastructure");
+        UpgradeParts.OrderablePartOf("src/capabilities/Acme.Shop.Capabilities.ClickHouse/Acme.Shop.Capabilities.ClickHouse.csproj").ShouldBe(UpgradeParts.Capabilities);
+        UpgradeParts.OrderablePartOf($"src/services/{Orders}/{Orders}.API/{Orders}.API.csproj").ShouldBeNull();
+        UpgradeParts.OrderablePartOf("Directory.Build.props").ShouldBeNull();
     }
 
     [Test]
@@ -54,6 +58,41 @@ internal sealed class UpgradeByPartTests
 
         UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, UpgradeParts.Common, "common/Acme.Shop.Common.Domain", "common/Acme.Shop.Common.Web",
             "common/Acme.Shop.Common.Application"]);
+    }
+
+    [Test]
+    public void TheCapabilities_ByDefaultGoAfterTheProjectsOfCommon()
+    {
+        string[] paths = ["src/common/Acme.Shop.Common.Infrastructure/i.cs", "src/capabilities/Acme.Shop.Capabilities.ClickHouse/c.cs",
+            "src/common/Acme.Shop.Common.Web/w.cs"];
+
+        UpgradeParts.In(paths).ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common.Infrastructure", "common/Acme.Shop.Common.Web", UpgradeParts.Capabilities]);
+    }
+
+    [Test]
+    public void TheCapabilities_GoBeforeTheProjectOfCommonATypeLeavesToThem()
+    {
+        string[] paths = ["src/common/Acme.Shop.Common.Infrastructure/i.cs", "src/capabilities/Acme.Shop.Capabilities.ClickHouse/c.cs",
+            "src/common/Acme.Shop.Common.Web/w.cs"];
+        var references = new Dictionary<string, IReadOnlySet<string>>
+        {
+            ["common/Acme.Shop.Common.Infrastructure"] = new HashSet<string> { UpgradeParts.Capabilities },
+        };
+
+        UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common.Web", UpgradeParts.Capabilities,
+            "common/Acme.Shop.Common.Infrastructure"]);
+    }
+
+    [Test]
+    public void AProjectOfCommon_GoesBeforeTheCapabilitiesATypeLeavesToIt()
+    {
+        string[] paths = ["src/common/Acme.Shop.Common.Domain/d.cs", "src/capabilities/Acme.Shop.Capabilities.ClickHouse/c.cs"];
+        var references = new Dictionary<string, IReadOnlySet<string>>
+        {
+            [UpgradeParts.Capabilities] = new HashSet<string> { "common/Acme.Shop.Common.Domain" },
+        };
+
+        UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common.Domain", UpgradeParts.Capabilities]);
     }
 
     [Test]

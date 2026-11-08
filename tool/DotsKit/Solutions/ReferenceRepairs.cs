@@ -18,13 +18,15 @@ internal sealed record TypeMap(IReadOnlyList<TypeMove> Moves, IReadOnlySet<strin
             after.All.Select(t => t.Namespace).ToHashSet(StringComparer.Ordinal));
 
     /// <summary>
-    /// The moves a step of an upgrade a part at a time follows: those whose two projects are merged. A namespace a
-    /// move out of which waits for its part still counts as kept, so the usings of it stay until that part.
+    /// The moves a step of an upgrade a part at a time follows: those that go to a merged project. The old files of
+    /// a move leave when its target merges - the merge follows the rename - so a type whose new home is merged is
+    /// gone from the old namespace even before the part the old files were in; the usings of a namespace a not yet
+    /// followed move leaves stay until the move's target merges.
     /// </summary>
     /// <param name="merged">Whether a project, relative to the root, is in a part merged so far or in this one.</param>
     public TypeMap Within(Func<string, bool> merged)
     {
-        var waiting = Moves.Where(m => !merged(m.From.Project) || !merged(m.To.Project)).ToList();
+        var waiting = Moves.Where(m => !merged(m.To.Project)).ToList();
         return waiting.Count == 0
             ? this
             : new([.. Moves.Except(waiting)], NextNamespaces.Union(waiting.Select(m => m.From.Namespace)).ToHashSet(StringComparer.Ordinal));
