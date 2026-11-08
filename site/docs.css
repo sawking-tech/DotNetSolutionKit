@@ -65,11 +65,19 @@
 .doc .releases__item th { padding: 0 0.6rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; text-align: center; white-space: nowrap; }
 .doc .releases__item td { padding: 0.3rem 0.6rem 0.6rem 0; text-align: center; white-space: nowrap; }
 .doc .releases__item th:nth-child(2) { width: 5em; }
-.doc .releases__item th:nth-child(3) { width: 5.6em; }
+.doc .releases__item th:nth-child(3) { width: 6em; }
 .doc .releases__item th:nth-child(4) { width: 4.6em; }
 .doc .releases__item th:nth-child(5) { width: 5.6em; }
 .doc .releases__item th:nth-child(6) { width: 2.4em; }
-.doc .releases__item th:nth-child(7) { width: 6.4em; }
+.doc .releases__item th:nth-child(7) { width: 7em; }
+/* a narrow screen keeps the table whole: the widths above are ems of the item's size, so one smaller
+   size shrinks every column and the row; headers may take a second line, values never scroll sideways */
+@media (max-width: 640px) {
+  .doc .releases__item { font-size: 0.72rem; }
+  .doc .releases__item th { font-size: 0.66rem; white-space: normal; }
+  .doc .releases__item td { padding: 0.2rem 0.3rem 0.35rem 0; }
+  .doc .releases__list { height: 20rem; }
+}
 @media (max-width: 480px) {
   /* the phone layout of site.css gives the window three columns; the pills take a row each */
   .doc .releases { grid-template-columns: 1fr auto auto; grid-template-areas: "title commit up" "find find find" "list list list" "down down down"; }
