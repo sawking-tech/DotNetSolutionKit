@@ -58,22 +58,22 @@
 .doc .releases__commit { grid-area: commit; }
 .doc .releases__commit input { width: 9ch; text-align: left; }
 /* six rows read in the window, as the home page's does */
-.doc .releases__list { height: 30rem; }
+.doc .releases__list { height: 23rem; }
 /* one column measure for every row: fixed layout over the shared widths, long words wrap, no line
    of any row pushes the table wider than the window */
-.doc .releases__item { display: table; width: 100%; table-layout: fixed; margin: 0 0 1.9rem; overflow: visible; border-collapse: collapse; }
-.doc .releases__item th { padding: 0 0.6rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; text-align: center; overflow-wrap: anywhere; }
-.doc .releases__item td { padding: 0.3rem 0.6rem 0.6rem 0; text-align: center; overflow-wrap: anywhere; }
-.doc .releases__item th:nth-child(2) { width: 4.4em; }
-.doc .releases__item th:nth-child(3) { width: 4.2em; }
-.doc .releases__item th:nth-child(4) { width: 3.8em; }
-.doc .releases__item th:nth-child(5) { width: 4.2em; }
-.doc .releases__item th:nth-child(6) { width: 1.6em; }
-.doc .releases__item th:nth-child(7) { width: 5.8em; }
+.doc .releases__item { display: table; width: 100%; table-layout: fixed; margin: 0 0 1.1rem; overflow: visible; border-collapse: collapse; }
+.doc .releases__item th { padding: 0 0.6rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; text-align: center; white-space: nowrap; }
+.doc .releases__item td { padding: 0.3rem 0.6rem 0.6rem 0; text-align: center; white-space: nowrap; }
+.doc .releases__item th:nth-child(2) { width: 5em; }
+.doc .releases__item th:nth-child(3) { width: 5.6em; }
+.doc .releases__item th:nth-child(4) { width: 4.6em; }
+.doc .releases__item th:nth-child(5) { width: 5.6em; }
+.doc .releases__item th:nth-child(6) { width: 2.4em; }
+.doc .releases__item th:nth-child(7) { width: 6.4em; }
 @media (max-width: 480px) {
   /* the phone layout of site.css gives the window three columns; the pills take a row each */
   .doc .releases { grid-template-columns: 1fr auto auto; grid-template-areas: "title commit up" "find find find" "list list list" "down down down"; }
-  .doc .releases__list { height: 30rem; }
+  .doc .releases__list { height: 23rem; }
   .doc .releases__item { font-size: 0.8rem; }
   .doc .releases__item th { font-size: 0.68rem; }
 }
