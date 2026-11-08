@@ -1,8 +1,8 @@
-using NamespaceRoot.ProductName.Common.Application.Events;
-using NamespaceRoot.ProductName.Common.Application.Events.Handlers;
+using NamespaceRoot.ProductName.Framework.DomainEvents;
+using NamespaceRoot.ProductName.Framework.DomainEvents.Handlers;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Domain.Events;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;

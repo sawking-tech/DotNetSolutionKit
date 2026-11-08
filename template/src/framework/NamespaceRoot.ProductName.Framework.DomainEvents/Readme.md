@@ -4,6 +4,17 @@ A domain event orchestration engine integrated with the **Entity Framework Core*
 lifecycle via **IUnitOfWork**. It provides a clean separation between synchronous domain logic,
 reliable messaging, and post-commit side effects.
 
+This project is the detachable seam of the system, a candidate for a package of its own. What is
+deliberately not here:
+
+- The EF Core pipeline that dispatches the phases — the interceptors, the handler-phase guard and
+  the scope context — lives in `NamespaceRoot.ProductName.Common.Infrastructure` /
+  `Persistence/EntityFramework/Events`, entangled with the `DbContext` pipeline it sits on.
+- The domain event primitives — `IDomainEvent`, `IHasDomainEvents`, `EventfulEntity`,
+  `AggregateRoot` — stay in `NamespaceRoot.ProductName.Common` / `Domain`: `IDomainEvent` carries
+  the core `IDomainExecutionContext` and `EventfulEntity` derives from the core `Entity<TId>`, so
+  extracting them would drag the execution-context core along.
+
 ### Core Architecture Principles
 
 1. Encapsulation by Design: Technical cleanup methods (ClearDomainEvents) are hidden from the Application Layer using Explicit Interface Implementation (IHasDomainEvents).

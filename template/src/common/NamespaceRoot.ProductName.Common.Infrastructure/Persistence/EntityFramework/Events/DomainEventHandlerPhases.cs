@@ -1,4 +1,4 @@
-using NamespaceRoot.ProductName.Common.Application.Events.Handlers;
+using NamespaceRoot.ProductName.Framework.DomainEvents.Handlers;
 
 namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 

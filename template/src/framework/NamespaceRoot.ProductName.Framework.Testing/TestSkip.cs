@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Tests;
+namespace NamespaceRoot.ProductName.Framework.Testing;
 
 /// <summary>
 /// Skips the running test, in whatever way the test framework does it.

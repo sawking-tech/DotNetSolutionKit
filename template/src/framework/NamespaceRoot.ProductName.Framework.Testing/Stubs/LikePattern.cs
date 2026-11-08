@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Stubs;
+namespace NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 /// <summary>
 /// A SQL <c>LIKE</c> pattern as a .NET regular expression, for the in-memory stand-ins of the search.

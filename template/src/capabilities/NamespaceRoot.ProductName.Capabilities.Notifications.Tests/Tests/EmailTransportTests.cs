@@ -7,7 +7,7 @@ using MimeKit;
 using Moq;
 using NamespaceRoot.ProductName.Capabilities.Notifications.Adapters;
 using NamespaceRoot.ProductName.Capabilities.Notifications.Factories;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 namespace NamespaceRoot.ProductName.Capabilities.Notifications.Tests;
 

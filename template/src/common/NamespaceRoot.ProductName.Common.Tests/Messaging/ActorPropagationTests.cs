@@ -8,7 +8,7 @@ using Moq;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Messaging;
 
