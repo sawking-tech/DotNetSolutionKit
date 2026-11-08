@@ -3,7 +3,7 @@ using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using NamespaceRoot.ProductName.Common.Exceptions;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 using NamespaceRoot.ProductName.Common.Web.Authorization;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;

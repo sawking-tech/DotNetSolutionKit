@@ -1,6 +1,6 @@
 using NamespaceRoot.ProductName.Common.Domain.Events;
 
-namespace NamespaceRoot.ProductName.Common.Application.Events.Handlers;
+namespace NamespaceRoot.ProductName.Framework.DomainEvents.Handlers;
 
 /// <summary>
 /// Handler executed if the transaction is rolled back due to an error.

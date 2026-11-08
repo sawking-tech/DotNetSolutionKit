@@ -7,7 +7,7 @@ using NamespaceRoot.ProductName.Common.Domain.Idempotency;
 using NamespaceRoot.ProductName.Common.Exceptions;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Idempotency;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Integration;
 

@@ -1,6 +1,6 @@
 using NamespaceRoot.ProductName.Common.Domain.Context;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Stubs;
+namespace NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 public class UserContextMock : IUserContext
 {

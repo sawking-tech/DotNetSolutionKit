@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <!--
-      What a service's tests build on, whichever test framework they use: execution contexts, the
-      PostgreSQL test databases, stubs, and the rule checks. No test framework here; a test project
-      adds its own and tells TestSkip how that framework skips a test.
+      Test helpers tied to an external system: the PostgreSQL and SQL Server test databases and the
+      audit verifiers. The portable harness (execution contexts, stubs, rules) lives in
+      NamespaceRoot.ProductName.Framework.Testing, referenced below. No test framework here; a test
+      project adds its own and tells TestSkip how that framework skips a test.
     -->
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -11,7 +12,7 @@
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <IsTestProject>false</IsTestProject>
-        <!-- The types keep the namespaces they had in Common.Tests, so tests written against them still build. -->
+        <!-- The remaining types keep the namespaces they had in Common.Tests, so tests written against them still build. -->
         <RootNamespace>NamespaceRoot.ProductName.Common.Tests</RootNamespace>
     </PropertyGroup>
 
@@ -28,6 +29,7 @@
       <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
       <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
       <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Web\NamespaceRoot.ProductName.Common.Web.csproj" />
+      <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj" />
     </ItemGroup>
 
 </Project>

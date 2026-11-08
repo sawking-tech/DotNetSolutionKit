@@ -6,7 +6,7 @@ using NamespaceRoot.ProductName.Common.Domain.Specifications;
 using NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Specifications;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.SqlServer;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Integration;
 

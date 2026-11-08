@@ -1,7 +1,7 @@
 using NamespaceRoot.ProductName.Common.Application.Messaging;
 using NamespaceRoot.ProductName.Common.Domain.Messaging;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Stubs;
+namespace NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 /// <summary>
 /// A bus that keeps what was published instead of delivering it.

@@ -1,7 +1,7 @@
 using System.Reflection;
 using NamespaceRoot.ProductName.Common.Domain;
 
-namespace NamespaceRoot.ProductName.Common.Tests;
+namespace NamespaceRoot.ProductName.Framework.Testing;
 
 public static class TestHelpers
 {

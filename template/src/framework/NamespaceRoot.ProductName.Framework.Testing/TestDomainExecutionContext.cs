@@ -1,7 +1,7 @@
 using NamespaceRoot.ProductName.Common.Domain.Context;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
-namespace NamespaceRoot.ProductName.Common.Tests;
+namespace NamespaceRoot.ProductName.Framework.Testing;
 
 public class TestDomainExecutionContext : IDomainExecutionContext
 {

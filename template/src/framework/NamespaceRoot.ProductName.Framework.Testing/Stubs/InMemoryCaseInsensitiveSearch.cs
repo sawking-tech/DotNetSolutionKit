@@ -5,7 +5,7 @@ using LinqSpecs;
 using NamespaceRoot.ProductName.Common.Domain.Specifications;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Specifications;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Stubs;
+namespace NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 /// <summary>
 /// The in-memory stand-in for <see cref="PostgresCaseInsensitiveSearch"/>: the same escaped pattern, matched

@@ -1,11 +1,11 @@
 // Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
 
-using NamespaceRoot.ProductName.Common.Application.Events.Handlers;
+using NamespaceRoot.ProductName.Framework.DomainEvents.Handlers;
 using NamespaceRoot.ProductName.Common.Domain.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace NamespaceRoot.ProductName.Common.Application.Events;
+namespace NamespaceRoot.ProductName.Framework.DomainEvents;
 
 /// <summary>
 /// Orchestrates the execution of domain event handlers across different transaction phases.

@@ -1,4 +1,4 @@
-using NamespaceRoot.ProductName.Common.Tests.Rules;
+using NamespaceRoot.ProductName.Framework.Testing.Rules;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;
 
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.Tests.Tests;

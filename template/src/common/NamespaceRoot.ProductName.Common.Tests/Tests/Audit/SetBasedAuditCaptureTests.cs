@@ -8,7 +8,7 @@ using NamespaceRoot.ProductName.Common.Domain;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
 using NamespaceRoot.ProductName.Common.Tests.Audit;
-using NamespaceRoot.ProductName.Common.Tests.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;

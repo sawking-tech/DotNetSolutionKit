@@ -1,3 +1,5 @@
+using NamespaceRoot.ProductName.Framework.Testing;
+
 namespace NamespaceRoot.ProductName.Common.Tests.Integration;
 
 /// <summary>

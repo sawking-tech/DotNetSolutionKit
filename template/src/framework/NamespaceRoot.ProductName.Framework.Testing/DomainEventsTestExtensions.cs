@@ -1,8 +1,8 @@
-using NamespaceRoot.ProductName.Common.Application.Events.Handlers;
+using NamespaceRoot.ProductName.Framework.DomainEvents.Handlers;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NamespaceRoot.ProductName.Common.Tests;
+namespace NamespaceRoot.ProductName.Framework.Testing;
 
 /// <summary>
 /// Registers the domain event pipeline with an explicit handler set instead of scanning a whole

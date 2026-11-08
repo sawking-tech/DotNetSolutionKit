@@ -40,6 +40,7 @@
       <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure\NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.csproj" />
       <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.API\NamespaceRoot.ProductName.ServiceNameOrCustom.API.csproj" />
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Testing\NamespaceRoot.ProductName.Common.Testing.csproj" />
+      <ProjectReference Include="../../../framework/NamespaceRoot.ProductName.Framework.Testing/NamespaceRoot.ProductName.Framework.Testing.csproj" />
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
       <!--#if (MongoDB) -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Mongo\NamespaceRoot.ProductName.Capabilities.Mongo.csproj" />

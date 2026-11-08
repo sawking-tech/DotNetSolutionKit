@@ -1,6 +1,6 @@
 using NamespaceRoot.ProductName.Common.Domain.Events;
 
-namespace NamespaceRoot.ProductName.Common.Application.Events.Handlers;
+namespace NamespaceRoot.ProductName.Framework.DomainEvents.Handlers;
 
 /// <summary>
 /// Internal non-generic interface to allow high-performance dispatching
