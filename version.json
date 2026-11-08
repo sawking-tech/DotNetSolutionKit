@@ -1,6 +1,12 @@
 {
-  "version": "2.9.1",
+  "version": "2.10.0-rc",
   "releaseNotes": {
+    "2.10.0-rc": {
+      "headline": "",
+      "highlights": [
+        ""
+      ]
+    },
     "2.9.1": {
       "headline": "dotskit upgrade takes the parts one run after another and stops at conflicts; --continue resumes.",
       "highlights": [
