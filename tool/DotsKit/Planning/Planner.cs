@@ -113,10 +113,10 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
             Add(part, uses);
         }
 
-        // A project of Common a type leaves goes after the one it goes to: the type arrives before it leaves.
+        // A project a type leaves goes after the one it goes to - a project of Common or the capabilities: the type arrives before it leaves.
         foreach (var move in moves.Moves)
         {
-            if (UpgradeParts.CommonPartOf(move.From.Project) is { } from && UpgradeParts.CommonPartOf(move.To.Project) is { } to && from != to)
+            if (UpgradeParts.OrderablePartOf(move.From.Project) is { } from && UpgradeParts.OrderablePartOf(move.To.Project) is { } to && from != to)
             {
                 Add(from, [to]);
             }
