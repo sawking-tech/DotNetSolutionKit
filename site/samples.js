@@ -517,12 +517,15 @@ function leaveCard() {
   }, CARD.waitMs);
 }
 
-// a day the branch was regenerated on lights its row in the table of releases
+// a day the branch was regenerated on turns the window of releases to its version and lights its row
 function markRelease(version) {
-  const row = document.querySelector(`#doc tr[data-version="${CSS.escape(version)}"]`);
+  const key = version.replace(/^v/, "");
+  const item = document.querySelector(`#doc .releases__item[data-version="${CSS.escape(key)}"]`);
+  if (!item || !releaseView) return;
+  releaseView.to(item, true);
+  const row = item.querySelector("tbody tr");
   if (!row) return;
   row.classList.remove("lit"); void row.offsetWidth; row.classList.add("lit");
-  row.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 }
 
 const HOVER = matchMedia("(hover: hover)");
@@ -553,10 +556,8 @@ addEventListener("resize", () => { if (pinned) placeCard(pinned); });
 
 /* ==== THE OVERVIEW: THE FRAME ====
    The overview of a sample before its data: its own headings, the empty grid, the measures with their
-   titles and the table with its head. The values are strokes until they come, so nothing moves when
-   they do. */
-const tableHead = () => `<thead><tr><th>${STR.release}</th><th>${STR.result}</th><th>${STR.tests}</th><th>${STR.lines}</th><th>${STR.branches}</th><th>${STR.runs}</th><th>${STR.date}</th></tr></thead>`;
-
+   titles and the window of releases with its head. The values are strokes until they come, so nothing
+   moves when they do. */
 function renderFrame(name) {
   const meterFrame = (title) => `<div class="meter"><div class="meter-title">${title}</div>
     <div class="meter-value">${ph(FRAME.meter)}</div><div class="meter-bar"></div></div>`;
@@ -568,7 +569,7 @@ function renderFrame(name) {
     <div class="run-head">${ph(FRAME.runHead)}</div>
     <div class="meters">${meterFrame(STR.testsTitle)}${meterFrame(STR.linesTitle)}${meterFrame(STR.branchesTitle)}</div>
     <h3>${STR.releases}</h3>
-    <div class="table-scroll"><table>${tableHead()}<tbody><tr>${FRAME.row.map((w) => `<td>${ph(w)}</td>`).join("")}</tr></tbody></table></div>`;
+    ${releaseWindow(`<table class="releases__item"><tbody><tr>${FRAME.row.map((w) => `<td>${ph(w)}</td>`).join("")}</tr></tbody></table>`)}`;
 }
 
 /* ==== THE OVERVIEW: THE MEASURES ====
@@ -607,19 +608,62 @@ function renderMeters(reports) {
     </div>`;
 }
 
-/* ==== THE OVERVIEW: THE SHEET ====
-   A sample with its data: the description, the grid, the last run and its measures, the table of
-   releases. The same elements as the frame, in the same order. */
+/* ==== THE OVERVIEW: THE WINDOW OF RELEASES ====
+   The same window the home page keeps its release notes in (site/version-window.js): a version at the
+   top, the next one blurred at the edge, the buttons step one version and the field of parts moves the
+   window to a version that exists. Here a version is a row of the sheet - generated from, result, tests,
+   coverage, runs, last run - with the head of the columns over it, so the version in focus labels
+   itself. Keys are the versions of the template's reports: "v2.9.0", a commit of master (a hash, the
+   field takes no hash - the buttons reach it), "2.10.0-rc" between releases. The field holds the
+   numeric form, without the "v". */
+const releaseColumns = () => [STR.release, STR.result, STR.tests, STR.lines, STR.branches, STR.runs, STR.date];
+
+function releaseWindow(body) {
+  return `<div class="releases">
+    <div class="releases__find" role="group" aria-label="Version">
+      <p class="releases__hint" role="status"></p>
+      <span aria-hidden="true">v</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Major" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Minor" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Patch" disabled>
+    </div>
+    <button class="releases__up" type="button" disabled><span aria-hidden="true">▲</span><span class="releases__say">${T("Newer", "Новее")}</span></button>
+    <button class="releases__down" type="button" disabled><span aria-hidden="true">▼</span><span class="releases__say">${T("Older", "Старше")}</span></button>
+    <div class="releases__list" tabindex="0" aria-label="Versions">${body}</div>
+  </div>`;
+}
+
+function releaseItem(report) {
+  const r = lastRun(report);
+  const key = report.version.replace(/^v/, "");
+  const tests = r.tests ? `${r.tests.passed} / ${r.tests.total}` : "-";
+  return `<table class="releases__item" data-version="${esc(key)}">
+      <thead><tr>${releaseColumns().map((title) => `<th>${title}</th>`).join("")}</tr></thead>
+      <tbody><tr><td>${versionLink(report.version)}</td><td>${result(r)}</td><td>${tests}</td>
+        <td>${fmtPct(r.coverage?.line)}</td><td>${fmtPct(r.coverage?.branch)}</td><td>${report.runs.length}</td>
+        <td><a href="${esc(r.url)}">${fmtDate(r.started)}</a></td></tr></tbody>
+    </table>`;
+}
+
 function renderReleases(reports) {
-  return `<div class="table-scroll"><table>${tableHead()}
-      <tbody>${reports.map((report) => {
-        const r = lastRun(report);
-        const tests = r.tests ? `${r.tests.passed} / ${r.tests.total}` : "-";
-        return `<tr data-version="${esc(report.version)}"><td>${versionLink(report.version)}</td><td>${result(r)}</td><td>${tests}</td>
-          <td>${fmtPct(r.coverage?.line)}</td><td>${fmtPct(r.coverage?.branch)}</td><td>${report.runs.length}</td>
-          <td><a href="${esc(r.url)}">${fmtDate(r.started)}</a></td></tr>`;
-      }).join("")}</tbody>
-    </table></div>`;
+  return releaseWindow(reports.map(releaseItem).join(""));
+}
+
+// the window of the sheet now, for markRelease to turn to a version
+let releaseView = null;
+
+// the shared mechanics wired to the drawn items: the buttons and a scroll keep the field, the field
+// and the buttons move the window; only versions the field can take are handed to it - a hash is
+// reached by the buttons
+function mountReleases(root, reports) {
+  const box = root.querySelector(".releases");
+  if (!box || !reports.length) return;
+  const list = box.querySelector(".releases__list");
+  const { scrollWindow, versionField } = window.VersionWindow;
+  const numeric = (version) => /^\d+\.\d+\.\d+/.test(version);
+  const typed = reports.map((report) => report.version.replace(/^v/, ""));
+  let field;
+  releaseView = scrollWindow(list, box.querySelector(".releases__up"), box.querySelector(".releases__down"),
+    (version) => { if (numeric(version)) field.show(version); });
+  field = versionField([...box.querySelectorAll(".releases__find input")], list, typed.filter(numeric), releaseView.to);
+  releaseView.edges();
 }
 
 function renderBranch(branch) {
@@ -643,6 +687,7 @@ function renderOverview() {
   doc.classList.remove("busy");
   hideCard();
   doc.innerHTML = `<h1>${STR.title}</h1><p>${STR.intro}</p>${branch ? renderBranch(branch) : renderFrame(state.branch)}`;
+  mountReleases(doc, branch?.reports ?? []);
   scrollDaysToToday(doc);
   document.title = `${state.branch} - samples - ${window.SITE.name}`;
 }
