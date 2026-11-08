@@ -67,25 +67,32 @@ function scrollWindow(list, up, down, onMove) {
   return { to, place, top, edges };
 }
 
-/* The field: a mask of parts between fixed dots that takes only a version that exists. A part accepts a
-   digit only while some version, with the parts before it, still starts so - a digit refused shakes the
-   field and shows under it the versions that can go there; once a part's value can grow no further, the
-   cursor goes to the next part by itself. A dot or a space goes on too, Backspace in an
-   empty part goes back, Enter goes to the version and lets the field go, and a changed part clears
-   the parts after it. The window moves to the newest version that starts with what is typed. While the
-   reader types, the field is theirs; otherwise show() puts a version into it. */
-function versionField(parts, list, versions, to) {
-  const split = versions.map((version) => version.split("."));
+/* The field: a mask of parts between fixed dots that takes only a key that exists. A part accepts a
+   character only while some key, with the parts before it, still starts so - a character refused
+   shakes the field and shows under it the keys that can go there; once a part's value can grow no
+   further, the cursor goes to the next part by itself. A dot or a space goes on too, Backspace in an
+   empty part goes back, Enter goes to the key and lets the field go, and a changed part clears
+   the parts after it. The window moves to the newest key that starts with what is typed. While the
+   reader types, the field is theirs; otherwise show() puts a key into it and clear() empties it.
+
+   One mechanics, two instances (site/samples.js): a version field and a commit field. The defaults
+   are the version field; options carry the little that a commit of master needs - its alphabet, how
+   a key splits into parts (a commit is one part, no dots), and how a refused character's hint
+   spells a key. Nothing else differs. */
+function versionField(parts, list, versions, to, options = {}) {
+  const strip = options.strip ?? /\D/g;             // a part keeps what this does not take out
+  const cut = options.cut ?? ((key) => key.split("."));
+  const spell = options.spell ?? ((key, open) => "v" + key.join(".") + (open ? ".x" : ""));
+  const split = versions.map(cut);
   const field = parts[0].parentElement;
   const hint = field.querySelector(".releases__hint");
   let hide;
 
-  // what can go into part i after the parts before it, as a hint for a digit refused there: "v2.x, v1.x"
-  // on the first part, "v2.8.x, v2.7.x" on the second, whole versions on the last
+  // what can go into part i after the parts before it, as a hint for a character refused there:
+  // "v2.x, v1.x" on the first part of a version, "v2.8.x, v2.7.x" on the second, whole keys on the last
   function refuse(i) {
     const before = parts.slice(0, i).map((part) => part.value);
-    const tail = i < parts.length - 1 ? ".x" : "";
-    const fit = values(i).map((value) => "v" + [...before, value].join(".") + tail);
+    const fit = values(i).map((value) => spell([...before, value], i < parts.length - 1));
     hint.textContent = fit.slice(0, 5).join(", ") + (fit.length > 5 ? ", ..." : "");
     field.classList.remove("releases--refused");
     void field.offsetWidth; // restart the shake
@@ -107,7 +114,7 @@ function versionField(parts, list, versions, to) {
     const items = [...list.children];
     const target = count
       ? items.find((item) => {
-          const own = item.dataset.version.split(".");
+          const own = cut(item.dataset.version);
           return typed.slice(0, count).every((value, k) => (k < count - 1 ? own[k] === value : own[k].startsWith(value)));
         })
       : null;
@@ -116,33 +123,40 @@ function versionField(parts, list, versions, to) {
     return target;
   }
 
-  function show(version) {
+  function show(key) {
     if (parts.includes(document.activeElement)) return;
-    version.split(".").forEach((value, i) => { if (parts[i]) parts[i].value = value; });
+    cut(key).forEach((value, i) => { if (parts[i]) parts[i].value = value; });
     for (const item of list.children) item.classList.remove("releases--found");
   }
 
+  // the other instance of the mechanics takes the floor: nothing of this field's, until a scroll
+  // puts a key back. Not while the reader types here, as in show
+  function clear() {
+    if (parts.includes(document.activeElement)) return;
+    for (const part of parts) part.value = "";
+  }
+
   parts.forEach((part, i) => {
-    part.placeholder = versions[0].split(".")[i] ?? "0";
+    part.placeholder = cut(versions[0])[i] ?? "0";
     part.disabled = false;
     let kept = "";
-    // a part taken in hand is selected, so what is typed replaces the version the field showed
+    // a part taken in hand is selected, so what is typed replaces the key the field showed
     part.addEventListener("focus", () => { kept = part.value; part.select(); });
     part.addEventListener("input", () => {
       const goOn = /[.,\s]/.test(part.value);
-      const digits = part.value.replace(/\D/g, "");
+      const typed = part.value.replace(strip, "");
       const allowed = values(i);
-      if (digits && !allowed.some((value) => value.startsWith(digits))) {
+      if (typed && !allowed.some((value) => value.startsWith(typed))) {
         part.value = kept;
         refuse(i);
         return;
       }
       field.classList.remove("releases--refused");
-      part.value = kept = digits;
+      part.value = kept = typed;
       for (const later of parts.slice(i + 1)) later.value = "";
       find();
-      const complete = allowed.includes(digits);
-      const grows = allowed.some((value) => value !== digits && value.startsWith(digits));
+      const complete = allowed.includes(typed);
+      const grows = allowed.some((value) => value !== typed && value.startsWith(typed));
       if (parts[i + 1] && complete && (goOn || !grows)) parts[i + 1].focus();
     });
     part.addEventListener("keydown", (event) => {
@@ -150,7 +164,7 @@ function versionField(parts, list, versions, to) {
         event.preventDefault();
         parts[i - 1].focus();
       } else if (event.key === "Enter") {
-        // the version as typed, written out whole, and the field is let go: a scroll puts versions
+        // the key as typed, written out whole, and the field is let go: a scroll puts keys
         // into it again. Written here, since a window already there does not scroll and would not write it
         event.preventDefault();
         const target = find();
@@ -159,7 +173,7 @@ function versionField(parts, list, versions, to) {
       }
     });
   });
-  return { show };
+  return { show, clear };
 }
 
 return { scrollWindow, versionField };

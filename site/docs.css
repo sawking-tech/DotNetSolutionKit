@@ -48,14 +48,21 @@
 /* ==== THE WINDOW OF RELEASES (the samples page) ===============================================
    The "By release" block is the home page's window (site/version-window.js, the .releases styles of
    site.css): a version - here a row of the sheet - at the top, the next one blurred at the edge, the
-   field and the buttons over it. A version is a table of the same seven columns, its head repeated
+   fields and the buttons over it. A version is a table of the same seven columns, its head repeated
    in every item so the one in focus labels itself; a row of a document's table, .doc table above,
-   would scroll sideways on its own, so inside the window it is a plain table. */
+   would scroll sideways on its own, so inside the window it is a plain table. A branch a commit
+   works toward (full-dev, a lifecycle) adds a second pill beside the version field: the same mask
+   over the hex alphabet, one part the width of a hash's start. */
+.doc .releases { grid-template-columns: 1fr auto auto auto auto; grid-template-areas: "title find commit up down" "list list list list list"; }
 .doc .releases > h3 { grid-area: title; margin: 0; }
+.doc .releases__commit { grid-area: commit; }
+.doc .releases__commit input { width: 14ch; text-align: left; }
 .doc .releases__list { height: 11rem; }
 .doc .releases__item { display: table; width: 100%; margin: 0 0 1.9rem; overflow: visible; border-collapse: collapse; }
 .doc .releases__item th { padding: 0 0.9rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; }
 .doc .releases__item td { padding: 0.3rem 0.9rem 0.6rem 0; }
 @media (max-width: 480px) {
+  /* the phone layout of site.css gives the window three columns; the commit pill takes its own row */
+  .doc .releases { grid-template-columns: 1fr auto auto; grid-template-areas: "title find up" "commit commit commit" "list list list" "down down down"; }
   .doc .releases__list { height: 13rem; }
 }

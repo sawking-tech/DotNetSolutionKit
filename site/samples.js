@@ -610,20 +610,30 @@ function renderMeters(reports) {
 
 /* ==== THE OVERVIEW: THE WINDOW OF RELEASES ====
    The same window the home page keeps its release notes in (site/version-window.js): a version at the
-   top, the next one blurred at the edge, the buttons step one version and the field of parts moves the
-   window to a version that exists. Here a version is a row of the sheet - generated from, result, tests,
-   coverage, runs, last run - with the head of the columns over it, so the version in focus labels
-   itself. Keys are the versions of the template's reports: "v2.9.0", a commit of master (a hash, the
-   field takes no hash - the buttons reach it), "2.10.0-rc" between releases. The field holds the
-   numeric form, without the "v". */
+   top, the next one blurred at the edge, the buttons step one version, the fields move the window to
+   a key that exists. Here a version is a row of the sheet - generated from, result, tests, lines,
+   branches, runs, last run - with the head of the columns over it, so the version in focus labels
+   itself. Keys are the versions of the template's reports: "v2.9.0", a commit of master (a hash),
+   "2.10.0-rc" between releases. Two fields share the one mask, each for its alphabet: the version
+   field takes the numeric form, without the "v"; beside it the commit field takes a hash part by
+   part, for the branches a commit works toward (full-dev, the lifecycle of a tag branch). A row is
+   of one kind, so while nothing is typed the field of the top row's kind holds its key and the
+   other stands empty. */
 const releaseColumns = () => [STR.release, STR.result, STR.tests, STR.lines, STR.branches, STR.runs, STR.date];
+// a report key of a commit the template was built from, as resolved from a tag by the samples' report
+const SHA_KEY = /^[0-9a-f]{7,40}$/;
 
-function releaseWindow(body) {
+function releaseWindow(body, hashes = null) {
+  const commit = hashes ? `
+    <div class="releases__find releases__commit" role="group" aria-label="Commit">
+      <p class="releases__hint" role="status"></p>
+      <span aria-hidden="true">#</span><input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Commit" disabled>
+    </div>` : "";
   return `<div class="releases">
     <div class="releases__find" role="group" aria-label="Version">
       <p class="releases__hint" role="status"></p>
       <span aria-hidden="true">v</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Major" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Minor" disabled><span aria-hidden="true">.</span><input type="text" inputmode="decimal" autocomplete="off" aria-label="Patch" disabled>
-    </div>
+    </div>${commit}
     <button class="releases__up" type="button" disabled><span aria-hidden="true">▲</span><span class="releases__say">${T("Newer", "Новее")}</span></button>
     <button class="releases__down" type="button" disabled><span aria-hidden="true">▼</span><span class="releases__say">${T("Older", "Старше")}</span></button>
     <div class="releases__list" tabindex="0" aria-label="Versions">${body}</div>
@@ -643,15 +653,17 @@ function releaseItem(report) {
 }
 
 function renderReleases(reports) {
-  return releaseWindow(reports.map(releaseItem).join(""));
+  const hashes = reports.map((report) => report.version).filter((version) => SHA_KEY.test(version));
+  return releaseWindow(reports.map(releaseItem).join(""), hashes.length ? hashes : null);
 }
 
 // the window of the sheet now, for markRelease to turn to a version
 let releaseView = null;
 
-// the shared mechanics wired to the drawn items: the buttons and a scroll keep the field, the field
-// and the buttons move the window; only versions the field can take are handed to it - a hash is
-// reached by the buttons
+// the shared mechanics wired to the drawn items: the buttons and a scroll keep the fields, the
+// fields and the buttons move the window. Both fields are the one mask with its alphabet: the
+// version field takes v-releases and -rc as typed, the commit field - hashes; a row at the top
+// fills its own kind's field and empties the other, until a reader types there
 function mountReleases(root, reports) {
   const box = root.querySelector(".releases");
   if (!box || !reports.length) return;
@@ -659,10 +671,17 @@ function mountReleases(root, reports) {
   const { scrollWindow, versionField } = window.VersionWindow;
   const numeric = (version) => /^\d+\.\d+\.\d+/.test(version);
   const typed = reports.map((report) => report.version.replace(/^v/, ""));
-  let field;
-  releaseView = scrollWindow(list, box.querySelector(".releases__up"), box.querySelector(".releases__down"),
-    (version) => { if (numeric(version)) field.show(version); });
-  field = versionField([...box.querySelectorAll(".releases__find input")], list, typed.filter(numeric), releaseView.to);
+  const hashes = reports.map((report) => report.version).filter((version) => SHA_KEY.test(version));
+  let field, commit;
+  releaseView = scrollWindow(list, box.querySelector(".releases__up"), box.querySelector(".releases__down"), (version) => {
+    if (SHA_KEY.test(version)) { commit.show(version); field.clear(); }
+    else if (numeric(version)) { field.show(version); commit.clear(); }
+  });
+  field = versionField([...box.querySelectorAll('.releases__find:not(.releases__commit) input')], list, typed.filter(numeric), releaseView.to);
+  commit = hashes.length
+    ? versionField([...box.querySelectorAll(".releases__commit input")], list, hashes, releaseView.to,
+        { strip: /[^0-9a-f]/g, cut: (key) => [key], spell: (key) => key[0] })
+    : { show() {}, clear() {} };
   releaseView.edges();
 }
 
