@@ -2,9 +2,9 @@ using ClickHouse.Client.Utility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NamespaceRoot.ProductName.Common.Exceptions;
-using NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+using NamespaceRoot.ProductName.Capabilities.ClickHouse;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Integration;
+namespace NamespaceRoot.ProductName.Capabilities.ClickHouse.Tests.Integration;
 
 /// <summary>
 /// The ClickHouse core against a real server: the schema check refuses a table the insert does not

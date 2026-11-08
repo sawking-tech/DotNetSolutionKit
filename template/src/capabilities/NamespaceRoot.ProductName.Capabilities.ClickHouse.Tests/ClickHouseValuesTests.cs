@@ -1,6 +1,6 @@
-using NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+using NamespaceRoot.ProductName.Capabilities.ClickHouse;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.ClickHouse;
+namespace NamespaceRoot.ProductName.Capabilities.ClickHouse.Tests;
 
 /// <summary>
 /// What a weakly typed driver value becomes, and what the schema check compares, without a server.

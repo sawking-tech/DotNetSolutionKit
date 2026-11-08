@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+namespace NamespaceRoot.ProductName.Capabilities.ClickHouse;
 
 /// <summary>Readiness of ClickHouse: a <c>SELECT 1</c> answers.</summary>
 internal sealed class ClickHouseHealthCheck(IClickHouseConnections connections) : IHealthCheck

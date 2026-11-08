@@ -128,7 +128,7 @@
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false",
-      "description": "ClickHouse connections, schema check and readiness in Common, registered in the service"
+      "description": "ClickHouse connections, schema check and readiness in its capability project, registered in the service"
     },
     "MongoDB": {
       "type": "parameter",
@@ -584,9 +584,8 @@
         {
           "condition": "(!ClickHouse)",
           "exclude": [
-            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/ClickHouse/**",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Tests/ClickHouse/**",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/ClickHouse*.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.ClickHouse/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.ClickHouse.Tests/**"
           ]
         },
         {

@@ -1,9 +1,9 @@
 using ClickHouse.Client.ADO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+using NamespaceRoot.ProductName.Capabilities.ClickHouse;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Integration;
+namespace NamespaceRoot.ProductName.Capabilities.ClickHouse.Tests.Integration;
 
 /// <summary>
 /// A ClickHouse database of the test's own, on the server named by <c>TEST_CLICKHOUSE</c>, dropped when

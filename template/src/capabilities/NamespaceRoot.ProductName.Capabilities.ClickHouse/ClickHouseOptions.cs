@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+namespace NamespaceRoot.ProductName.Capabilities.ClickHouse;
 
 /// <summary>
 /// Connection settings for ClickHouse, the <c>ClickHouse</c> section.

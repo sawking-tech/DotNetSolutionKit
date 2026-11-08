@@ -2,7 +2,7 @@ using ClickHouse.Client.ADO;
 using Microsoft.Extensions.Options;
 using NamespaceRoot.ProductName.Common.Exceptions;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+namespace NamespaceRoot.ProductName.Capabilities.ClickHouse;
 
 /// <summary>
 /// Opens ClickHouse connections over one shared HTTP client, so sockets are pooled across connections.

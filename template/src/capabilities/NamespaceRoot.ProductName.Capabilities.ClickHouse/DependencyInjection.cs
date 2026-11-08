@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NamespaceRoot.ProductName.Common.Contracts.Health;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+namespace NamespaceRoot.ProductName.Capabilities.ClickHouse;
 
 public static class DependencyInjection
 {

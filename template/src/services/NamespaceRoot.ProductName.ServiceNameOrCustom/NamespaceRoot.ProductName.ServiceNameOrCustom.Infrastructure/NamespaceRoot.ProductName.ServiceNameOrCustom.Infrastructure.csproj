@@ -18,6 +18,9 @@
       <!--#if (NotifyEmail) -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Notifications\NamespaceRoot.ProductName.Capabilities.Notifications.csproj" />
       <!--#endif -->
+      <!--#if (ClickHouse) -->
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.ClickHouse\NamespaceRoot.ProductName.Capabilities.ClickHouse.csproj" />
+      <!--#endif -->
       <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Application\NamespaceRoot.ProductName.ServiceNameOrCustom.Application.csproj" />
     </ItemGroup>
 

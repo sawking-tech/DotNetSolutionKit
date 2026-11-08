@@ -2,7 +2,7 @@ using ClickHouse.Client.Utility;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+namespace NamespaceRoot.ProductName.Capabilities.ClickHouse;
 
 /// <summary>
 /// Checks at startup that a table carries every column an insert names, and refuses to start when it
