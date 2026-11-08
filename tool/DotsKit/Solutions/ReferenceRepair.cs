@@ -76,18 +76,18 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
     /// <param name="map">The types the template moved.</param>
     /// <param name="build">The build that failed.</param>
     /// <param name="ct">Cancels the repair.</param>
-    /// <param name="waiting">Files, relative to the root, the repair leaves alone: the template's files of the parts not merged yet.</param>
-    public async Task<RepairResult> RunAsync(string root, TypeMap map, ProcessResult build, CancellationToken ct, IReadOnlySet<string>? waiting = null)
+    public async Task<RepairResult> RunAsync(string root, TypeMap map, ProcessResult build, CancellationToken ct)
     {
         var made = new HashSet<Repair>();
         var applied = new List<Repair>();
         for (var round = 0; round < MaxRounds && build.Code != 0; round++)
         {
             // The build names the files of every project of All.sln: one of them outside the solution, reached
-            // through a link or added by the team from elsewhere, is not the solution's to repair.
+            // through a link or added by the team from elsewhere, is not the solution's to repair. A file of a part
+            // not merged yet is repaired too: an error of it means the type's new home is merged already, and the
+            // merge of its own part brings both sides in line with the repair.
             var repairs = ReferenceRepairs.Decide(BuildErrors.Parse(build.Output), map, root, TextOf)
-                .Where(r => !made.Contains(r) && Folders.IsInside(root, RepairReport.FileOf(r))
-                    && waiting?.Contains(Path.GetRelativePath(root, RepairReport.FileOf(r)).Replace('\\', '/')) != true).ToList();
+                .Where(r => !made.Contains(r) && Folders.IsInside(root, RepairReport.FileOf(r))).ToList();
             if (repairs.Count == 0)
             {
                 break;

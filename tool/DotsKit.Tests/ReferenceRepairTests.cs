@@ -90,6 +90,20 @@ internal sealed class ReferenceRepairTests
     }
 
     [Test]
+    public void AnErrorInAnotherLocale_IsReadByItsQuotedNames()
+    {
+        // MSBuild quotes with double quotes and writes the message in the machine's locale, here Russian.
+        // The file declares the type's old namespace itself - the reference needs no using - as the same-namespace
+        // files a move breaks: PostgresDbTestExecutionContext and the moved ServiceDbTestExecutionContext.
+        var localized = ReferenceRepairs.Decide(
+            [new BuildError(OrderFile, "CS0246", "Не удалось найти тип или имя пространства имен \"DomainEvent\" (возможно, отсутствует директива using или ссылка на сборку).", Orders)],
+            Split, Root, _ => "namespace Acme.Shop.Common.Events;\npublic class Order\n{\n}\n");
+
+        localized.ShouldBe([new AddUsing(OrderFile, "Acme.Shop.Common.Domain.Events"),
+            new AddReference(Path.GetFullPath(Orders), Path.GetFullPath(Path.Combine(Root, CommonDomain)))]);
+    }
+
+    [Test]
     public void AUsingOfAGivenUpNamespace_IsReplaced_AndTheProjectItsTypesWentToIsReferenced()
     {
         var repairs = ReferenceRepairs.Decide(
@@ -297,7 +311,7 @@ internal sealed class ReferenceRepairTests
     }
 
     [Test]
-    public async Task TheTemplatesFilesOfAPartNotMergedYet_AreLeftByTheRepairOfTheBuild_TheTeamsAreRepaired()
+    public async Task TheTemplatesFilesOfAPartNotMergedYet_AreRepairedToo_WhenTheBuildNamesThem_TheTypeIsGoneFromItsOldHome()
     {
         var root = Io.Folders.NewTemp("repair-waiting");
         var templates = Path.Combine(root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs");
@@ -311,11 +325,13 @@ internal sealed class ReferenceRepairTests
             + $"{teams}(1,7): error CS0246: The type or namespace name 'DomainEvent' could not be found [{project}]\n", "");
         var writer = new RecordingWriter();
 
-        await new ReferenceRepair(writer, new Builds()).RunAsync(root, TypeMap.Between(Before, After), failed, CancellationToken.None,
-            new HashSet<string> { "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs", Orders[3..] });
+        // An error of a file of a part not merged yet means the type's new home is merged already: the repair
+        // retargets the file, and the merge of its own part brings both sides in line with it.
+        await new ReferenceRepair(writer, new Builds()).RunAsync(root, TypeMap.Between(Before, After), failed, CancellationToken.None);
 
-        writer.Repairs.ShouldNotBeEmpty();
-        writer.Repairs.Select(RepairReport.FileOf).ShouldAllBe(f => f == teams);
+        var files = writer.Repairs.Select(RepairReport.FileOf).ToList();
+        files.ShouldContain(teams);
+        files.ShouldContain(templates);
     }
 
     [Test]
