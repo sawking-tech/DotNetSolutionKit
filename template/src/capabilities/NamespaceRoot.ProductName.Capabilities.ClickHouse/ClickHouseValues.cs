@@ -2,7 +2,7 @@ using System.Globalization;
 using ClickHouse.Client.ADO;
 using ClickHouse.Client.Utility;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+namespace NamespaceRoot.ProductName.Capabilities.ClickHouse;
 
 /// <summary>
 /// The driver hands values back weakly typed. One coercion for every reader, so two endpoints do not

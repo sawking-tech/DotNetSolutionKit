@@ -53,8 +53,8 @@ Some flags hold one value for the whole solution and must be passed again, uncha
 | `--Database` | `postgres` or `mssql`: the value the solution was generated with |
 | `--Deploy` | `compose`, `k8s` or `none`: the same value |
 
-Others add files to `Common` or a project to `src/capabilities` (`--MongoDB`, `--Notify`), and were chosen
-when the shared code was generated. A service that should use
+Others add files to `Common` or a project to `src/capabilities` (`--MongoDB`, `--ClickHouse`,
+`--Notify`), and were chosen when the shared code was generated. A service that should use
 them passes them again: `-I`, `--Vault`, `--DiffApi`, `--FeatureFlags`, `--Storage`, `--ClickHouse`,
 `--MongoDB`, `--Notify`, `--Audit`. A service generated without them leaves them out. Pass only the flags whose part the solution
 already has, in `src/common` or `src/capabilities`. With `--Messaging`, `--Notify email` also gives the service the consumer of `SendEmailCommandV1`;
@@ -66,8 +66,8 @@ Per service, freely: `-H` (Hangfire), `--Messaging` (`none`, `outbox`, `direct`)
 Read what the solution has before choosing:
 
 ```bash
-ls src/capabilities                                                   # Capabilities.Notifications -> --Notify email; Capabilities.Mongo -> --MongoDB
-ls src/common/NamespaceRoot.ProductName.Common.Infrastructure        # Persistence/SqlServer -> mssql; ClickHouse, Storage; Configuration/Secrets -> -I or --Vault
+ls src/capabilities                                                   # Capabilities.Notifications -> --Notify email; Capabilities.Mongo -> --MongoDB; Capabilities.ClickHouse -> --ClickHouse
+ls src/common/NamespaceRoot.ProductName.Common.Infrastructure        # Persistence/SqlServer -> mssql; Storage; Configuration/Secrets -> -I or --Vault
 ls src/common/NamespaceRoot.ProductName.Common.Web/FeatureManagement  # present -> --FeatureFlags
 ls deploy                                                             # compose or k8s
 ```

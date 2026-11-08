@@ -4,8 +4,16 @@
     "3.0.0-rc": {
       "headline": "",
       "highlights": [
+        "ClickHouse of --ClickHouse moves out of Common to its own project Capabilities.ClickHouse in src/capabilities, with the driver only in a service that uses it; dotskit upgrade retargets a solution's references and usings.",
         ""
-      ]
+      ],
+      "ru": {
+        "headline": "",
+        "highlights": [
+          "ClickHouse флага --ClickHouse переезжает из Common в собственный проект Capabilities.ClickHouse в src/capabilities, и драйвер остаётся только в сервисе, который его использует; dotskit upgrade перенацеливает ссылки и using'и решения.",
+          ""
+        ]
+      }
     },
     "2.9.1": {
       "headline": "dotskit upgrade takes the parts one run after another and stops at conflicts; --continue resumes.",
