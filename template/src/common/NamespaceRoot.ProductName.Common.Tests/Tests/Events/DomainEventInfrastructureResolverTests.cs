@@ -2,6 +2,7 @@ using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramewor
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using NamespaceRoot.ProductName.Framework.Testing;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Events;
 
