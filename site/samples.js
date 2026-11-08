@@ -716,7 +716,6 @@ function renderBranch(branch) {
     <div class="run-head">${result(run)}<span>${fmtDate(run.started)}</span><span>${fmtDuration(run.seconds)}</span>
       <a href="${esc(run.url)}">${STR.run}</a></div>
     ${renderMeters(reports)}
-    <h3>${STR.releases}</h3>
     ${renderReleases(reports)}`;
 }
 
