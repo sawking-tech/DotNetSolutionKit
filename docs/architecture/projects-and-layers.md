@@ -23,6 +23,9 @@ flowchart BT
         CN["Capabilities.Notifications, with --Notify email"]
         CM["Capabilities.Mongo, with --MongoDB"] --> C
         CM --> CC
+        CCH["Capabilities.ClickHouse, with --ClickHouse"] --> C
+        CCH --> CC
+        CS["Capabilities.Storage, with --Storage"] --> C
     end
     subgraph service ["src/services/#lt;Service#gt;"]
         D["#lt;Service#gt;"] --> C
@@ -62,6 +65,10 @@ flowchart BT
 | `Capabilities.Notifications.Tests` | The tests of email | `Capabilities.Notifications`, `Common.Testing` |
 | `Capabilities.Mongo` | MongoDB of `--MongoDB`: the store, its options, its health check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
 | `Capabilities.Mongo.Tests` | The tests of MongoDB | `Capabilities.Mongo`, `Common`, `Common.Testing` |
+| `Capabilities.ClickHouse` | ClickHouse of `--ClickHouse`: connections, the schema guard, the readiness check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
+| `Capabilities.ClickHouse.Tests` | The tests of ClickHouse | `Capabilities.ClickHouse`, `Common`, `Common.Testing` |
+| `Capabilities.Storage` | Object storage of `--Storage`: `IS3ObjectStorage`, its settings, the null double. A service with the flag references it, so only that service carries the AWS SDK | `Common` |
+| `Capabilities.Storage.Tests` | The tests of object storage | `Capabilities.Storage`, `Common`, `Common.Testing` |
 
 ## A service
 
