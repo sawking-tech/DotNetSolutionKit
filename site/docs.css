@@ -47,24 +47,33 @@
 
 /* ==== THE WINDOW OF RELEASES (the samples page) ===============================================
    The "By release" block is the home page's window (site/version-window.js, the .releases styles of
-   site.css): a version - here a row of the sheet - at the top, the next one blurred at the edge, the
-   fields and the buttons over it. A version is a table of the same seven columns, its head repeated
-   in every item so the one in focus labels itself; a row of a document's table, .doc table above,
-   would scroll sideways on its own, so inside the window it is a plain table. A branch a commit
-   works toward (full-dev, a lifecycle) adds a second pill beside the version field: the same mask
-   over the hex alphabet, one part the width of a hash's start. */
-.doc .releases { grid-template-columns: 1fr auto auto auto auto; grid-template-areas: "title find commit up down" "list list list list list"; }
+   site.css): a version - here a row of the sheet - at the top, the next one blurred at the edge. The
+   heading stands left of one control line: the commit pill, the version pill, the newer and the
+   older button. A version is a table of the same seven columns, its head repeated in every item so
+   the one in focus labels itself; every item's table lays itself out fixed by one shared set of
+   column widths (in ems of the item's size), so a narrow screen shrinks the whole table, cells wrap
+   their words, and the lines of all rows stand strictly one under another. */
+.doc .releases { grid-template-columns: 1fr auto auto auto auto; grid-template-areas: "title commit find up down" "list list list list list"; }
 .doc .releases > h3 { grid-area: title; margin: 0; }
 .doc .releases__commit { grid-area: commit; }
 .doc .releases__commit input { width: 9ch; text-align: left; }
 /* six rows read in the window, as the home page's does */
 .doc .releases__list { height: 30rem; }
-.doc .releases__item { display: table; width: 100%; margin: 0 0 1.9rem; overflow: visible; border-collapse: collapse; }
-/* values sit at the centre of their cells, as the home page's digest reads */
-.doc .releases__item th { padding: 0 0.9rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; text-align: center; }
-.doc .releases__item td { padding: 0.3rem 0.9rem 0.6rem 0; text-align: center; }
+/* one column measure for every row: fixed layout over the shared widths, long words wrap, no line
+   of any row pushes the table wider than the window */
+.doc .releases__item { display: table; width: 100%; table-layout: fixed; margin: 0 0 1.9rem; overflow: visible; border-collapse: collapse; }
+.doc .releases__item th { padding: 0 0.6rem 0.2rem 0; border-bottom: 0; font-size: 0.78rem; font-weight: 400; text-align: center; overflow-wrap: anywhere; }
+.doc .releases__item td { padding: 0.3rem 0.6rem 0.6rem 0; text-align: center; overflow-wrap: anywhere; }
+.doc .releases__item th:nth-child(2) { width: 4.4em; }
+.doc .releases__item th:nth-child(3) { width: 4.2em; }
+.doc .releases__item th:nth-child(4) { width: 3.8em; }
+.doc .releases__item th:nth-child(5) { width: 4.2em; }
+.doc .releases__item th:nth-child(6) { width: 1.6em; }
+.doc .releases__item th:nth-child(7) { width: 5.8em; }
 @media (max-width: 480px) {
-  /* the phone layout of site.css gives the window three columns; the commit pill takes its own row */
-  .doc .releases { grid-template-columns: 1fr auto auto; grid-template-areas: "title find up" "commit commit commit" "list list list" "down down down"; }
+  /* the phone layout of site.css gives the window three columns; the pills take a row each */
+  .doc .releases { grid-template-columns: 1fr auto auto; grid-template-areas: "title commit up" "find find find" "list list list" "down down down"; }
   .doc .releases__list { height: 30rem; }
+  .doc .releases__item { font-size: 0.8rem; }
+  .doc .releases__item th { font-size: 0.68rem; }
 }
