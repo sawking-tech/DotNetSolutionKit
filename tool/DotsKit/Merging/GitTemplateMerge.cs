@@ -75,7 +75,7 @@ internal sealed record TemplateCommit(string Tree, string Version);
 /// </summary>
 /// <param name="runner">Runs git.</param>
 /// <param name="self">The command line that runs dotskit again (<see cref="SelfCommand"/>), for git to run the driver.</param>
-internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGitMerge
+internal sealed partial class GitTemplateMerge(IProcessRunner runner, string self) : IGitMerge
 {
     public const string Branch = "dotskit/template";
 
@@ -154,8 +154,25 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         // --force: a delete/modify conflict follows the template too; -X theirs does not touch it.
         var resolvedByForce = preferTemplate ? await ResolveDeletedAsync(root, [.. conflicts.Except(restyled, StringComparer.Ordinal)], ct) : [];
         await _git.RemoveAsync(root, restyled, ct);
+        // A conflict the repair alone made on the solution's side - the file differs from its base only by added
+        // using lines - takes the template's version: the build after the merge names what the file still misses,
+        // and a using the team added by hand comes back with the same name.
+        var repairAlone = new List<string>();
+        foreach (var path in conflicts.Except(restyled).Except(resolvedByForce, StringComparer.Ordinal).Where(ours.Contains))
+        {
+            if (await OnlyAddedUsingsAsync(root, path, ct))
+            {
+                repairAlone.Add(path);
+            }
+        }
+
+        if (repairAlone.Count > 0)
+        {
+            await runner.RunCheckedAsync("git", ["checkout", "--theirs", "--", .. repairAlone], root, ct);
+        }
+
         Taken = [.. takenFromReport.Concat(resolvedByForce).Distinct().OrderBy(p => p, StringComparer.Ordinal)];
-        return [.. conflicts.Except(restyled, StringComparer.Ordinal).Except(resolvedByForce)];
+        return [.. conflicts.Except(restyled, StringComparer.Ordinal).Except(resolvedByForce).Except(repairAlone, StringComparer.Ordinal)];
     }
 
     /// <summary>
@@ -214,6 +231,43 @@ internal sealed class GitTemplateMerge(IProcessRunner runner, string self) : IGi
         // The solution's side, mode and blob, as the base: one line per file for git update-index --index-info.
         var lines = bothAdded.Select(e => $"{e.Sides[0]} {e.Sides[1]} 1\t{e.Path}");
         await runner.RunCheckedAsync("git", ["update-index", "--index-info"], root, ct, input: string.Join('\n', lines) + "\n");
+    }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^\s*(global\s+)?using\s+[\w.]+\s*;\s*$")]
+    private static partial System.Text.RegularExpressions.Regex AddedUsing();
+
+    /// <summary>Whether the solution's side of a conflict changes nothing against the base but using lines and the blanks with them: the repair replaces usings of the namespaces the template gave up as well as it adds new ones.</summary>
+    private async Task<bool> OnlyAddedUsingsAsync(string root, string path, CancellationToken ct)
+    {
+        var diff = await runner.RunAsync("git", ["diff", "--no-color", "--no-ext-diff", ":1:" + path, ":2:" + path], root, ct);
+        if (diff.Code != 0)
+        {
+            return false;
+        }
+
+        var changed = false;
+        foreach (var line in diff.Output.Split('\n'))
+        {
+            if (line.StartsWith('-') && !line.StartsWith("---"))
+            {
+                changed = true;
+                if (!AddedUsing().IsMatch(line[1..]))
+                {
+                    return false;
+                }
+            }
+
+            if (line.StartsWith('+') && !line.StartsWith("+++"))
+            {
+                changed = true;
+                if (line[1..] is not { } rest || (rest.Length > 0 && !AddedUsing().IsMatch(rest)))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return changed;
     }
 
     /// <summary>
