@@ -19,7 +19,7 @@ internal sealed class ChainScenarios
     private const string First = "1.0.0";
 
     /// <summary>The last patch of every minor of 2.x, in order.</summary>
-    private static readonly string[] Releases = ["2.0.0", "2.1.3", "2.2.0", "2.3.0", "2.4.0", "2.5.0", "2.6.2", "2.7.0", "2.8.0"];
+    private static readonly string[] Releases = ["2.0.0", "2.1.3", "2.2.0", "2.3.0", "2.4.0", "2.5.0", "2.6.2", "2.7.0", "2.8.0", "2.9.1"];
 
     private const string TeamFile = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Application/Team/OrderAudit.cs";
 
