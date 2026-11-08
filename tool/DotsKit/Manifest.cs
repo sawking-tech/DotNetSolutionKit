@@ -145,7 +145,7 @@ internal sealed record Manifest
     /// the resolution takes the part again, and Done takes it once its merge is committed.
     /// </summary>
     public Manifest WithPartInConflict(string to, IReadOnlyList<string> parts) =>
-        this with { Upgrade = new UpgradeInProgress { To = to, Parts = [.. parts], Done = [.. (Upgrade?.Done ?? [])] } };
+        this with { Upgrade = new UpgradeInProgress { To = to, Parts = [.. parts], Done = [.. Upgrade?.Done ?? []] } };
 
     /// <summary>
     /// The parameters of the whole solution a command names with another value than the solution has, the
