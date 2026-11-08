@@ -53,10 +53,11 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
             // A part follows only the moves between the parts merged so far: a type that goes to a part not yet merged keeps its using.
             types = moves.Within(step.InDoneOrThis);
             (baseDir, nextDir) = (Folders.Overlay(baseDir, nextDir, step.InDone), Folders.Overlay(baseDir, nextDir, step.InDoneOrThis));
-            // The template's files of the parts not merged yet carry in the solution the repair of the parts before: both
-            // sides of the step carry it too, so a later part merges them as the template changes them, with no conflict.
-            await repair.BeforeBuildAsync(baseDir, moves.Within(step.InDone), [], ct);
-            await repair.BeforeBuildAsync(nextDir, types, [], ct);
+            // The repair of the trees covers the files of the parts merged so far and this one: a file of a part not
+            // merged yet is repaired on the solution's side by the build's errors and by its own part later, and the
+            // two sides of a merge never carry two repairs of one file.
+            await repair.BeforeBuildAsync(baseDir, moves.Within(step.InDone), [], ct, step.InDone);
+            await repair.BeforeBuildAsync(nextDir, types, [], ct, step.InDoneOrThis);
             PackageVersions.KeepReferenced(baseDir, before, root);
             PackageVersions.KeepReferenced(nextDir, before, root);
             // The repair by the build's errors cannot be carried by the trees: the template's files of the parts not merged
