@@ -91,7 +91,7 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         {
             var first = await builder.BuildAsync(plan.Root, ct);
             result = first.Code != 0 && plan.Types is not null
-                ? await repair.RunAsync(plan.Root, plan.Types, first, ct, plan.Waiting)
+                ? await repair.RunAsync(plan.Root, plan.Types, first, ct)
                 : new(first, [], null);
         }
         catch (OperationCanceledException)
