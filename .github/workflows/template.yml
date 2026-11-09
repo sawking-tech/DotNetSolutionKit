@@ -175,7 +175,8 @@ jobs:
         if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
         run: |
-          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz \
+          curl -sSfL --retry 5 --retry-all-errors --retry-delay 10 \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz \
             | tar -xz -C /usr/local/bin gitleaks
           gitleaks dir . --config "$GITHUB_WORKSPACE/template/tools/gitleaks/.gitleaks.toml" --redact --verbose
 
