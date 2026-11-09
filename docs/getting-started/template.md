@@ -78,8 +78,8 @@ and, for a flag, from its file in [`src/package-versions/`](../../template/src/p
 | `--Agent` | `claude` | [Rules and skills for an AI agent](agents.md): `claude`, `opencode` or `none`. With `--Solution`. |
 | `--HttpPort` | free port | Port in `launchSettings.json` and on the host under compose; without it, a free port from 5000-5999 on the generating machine, so services generated one after another do not share a port. |
 
-`-I`, `--Vault`, `--DiffApi`, `--FeatureFlags`, `--HierarchyRules`, `--Storage`, `--ClickHouse` and `--Audit` add files to `Common`,
-and `--MongoDB` and `--Notify` add a project to `src/capabilities`, so they have to be passed with `--Solution`,
+`-I`, `--Vault`, `--DiffApi`, `--FeatureFlags`, `--HierarchyRules`, `--Storage` and `--Audit` add files to `Common`,
+and `--MongoDB`, `--ClickHouse` and `--Notify` add a project to `src/capabilities`, so they have to be passed with `--Solution`,
 when the shared code is generated. Pass `-I`, `--Vault`, `--DiffApi`, `--FeatureFlags`, `--Storage`, `--ClickHouse`, `--MongoDB`, `--Notify` and `--Audit` again to
 each service generated later that should use them: they change the service's code too, and the service
 then wires what `Common` and `src/capabilities` already have. A service generated without them leaves them out.

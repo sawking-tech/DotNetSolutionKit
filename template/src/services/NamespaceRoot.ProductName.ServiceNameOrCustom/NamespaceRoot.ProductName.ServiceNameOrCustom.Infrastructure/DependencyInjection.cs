@@ -16,7 +16,7 @@ using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramewor
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
 //#if (ClickHouse)
-using NamespaceRoot.ProductName.Common.Infrastructure.ClickHouse;
+using NamespaceRoot.ProductName.Capabilities.ClickHouse;
 //#endif
 //#if (MongoDB)
 using NamespaceRoot.ProductName.Capabilities.Mongo;

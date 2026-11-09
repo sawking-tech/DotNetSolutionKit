@@ -17,9 +17,6 @@
         <!--#if (Storage) -->
         <PackageReference Include="AWSSDK.S3" />
         <!--#endif -->
-        <!--#if (ClickHouse) -->
-        <PackageReference Include="ClickHouse.Client" />
-        <!--#endif -->
         <PackageReference Include="Hangfire.Core" />
         <PackageReference Include="MassTransit.RabbitMQ" />
         <PackageReference Include="MassTransit.EntityFrameworkCore" />
