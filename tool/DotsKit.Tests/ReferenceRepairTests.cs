@@ -377,7 +377,7 @@ internal sealed class ReferenceRepairTests
 
         added.ShouldBe("using System;\r\nusing Acme.Shop.Common;\r\nusing Acme.Shop.Framework.Events;\r\n\r\nnamespace X;\r\n");
         UsingLines.Add(added, "Acme.Shop.Framework.Events").ShouldBe(added);
-        UsingLines.Add("namespace X;\n", "N").ShouldBe("using N;\nnamespace X;\n");
+        UsingLines.Add("namespace X;\n", "N").ShouldBe("using N;\n\nnamespace X;\n");
     }
 
     [Test]
@@ -393,6 +393,6 @@ internal sealed class ReferenceRepairTests
         UsingLines.Replace("global using Old.Ns;\n", "Old.Ns", "New.Ns").ShouldBe("global using New.Ns;\n");
         UsingLines.Replace("using Old.Ns;\nnamespace X;\n", "Old.Ns", "New.Ns").ShouldBe("using New.Ns;\nnamespace X;\n");
         UsingLines.Replace("using Old.Ns;\nusing New.Ns;\nnamespace X;\n", "Old.Ns", "New.Ns").ShouldBe("using New.Ns;\nnamespace X;\n");
-        UsingLines.Replace("using New.A;\nnamespace X;\n", "Old.Ns", "New.B").ShouldBe("using New.A;\nusing New.B;\nnamespace X;\n");
+        UsingLines.Replace("using New.A;\nnamespace X;\n", "Old.Ns", "New.B").ShouldBe("using New.A;\nusing New.B;\n\nnamespace X;\n");
     }
 }
