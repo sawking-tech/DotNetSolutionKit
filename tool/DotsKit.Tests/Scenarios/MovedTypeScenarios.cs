@@ -52,8 +52,8 @@ internal sealed class MovedTypeScenarios
 
         var homes = TypeIndex.Read(solution.Root).Find("IDomainEventHandler");
 
-        homes.ShouldBe([new TypeHome("IDomainEventHandler", $"{Sandbox.Prefix}.Common.Application.Events.Handlers",
-            $"src/common/{Sandbox.Prefix}.Common.Application/{Sandbox.Prefix}.Common.Application.csproj")]);
+        homes.ShouldBe([new TypeHome("IDomainEventHandler", $"{Sandbox.Prefix}.Framework.DomainEvents.Handlers",
+            $"src/framework/{Sandbox.Prefix}.Framework.DomainEvents/{Sandbox.Prefix}.Framework.DomainEvents.csproj")]);
     }
 
     [Test]
