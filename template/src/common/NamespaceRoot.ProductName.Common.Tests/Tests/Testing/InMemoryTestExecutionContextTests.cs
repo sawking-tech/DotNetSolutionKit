@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Tests.Fixtures;
+using NamespaceRoot.ProductName.Framework.Testing;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Testing;
 
