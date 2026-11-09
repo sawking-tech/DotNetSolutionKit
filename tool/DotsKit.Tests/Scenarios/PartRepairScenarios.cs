@@ -76,7 +76,7 @@ internal sealed class PartRepairScenarios
         // The merge brings the template's Order.cs and project to the new namespace - all at once as the template's change, a
         // part at a time as the repair the step's two sides carry - and the repair takes the team's file; all at once it adds
         // the reference the template's project has not got.
-        lines.ShouldContain($"  Acme.Shop.Orders.Domain: using {OldNamespace} -> {NewNamespace}{(allAtOnce ? "; reference to Acme.Shop.Common" : "")}");
+        lines.ShouldContain($"  Acme.Shop.Orders.Domain: using {OldNamespace} -> {NewNamespace}{(allAtOnce ? "" : " (2 files)")}; reference to Acme.Shop.Common");
     }
 
     [Test]
