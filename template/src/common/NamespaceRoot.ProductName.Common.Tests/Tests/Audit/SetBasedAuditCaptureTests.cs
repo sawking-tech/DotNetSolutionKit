@@ -12,6 +12,7 @@ using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using NamespaceRoot.ProductName.Framework.Testing;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Audit;
 

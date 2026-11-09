@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using NamespaceRoot.ProductName.Framework.Testing;
 
 namespace NamespaceRoot.ProductName.Common.Tests;
 

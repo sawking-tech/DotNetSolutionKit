@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using NamespaceRoot.ProductName.Framework.Testing;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Events;
 

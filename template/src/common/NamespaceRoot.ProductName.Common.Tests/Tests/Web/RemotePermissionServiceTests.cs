@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using NamespaceRoot.ProductName.Common.Exceptions;
 using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 using NamespaceRoot.ProductName.Common.Web.Authorization;
+using NamespaceRoot.ProductName.Framework.Testing;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;
 
