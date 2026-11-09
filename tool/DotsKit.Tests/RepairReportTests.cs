@@ -17,14 +17,16 @@ internal sealed class RepairReportTests
         TypeIndex.Of([(Domain, "namespace Acme.Shop.Common.Domain.Events;\npublic sealed class DomainEvent;\n")]));
 
     [Test]
-    public void AMoveBetweenTwoParts_IsFollowedOnceBothAreMerged_AndItsNamespaceIsKeptTill()
+    public void AMoveBetweenTwoParts_IsFollowedOnceItsTargetIsMerged_AndItsNamespaceIsKeptTill()
     {
         var applicationOnly = Moved.Within(project => UpgradeParts.Of(project) == "common/Acme.Shop.Common.Application");
+        var domainOnly = Moved.Within(project => UpgradeParts.Of(project) == "common/Acme.Shop.Common.Domain");
         var both = Moved.Within(project => UpgradeParts.Of(project).StartsWith("common/", StringComparison.Ordinal));
 
         Moved.OutOf("Acme.Shop.Common.Application.Events").ShouldHaveSingleItem();
         applicationOnly.Moves.ShouldBeEmpty();
         applicationOnly.OutOf("Acme.Shop.Common.Application.Events").ShouldBeEmpty();
+        domainOnly.ShouldBeSameAs(Moved);
         both.ShouldBeSameAs(Moved);
     }
 
