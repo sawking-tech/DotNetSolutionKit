@@ -620,7 +620,9 @@
           "exclude": [
             "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Storage/**",
             "src/common/NamespaceRoot.ProductName.Common/Exceptions/StorageException.cs",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/S3ObjectStorageTests.cs"
+            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/S3ObjectStorageTests.cs",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Storage/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Storage.Tests/**"
           ]
         },
         {
