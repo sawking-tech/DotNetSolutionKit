@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Domain.Events;
 using NamespaceRoot.ProductName.Framework.Testing.Stubs;
+using NamespaceRoot.ProductName.Framework.Testing;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Persistence;
 

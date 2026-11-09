@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using NamespaceRoot.ProductName.Framework.Testing.Rules;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Rules;
 
