@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets;
 
 /// <summary>
 /// Adds the secret store to a service's configuration.

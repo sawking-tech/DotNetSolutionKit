@@ -8,12 +8,6 @@
 
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
-        <!--#if (Infisical) -->
-        <PackageReference Include="Infisical.Sdk" />
-        <!--#endif -->
-        <!--#if (Vault) -->
-        <PackageReference Include="VaultSharp" />
-        <!--#endif -->
         <!--#if (Storage) -->
         <PackageReference Include="AWSSDK.S3" />
         <!--#endif -->

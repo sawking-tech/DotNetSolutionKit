@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using NamespaceRoot.ProductName.Common.Exceptions;
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+using NamespaceRoot.ProductName.Capabilities.Secrets;
 using NUnit.Framework;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets.Tests.Secrets;
 
 /// <summary>
 /// How secrets become configuration: which folder wins, how a secret name becomes a configuration path,

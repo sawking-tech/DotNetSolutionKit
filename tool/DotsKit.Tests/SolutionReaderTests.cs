@@ -192,7 +192,7 @@ internal sealed class SolutionReaderTests
             .With("deploy/k8s/namespace.yaml")
             .With(".opencode/rules.md")
             .With("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Tests/Acme.Shop.Orders.Tests.csproj", "<PackageReference Include=\"xunit.v3\" />")
-            .With("src/common/Acme.Shop.Common.Infrastructure/Configuration/Secrets/VaultOptions.cs")
+            .With("src/capabilities/Acme.Shop.Capabilities.Secrets/VaultOptions.cs")
             .With(".github/workflows/ci.yml");
 
         var solution = Read(files).SolutionArgs;

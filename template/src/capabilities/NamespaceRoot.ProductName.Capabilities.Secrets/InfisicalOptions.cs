@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets;
 
 /// <summary>
 /// Infisical as the secret store: the <c>Infisical</c> section.

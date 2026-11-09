@@ -661,23 +661,23 @@
         {
           "condition": "(!SecretStore)",
           "exclude": [
-            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Configuration/Secrets/**",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Secrets/**"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/**"
           ]
         },
         {
           "condition": "(!Infisical)",
           "exclude": [
-            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Configuration/Secrets/Infisical*.cs",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Secrets/SecretsConfigurationTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets/Infisical*.cs",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/Secrets/SecretsConfigurationTests.cs"
           ]
         },
         {
           "condition": "(!Vault)",
           "exclude": [
-            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Configuration/Secrets/Vault*.cs",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Secrets/VaultConfigurationTests.cs",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/VaultSecretStoreTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets/Vault*.cs",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/Secrets/VaultConfigurationTests.cs",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/VaultSecretStoreTests.cs"
           ]
         },
         {
@@ -706,7 +706,7 @@
             "src/common/NamespaceRoot.ProductName.Common.Application/FeatureManagement/**",
             "src/common/NamespaceRoot.ProductName.Common.Web/FeatureManagement/**",
             "src/common/NamespaceRoot.ProductName.Common.Tests/FeatureManagement/**",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Secrets/FeatureFlagsStoreOutageTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/Secrets/FeatureFlagsStoreOutageTests.cs"
           ]
         },
         {
