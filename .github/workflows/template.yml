@@ -7,7 +7,7 @@ name: Template
 on:
   pull_request:
   push:
-    branches: [master, dev, '2.x']
+    branches: [master]
   workflow_dispatch:
 
 permissions:
