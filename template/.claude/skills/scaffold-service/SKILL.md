@@ -66,8 +66,8 @@ Per service, freely: `-H` (Hangfire), `--Messaging` (`none`, `outbox`, `direct`)
 Read what the solution has before choosing:
 
 ```bash
-ls src/capabilities                                                   # Capabilities.Notifications -> --Notify email; Capabilities.Mongo -> --MongoDB; Capabilities.ClickHouse -> --ClickHouse
-ls src/common/NamespaceRoot.ProductName.Common.Infrastructure        # Persistence/SqlServer -> mssql; Storage; Configuration/Secrets -> -I or --Vault
+ls src/capabilities                                                   # Capabilities.Notifications -> --Notify email; Capabilities.Mongo -> --MongoDB; Capabilities.ClickHouse -> --ClickHouse; Capabilities.Secrets -> --Infisical or --Vault
+ls src/common/NamespaceRoot.ProductName.Common.Infrastructure        # Persistence/SqlServer -> mssql; Storage
 ls src/common/NamespaceRoot.ProductName.Common.Web/FeatureManagement  # present -> --FeatureFlags
 ls deploy                                                             # compose or k8s
 ```

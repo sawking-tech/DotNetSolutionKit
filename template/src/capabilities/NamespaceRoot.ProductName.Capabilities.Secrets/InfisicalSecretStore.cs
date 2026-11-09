@@ -4,7 +4,7 @@ using Infisical.Sdk;
 using Infisical.Sdk.Model;
 using NamespaceRoot.ProductName.Common.Exceptions;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets;
 
 /// <summary>
 /// Reads secrets from Infisical with a machine identity.

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using NamespaceRoot.ProductName.Common.Exceptions;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets;
 
 /// <summary>
 /// Makes the secret store one more configuration source, so nothing downstream knows a value came from it.

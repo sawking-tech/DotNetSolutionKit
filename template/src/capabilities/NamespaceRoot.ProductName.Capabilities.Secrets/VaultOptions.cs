@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets;
 
 /// <summary>
 /// HashiCorp Vault as the secret store: the <c>Vault</c> section.

@@ -3,7 +3,7 @@ using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Application.FeatureManagement;
 //#endif
 //#if (SecretStore)
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+using NamespaceRoot.ProductName.Capabilities.Secrets;
 //#endif
 //#if (DiffApi)
 using NamespaceRoot.ProductName.Common.Web.Setup;

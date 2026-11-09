@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets;
 
 /// <summary>
 /// Reads secrets from wherever they are kept.

@@ -7,7 +7,7 @@ using VaultSharp.V1.AuthMethods;
 using VaultSharp.V1.AuthMethods.AppRole;
 using VaultSharp.V1.AuthMethods.Token;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets;
 
 /// <summary>
 /// Reads secrets from the KV version 2 engine of HashiCorp Vault.

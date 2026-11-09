@@ -4,9 +4,9 @@ using Microsoft.Extensions.Hosting;
 using NamespaceRoot.ProductName.Common.Application.FeatureManagement;
 using NamespaceRoot.ProductName.Common.Exceptions;
 using NamespaceRoot.ProductName.Common.FeatureManagement;
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+using NamespaceRoot.ProductName.Capabilities.Secrets;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets.Tests.Secrets;
 
 /// <summary>
 /// The feature flags of a service whose secret store answers, changes and goes down, end to end: the

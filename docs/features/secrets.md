@@ -113,7 +113,7 @@ outside `Local` it does not start.
 
 ## Tests
 
-`Common.Tests` covers the order of the folders and the optional and required store, with the store
+The capability's own tests cover the order of the folders and the optional and required store, with the store
 replaced by a stub. With `--Vault`, the same rules are checked through the `Vault`
 section, and the Vault store itself against a real Vault in development mode (`TEST_VAULT`) in the
 integration tests of the template's CI and of a generated solution's.

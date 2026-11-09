@@ -1,9 +1,9 @@
 using NamespaceRoot.ProductName.Common.Exceptions;
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration.Secrets;
+using NamespaceRoot.ProductName.Capabilities.Secrets;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods.Token;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Integration;
+namespace NamespaceRoot.ProductName.Capabilities.Secrets.Tests;
 
 /// <summary>
 /// The Vault store against a real Vault, from <c>TEST_VAULT</c>: <c>Address=http://localhost:8200;Token=...</c>,
