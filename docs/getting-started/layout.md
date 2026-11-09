@@ -23,7 +23,7 @@ acme-shop/
 │   │   ├── Acme.Shop.Common.Web/              the host: pipeline, errors, Swagger, authentication
 │   │   ├── Acme.Shop.Common.Testing/          the test harness, with no test framework
 │   │   └── Acme.Shop.Common.Tests/            the tests of Common
-│   ├── capabilities/              a project per flag: Capabilities.Mongo, Capabilities.Notifications
+│   ├── capabilities/              a project per flag: Capabilities.Mongo, Capabilities.ClickHouse, Capabilities.Storage, Capabilities.Notifications
 │   └── services/
 │       ├── Acme.Shop.All.sln      every project of the solution
 │       └── Acme.Shop.Orders/      one service, four projects (below)
