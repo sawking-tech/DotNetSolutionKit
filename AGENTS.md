@@ -184,5 +184,5 @@ file-byte violations and C# style violations in the tool.
 - CI uses minimal permissions. nuget.org publishing uses Trusted Publishing without stored keys. A NuGet
   version can be unlisted, not deleted.
 
-## Plan-first (закон сессий)
-Работа строго по plan.kdl: 1) пункт в плане (`plan.mjs add`), 2) уточнение why/how/done_when, 3) приоритизация позицией, 4) `plan.mjs take` - и только потом действия. Хотфикс без пункта плана запрещен, без исключений "мелочи". Отметка прогресса: plan.mjs done + check.
+## Plan-first (the law of sessions)
+Work strictly from plan.kdl: 1) an item in the plan (`plan.mjs add`), 2) its why/how/done_when, 3) priority by position, 4) `plan.mjs take` - only then action. A hotfix without a plan item is forbidden, with no "it's small" exceptions. Progress is marked with plan.mjs done + check.
