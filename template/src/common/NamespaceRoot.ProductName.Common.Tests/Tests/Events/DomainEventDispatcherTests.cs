@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
+using NamespaceRoot.ProductName.Framework.Testing;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Events;
 
