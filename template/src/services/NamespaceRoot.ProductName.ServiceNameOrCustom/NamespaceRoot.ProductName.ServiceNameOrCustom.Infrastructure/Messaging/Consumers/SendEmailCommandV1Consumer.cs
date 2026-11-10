@@ -1,10 +1,12 @@
 using Microsoft.Extensions.Logging;
 using NamespaceRoot.ProductName.Common.Application.Messaging.Consumers;
 using NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
+using NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Notifications;
 using NamespaceRoot.ProductName.Common.Infrastructure.Messaging.Consumers;
 //#if (Storage)
 using NamespaceRoot.ProductName.Capabilities.Persistence.S3;
+using NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions;
 //#endif
 
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.Messaging.Consumers;

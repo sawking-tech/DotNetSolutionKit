@@ -47,7 +47,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests.csproj", "{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions", "..\capabilities\Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions.csproj", "{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions.csproj", "{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}"
 EndProject
 #endif
 #if (SecretStore)

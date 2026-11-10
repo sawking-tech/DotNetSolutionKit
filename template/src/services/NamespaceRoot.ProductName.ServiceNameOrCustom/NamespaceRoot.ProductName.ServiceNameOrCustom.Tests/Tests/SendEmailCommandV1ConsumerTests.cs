@@ -4,10 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
+using NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Notifications;
 //#if (Storage)
-using NamespaceRoot.ProductName.Capabilities.Persistence.S3;
+using NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions;
 //#endif
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.Messaging.Consumers;
 

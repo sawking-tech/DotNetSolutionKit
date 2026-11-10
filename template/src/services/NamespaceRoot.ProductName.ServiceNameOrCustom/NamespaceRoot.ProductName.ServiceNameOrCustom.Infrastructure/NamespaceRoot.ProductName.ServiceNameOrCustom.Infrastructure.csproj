@@ -16,9 +16,11 @@
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.csproj" />
       <!--#endif -->
       <!--#if (NotifyEmail) -->
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions.csproj" />
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.csproj" />
       <!--#endif -->
       <!--#if (Storage) -->
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions.csproj" />
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3\NamespaceRoot.ProductName.Capabilities.Persistence.S3.csproj" />
       <!--#endif -->
       <!--#if (ClickHouse) -->
