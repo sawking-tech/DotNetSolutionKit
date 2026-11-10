@@ -78,6 +78,11 @@ mindmap
 
 ## Features
 
+The docs call them *features*; in a generated solution the same units are *capabilities* —
+functional modules under `src/capabilities` and `src/framework`. It is one thing seen from two
+sides: the template ships a feature, the solution carries a module, and the consumer works with
+modules and names them that way.
+
 - [Background jobs](features/background-jobs.md): Hangfire, `--Hangfire`
 - [Message bus](features/messaging.md): MassTransit, `--Messaging`
 - [Secrets from Infisical or Vault](features/secrets.md): `-I`, `--Vault`
