@@ -135,8 +135,8 @@ internal sealed class SolutionReaderTests
     {
         var files = Solution().WithService("ST.Demo.Billing", 5001, "HangfireSettings", "S3", "MongoDB", "Email")
             .With("src/common/ST.Demo.Common.Infrastructure/Storage/DependencyInjection.cs")
-            .With("src/capabilities/ST.Demo.Capabilities.Persistence.Mongo/Mongo.csproj")
-            .With("src/capabilities/ST.Demo.Capabilities.Messaging.Notifications/Notifications.csproj");
+            .With("src/capabilities/ST.Demo.Capabilities.Mongo/Mongo.csproj")
+            .With("src/capabilities/ST.Demo.Capabilities.Notifications/Notifications.csproj");
 
         var billing = Read(files).FindService("Billing")!;
 
@@ -145,6 +145,26 @@ internal sealed class SolutionReaderTests
         billing["Notify"].ShouldBe("email");
         Read(files).FindService("Orders")!.IsOn("MongoDB").ShouldBeFalse();
         Read(files).SolutionArgs.IsOn("MongoDB").ShouldBeTrue();
+    }
+
+    [Test]
+    public void TheCapabilityFlagsOfA30Solution_AreReadFromTheGroupFolders()
+    {
+        var files = Solution()
+            .With("src/capabilities/ST.Demo.Capabilities.Persistence/ST.Demo.Capabilities.Persistence.S3/S3.csproj")
+            .With("src/capabilities/ST.Demo.Capabilities.Persistence/ST.Demo.Capabilities.Persistence.Mongo/Mongo.csproj")
+            .With("src/capabilities/ST.Demo.Capabilities.Analytics/ST.Demo.Capabilities.Analytics.ClickHouse/ClickHouse.csproj")
+            .With("src/capabilities/ST.Demo.Capabilities.Messaging/ST.Demo.Capabilities.Messaging.Notifications/Notifications.csproj")
+            .With("src/capabilities/ST.Demo.Capabilities.Security/ST.Demo.Capabilities.Security.CredentialStore/InfisicalOptions.cs");
+
+        var solution = Read(files).SolutionArgs;
+
+        solution.IsOn("Storage").ShouldBeTrue();
+        solution.IsOn("MongoDB").ShouldBeTrue();
+        solution.IsOn("ClickHouse").ShouldBeTrue();
+        solution["Notify"].ShouldBe("email");
+        solution.IsOn("Infisical").ShouldBeTrue();
+        solution.IsOn("Vault").ShouldBeFalse();
     }
 
     [Test]
@@ -192,7 +212,7 @@ internal sealed class SolutionReaderTests
             .With("deploy/k8s/namespace.yaml")
             .With(".opencode/rules.md")
             .With("src/services/ST.Demo.Orders/ST.Demo.Orders.Tests/ST.Demo.Orders.Tests.csproj", "<PackageReference Include=\"xunit.v3\" />")
-            .With("src/capabilities/ST.Demo.Capabilities.Security.CredentialStore/VaultOptions.cs")
+            .With("src/capabilities/ST.Demo.Capabilities.Secrets/VaultOptions.cs")
             .With(".github/workflows/ci.yml");
 
         var solution = Read(files).SolutionArgs;
@@ -226,4 +246,3 @@ internal sealed class SolutionReaderTests
         SolutionReader.Version(new Files()).ShouldBeNull();
     }
 }
-

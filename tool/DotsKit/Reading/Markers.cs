@@ -19,11 +19,11 @@ internal static class Markers
     /// </summary>
     public static readonly IReadOnlyList<(string Flag, string[] Paths)> SolutionFlags =
     [
-        ("Storage", ["src/capabilities/{P}.Capabilities.Persistence.S3", "src/common/{P}.Common.Infrastructure/Storage"]),
-        ("ClickHouse", ["src/capabilities/{P}.Capabilities.Analytics.ClickHouse", "src/capabilities/{P}.Capabilities.ClickHouse"]),
-        ("MongoDB", ["src/capabilities/{P}.Capabilities.Persistence.Mongo", "src/capabilities/{P}.Capabilities.Mongo"]),
-        ("Infisical", ["src/capabilities/{P}.Capabilities.Security.CredentialStore/Infisical*", "src/capabilities/{P}.Capabilities.Secrets/Infisical*"]),
-        ("Vault", ["src/capabilities/{P}.Capabilities.Security.CredentialStore/Vault*", "src/capabilities/{P}.Capabilities.Secrets/Vault*"]),
+        ("Storage", ["src/capabilities/{P}.Capabilities.Persistence/{P}.Capabilities.Persistence.S3", "src/common/{P}.Common.Infrastructure/Storage"]),
+        ("ClickHouse", ["src/capabilities/{P}.Capabilities.Analytics/{P}.Capabilities.Analytics.ClickHouse", "src/capabilities/{P}.Capabilities.ClickHouse"]),
+        ("MongoDB", ["src/capabilities/{P}.Capabilities.Persistence/{P}.Capabilities.Persistence.Mongo", "src/capabilities/{P}.Capabilities.Mongo"]),
+        ("Infisical", ["src/capabilities/{P}.Capabilities.Security/{P}.Capabilities.Security.CredentialStore/Infisical*", "src/capabilities/{P}.Capabilities.Secrets/Infisical*"]),
+        ("Vault", ["src/capabilities/{P}.Capabilities.Security/{P}.Capabilities.Security.CredentialStore/Vault*", "src/capabilities/{P}.Capabilities.Secrets/Vault*"]),
         ("DiffApi", ["src/common/{P}.Common.Web/Setup/SchemaDump.cs"]),
         ("FeatureFlags", ["src/common/{P}.Common/FeatureManagement"]),
         ("HierarchyRules", ["src/common/{P}.Common/Domain/IHierarchicalEntity.cs"]),
@@ -35,7 +35,7 @@ internal static class Markers
 
     /// <summary>The email channel of --Notify, in the capability of its own since 2.8; the second path is the 2.x layout, gone in 3.0.</summary>
     public static readonly string[] NotifyEmailPaths =
-        ["src/capabilities/{P}.Capabilities.Messaging.Notifications", "src/capabilities/{P}.Capabilities.Notifications"];
+        ["src/capabilities/{P}.Capabilities.Messaging/{P}.Capabilities.Messaging.Notifications", "src/capabilities/{P}.Capabilities.Notifications"];
 
     public const string SqlServerPath = "src/common/{P}.Common.Infrastructure/Persistence/SqlServer";
     public const string ComposePath = "deploy/compose";
@@ -95,4 +95,3 @@ internal static class Markers
     public static string Of(string path, string prefix, string? service = null) =>
         path.Replace(Prefix, prefix, StringComparison.Ordinal).Replace(Service, service ?? "", StringComparison.Ordinal);
 }
-
