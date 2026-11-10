@@ -23,6 +23,12 @@ service whenever the team wants one.
 What it gives a solution in full - the principles, the economics, the cost:
 [what the template gives](docs/getting-started/what-it-gives.md).
 
+On timing: 3.0 ships later than the [roadmap](docs/roadmap.md) planned, and it is a transitional
+release. Its work is the restructuring of the template and its capabilities; the solution it generates
+stays on .NET 8, whose support Microsoft ends on November 10, 2026 - the era has passed. The era of
+.NET continues: .NET 10 goes on, .NET 11 has just begun, and that is a fine thing. The next major,
+4.0, moves the template and a generated solution to .NET 10, the long-term line.
+
 ## Install and generate
 
 The recommended way is the tool [dotskit](docs/getting-started/tool.md): it generates a solution, adds
