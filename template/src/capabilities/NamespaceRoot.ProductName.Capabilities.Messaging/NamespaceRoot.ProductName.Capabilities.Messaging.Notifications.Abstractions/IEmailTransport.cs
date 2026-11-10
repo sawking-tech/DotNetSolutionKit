@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions;
 
 internal interface IEmailTransport
 {

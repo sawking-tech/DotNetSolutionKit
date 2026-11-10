@@ -25,4 +25,5 @@
             <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
-</Project>
+</Project>        <ProjectReference Include="..\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions.csproj" />
+

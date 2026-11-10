@@ -1,7 +1,7 @@
 using ClickHouse.Client.ADO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse;
+using NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Abstractions;
 
 namespace NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests.Integration;
 

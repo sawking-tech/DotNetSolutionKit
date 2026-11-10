@@ -1,5 +1,5 @@
 using NamespaceRoot.ProductName.Common.Exceptions;
-using NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
+using NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods.Token;
 

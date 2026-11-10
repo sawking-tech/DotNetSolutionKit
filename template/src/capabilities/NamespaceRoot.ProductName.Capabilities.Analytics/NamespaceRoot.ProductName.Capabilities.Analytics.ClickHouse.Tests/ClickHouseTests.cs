@@ -2,7 +2,7 @@ using ClickHouse.Client.Utility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NamespaceRoot.ProductName.Common.Exceptions;
-using NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse;
+using NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Abstractions;
 
 namespace NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests.Integration;
 

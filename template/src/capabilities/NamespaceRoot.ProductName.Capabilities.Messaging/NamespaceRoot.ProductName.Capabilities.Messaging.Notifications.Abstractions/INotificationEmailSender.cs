@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions;
 
 /// <summary>
 /// Sends a message by email to its recipient as it is: a subject and a plain text body. Implementations use

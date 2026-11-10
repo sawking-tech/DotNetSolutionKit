@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse;
+namespace NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Abstractions;
 
 /// <summary>
 /// Connection settings for ClickHouse, the <c>ClickHouse</c> section.

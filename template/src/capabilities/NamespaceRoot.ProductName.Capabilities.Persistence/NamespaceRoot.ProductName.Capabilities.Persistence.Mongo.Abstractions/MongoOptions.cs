@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using MongoDB.Driver;
 
-namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mongo;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Abstractions;
 
 /// <summary>
 /// Connection settings for MongoDB, the <c>MongoDB</c> section.

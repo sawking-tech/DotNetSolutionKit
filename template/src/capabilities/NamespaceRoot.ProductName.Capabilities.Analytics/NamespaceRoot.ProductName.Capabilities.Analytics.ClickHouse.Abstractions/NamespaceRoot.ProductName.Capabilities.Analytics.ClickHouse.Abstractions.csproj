@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- The contracts of the NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse capability: interfaces and options. No external packages:
+         a consumer references this project and gets no driver transitively. -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+</Project>

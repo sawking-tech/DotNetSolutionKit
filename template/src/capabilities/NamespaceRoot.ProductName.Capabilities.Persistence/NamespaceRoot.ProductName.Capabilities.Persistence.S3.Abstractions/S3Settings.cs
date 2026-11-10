@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NamespaceRoot.ProductName.Capabilities.Persistence.S3;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions;
 
 /// <summary>
 /// An S3-compatible bucket: AWS S3, or a self-hosted server (SeaweedFS, MinIO) with path-style URLs.

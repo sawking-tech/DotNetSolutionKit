@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NamespaceRoot.ProductName.Common.Exceptions;
-using NamespaceRoot.ProductName.Capabilities.Persistence.S3;
+using NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions;
 
 namespace NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests.Integration;
 

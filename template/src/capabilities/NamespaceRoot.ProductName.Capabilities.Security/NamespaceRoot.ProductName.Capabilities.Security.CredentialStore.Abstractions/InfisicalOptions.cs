@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
+namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions;
 
 /// <summary>
 /// Infisical as the secret store: the <c>Infisical</c> section.

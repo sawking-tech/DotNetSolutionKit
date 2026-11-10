@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Capabilities.Persistence.S3;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions;
 
 /// <summary>
 /// S3-compatible object storage: AWS S3, SeaweedFS, MinIO. Callers stay free of the SDK; a missing object is a

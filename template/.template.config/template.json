@@ -551,7 +551,8 @@
           "condition": "(!NotifyEmail)",
           "exclude": [
             "**/Messaging/Notifications/SendEmailCommandV1.cs"
-          ]
+          
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions/**",]
         },
         {
           "condition": "(!NotifyEmail || Messaging == \"none\")",
@@ -586,14 +587,16 @@
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse/**",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests/**"
-          ]
+          
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Analytics/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Abstractions/**",]
         },
         {
           "condition": "(!MongoDB)",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.Mongo/**",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests/**"
-          ]
+          
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence/NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Abstractions/**",]
         },
         {
           "condition": "(!NotifyEmail)",
@@ -621,7 +624,8 @@
             "src/common/NamespaceRoot.ProductName.Common/Exceptions/StorageException.cs",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.S3/**",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests/**"
-          ]
+          
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence/NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions/**",]
         },
         {
           "condition": "(Database != \"mssql\")",
@@ -661,7 +665,8 @@
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/**",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/**"
-          ]
+          
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions/**",]
         },
         {
           "condition": "(!Infisical)",

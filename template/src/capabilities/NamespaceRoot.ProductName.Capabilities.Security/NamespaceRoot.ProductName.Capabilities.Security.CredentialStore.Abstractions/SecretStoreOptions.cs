@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
+namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions;
 
 /// <summary>
 /// What every secret store shares: which folders a service reads and whether it may start without them.

@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
+namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions;
 
 /// <summary>
 /// HashiCorp Vault as the secret store: the <c>Vault</c> section.

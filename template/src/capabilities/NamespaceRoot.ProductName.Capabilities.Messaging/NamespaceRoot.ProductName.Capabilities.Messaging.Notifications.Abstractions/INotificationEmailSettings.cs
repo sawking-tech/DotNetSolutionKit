@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions;
 
 /// <summary>How email is sent, the <c>Email</c> section.</summary>
 public interface INotificationEmailSettings

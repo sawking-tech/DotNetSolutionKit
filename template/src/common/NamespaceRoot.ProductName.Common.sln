@@ -1,7 +1,19 @@
-﻿﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Common", "NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj", "{A9C0F473-2F7D-4D5C-A77F-F5B4B982FE1C}"
+#if (MongoDB)
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Abstractions.csproj", "{369F0DD6-8F0D-4C53-9DEF-E4E143B73616}"
+#if (ClickHouse)
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Analytics\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Abstractions\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Abstractions.csproj", "{140B53D6-FF2E-43DE-BCBD-4A93732B25D3}"
+#if (NotifyEmail)
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions.csproj", "{05B476CD-8E67-4F3D-96E1-510FC86F27C6}"
+#if (SecretStore)
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions.csproj", "{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}"
 EndProject
+#endif
+#endif
+#endif
+#endif
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Common.Contracts", "NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj", "{28AFCEBD-14CE-4AE9-94AF-31CA3C0AF11D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Common.Application", "NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj", "{9D6ABD18-4617-43C9-86EB-4FAE2533D58D}"
@@ -35,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests.csproj", "{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions", "..\capabilities\Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions.csproj", "{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}"
+EndProject
 #endif
 #if (SecretStore)
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.csproj", "{61CF3F26-821E-49AC-8819-229D7249BEA1}"
@@ -58,6 +72,22 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU.ActiveCfg
+		{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}.Debug|Any CPU.Build.0 = Debug|Any CPU.Build.0
+		{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}.Release|Any CPU.ActiveCfg = Release|Any CPU.ActiveCfg
+		{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}.Release|Any CPU.Build.0 = Release|Any CPU.Build.0
+		{05B476CD-8E67-4F3D-96E1-510FC86F27C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU.ActiveCfg
+		{05B476CD-8E67-4F3D-96E1-510FC86F27C6}.Debug|Any CPU.Build.0 = Debug|Any CPU.Build.0
+		{05B476CD-8E67-4F3D-96E1-510FC86F27C6}.Release|Any CPU.ActiveCfg = Release|Any CPU.ActiveCfg
+		{05B476CD-8E67-4F3D-96E1-510FC86F27C6}.Release|Any CPU.Build.0 = Release|Any CPU.Build.0
+		{140B53D6-FF2E-43DE-BCBD-4A93732B25D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU.ActiveCfg
+		{140B53D6-FF2E-43DE-BCBD-4A93732B25D3}.Debug|Any CPU.Build.0 = Debug|Any CPU.Build.0
+		{140B53D6-FF2E-43DE-BCBD-4A93732B25D3}.Release|Any CPU.ActiveCfg = Release|Any CPU.ActiveCfg
+		{140B53D6-FF2E-43DE-BCBD-4A93732B25D3}.Release|Any CPU.Build.0 = Release|Any CPU.Build.0
+		{369F0DD6-8F0D-4C53-9DEF-E4E143B73616}.Debug|Any CPU.ActiveCfg = Debug|Any CPU.ActiveCfg
+		{369F0DD6-8F0D-4C53-9DEF-E4E143B73616}.Debug|Any CPU.Build.0 = Debug|Any CPU.Build.0
+		{369F0DD6-8F0D-4C53-9DEF-E4E143B73616}.Release|Any CPU.ActiveCfg = Release|Any CPU.ActiveCfg
+		{369F0DD6-8F0D-4C53-9DEF-E4E143B73616}.Release|Any CPU.Build.0 = Release|Any CPU.Build.0
 		{A9C0F473-2F7D-4D5C-A77F-F5B4B982FE1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9C0F473-2F7D-4D5C-A77F-F5B4B982FE1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9C0F473-2F7D-4D5C-A77F-F5B4B982FE1C}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -269,6 +299,10 @@ Global
 		{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}.Release|x64.Build.0 = Release|Any CPU
 		{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}.Release|x86.ActiveCfg = Release|Any CPU
 		{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}.Release|x86.Build.0 = Release|Any CPU
+		{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU.ActiveCfg
+		{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}.Debug|Any CPU.Build.0 = Debug|Any CPU.Build.0
+		{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}.Release|Any CPU.ActiveCfg = Release|Any CPU.ActiveCfg
+		{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}.Release|Any CPU.Build.0 = Release|Any CPU.Build.0
 #endif
 #if (SecretStore)
 		{61CF3F26-821E-49AC-8819-229D7249BEA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

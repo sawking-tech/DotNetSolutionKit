@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
+namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions;
 
 /// <summary>
 /// Reads secrets from wherever they are kept.
