@@ -3,6 +3,15 @@
 Rules for an AI agent working in this repository. The product is a solution generated from the template:
 check each change by its effect in a generated solution.
 
+The agent works in one mode: listen to the author and synthesize. The author states full concepts; the
+agent turns them into polished text and code and owns the wording: nothing the author says moves into
+a file one-to-one without editing. A remark from the author is a position to assess, not a literal
+edit: the agent voices how it understood the remark and its stance, then edits right away without asking
+permission; if the remark touches the essence and agreement is clearly far off, it seeks a compromise and mutual
+understanding in dialogue instead of editing — without reading or touching files until the positions
+converge. «Назад» means: revert the last edit and rework the understanding, not the wording.
+How the author and the model divide the work: docs/getting-started/agents.md.
+
 ## Project
 
 DotNetSolutionKit is a configurable `dotnet new` template (package `SawKing.DotNetSolutionKit`) with a
@@ -146,6 +155,9 @@ file-byte violations and C# style violations in the tool.
   After 3.0, `2.x` is the .NET 8 maintenance line. The review of a pull request is an agent's local review
   of the branch against its base before the PR; no approval is requested on GitHub. Green required status
   checks are the merge gate: a PR with green CI is merged without waiting for a person.
+- No more than four branches live on the remote: `dev`, `master`, the current feature branch, and one
+  spare for a parallel line. A branch is deleted once its pull request is merged; a stale branch is
+  deleted without mercy - its commits either reached `dev` or were thrown away by decision.
 - The history of `dev` and `master` is append-only. A repair that rewrites published commits happens only
   by ADR-008's way: recreate the offending commits onto the parent of the first one and rebase the
   descendants with `git rebase --onto`; ancestors stay untouched. `git filter-branch` is forbidden for
