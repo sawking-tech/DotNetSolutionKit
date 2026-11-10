@@ -586,7 +586,7 @@
           "condition": "(!ClickHouse)",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Analytics/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Analytics/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests/**",
 
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Analytics/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Abstractions/**"
           ]
@@ -595,14 +595,14 @@
           "condition": "(!MongoDB)",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence/NamespaceRoot.ProductName.Capabilities.Persistence.Mongo/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.Mongo/NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests/**"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence/NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests/**"
           ]
         },
         {
           "condition": "(!NotifyEmail)",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests/**"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests/**"
           ]
         },
         {
@@ -623,7 +623,7 @@
           "exclude": [
             "src/common/NamespaceRoot.ProductName.Common/Exceptions/StorageException.cs",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence/NamespaceRoot.ProductName.Capabilities.Persistence.S3/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.S3/NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence/NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests/**",
 
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence/NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions/**"
           ]
@@ -665,7 +665,7 @@
           "condition": "(!SecretStore)",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/**",
 
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions/**"
           ]
@@ -674,7 +674,7 @@
           "condition": "(!Infisical)",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/Infisical*.cs",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Secrets/SecretsConfigurationTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Secrets/SecretsConfigurationTests.cs"
           ]
         },
         {
@@ -987,3 +987,4 @@
 
   ]
 }
+
