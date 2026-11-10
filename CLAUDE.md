@@ -207,4 +207,3 @@ and the plan says nothing about it, the claim is the model's invention wearing t
 detection is a stop signal: ask the author what the claim rests on, or start a session over (a new
 context: `/clear`), reload it with `load-context`, and rebuild the picture from the sources - not
 continue on the summary.
-

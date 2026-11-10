@@ -50,4 +50,3 @@ internal sealed class RepairReportTests
         lines.ShouldBe(["  ST.Demo.Orders.Domain: using ST.Demo.Common.Events -> ST.Demo.Common.Domain.Events (2 files); using ST.Demo.Common.Domain added; reference to ST.Demo.Common.Domain"]);
     }
 }
-

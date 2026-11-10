@@ -8,7 +8,7 @@
 
 | Часть | |
 |---|---|
-| `INotificationEmailSender` | порт в `Capabilities.Notifications` - отдельном проекте, на который ссылается сервис с `--Notify email`; остальной `Common` ему не нужен: `SendEmailAsync` и `SendEmailWithAttachmentAsync` |
+| `INotificationEmailSender` | порт в `Capabilities.Messaging.Notifications` - отдельном проекте, на который ссылается сервис с `--Notify email`; остальной `Common` ему не нужен: `SendEmailAsync` и `SendEmailWithAttachmentAsync` |
 | транспорты | SMTP на MailKit и Microsoft Graph, внутренние; тот, что назван в `Email:Provider`, выбирается один раз при регистрации |
 | песочница | вне Production каждое письмо уходит на один адрес с пометкой сверху: кому оно было, окружение и время; ни один транспорт её не обходит |
 
@@ -90,7 +90,7 @@ await bus.SendAsync(new SendEmailCommandV1
 
 Тест сервиса даёт ему двойник `INotificationEmailSender`, как любого другого порта; тесты владельца
 проверяют, что команда, отправленная в шину на её очередь, доходит до потребителя `SendEmailCommandV1`, а он отправляет
-то, что сказано в команде, с вложением и без. `Capabilities.Notifications.Tests` проверяет
+то, что сказано в команде, с вложением и без. `Capabilities.Messaging.Notifications.Tests` проверяет
 ядро: какие настройки обязательны, транспорт названного провайдера, что SMTP- и Graph-транспорты передают
 клиентам, защиту по порту и песочницу; и на настоящем MailHog из `TEST_SMTP` и `TEST_SMTP_API` - что письмо
 в Production приходит получателю, а в других окружениях на адрес песочницы.

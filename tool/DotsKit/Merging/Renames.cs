@@ -88,4 +88,3 @@ internal sealed class GitRenames(IProcessRunner runner) : IRenames
         return at < 0 ? normal : normal[(at + prefix.Length)..];
     }
 }
-

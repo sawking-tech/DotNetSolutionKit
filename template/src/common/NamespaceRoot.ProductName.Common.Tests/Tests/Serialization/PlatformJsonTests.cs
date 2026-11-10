@@ -78,4 +78,3 @@ internal class PlatformJsonTests
     public void Should_KeepNonAsciiReadable() =>
         Write(new Sample("Grüne Straße", AuthMethod.Jwt, DateTimeOffset.UnixEpoch)).ShouldContain("Grüne Straße");
 }
-

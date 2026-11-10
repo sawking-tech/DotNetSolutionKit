@@ -72,4 +72,3 @@ internal sealed class TemplateReferencesTests
         removed.ShouldContain(OrdersToContracts);
     }
 }
-

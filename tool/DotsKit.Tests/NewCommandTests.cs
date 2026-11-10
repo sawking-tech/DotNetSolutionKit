@@ -277,4 +277,3 @@ internal sealed class NewCommandTests
         Should.Throw<InvalidOperationException>(() => SolutionRoot.HasSolution(root)).Message.ShouldContain("2");
     }
 }
-

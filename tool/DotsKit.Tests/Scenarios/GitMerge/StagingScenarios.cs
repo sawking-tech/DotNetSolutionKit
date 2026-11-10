@@ -33,4 +33,3 @@ internal sealed class StagingScenarios
             .Split('\n', StringSplitOptions.RemoveEmptyEntries).Length.ShouldBe(Files);
     }
 }
-

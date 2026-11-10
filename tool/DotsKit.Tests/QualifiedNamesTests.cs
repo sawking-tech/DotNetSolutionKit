@@ -67,4 +67,3 @@ internal sealed class QualifiedNamesTests
         QualifiedNames.Names(Code, Old, "OrderPlaced").ShouldBeFalse();
     }
 }
-

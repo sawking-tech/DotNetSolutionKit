@@ -1,6 +1,6 @@
 # ClickHouse
 
-`--ClickHouse` adds a project `Capabilities.ClickHouse` to `src/capabilities` with what every service that
+`--ClickHouse` adds a project `Capabilities.Analytics.ClickHouse` to `src/capabilities` with what every service that
 reads or writes ClickHouse needs, and registers it in the service. The queries stay in the service: a reader or writer is a class of the service's
 infrastructure behind a port of its application layer.
 
@@ -55,7 +55,7 @@ Under docker compose the infrastructure gets a ClickHouse server; the credential
 
 A service test does not reach ClickHouse: it gives the service an in-memory double of its reader or
 writer port, as for any other port. The SQL is tested against a real server: `ClickHouseTestDatabase` in
-`Capabilities.ClickHouse.Tests` creates a database of the test's own on the server named by `TEST_CLICKHOUSE` and drops it
+`Capabilities.Analytics.ClickHouse.Tests` creates a database of the test's own on the server named by `TEST_CLICKHOUSE` and drops it
 afterwards; the test creates its tables with `ExecuteAsync`. Without the variable the test is skipped.
 
 ```bash
@@ -63,5 +63,5 @@ eval "$(bash tests/servers/up.sh)"     # the test servers, ClickHouse among them
 dotnet test --filter "FullyQualifiedName~ClickHouse"
 ```
 
-`Capabilities.ClickHouse.Tests` checks the core this way: a table that fits passes, a missing column and a missing table
+`Capabilities.Analytics.ClickHouse.Tests` checks the core this way: a table that fits passes, a missing column and a missing table
 stop the start with the right message, a paged read comes back typed, readiness, and the switch.

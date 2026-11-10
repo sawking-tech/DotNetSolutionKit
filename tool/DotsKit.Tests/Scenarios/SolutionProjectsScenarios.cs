@@ -61,4 +61,3 @@ internal sealed class SolutionProjectsScenarios
         (await projects.ListAsync(solution, CancellationToken.None)).ShouldBeEmpty();
     }
 }
-

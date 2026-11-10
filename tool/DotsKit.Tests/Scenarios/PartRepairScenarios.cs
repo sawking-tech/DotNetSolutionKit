@@ -310,4 +310,3 @@ internal sealed class PartRepairScenarios
         public bool Confirm(string question) => true;
     }
 }
-

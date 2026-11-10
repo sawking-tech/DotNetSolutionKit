@@ -119,4 +119,3 @@ internal sealed class TemplateArgsTests
         inherited[store].ShouldBe("false");
     }
 }
-

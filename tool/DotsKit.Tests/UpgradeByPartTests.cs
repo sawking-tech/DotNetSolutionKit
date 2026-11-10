@@ -224,4 +224,3 @@ internal sealed class UpgradeByPartTests
 
     private static string Read(string root, string path) => File.ReadAllText(Path.Combine(root, path));
 }
-

@@ -21,12 +21,12 @@ flowchart BT
         CW --> CI
     end
     subgraph capabilities [src/capabilities]
-        CN["Capabilities.Notifications, with --Notify email"]
-        CM["Capabilities.Mongo, with --MongoDB"] --> C
+        CN["Capabilities.Messaging.Notifications, with --Notify email"]
+        CM["Capabilities.Persistence.Mongo, with --MongoDB"] --> C
         CM --> CC
-        CCH["Capabilities.ClickHouse, with --ClickHouse"] --> C
+        CCH["Capabilities.Analytics.ClickHouse, with --ClickHouse"] --> C
         CCH --> CC
-        CS["Capabilities.Storage, with --Storage"] --> C
+        CS["Capabilities.Persistence.S3, with --Storage"] --> C
     end
     subgraph service ["src/services/#lt;Service#gt;"]
         D["#lt;Service#gt;"] --> C
@@ -62,14 +62,14 @@ flowchart BT
 | `Common.Web` | Веб-слой сервиса: pipeline, ошибки, валидация, Swagger, аутентификация, права, здоровье | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure` |
 | `Common.Testing` | Тестовая инфраструктура для тестов сервисов: контексты, тестовые базы, заглушки, проверки правил; без тестового фреймворка | все перечисленные выше |
 | `Common.Tests` | Тесты `Common` | все перечисленные выше, `Common.Testing` |
-| `Capabilities.Notifications` | Почта `--Notify email`: порт, транспорты SMTP и Graph, песочница. На него ссылается сервис с флагом, поэтому MailKit и Graph SDK есть только у этого сервиса | ничего из `Common` |
-| `Capabilities.Notifications.Tests` | Тесты почты | `Capabilities.Notifications`, `Common.Testing` |
-| `Capabilities.Mongo` | MongoDB `--MongoDB`: хранилище, его настройки, проверка здоровья. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
-| `Capabilities.Mongo.Tests` | Тесты MongoDB | `Capabilities.Mongo`, `Common`, `Common.Testing` |
-| `Capabilities.ClickHouse` | ClickHouse флага `--ClickHouse`: подключения, страж схемы, проверка готовности. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
-| `Capabilities.ClickHouse.Tests` | Тесты ClickHouse | `Capabilities.ClickHouse`, `Common`, `Common.Testing` |
-| `Capabilities.Storage` | Объектное хранилище флага `--Storage`: `IS3ObjectStorage`, его настройки, null-заглушка. На него ссылается сервис с флагом, поэтому AWS SDK есть только у этого сервиса | `Common` |
-| `Capabilities.Storage.Tests` | Тесты объектного хранилища | `Capabilities.Storage`, `Common`, `Common.Testing` |
+| `Capabilities.Messaging.Notifications` | Почта `--Notify email`: порт, транспорты SMTP и Graph, песочница. На него ссылается сервис с флагом, поэтому MailKit и Graph SDK есть только у этого сервиса | ничего из `Common` |
+| `Capabilities.Messaging.Notifications.Tests` | Тесты почты | `Capabilities.Messaging.Notifications`, `Common.Testing` |
+| `Capabilities.Persistence.Mongo` | MongoDB `--MongoDB`: хранилище, его настройки, проверка здоровья. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
+| `Capabilities.Persistence.Mongo.Tests` | Тесты MongoDB | `Capabilities.Persistence.Mongo`, `Common`, `Common.Testing` |
+| `Capabilities.Analytics.ClickHouse` | ClickHouse флага `--ClickHouse`: подключения, страж схемы, проверка готовности. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
+| `Capabilities.Analytics.ClickHouse.Tests` | Тесты ClickHouse | `Capabilities.Analytics.ClickHouse`, `Common`, `Common.Testing` |
+| `Capabilities.Persistence.S3` | Объектное хранилище флага `--Storage`: `IS3ObjectStorage`, его настройки, null-заглушка. На него ссылается сервис с флагом, поэтому AWS SDK есть только у этого сервиса | `Common` |
+| `Capabilities.Persistence.S3.Tests` | Тесты объектного хранилища | `Capabilities.Persistence.S3`, `Common`, `Common.Testing` |
 
 ## Сервис
 

@@ -110,4 +110,3 @@ public class AggregateRootTests
             "the shared repository stores aggregate roots and nothing else");
     }
 }
-

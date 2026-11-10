@@ -150,4 +150,3 @@ dotnet run --project src/services/MyCompany.MyProduct.Orders/MyCompany.MyProduct
 
 Чтобы запустить сервис раньше, чем появятся его база данных, брокер или хранилище секретов, отключите их в
 конфигурации, например `Database__Enabled=false`; см. [отключение зависимостей](../operations/switching-dependencies-off.md).
-

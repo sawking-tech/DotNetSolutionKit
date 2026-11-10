@@ -1,6 +1,6 @@
 # MongoDB
 
-`--MongoDB` adds `Capabilities.Mongo`, a project of its own, with what a service that keeps documents in MongoDB
+`--MongoDB` adds `Capabilities.Persistence.Mongo`, a project of its own, with what a service that keeps documents in MongoDB
 needs beside its main database, and registers it in the service, which references the project. MongoDB does not replace `--Database`: entities, migrations and
 the outbox stay in PostgreSQL or SQL Server. The queries stay in the service: a reader or writer is a
 class of the service's infrastructure behind a port of its application layer.
@@ -42,7 +42,7 @@ Under docker compose the infrastructure gets a MongoDB server; the credentials c
 
 A service test does not reach MongoDB: it gives the service an in-memory double of its reader or writer
 port, as for any other port. The driver is tested against a real server: `MongoTestDatabase` in
-`Capabilities.Mongo.Tests` names a database of the test's own on the server named by `TEST_MONGO` and drops it
+`Capabilities.Persistence.Mongo.Tests` names a database of the test's own on the server named by `TEST_MONGO` and drops it
 afterwards. Without the variable the test is skipped.
 
 ```bash
@@ -50,6 +50,6 @@ eval "$(bash tests/servers/up.sh)"     # the test servers, MongoDB among them (t
 dotnet test --filter "FullyQualifiedName~Mongo"
 ```
 
-`Capabilities.Mongo.Tests` checks the core this way: a document written reads back as it was, its `Guid` included, and
+`Capabilities.Persistence.Mongo.Tests` checks the core this way: a document written reads back as it was, its `Guid` included, and
 readiness reports the server; without a server, the settings it requires, a malformed connection string, and
 the switch.

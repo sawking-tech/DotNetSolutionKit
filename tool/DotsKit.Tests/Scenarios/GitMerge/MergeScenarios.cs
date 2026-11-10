@@ -231,4 +231,3 @@ internal sealed class MergeScenarios
         merge.Taken.ShouldBe([ProgramFile]);
     }
 }
-

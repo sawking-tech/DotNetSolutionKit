@@ -20,12 +20,12 @@ flowchart BT
         CW --> CI
     end
     subgraph capabilities [src/capabilities]
-        CN["Capabilities.Notifications, with --Notify email"]
-        CM["Capabilities.Mongo, with --MongoDB"] --> C
+        CN["Capabilities.Messaging.Notifications, with --Notify email"]
+        CM["Capabilities.Persistence.Mongo, with --MongoDB"] --> C
         CM --> CC
-        CCH["Capabilities.ClickHouse, with --ClickHouse"] --> C
+        CCH["Capabilities.Analytics.ClickHouse, with --ClickHouse"] --> C
         CCH --> CC
-        CS["Capabilities.Storage, with --Storage"] --> C
+        CS["Capabilities.Persistence.S3, with --Storage"] --> C
     end
     subgraph service ["src/services/#lt;Service#gt;"]
         D["#lt;Service#gt;"] --> C
@@ -61,14 +61,14 @@ flowchart BT
 | `Common.Web` | The web layer of a service: pipeline, errors, validation, Swagger, authentication, permissions, health | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure` |
 | `Common.Testing` | Test infrastructure for the services' tests: the test contexts, the test databases, stubs, rule checks; no test framework | all of the above |
 | `Common.Tests` | The tests of `Common` | all of the above, `Common.Testing` |
-| `Capabilities.Notifications` | Email of `--Notify email`: the port, the SMTP and Graph transports, the sandbox. A service with the flag references it, so only that service carries MailKit and the Graph SDK | nothing of `Common` |
-| `Capabilities.Notifications.Tests` | The tests of email | `Capabilities.Notifications`, `Common.Testing` |
-| `Capabilities.Mongo` | MongoDB of `--MongoDB`: the store, its options, its health check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
-| `Capabilities.Mongo.Tests` | The tests of MongoDB | `Capabilities.Mongo`, `Common`, `Common.Testing` |
-| `Capabilities.ClickHouse` | ClickHouse of `--ClickHouse`: connections, the schema guard, the readiness check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
-| `Capabilities.ClickHouse.Tests` | The tests of ClickHouse | `Capabilities.ClickHouse`, `Common`, `Common.Testing` |
-| `Capabilities.Storage` | Object storage of `--Storage`: `IS3ObjectStorage`, its settings, the null double. A service with the flag references it, so only that service carries the AWS SDK | `Common` |
-| `Capabilities.Storage.Tests` | The tests of object storage | `Capabilities.Storage`, `Common`, `Common.Testing` |
+| `Capabilities.Messaging.Notifications` | Email of `--Notify email`: the port, the SMTP and Graph transports, the sandbox. A service with the flag references it, so only that service carries MailKit and the Graph SDK | nothing of `Common` |
+| `Capabilities.Messaging.Notifications.Tests` | The tests of email | `Capabilities.Messaging.Notifications`, `Common.Testing` |
+| `Capabilities.Persistence.Mongo` | MongoDB of `--MongoDB`: the store, its options, its health check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
+| `Capabilities.Persistence.Mongo.Tests` | The tests of MongoDB | `Capabilities.Persistence.Mongo`, `Common`, `Common.Testing` |
+| `Capabilities.Analytics.ClickHouse` | ClickHouse of `--ClickHouse`: connections, the schema guard, the readiness check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
+| `Capabilities.Analytics.ClickHouse.Tests` | The tests of ClickHouse | `Capabilities.Analytics.ClickHouse`, `Common`, `Common.Testing` |
+| `Capabilities.Persistence.S3` | Object storage of `--Storage`: `IS3ObjectStorage`, its settings, the null double. A service with the flag references it, so only that service carries the AWS SDK | `Common` |
+| `Capabilities.Persistence.S3.Tests` | The tests of object storage | `Capabilities.Persistence.S3`, `Common`, `Common.Testing` |
 
 ## A service
 

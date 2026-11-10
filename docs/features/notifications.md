@@ -8,7 +8,7 @@ Messages rendered from templates come with `--Templates`, which is
 
 | Part | |
 |---|---|
-| `INotificationEmailSender` | the port in `Capabilities.Notifications`, a project of its own that a service with `--Notify email` references; it needs nothing else of `Common`: `SendEmailAsync` and `SendEmailWithAttachmentAsync` |
+| `INotificationEmailSender` | the port in `Capabilities.Messaging.Notifications`, a project of its own that a service with `--Notify email` references; it needs nothing else of `Common`: `SendEmailAsync` and `SendEmailWithAttachmentAsync` |
 | transports | SMTP on MailKit and Microsoft Graph, internal; the one `Email:Provider` names is chosen once, at registration |
 | sandbox | outside Production every message goes to one address, with a note on top naming who it was for, the environment and the time; no transport can skip it |
 
@@ -90,7 +90,7 @@ in `deploy/compose/.env` name a real server instead.
 A service test gives the service a double of `INotificationEmailSender`, as of any other port; the owner's
 tests check that a command sent on the bus to its queue reaches the consumer of `SendEmailCommandV1`, which sends
 what the command says, with its attachment and without it.
-`Capabilities.Notifications.Tests` checks the core: the settings it requires, the transport of the named provider, what the SMTP
+`Capabilities.Messaging.Notifications.Tests` checks the core: the settings it requires, the transport of the named provider, what the SMTP
 and Graph transports hand their clients, the security by port and the sandbox; and, against a real MailHog
 named by `TEST_SMTP` and `TEST_SMTP_API`, that a message arrives at its recipient in Production and at the
 sandbox address elsewhere.

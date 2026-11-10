@@ -118,4 +118,3 @@ internal sealed class InitScenarios
         Manifest.Parse(solution.Read(Layout.ManifestPath)).FindService("Stock")!.Port.ShouldBe(5100);
     }
 }
-

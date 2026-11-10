@@ -248,4 +248,3 @@ internal sealed class TeamScenarios
         refused.Error.ShouldContain("uncommitted");
     }
 }
-

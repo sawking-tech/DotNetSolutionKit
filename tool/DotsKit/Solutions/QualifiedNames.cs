@@ -61,4 +61,3 @@ internal static class QualifiedNames
 
     private static string Unqualified(string name) => name.StartsWith(Global, StringComparison.Ordinal) ? name[Global.Length..] : name;
 }
-

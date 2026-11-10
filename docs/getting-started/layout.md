@@ -23,7 +23,7 @@ ST-Demo/
 │   │   ├── ST.Demo.Common.Web/              the host: pipeline, errors, Swagger, authentication
 │   │   ├── ST.Demo.Common.Testing/          the test harness, with no test framework
 │   │   └── ST.Demo.Common.Tests/            the tests of Common
-│   ├── capabilities/              a project per flag: Capabilities.Mongo, Capabilities.ClickHouse, Capabilities.Storage, Capabilities.Notifications
+│   ├── capabilities/              a project per flag, grouped by system: Persistence (Mongo, S3), Analytics (ClickHouse), Messaging (Notifications), Security (CredentialStore), each with .Abstractions and .Tests beside it
 │   └── services/
 │       ├── ST.Demo.All.sln      every project of the solution
 │       └── ST.Demo.Orders/      one service, four projects (below)
@@ -84,4 +84,3 @@ flowchart LR
 
 A flag adds its own project under `src/capabilities` and its versions under `src/package-versions`, and the
 services that use it reference it - so a service carries only the packages of its own flags.
-

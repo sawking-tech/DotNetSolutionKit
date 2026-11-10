@@ -210,4 +210,3 @@ internal sealed class GitModeTests
         System.IO.File.Exists(Path.Combine(root, moved)).ShouldBeFalse();
     }
 }
-

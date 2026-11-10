@@ -281,4 +281,3 @@ come from their tags on GitHub, and `DOTSKIT_TEMPLATE_SOURCE` still stands the s
 - The merge needs the solution at the root of its git repository. A solution in a folder of a larger
   repository is refused before the plan: move it to its own repository. The clean working tree is checked over
   the whole repository.
-

@@ -62,4 +62,3 @@ internal sealed class PlanWriterTests
         File.Exists(Path.Combine(root, Layout.ManifestPath)).ShouldBeTrue();
     }
 }
-

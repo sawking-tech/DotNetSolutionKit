@@ -23,7 +23,7 @@ ST-Demo/
 │   │   ├── ST.Demo.Common.Web/              хост: конвейер, ошибки, Swagger, аутентификация
 │   │   ├── ST.Demo.Common.Testing/          тестовая оснастка, без тестового фреймворка
 │   │   └── ST.Demo.Common.Tests/            тесты Common
-│   ├── capabilities/              проект на флаг: Capabilities.Mongo, Capabilities.ClickHouse, Capabilities.Storage, Capabilities.Notifications
+│   ├── capabilities/              проект на флаг, сгруппированы по системе: Persistence (Mongo, S3), Analytics (ClickHouse), Messaging (Notifications), Security (CredentialStore), рядом .Abstractions и .Tests
 │   └── services/
 │       ├── ST.Demo.All.sln      все проекты решения
 │       └── ST.Demo.Orders/      один сервис, четыре проекта (ниже)
@@ -84,4 +84,3 @@ flowchart LR
 
 Флаг добавляет свой проект в `src/capabilities` и свои версии в `src/package-versions`, а сервисы, которые им
 пользуются, ссылаются на него - поэтому сервис несёт только пакеты своих флагов.
-

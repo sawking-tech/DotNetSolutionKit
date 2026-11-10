@@ -396,4 +396,3 @@ internal sealed class ReferenceRepairTests
         UsingLines.Replace("using New.A;\nnamespace X;\n", "Old.Ns", "New.B").ShouldBe("using New.A;\nusing New.B;\n\nnamespace X;\n");
     }
 }
-

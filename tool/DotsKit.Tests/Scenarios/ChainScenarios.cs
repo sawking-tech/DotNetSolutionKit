@@ -76,4 +76,3 @@ internal sealed class ChainScenarios
         solution.Read(TeamFile).ShouldContain("public sealed class OrderAudit");
     }
 }
-

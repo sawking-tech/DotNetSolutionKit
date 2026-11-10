@@ -105,4 +105,3 @@ internal sealed class CentralVersionsTests
         CentralVersions.Decide(root, new HashSet<string>()).ShouldBeEmpty();
     }
 }
-

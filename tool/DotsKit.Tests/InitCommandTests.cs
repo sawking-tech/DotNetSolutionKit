@@ -411,4 +411,3 @@ internal sealed class InitCommandTests
         Options.Parse("init", ["--template-version", "2.7.0"]).TemplateVersion.ShouldBe("2.7.0");
     }
 }
-

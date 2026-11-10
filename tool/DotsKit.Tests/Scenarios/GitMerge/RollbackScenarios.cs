@@ -163,4 +163,3 @@ internal sealed class RollbackScenarios
         Read(root, Layout.ManifestPath).ShouldBe(described + "\n");
     }
 }
-

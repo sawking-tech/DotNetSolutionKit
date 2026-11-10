@@ -131,4 +131,3 @@ internal sealed class Sandbox
         return hive;
     }
 }
-

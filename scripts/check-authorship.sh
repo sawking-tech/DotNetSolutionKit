@@ -16,7 +16,6 @@ cd "$solution"
 
 mark="Copyright (c) 2025 Vladimir Savkin"
 common="src/common/*.Common"
-capabilities="src/capabilities/*.Capabilities"
 files=(
     "Directory.Build.props"
     "Dockerfile"
@@ -40,7 +39,7 @@ files=(
     "?$common.Infrastructure/Persistence/EntityFramework/Audit/AuditSaveChangesInterceptor.cs"
     "?$common.Infrastructure/Persistence/EntityFramework/Audit/SetBasedAuditCapture.cs"
     "?$common.Testing/Audit/AuditMarkerVerifier.cs"
-    "?$capabilities.Capabilities.Secrets/InfisicalSecretStore.cs"
+    "?src/capabilities/*.Capabilities.Security/*.Capabilities.Security.CredentialStore/InfisicalSecretStore.cs"
     "?.github/workflows/ci.yml"
     "?.github/workflows/api-diff.yml"
     "?scripts/generate-api-schemas.sh"

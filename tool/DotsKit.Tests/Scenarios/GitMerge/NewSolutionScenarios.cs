@@ -114,4 +114,3 @@ internal sealed class NewSolutionScenarios
 
     private static async Task Git(string root, params string[] args) => await Runner.RunCheckedAsync("git", args, root, CancellationToken.None);
 }
-

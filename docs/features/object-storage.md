@@ -1,6 +1,6 @@
 # Object storage
 
-`--Storage` adds a project `Capabilities.Storage` to `src/capabilities` with S3-compatible object
+`--Storage` adds a project `Capabilities.Persistence.S3` to `src/capabilities` with S3-compatible object
 storage and registers it in the service: files a service keeps outside its database, such as
 documents, images, generated PDFs.
 

@@ -66,4 +66,3 @@ internal sealed class TemplateStyleTests
             Task.FromResult(new TextMergeResult(string.Empty, 0, "no merge"));
     }
 }
-

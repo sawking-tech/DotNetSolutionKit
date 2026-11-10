@@ -40,4 +40,3 @@ internal sealed class SolutionLockTests
         solution.Exists("src/services/ST.Demo.Billing").ShouldBeFalse();
     }
 }
-

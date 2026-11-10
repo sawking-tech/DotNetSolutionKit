@@ -78,4 +78,3 @@ internal static class GitSolution
     public static string Base() =>
         Tree((".gitignore", "appsettings.Secrets.json\n"), (ProgramFile, BaseProgram), (Solution, "the template's All.sln\n"), (Secrets, "the template's secret\n"));
 }
-

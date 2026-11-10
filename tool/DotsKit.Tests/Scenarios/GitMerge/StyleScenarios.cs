@@ -70,4 +70,3 @@ internal sealed class StyleScenarios
         File.ReadAllText(Path.Combine(root, ProgramFile)).ShouldBe("template\r\na\r\nb\r\nteam\r\n");
     }
 }
-

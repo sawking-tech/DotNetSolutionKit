@@ -149,4 +149,3 @@ internal sealed class MovedTypeScenarios
         build.Code.ShouldBe(0, build.Output + build.Error);
     }
 }
-

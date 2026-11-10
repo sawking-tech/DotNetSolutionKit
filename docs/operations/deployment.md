@@ -145,4 +145,3 @@ current `kubectl` context; further arguments go to `kubectl apply` (`--namespace
 Both were run end to end on a generated solution: compose with two services, one generated later without
 `--Solution`, each answering `/ready` with its own commit; Kubernetes on k3s with four replicas of a service
 with a dotted name on a fresh database, all ready without a restart.
-

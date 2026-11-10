@@ -356,4 +356,3 @@ internal sealed class UpgradeCommandTests
         refused.Next.ShouldBeNull();
     }
 }
-

@@ -73,4 +73,3 @@ internal sealed class UpgradeScenarios
         added.Code.ShouldBe(0, added.Output + added.Error);
     }
 }
-

@@ -1,6 +1,6 @@
 # ClickHouse
 
-`--ClickHouse` добавляет проект `Capabilities.ClickHouse` в `src/capabilities` с тем, что нужно каждому
+`--ClickHouse` добавляет проект `Capabilities.Analytics.ClickHouse` в `src/capabilities` с тем, что нужно каждому
 сервису, который читает или пишет ClickHouse, и регистрирует это в сервисе. Запросы остаются в сервисе: читатель или писатель - класс инфраструктуры
 сервиса за портом его слоя приложения.
 
@@ -55,7 +55,7 @@ await guard.EnsureColumnsAsync("reports.usage", UsageWriter.Columns, "Apply depl
 
 Тест сервиса не ходит в ClickHouse: он даёт сервису in-memory двойник порта читателя или писателя, как
 для любого другого порта. SQL тестируется на реальном сервере: `ClickHouseTestDatabase` в
-`Capabilities.ClickHouse.Tests` создаёт собственную базу теста на сервере из `TEST_CLICKHOUSE` и удаляет её после; тест
+`Capabilities.Analytics.ClickHouse.Tests` создаёт собственную базу теста на сервере из `TEST_CLICKHOUSE` и удаляет её после; тест
 создаёт свои таблицы через `ExecuteAsync`. Без переменной тест пропускается.
 
 ```bash
@@ -63,6 +63,6 @@ eval "$(bash tests/servers/up.sh)"     # тестовые серверы, сре
 dotnet test --filter "FullyQualifiedName~ClickHouse"
 ```
 
-Так `Capabilities.ClickHouse.Tests` проверяет ядро: подходящая таблица проходит, отсутствующая колонка и отсутствующая
+Так `Capabilities.Analytics.ClickHouse.Tests` проверяет ядро: подходящая таблица проходит, отсутствующая колонка и отсутствующая
 таблица останавливают старт с нужным сообщением, постраничное чтение возвращает типизированные значения,
 готовность и выключатель.

@@ -142,4 +142,3 @@ internal sealed class ManifestTests
         MembershipChange.Of(solution, @base, unchanged).IsEmpty.ShouldBeTrue();
     }
 }
-

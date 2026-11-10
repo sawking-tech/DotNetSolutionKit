@@ -353,4 +353,3 @@ internal sealed class UpgradePartsTests
         UpgradeGuide.Of("2.8.0", TemplateSource.SourcesVersion).ShouldContain($"to {TemplateSource.SourcesVersion}: ");
     }
 }
-
