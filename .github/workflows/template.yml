@@ -13,6 +13,13 @@ on:
 permissions:
   contents: read
 
+env:
+  # The capability paths nest two long generated names (group/module); without this the Windows
+  # checkout fails with "Filename too long".
+  GIT_CONFIG_COUNT: 1
+  GIT_CONFIG_KEY_0: core.longpaths
+  GIT_CONFIG_VALUE_0: "true"
+
 jobs:
   # The paths a change may touch without the checks below: the documentation, the site and what only a reader
   # sees. Anything else - the template, the tool, the scripts, a workflow - and every check runs. A path that is
