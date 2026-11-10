@@ -16,7 +16,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions.csproj" />
-        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+        <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -24,4 +24,8 @@
             <_Parameter1>NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions" />
+    </ItemGroup>
+
 </Project>

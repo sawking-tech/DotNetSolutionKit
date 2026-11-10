@@ -17,9 +17,14 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions.csproj" />
         <ProjectReference Include="..\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.csproj" />
-        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Testing\NamespaceRoot.ProductName.Common.Testing.csproj" />
-        <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj" />
+        <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Testing\NamespaceRoot.ProductName.Common.Testing.csproj" />
+        <ProjectReference Include="..\..\..\framework\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions" />
     </ItemGroup>
 
 </Project>

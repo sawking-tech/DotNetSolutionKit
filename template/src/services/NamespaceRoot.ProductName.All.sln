@@ -1,4 +1,4 @@
-﻿﻿
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceNameOrCustom", "ServiceNameOrCustom", "{121B974B-9C00-47EC-8961-469C6E1596EB}"
 EndProject
@@ -33,33 +33,33 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.Testing", "..\framework\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj", "{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}"
 EndProject
 #if (NotifyEmail)
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.Notifications", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.csproj", "{6F1C2B8E-3D4A-4E57-9B21-0C7A5E3D9F10}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.Notifications", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.csproj", "{6F1C2B8E-3D4A-4E57-9B21-0C7A5E3D9F10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests.csproj", "{8A2D4C61-5B7E-4F93-A1C8-2E6B9D0F3A47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests.csproj", "{8A2D4C61-5B7E-4F93-A1C8-2E6B9D0F3A47}"
 EndProject
 #endif
 #if (MongoDB)
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Mongo", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.csproj", "{3C9E7A14-2B6F-4D85-9E10-7F4A2C6B8D31}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Mongo", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.csproj", "{3C9E7A14-2B6F-4D85-9E10-7F4A2C6B8D31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests.csproj", "{5D1B8F27-4C3A-4E96-B7A2-1E9C0D5F6A48}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests.csproj", "{5D1B8F27-4C3A-4E96-B7A2-1E9C0D5F6A48}"
 EndProject
 #endif
 #if (ClickHouse)
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.csproj", "{3CA2EB4C-A041-485C-837A-985EB0323B4D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Analytics\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.csproj", "{3CA2EB4C-A041-485C-837A-985EB0323B4D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests.csproj", "{62959F8A-9FAF-4C0D-B50B-995DDC7E1CE7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Analytics\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests.csproj", "{62959F8A-9FAF-4C0D-B50B-995DDC7E1CE7}"
 EndProject
 #endif
 #if (Storage)
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence.S3\NamespaceRoot.ProductName.Capabilities.Persistence.S3.csproj", "{7B3D5E18-9F2A-4C6B-8D47-2E5A1F9C3B68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3\NamespaceRoot.ProductName.Capabilities.Persistence.S3.csproj", "{7B3D5E18-9F2A-4C6B-8D47-2E5A1F9C3B68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests.csproj", "{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests.csproj", "{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}"
 EndProject
 #endif
 #if (SecretStore)
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.csproj", "{61CF3F26-821E-49AC-8819-229D7249BEA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.csproj", "{61CF3F26-821E-49AC-8819-229D7249BEA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.csproj", "{5D30102B-EE73-4ED4-B87D-F091FAC68989}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.csproj", "{5D30102B-EE73-4ED4-B87D-F091FAC68989}"
 EndProject
 #endif
 Global
