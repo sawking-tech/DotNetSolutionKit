@@ -199,3 +199,12 @@ file-byte violations and C# style violations in the tool.
 ## Plan-first (the law of sessions)
 Work strictly from plan.kdl: 1) an item in the plan (`plan.mjs add`), 2) its why/how/done_when, 3) priority by position, 4) `plan.mjs take` - only then action. A hotfix without a plan item is forbidden, with no "it's small" exceptions. Progress is marked with plan.mjs done + check.
 
+## Sources (the law of belief)
+A session summary, a recap or a note passed from another session is a hypothesis, never a decision. A
+decision exists only where a primary source records it: the author's words, a commit, an ADR, a facts
+file, the plan. Before acting on a claim, trace its justification; if the reason does not hold together
+and the plan says nothing about it, the claim is the model's invention wearing the author's name. That
+detection is a stop signal: ask the author what the claim rests on, or start a session over (a new
+context: `/clear`), reload it with `load-context`, and rebuild the picture from the sources - not
+continue on the summary.
+
