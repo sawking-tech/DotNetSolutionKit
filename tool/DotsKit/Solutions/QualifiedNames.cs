@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace DotsKit.Solutions;
 
 /// <summary>
-/// A type named in code by its full name - <c>Acme.Shop.Common.Events.DomainEvent</c> as a type, in new, typeof, a
+/// A type named in code by its full name - <c>ST.Demo.Common.Events.DomainEvent</c> as a type, in new, typeof, a
 /// generic argument, an attribute or before a static member - found by the C# syntax and its namespace replaced in
 /// place, so a type the template moved is named where it lives now. Only the syntax is read: no compilation, no
 /// MSBuild; a plain using directive is left to the repair of usings and a namespace declaration to nobody, while an
@@ -61,3 +61,4 @@ internal static class QualifiedNames
 
     private static string Unqualified(string name) => name.StartsWith(Global, StringComparison.Ordinal) ? name[Global.Length..] : name;
 }
+

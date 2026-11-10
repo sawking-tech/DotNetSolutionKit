@@ -1,13 +1,13 @@
 # Устройство решения
 
 Как сгенерированное решение выглядит на диске, какой файл за что отвечает и где живёт код команды. Имена ниже
-берутся из генерации: `-N Acme -P Shop -S Orders` даёт `Acme.Shop.Common`, `Acme.Shop.Orders` и
-`src/services/Acme.Shop.All.sln`.
+берутся из генерации: `-N ST -P Demo -S Orders` даёт `ST.Demo.Common`, `ST.Demo.Orders` и
+`src/services/ST.Demo.All.sln`.
 
 ## Папки
 
 ```
-acme-shop/
+ST-Demo/
 ├── .dotskit/manifest.json         из чего сгенерировано решение; dotskit читает его на каждом запуске
 ├── Directory.Build.props          свойства всех проектов и DotNetSolutionKitVersion
 ├── Dockerfile                     один образ на все сервисы
@@ -16,17 +16,17 @@ acme-shop/
 │   ├── Directory.Packages.props   версия каждого пакета, объявленная один раз
 │   ├── package-versions/*.props   версии, которые приносит флаг, по файлу на флаг
 │   ├── common/                    то, что общее у сервисов
-│   │   ├── Acme.Shop.Common/                  примитивы домена: сущности, агрегаты, события, Money
-│   │   ├── Acme.Shop.Common.Contracts/        то, что пересекает границу: запросы, ответы, сообщения шины
-│   │   ├── Acme.Shop.Common.Application/      сценарии над доменом и порты, которые им нужны
-│   │   ├── Acme.Shop.Common.Infrastructure/   EF Core, шина, хранилище секретов, внешний мир
-│   │   ├── Acme.Shop.Common.Web/              хост: конвейер, ошибки, Swagger, аутентификация
-│   │   ├── Acme.Shop.Common.Testing/          тестовая оснастка, без тестового фреймворка
-│   │   └── Acme.Shop.Common.Tests/            тесты Common
+│   │   ├── ST.Demo.Common/                  примитивы домена: сущности, агрегаты, события, Money
+│   │   ├── ST.Demo.Common.Contracts/        то, что пересекает границу: запросы, ответы, сообщения шины
+│   │   ├── ST.Demo.Common.Application/      сценарии над доменом и порты, которые им нужны
+│   │   ├── ST.Demo.Common.Infrastructure/   EF Core, шина, хранилище секретов, внешний мир
+│   │   ├── ST.Demo.Common.Web/              хост: конвейер, ошибки, Swagger, аутентификация
+│   │   ├── ST.Demo.Common.Testing/          тестовая оснастка, без тестового фреймворка
+│   │   └── ST.Demo.Common.Tests/            тесты Common
 │   ├── capabilities/              проект на флаг: Capabilities.Mongo, Capabilities.ClickHouse, Capabilities.Storage, Capabilities.Notifications
 │   └── services/
-│       ├── Acme.Shop.All.sln      все проекты решения
-│       └── Acme.Shop.Orders/      один сервис, четыре проекта (ниже)
+│       ├── ST.Demo.All.sln      все проекты решения
+│       └── ST.Demo.Orders/      один сервис, четыре проекта (ниже)
 ├── gateway/                       шлюз API, при --ApiGateway
 ├── deploy/
 │   ├── compose/                   docker compose: сервисы и infra/ по файлу на часть
@@ -60,11 +60,11 @@ flowchart TD
 
 | Проект | Что внутри | Что здесь пишет команда |
 |---|---|---|
-| `Acme.Shop.Orders` | домен: сущности, агрегаты, доменные события, спецификации | модель продукта |
-| `Acme.Shop.Orders.Application` | сценарии и порты, которые они вызывают | что продукт делает, по шагам |
-| `Acme.Shop.Orders.Infrastructure` | `DbContext`, репозитории, шина, интеграции | как он достаёт внешний мир |
-| `Acme.Shop.Orders.API` | контроллеры, `Program.cs`, настройки | endpoints |
-| `Acme.Shop.Orders.Tests` | тесты этого сервиса | то, что доказывает написанное выше |
+| `ST.Demo.Orders` | домен: сущности, агрегаты, доменные события, спецификации | модель продукта |
+| `ST.Demo.Orders.Application` | сценарии и порты, которые они вызывают | что продукт делает, по шагам |
+| `ST.Demo.Orders.Infrastructure` | `DbContext`, репозитории, шина, интеграции | как он достаёт внешний мир |
+| `ST.Demo.Orders.API` | контроллеры, `Program.cs`, настройки | endpoints |
+| `ST.Demo.Orders.Tests` | тесты этого сервиса | то, что доказывает написанное выше |
 
 ## Шаблон и решение
 
@@ -74,7 +74,7 @@ flowchart TD
 ```mermaid
 flowchart LR
     T["Шаблон<br/>dotnet new DotNetSolutionKit"] -->|"--Solution"| Root["Корень и Common<br/>src/common, deploy, scripts, CI"]
-    T -->|"-S Orders"| S1["Сервис<br/>src/services/Acme.Shop.Orders"]
+    T -->|"-S Orders"| S1["Сервис<br/>src/services/ST.Demo.Orders"]
     T -->|"-S Billing"| S2["Ещё один сервис"]
     Root --> M[".dotskit/manifest.json"]
     S1 --> M
@@ -84,3 +84,4 @@ flowchart LR
 
 Флаг добавляет свой проект в `src/capabilities` и свои версии в `src/package-versions`, а сервисы, которые им
 пользуются, ссылаются на него - поэтому сервис несёт только пакеты своих флагов.
+

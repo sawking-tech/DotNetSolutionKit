@@ -13,11 +13,11 @@ namespace DotsKit.Tests.Scenarios;
 [Parallelizable(ParallelScope.All)]
 internal sealed class MovedTypeScenarios
 {
-    private const string Common = "src/common/Acme.Shop.Common/Acme.Shop.Common.csproj";
-    private const string Framework = "src/framework/Acme.Shop.Framework.Events/Acme.Shop.Framework.Events.csproj";
-    private const string Orders = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Acme.Shop.Orders.Domain.csproj";
-    private const string Order = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs";
-    private const string Solution = "src/services/Acme.Shop.All.sln";
+    private const string Common = "src/common/ST.Demo.Common/ST.Demo.Common.csproj";
+    private const string Framework = "src/framework/ST.Demo.Framework.Events/ST.Demo.Framework.Events.csproj";
+    private const string Orders = "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/ST.Demo.Orders.Domain.csproj";
+    private const string Order = "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Order.cs";
+    private const string Solution = "src/services/ST.Demo.All.sln";
 
     private const string Project = """
         <Project Sdk="Microsoft.NET.Sdk">
@@ -31,8 +31,8 @@ internal sealed class MovedTypeScenarios
     private const string EmptySolution = "Microsoft Visual Studio Solution File, Format Version 12.00\nGlobal\nEndGlobal\n";
 
     private const string EventOf = "namespace {0};\n\npublic sealed class DomainEvent;\n";
-    private const string Marker = "namespace Acme.Shop.Common;\n\npublic static class Marker;\n";
-    private const string OrderText = "using Acme.Shop.Common.Events;\n\nnamespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{\n    public DomainEvent? Last { get; set; }\n}\n";
+    private const string Marker = "namespace ST.Demo.Common;\n\npublic static class Marker;\n";
+    private const string OrderText = "using ST.Demo.Common.Events;\n\nnamespace ST.Demo.Orders.Domain;\n\npublic sealed class Order\n{\n    public DomainEvent? Last { get; set; }\n}\n";
 
     private static readonly ProcessRunner Runner = new();
 
@@ -61,7 +61,7 @@ internal sealed class MovedTypeScenarios
     {
         var before = Folders.NewTemp("moved-base");
         Put(before, Common, Project);
-        Put(before, Folder(Common) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Common.Events"));
+        Put(before, Folder(Common) + "/DomainEvent.cs", string.Format(EventOf, "ST.Demo.Common.Events"));
         Put(before, Folder(Common) + "/Marker.cs", Marker);
 
         // The solution after the merge: the template moved DomainEvent out of Common, the team's Order still uses it.
@@ -69,7 +69,7 @@ internal sealed class MovedTypeScenarios
         Put(root, Common, Project);
         Put(root, Folder(Common) + "/Marker.cs", Marker);
         Put(root, Framework, Project);
-        Put(root, Folder(Framework) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Framework.Events"));
+        Put(root, Folder(Framework) + "/DomainEvent.cs", string.Format(EventOf, "ST.Demo.Framework.Events"));
         Put(root, Orders, Project);
         Put(root, Order, OrderText);
         // Written by hand: dotnet new sln makes an .slnx from the SDK 10 on, and All.sln is an .sln.
@@ -86,8 +86,8 @@ internal sealed class MovedTypeScenarios
         build.Code.ShouldBe(0, build.Output + build.Error);
         repaired.ShouldNotBeEmpty();
         stopped.ShouldBeNull();
-        File.ReadAllText(Path.Combine(root, Order)).ShouldStartWith("using Acme.Shop.Framework.Events;\n");
-        File.ReadAllText(Path.Combine(root, Orders)).ShouldContain("Acme.Shop.Framework.Events.csproj");
+        File.ReadAllText(Path.Combine(root, Order)).ShouldStartWith("using ST.Demo.Framework.Events;\n");
+        File.ReadAllText(Path.Combine(root, Orders)).ShouldContain("ST.Demo.Framework.Events.csproj");
     }
 
     [Test]
@@ -95,13 +95,13 @@ internal sealed class MovedTypeScenarios
     {
         var before = Folders.NewTemp("moved-text-base");
         Put(before, Common, Project);
-        Put(before, Folder(Common) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Common.Events"));
+        Put(before, Folder(Common) + "/DomainEvent.cs", string.Format(EventOf, "ST.Demo.Common.Events"));
         Put(before, Folder(Common) + "/Marker.cs", Marker);
         var root = Folders.NewTemp("moved-text-next");
         Put(root, Common, Project);
         Put(root, Folder(Common) + "/Marker.cs", Marker);
         Put(root, Framework, Project);
-        Put(root, Folder(Framework) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Framework.Events"));
+        Put(root, Folder(Framework) + "/DomainEvent.cs", string.Format(EventOf, "ST.Demo.Framework.Events"));
         Put(root, Orders, Project);
         Put(root, Order, OrderText);
         Put(root, Solution, EmptySolution);
@@ -119,20 +119,20 @@ internal sealed class MovedTypeScenarios
     [Test]
     public async Task TheTeamsCode_ThatNamesAMovedTypeByItsFullName_IsRepairedFromItsText_TheNamespaceItLeftStaying()
     {
-        const string shipped = "namespace Acme.Shop.Common.Events;\n\npublic sealed class OrderShipped;\n";
-        const string fullNames = "namespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{\n"
-            + "    public Acme.Shop.Common.Events.DomainEvent? Last { get; set; }\n"
-            + "    public System.Type Kind => typeof(global::Acme.Shop.Common.Events.DomainEvent);\n"
-            + "    public Acme.Shop.Common.Events.OrderShipped? Shipped { get; set; }\n}\n";
+        const string shipped = "namespace ST.Demo.Common.Events;\n\npublic sealed class OrderShipped;\n";
+        const string fullNames = "namespace ST.Demo.Orders.Domain;\n\npublic sealed class Order\n{\n"
+            + "    public ST.Demo.Common.Events.DomainEvent? Last { get; set; }\n"
+            + "    public System.Type Kind => typeof(global::ST.Demo.Common.Events.DomainEvent);\n"
+            + "    public ST.Demo.Common.Events.OrderShipped? Shipped { get; set; }\n}\n";
         var before = Folders.NewTemp("moved-full-base");
         Put(before, Common, Project);
-        Put(before, Folder(Common) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Common.Events"));
+        Put(before, Folder(Common) + "/DomainEvent.cs", string.Format(EventOf, "ST.Demo.Common.Events"));
         Put(before, Folder(Common) + "/OrderShipped.cs", shipped);
         var root = Folders.NewTemp("moved-full-next");
         Put(root, Common, Project);
         Put(root, Folder(Common) + "/OrderShipped.cs", shipped);
         Put(root, Framework, Project);
-        Put(root, Folder(Framework) + "/DomainEvent.cs", string.Format(EventOf, "Acme.Shop.Framework.Events"));
+        Put(root, Folder(Framework) + "/DomainEvent.cs", string.Format(EventOf, "ST.Demo.Framework.Events"));
         Put(root, Orders, Project);
         Put(root, Order, fullNames);
         Put(root, Solution, EmptySolution);
@@ -143,9 +143,10 @@ internal sealed class MovedTypeScenarios
         var repaired = await new ReferenceRepair(new RepairWriter(), new DotnetBuilder(Runner)).BeforeBuildAsync(root, map, [], CancellationToken.None);
         var build = await new DotnetBuilder(Runner).BuildAsync(root, CancellationToken.None);
 
-        RepairReport.ByProject(repaired).ShouldBe(["  Acme.Shop.Orders.Domain: Acme.Shop.Common.Events.DomainEvent -> Acme.Shop.Framework.Events.DomainEvent; reference to Acme.Shop.Framework.Events"]);
-        File.ReadAllText(Path.Combine(root, Order)).ShouldContain("typeof(global::Acme.Shop.Framework.Events.DomainEvent)");
-        File.ReadAllText(Path.Combine(root, Order)).ShouldContain("Acme.Shop.Common.Events.OrderShipped?");
+        RepairReport.ByProject(repaired).ShouldBe(["  ST.Demo.Orders.Domain: ST.Demo.Common.Events.DomainEvent -> ST.Demo.Framework.Events.DomainEvent; reference to ST.Demo.Framework.Events"]);
+        File.ReadAllText(Path.Combine(root, Order)).ShouldContain("typeof(global::ST.Demo.Framework.Events.DomainEvent)");
+        File.ReadAllText(Path.Combine(root, Order)).ShouldContain("ST.Demo.Common.Events.OrderShipped?");
         build.Code.ShouldBe(0, build.Output + build.Error);
     }
 }
+

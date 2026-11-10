@@ -10,9 +10,9 @@ namespace DotsKit.Tests;
 internal sealed class CentralVersionsTests
 {
     private const string Central = "src/Directory.Packages.props";
-    private const string Billing = "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Application/Acme.Shop.Billing.Application.csproj";
-    private const string Orders = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Application/Acme.Shop.Orders.Application.csproj";
-    private const string Left = "src/services/Acme.Shop.Stock/Acme.Shop.Stock.Application/Acme.Shop.Stock.Application.csproj";
+    private const string Billing = "src/services/ST.Demo.Billing/ST.Demo.Billing.Application/ST.Demo.Billing.Application.csproj";
+    private const string Orders = "src/services/ST.Demo.Orders/ST.Demo.Orders.Application/ST.Demo.Orders.Application.csproj";
+    private const string Left = "src/services/ST.Demo.Stock/ST.Demo.Stock.Application/ST.Demo.Stock.Application.csproj";
     private const string Managed = "<Project>\n  <PropertyGroup>\n    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>\n  </PropertyGroup>\n";
 
     private static void Put(string root, string path, string text)
@@ -105,3 +105,4 @@ internal sealed class CentralVersionsTests
         CentralVersions.Decide(root, new HashSet<string>()).ShouldBeEmpty();
     }
 }
+

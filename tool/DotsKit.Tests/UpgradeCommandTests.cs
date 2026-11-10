@@ -127,15 +127,15 @@ internal sealed class UpgradeCommandTests
     {
         var root = Folders.NewTemp("upgrade-command");
         Directory.CreateDirectory(Layout.ServicesOf(root));
-        File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "Acme.Shop" + Layout.SolutionSuffix), "");
-        Directory.CreateDirectory(Path.Combine(Layout.ServicesOf(root), "Acme.Shop.Orders"));
-        File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "Acme.Shop.Orders", "Program.cs"), "");
+        File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "ST.Demo" + Layout.SolutionSuffix), "");
+        Directory.CreateDirectory(Path.Combine(Layout.ServicesOf(root), "ST.Demo.Orders"));
+        File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "ST.Demo.Orders", "Program.cs"), "");
         if (template is null)
         {
             return root;
         }
 
-        var manifest = new Manifest { Template = template, Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"], Services = [["--ServiceNameOrCustom", "Orders"]] };
+        var manifest = new Manifest { Template = template, Solution = ["--NamespaceRoot", "ST", "--ProductName", "Demo"], Services = [["--ServiceNameOrCustom", "Orders"]] };
         Directory.CreateDirectory(Path.Combine(root, ".dotskit"));
         File.WriteAllText(Path.Combine(root, Layout.ManifestPath), manifest.Serialize());
         return root;
@@ -224,9 +224,9 @@ internal sealed class UpgradeCommandTests
 
         (await fakes.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None)).ShouldBe(ExitCode.Done);
 
-        fakes.Steps.Select(s => s!.Part).ShouldBe([UpgradeParts.Shared, "Acme.Shop.Orders"]);
+        fakes.Steps.Select(s => s!.Part).ShouldBe([UpgradeParts.Shared, "ST.Demo.Orders"]);
         fakes.Lines.ShouldContain(l => l.EndsWith(": shared, 1 of 2.", StringComparison.Ordinal));
-        fakes.Lines.ShouldContain(l => l.EndsWith(": Acme.Shop.Orders, 2 of 2, the last.", StringComparison.Ordinal));
+        fakes.Lines.ShouldContain(l => l.EndsWith(": ST.Demo.Orders, 2 of 2, the last.", StringComparison.Ordinal));
         fakes.Commits.ShouldBe([$"dotskit: the upgrade to {ToolVersion}, part {UpgradeParts.Shared}", $"dotskit: the upgrade to {ToolVersion}, finished"]);
         var merged = Manifest.Load(root)!;
         merged.Template.ShouldBe(ToolVersion);
@@ -237,7 +237,7 @@ internal sealed class UpgradeCommandTests
     public async Task AnUpgrade_StopsAtTheFirstPartInConflict_NamesWhatIsLeftAndHowItGoesOn()
     {
         var root = Solution("2.7.0");
-        var fakes = new Fakes { Conflicts = ["src/services/Acme.Shop.Orders/Program.cs"] };
+        var fakes = new Fakes { Conflicts = ["src/services/ST.Demo.Orders/Program.cs"] };
 
         (await fakes.Command().RunAsync(Options.Parse(["--yes"]), root, CancellationToken.None)).ShouldBe(ExitCode.Conflicts);
 
@@ -248,7 +248,7 @@ internal sealed class UpgradeCommandTests
         var open = Manifest.Load(root)!.Upgrade!;
         open.To.ShouldBe(ToolVersion);
         open.Done.ShouldBeEmpty();
-        open.Parts.ShouldBe([UpgradeParts.Shared, "Acme.Shop.Orders"]);
+        open.Parts.ShouldBe([UpgradeParts.Shared, "ST.Demo.Orders"]);
     }
 
     [Test]
@@ -257,11 +257,11 @@ internal sealed class UpgradeCommandTests
         var root = Solution("2.7.0");
         var manifest = Manifest.Load(root)! with { Upgrade = new UpgradeInProgress { To = ToolVersion, Done = [UpgradeParts.Shared] } };
         File.WriteAllText(Path.Combine(root, Layout.ManifestPath), manifest.Serialize());
-        var fakes = new Fakes { Conflicts = ["src/services/Acme.Shop.Orders/Program.cs"] };
+        var fakes = new Fakes { Conflicts = ["src/services/ST.Demo.Orders/Program.cs"] };
 
         (await fakes.Command().RunAsync(Options.Parse(["--yes", "--continue"]), root, CancellationToken.None)).ShouldBe(ExitCode.Conflicts);
 
-        fakes.Lines.ShouldContain($"Conflicts in Acme.Shop.Orders, the last part of the upgrade to {ToolVersion}: resolve them, commit, then dotskit upgrade --continue repairs the usings, builds and finishes the upgrade.");
+        fakes.Lines.ShouldContain($"Conflicts in ST.Demo.Orders, the last part of the upgrade to {ToolVersion}: resolve them, commit, then dotskit upgrade --continue repairs the usings, builds and finishes the upgrade.");
         // The last part counts as merged only once its merge is committed: the stop leaves it out of Done.
         Manifest.Load(root)!.Upgrade!.Done.ShouldBe([UpgradeParts.Shared]);
     }
@@ -312,7 +312,7 @@ internal sealed class UpgradeCommandTests
     public async Task UnderAllowDirty_AFileSavedAfterTheStart_IsNotWrittenOver_AndAnUntouchedTreeIs()
     {
         var root = Solution("2.7.0");
-        var program = Path.Combine(Layout.ServicesOf(root), "Acme.Shop.Orders", "Program.cs");
+        var program = Path.Combine(Layout.ServicesOf(root), "ST.Demo.Orders", "Program.cs");
         var saved = new Fakes { WhilePlanning = () => File.WriteAllText(program, "// saved in the IDE while the plan waited") };
         var untouched = new Fakes();
         var dirty = Options.Parse(["--yes", "--allow-dirty", "--all-at-once"]);
@@ -328,7 +328,7 @@ internal sealed class UpgradeCommandTests
     [Test]
     public async Task AFileGitHidesTheChangesOf_IsNamed_BeforeAnythingIsPlanned()
     {
-        var fakes = new Fakes { Hidden = ["src/services/Acme.Shop.Orders/appsettings.Development.json"] };
+        var fakes = new Fakes { Hidden = ["src/services/ST.Demo.Orders/appsettings.Development.json"] };
 
         var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.RunAsync(Solution("2.7.0")));
 
@@ -356,3 +356,4 @@ internal sealed class UpgradeCommandTests
         refused.Next.ShouldBeNull();
     }
 }
+

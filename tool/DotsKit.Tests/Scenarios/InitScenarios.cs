@@ -36,7 +36,7 @@ internal sealed class InitScenarios
     public async Task ASolutionWithFlagsOnItsServices_IsReproducedWhole_AndDotskitAddsToIt()
     {
         var solution = await MadeByTheTemplateAsync(
-            ["-N", "Acme", "-P", "Shop", "-S", "Orders", "--Storage", "true", "--MongoDB", "true", "--Notify", "email", "--Messaging", "outbox", "--Audit", "true", "--DiffApi", "true", "--FeatureFlags", "true", "--ClickHouse", "true"],
+            ["-N", "ST", "-P", "Demo", "-S", "Orders", "--Storage", "true", "--MongoDB", "true", "--Notify", "email", "--Messaging", "outbox", "--Audit", "true", "--DiffApi", "true", "--FeatureFlags", "true", "--ClickHouse", "true"],
             ["-S", "Billing", "--Storage", "true", "--Messaging", "outbox", "--Notify", "email", "--Audit", "true"],
             ["-S", "Stock", "--Hangfire", "false", "--Messaging", "direct", "--ClickHouse", "true", "--FeatureFlags", "true"]);
 
@@ -56,7 +56,7 @@ internal sealed class InitScenarios
     [Test]
     public async Task AServiceAddedToASolutionWithInfisical_GetsTheSecretStore()
     {
-        var solution = await MadeByTheTemplateAsync(["-N", "Acme", "-P", "Shop", "-S", "Orders", "--Infisical", "true"]);
+        var solution = await MadeByTheTemplateAsync(["-N", "ST", "-P", "Demo", "-S", "Orders", "--Infisical", "true"]);
         var init = await solution.DotskitAsync("init", "--yes");
         init.Code.ShouldBe(0, init.Output + init.Error);
         await solution.CommitAsync("described");
@@ -64,14 +64,14 @@ internal sealed class InitScenarios
         var added = await solution.DotskitAsync("new", "-S", "Catalog", "--yes");
 
         added.Code.ShouldBe(0, added.Output + added.Error);
-        solution.Read("src/services/Acme.Shop.Catalog/Acme.Shop.Catalog.API/appsettings.json").ShouldContain("\"Infisical\"");
+        solution.Read("src/services/ST.Demo.Catalog/ST.Demo.Catalog.API/appsettings.json").ShouldContain("\"Infisical\"");
     }
 
     [Test]
     public async Task ASolutionOfOtherChoices_AndAGateway_IsReproducedWhole()
     {
         var solution = await MadeByTheTemplateAsync(
-            ["-N", "Acme", "-P", "Shop", "-S", "Orders", "--Database", "mssql", "--Deploy", "k8s", "--TestFramework", "xunit", "--Agent", "opencode", "--GitHubCiCd", "true", "--Vault", "true", "--Infisical", "true", "--HierarchyRules", "true"],
+            ["-N", "ST", "-P", "Demo", "-S", "Orders", "--Database", "mssql", "--Deploy", "k8s", "--TestFramework", "xunit", "--Agent", "opencode", "--GitHubCiCd", "true", "--Vault", "true", "--Infisical", "true", "--HierarchyRules", "true"],
             ["-S", "Gate", "--ApiGateway", "true", "--Database", "mssql", "--Deploy", "k8s", "--TestFramework", "xunit", "--Agent", "opencode"],
             ["-S", "Billing", "--Database", "mssql", "--Deploy", "k8s", "--TestFramework", "xunit", "--Agent", "opencode", "--Vault", "true"]);
 
@@ -90,7 +90,7 @@ internal sealed class InitScenarios
         (await solution.DotnetAsync("new", "install", "SawKing.DotNetSolutionKit::2.7.0", "--debug:custom-hive", hive)).Code.ShouldBe(0);
         foreach (var args in new[] { new[] { "-S", "Orders", "-M", "false" }, ["-S", "Billing"] })
         {
-            var made = await solution.DotnetAsync(["new", "DotNetSolutionKit", "-N", "Acme", "-P", "Shop", .. args, "--Storage", "true", "--Messaging", "outbox", "--debug:custom-hive", hive]);
+            var made = await solution.DotnetAsync(["new", "DotNetSolutionKit", "-N", "ST", "-P", "Demo", .. args, "--Storage", "true", "--Messaging", "outbox", "--debug:custom-hive", hive]);
             made.Code.ShouldBe(0, made.Output + made.Error);
         }
         // 2.7 left a service out of All.sln until manual-add-projects.sh, which adds it as this does.
@@ -108,7 +108,7 @@ internal sealed class InitScenarios
     public async Task AServiceTheTemplateAddedToASolutionOfDotskit_IsAddedToItsManifest()
     {
         var solution = await Sandbox.SolutionAsync();
-        await GenerateAsync(solution, ["-N", "Acme", "-P", "Shop", "-S", "Stock", "--HttpPort", "5100"]);
+        await GenerateAsync(solution, ["-N", "ST", "-P", "Demo", "-S", "Stock", "--HttpPort", "5100"]);
         await solution.CommitAsync("a service by the template alone");
 
         var init = await solution.DotskitAsync("init", "--yes");
@@ -118,3 +118,4 @@ internal sealed class InitScenarios
         Manifest.Parse(solution.Read(Layout.ManifestPath)).FindService("Stock")!.Port.ShouldBe(5100);
     }
 }
+

@@ -12,7 +12,7 @@ namespace DotsKit.Tests.Scenarios;
 [Parallelizable(ParallelScope.All)]
 internal sealed class UpgradeScenarios
 {
-    private const string Program = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.API/Program.cs";
+    private const string Program = "src/services/ST.Demo.Orders/ST.Demo.Orders.API/Program.cs";
     private const string TeamsLine = "// the team's own line";
     private const string Pinned = "Npgsql.EntityFrameworkCore.PostgreSQL";
     private const string PinnedVersion = "8.0.10";
@@ -31,7 +31,7 @@ internal sealed class UpgradeScenarios
         (await solution.DotnetAsync("new", "install", $"SawKing.DotNetSolutionKit::{version}", "--debug:custom-hive", hive)).Code.ShouldBe(0);
         foreach (var args in new[] { new[] { "-S", "Orders", "-M", "false", "--Storage", "true" }, ["-S", "Billing", "--Storage", "true", "--Messaging", "outbox"] })
         {
-            var made = await solution.DotnetAsync(["new", "DotNetSolutionKit", "-N", "Acme", "-P", "Shop", .. args, "--debug:custom-hive", hive]);
+            var made = await solution.DotnetAsync(["new", "DotNetSolutionKit", "-N", "ST", "-P", "Demo", .. args, "--debug:custom-hive", hive]);
             made.Code.ShouldBe(0, made.Output + made.Error);
         }
         // Before 2.8 a service stayed out of All.sln until manual-add-projects.sh, which adds it as this does.
@@ -65,7 +65,7 @@ internal sealed class UpgradeScenarios
         PackageVersions.Read(string.Concat(VersionFiles
             .Where(solution.Exists).Select(solution.Read)))[Pinned].ShouldBe(PinnedVersion);
         solution.Exists("src/services/manual-add-projects.sh").ShouldBeFalse();
-        var tests = await solution.DotnetAsync("test", "src/services/Acme.Shop.All.sln", "--filter", "TestCategory!=Integration");
+        var tests = await solution.DotnetAsync("test", "src/services/ST.Demo.All.sln", "--filter", "TestCategory!=Integration");
         tests.Code.ShouldBe(0, tests.Output + tests.Error);
         await solution.CommitAsync("upgraded");
 
@@ -73,3 +73,4 @@ internal sealed class UpgradeScenarios
         added.Code.ShouldBe(0, added.Output + added.Error);
     }
 }
+

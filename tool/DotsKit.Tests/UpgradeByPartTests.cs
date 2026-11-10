@@ -8,21 +8,21 @@ namespace DotsKit.Tests;
 [Parallelizable(ParallelScope.All)]
 internal sealed class UpgradeByPartTests
 {
-    private const string Orders = "Acme.Shop.Orders";
-    private const string Billing = "Acme.Shop.Billing";
+    private const string Orders = "ST.Demo.Orders";
+    private const string Billing = "ST.Demo.Billing";
 
     [Test]
     public void APath_IsInItsServiceFolder_OrInTheSharedPart()
     {
         UpgradeParts.Of($"src/services/{Orders}/{Orders}.API/Setup/ApplicationSetup.cs").ShouldBe(Orders);
-        UpgradeParts.Of("src/common/Acme.Shop.Common/Domain/Entity.cs").ShouldBe("common/Acme.Shop.Common");
+        UpgradeParts.Of("src/common/ST.Demo.Common/Domain/Entity.cs").ShouldBe("common/ST.Demo.Common");
         UpgradeParts.Of("src/common/Directory.Build.props").ShouldBe(UpgradeParts.Common);
-        UpgradeParts.Of("src/capabilities/Acme.Shop.Capabilities.Persistence.Mongo/MongoSetup.cs").ShouldBe(UpgradeParts.Capabilities);
+        UpgradeParts.Of("src/capabilities/ST.Demo.Capabilities.Persistence.Mongo/MongoSetup.cs").ShouldBe(UpgradeParts.Capabilities);
         UpgradeParts.Of("src/Directory.Packages.props").ShouldBe(UpgradeParts.Shared);
-        UpgradeParts.Of("src/services/Acme.Shop.All.sln").ShouldBe(UpgradeParts.Shared);
+        UpgradeParts.Of("src/services/ST.Demo.All.sln").ShouldBe(UpgradeParts.Shared);
         UpgradeParts.Of("deploy/compose/compose.yml").ShouldBe(UpgradeParts.Shared);
-        UpgradeParts.OrderablePartOf("src/common/Acme.Shop.Common.Infrastructure/Acme.Shop.Common.Infrastructure.csproj").ShouldBe("common/Acme.Shop.Common.Infrastructure");
-        UpgradeParts.OrderablePartOf("src/capabilities/Acme.Shop.Capabilities.Analytics.ClickHouse/Acme.Shop.Capabilities.Analytics.ClickHouse.csproj").ShouldBe(UpgradeParts.Capabilities);
+        UpgradeParts.OrderablePartOf("src/common/ST.Demo.Common.Infrastructure/ST.Demo.Common.Infrastructure.csproj").ShouldBe("common/ST.Demo.Common.Infrastructure");
+        UpgradeParts.OrderablePartOf("src/capabilities/ST.Demo.Capabilities.Analytics.ClickHouse/ST.Demo.Capabilities.Analytics.ClickHouse.csproj").ShouldBe(UpgradeParts.Capabilities);
         UpgradeParts.OrderablePartOf($"src/services/{Orders}/{Orders}.API/{Orders}.API.csproj").ShouldBeNull();
         UpgradeParts.OrderablePartOf("Directory.Build.props").ShouldBeNull();
     }
@@ -30,86 +30,86 @@ internal sealed class UpgradeByPartTests
     [Test]
     public void TheParts_AreTheSharedOneFirst_ThenTheServiceFoldersInOrder()
     {
-        UpgradeParts.In([$"src/services/{Orders}/a.cs", "Directory.Build.props", $"src/services/{Billing}/b.cs", "src/common/Acme.Shop.Common.Web/w.cs",
-                "src/common/Acme.Shop.Common/c.cs", "src/capabilities/Acme.Shop.Capabilities.Persistence.Mongo/m.cs"])
-            .ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common", "common/Acme.Shop.Common.Web", UpgradeParts.Capabilities, Billing, Orders]);
+        UpgradeParts.In([$"src/services/{Orders}/a.cs", "Directory.Build.props", $"src/services/{Billing}/b.cs", "src/common/ST.Demo.Common.Web/w.cs",
+                "src/common/ST.Demo.Common/c.cs", "src/capabilities/ST.Demo.Capabilities.Persistence.Mongo/m.cs"])
+            .ShouldBe([UpgradeParts.Shared, "common/ST.Demo.Common", "common/ST.Demo.Common.Web", UpgradeParts.Capabilities, Billing, Orders]);
     }
 
     [Test]
     public void TheProjectsOfCommon_ThatReferenceNoOther_GoByLayer_FromTheDomainToTheTests()
     {
-        string[] paths = ["src/common/Acme.Shop.Common.Tests/t.cs", "src/common/Acme.Shop.Common.Web/w.cs", "src/common/Acme.Shop.Common.Infrastructure/i.cs",
-            "src/common/Acme.Shop.Common.Application/a.cs", "src/common/Acme.Shop.Common.Contracts/c.cs", "src/common/Acme.Shop.Common/d.cs"];
+        string[] paths = ["src/common/ST.Demo.Common.Tests/t.cs", "src/common/ST.Demo.Common.Web/w.cs", "src/common/ST.Demo.Common.Infrastructure/i.cs",
+            "src/common/ST.Demo.Common.Application/a.cs", "src/common/ST.Demo.Common.Contracts/c.cs", "src/common/ST.Demo.Common/d.cs"];
 
-        UpgradeParts.In(paths).ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common", "common/Acme.Shop.Common.Contracts", "common/Acme.Shop.Common.Application",
-            "common/Acme.Shop.Common.Infrastructure", "common/Acme.Shop.Common.Web", "common/Acme.Shop.Common.Tests"]);
+        UpgradeParts.In(paths).ShouldBe([UpgradeParts.Shared, "common/ST.Demo.Common", "common/ST.Demo.Common.Contracts", "common/ST.Demo.Common.Application",
+            "common/ST.Demo.Common.Infrastructure", "common/ST.Demo.Common.Web", "common/ST.Demo.Common.Tests"]);
     }
 
     [Test]
     public void TheProjectsOfCommon_GoBeforeThoseThatReferenceThem_ThenByLayer()
     {
-        string[] paths = ["src/common/Directory.Build.props", "src/common/Acme.Shop.Common.Application/a.cs", "src/common/Acme.Shop.Common.Web/w.cs",
-            "src/common/Acme.Shop.Common.Domain/d.cs"];
+        string[] paths = ["src/common/Directory.Build.props", "src/common/ST.Demo.Common.Application/a.cs", "src/common/ST.Demo.Common.Web/w.cs",
+            "src/common/ST.Demo.Common.Domain/d.cs"];
         var references = new Dictionary<string, IReadOnlySet<string>>
         {
-            ["common/Acme.Shop.Common.Application"] = new HashSet<string> { "common/Acme.Shop.Common.Web" },
-            ["common/Acme.Shop.Common.Web"] = new HashSet<string> { "common/Acme.Shop.Common.Domain" },
+            ["common/ST.Demo.Common.Application"] = new HashSet<string> { "common/ST.Demo.Common.Web" },
+            ["common/ST.Demo.Common.Web"] = new HashSet<string> { "common/ST.Demo.Common.Domain" },
         };
 
-        UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, UpgradeParts.Common, "common/Acme.Shop.Common.Domain", "common/Acme.Shop.Common.Web",
-            "common/Acme.Shop.Common.Application"]);
+        UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, UpgradeParts.Common, "common/ST.Demo.Common.Domain", "common/ST.Demo.Common.Web",
+            "common/ST.Demo.Common.Application"]);
     }
 
     [Test]
     public void TheCapabilities_ByDefaultGoAfterTheProjectsOfCommon()
     {
-        string[] paths = ["src/common/Acme.Shop.Common.Infrastructure/i.cs", "src/capabilities/Acme.Shop.Capabilities.Analytics.ClickHouse/c.cs",
-            "src/common/Acme.Shop.Common.Web/w.cs"];
+        string[] paths = ["src/common/ST.Demo.Common.Infrastructure/i.cs", "src/capabilities/ST.Demo.Capabilities.Analytics.ClickHouse/c.cs",
+            "src/common/ST.Demo.Common.Web/w.cs"];
 
-        UpgradeParts.In(paths).ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common.Infrastructure", "common/Acme.Shop.Common.Web", UpgradeParts.Capabilities]);
+        UpgradeParts.In(paths).ShouldBe([UpgradeParts.Shared, "common/ST.Demo.Common.Infrastructure", "common/ST.Demo.Common.Web", UpgradeParts.Capabilities]);
     }
 
     [Test]
     public void TheCapabilities_GoBeforeTheProjectOfCommonATypeLeavesToThem()
     {
-        string[] paths = ["src/common/Acme.Shop.Common.Infrastructure/i.cs", "src/capabilities/Acme.Shop.Capabilities.Analytics.ClickHouse/c.cs",
-            "src/common/Acme.Shop.Common.Web/w.cs"];
+        string[] paths = ["src/common/ST.Demo.Common.Infrastructure/i.cs", "src/capabilities/ST.Demo.Capabilities.Analytics.ClickHouse/c.cs",
+            "src/common/ST.Demo.Common.Web/w.cs"];
         var references = new Dictionary<string, IReadOnlySet<string>>
         {
-            ["common/Acme.Shop.Common.Infrastructure"] = new HashSet<string> { UpgradeParts.Capabilities },
+            ["common/ST.Demo.Common.Infrastructure"] = new HashSet<string> { UpgradeParts.Capabilities },
         };
 
-        UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common.Web", UpgradeParts.Capabilities,
-            "common/Acme.Shop.Common.Infrastructure"]);
+        UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, "common/ST.Demo.Common.Web", UpgradeParts.Capabilities,
+            "common/ST.Demo.Common.Infrastructure"]);
     }
 
     [Test]
     public void AProjectOfCommon_GoesBeforeTheCapabilitiesATypeLeavesToIt()
     {
-        string[] paths = ["src/common/Acme.Shop.Common.Domain/d.cs", "src/capabilities/Acme.Shop.Capabilities.Analytics.ClickHouse/c.cs"];
+        string[] paths = ["src/common/ST.Demo.Common.Domain/d.cs", "src/capabilities/ST.Demo.Capabilities.Analytics.ClickHouse/c.cs"];
         var references = new Dictionary<string, IReadOnlySet<string>>
         {
-            [UpgradeParts.Capabilities] = new HashSet<string> { "common/Acme.Shop.Common.Domain" },
+            [UpgradeParts.Capabilities] = new HashSet<string> { "common/ST.Demo.Common.Domain" },
         };
 
-        UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common.Domain", UpgradeParts.Capabilities]);
+        UpgradeParts.In(paths, references).ShouldBe([UpgradeParts.Shared, "common/ST.Demo.Common.Domain", UpgradeParts.Capabilities]);
     }
 
     [Test]
     public void APathOfNoPartOfTheUpgrade_GoesWithTheSharedPart_AndAPartOfTheUpgradeWaitsForItsTurn()
     {
-        var step = new PartStep(new HashSet<string>(), UpgradeParts.Shared, [UpgradeParts.Shared, "common/Acme.Shop.Common", "common/Acme.Shop.Common.Domain", Orders]);
+        var step = new PartStep(new HashSet<string>(), UpgradeParts.Shared, [UpgradeParts.Shared, "common/ST.Demo.Common", "common/ST.Demo.Common.Domain", Orders]);
 
-        step.InDoneOrThis("src/common/Acme.Shop.Common.Domain/d.cs").ShouldBeFalse();
-        step.InDoneOrThis("src/common/Acme.Shop.Common.Web/w.cs").ShouldBeTrue();
-        step.InDoneOrThis("src/common/Acme.Shop.Common/c.cs").ShouldBeFalse();
+        step.InDoneOrThis("src/common/ST.Demo.Common.Domain/d.cs").ShouldBeFalse();
+        step.InDoneOrThis("src/common/ST.Demo.Common.Web/w.cs").ShouldBeTrue();
+        step.InDoneOrThis("src/common/ST.Demo.Common/c.cs").ShouldBeFalse();
     }
 
     [Test]
     public void ARun_TakesTheFirstPartLeft_OrTheOneNamed_AndTheSharedOneGoesFirst()
     {
-        IReadOnlyList<string> parts = [UpgradeParts.Shared, UpgradeParts.Capabilities, "common/Acme.Shop.Common", Billing, Orders];
-        string[] shared = [UpgradeParts.Shared, UpgradeParts.Capabilities, "common/Acme.Shop.Common"];
+        IReadOnlyList<string> parts = [UpgradeParts.Shared, UpgradeParts.Capabilities, "common/ST.Demo.Common", Billing, Orders];
+        string[] shared = [UpgradeParts.Shared, UpgradeParts.Capabilities, "common/ST.Demo.Common"];
 
         UpgradeParts.Next(parts, [], null).ShouldBe(UpgradeParts.Shared);
         UpgradeParts.Next(parts, [UpgradeParts.Shared], null).ShouldBe(UpgradeParts.Capabilities);
@@ -125,19 +125,19 @@ internal sealed class UpgradeByPartTests
     [Test]
     public void APartNamedByTheEndOfItsName_IsTakenOnlyWhenNoOtherPartEndsSo()
     {
-        IReadOnlyList<string> parts = [UpgradeParts.Shared, UpgradeParts.Capabilities, "Acme.Billing.Orders", Orders];
+        IReadOnlyList<string> parts = [UpgradeParts.Shared, UpgradeParts.Capabilities, "ST.Billing.Orders", Orders];
         string[] shared = [UpgradeParts.Shared, UpgradeParts.Capabilities];
 
         Should.Throw<ArgumentException>(() => UpgradeParts.Next(parts, shared, "Orders")).Message
-            .ShouldBe($"--part Orders names Acme.Billing.Orders, {Orders}: name one of them in full.");
+            .ShouldBe($"--part Orders names ST.Billing.Orders, {Orders}: name one of them in full.");
         UpgradeParts.Next(parts, shared, Orders).ShouldBe(Orders);
-        UpgradeParts.Next(parts, shared, "Billing.Orders").ShouldBe("Acme.Billing.Orders");
+        UpgradeParts.Next(parts, shared, "Billing.Orders").ShouldBe("ST.Billing.Orders");
     }
 
     [Test]
     public void TheFoldersOfAnIde_BesideAllSln_AreNoParts_AndASolutionWithoutCapabilitiesHasNoSuchPart()
     {
-        var root = Tree(($"src/services/{Orders}/a.cs", "x"), ("src/services/.vs/Acme/v17/.suo", "x"), ("src/services/.idea/workspace.xml", "x"));
+        var root = Tree(($"src/services/{Orders}/a.cs", "x"), ("src/services/.vs/ST/v17/.suo", "x"), ("src/services/.idea/workspace.xml", "x"));
 
         UpgradeParts.In(Folders.RelativeFiles(root)).ShouldBe([UpgradeParts.Shared, Orders]);
     }
@@ -174,9 +174,9 @@ internal sealed class UpgradeByPartTests
     [Test]
     public void TheManifest_KeepsThePartsMerged_AndTheLastMovesTheVersion()
     {
-        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "Acme"], Services = [["--ServiceNameOrCustom", "Orders"]] };
+        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "ST"], Services = [["--ServiceNameOrCustom", "Orders"]] };
 
-        string[] parts = [UpgradeParts.Shared, "common/Acme.Shop.Common.Domain", Orders];
+        string[] parts = [UpgradeParts.Shared, "common/ST.Demo.Common.Domain", Orders];
         var between = Manifest.Parse(manifest.WithPartMerged("2.7.0", UpgradeParts.Shared, last: false, parts).Serialize());
         var done = between.WithPartMerged("2.7.0", Orders, last: true, parts);
         var again = between.WithPartMerged("2.7.0", UpgradeParts.Shared, last: false, parts);
@@ -197,9 +197,9 @@ internal sealed class UpgradeByPartTests
     [Test]
     public void TheManifestOfAStoppedPart_KeepsItOutOfDone_UntilItsMergeIsCommitted()
     {
-        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "Acme"], Services = [["--ServiceNameOrCustom", "Orders"]] };
+        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "ST"], Services = [["--ServiceNameOrCustom", "Orders"]] };
 
-        string[] parts = [UpgradeParts.Shared, "common/Acme.Shop.Common.Domain", Orders];
+        string[] parts = [UpgradeParts.Shared, "common/ST.Demo.Common.Domain", Orders];
         var between = Manifest.Parse(manifest.WithPartMerged("2.7.0", UpgradeParts.Shared, last: false, parts).Serialize());
         var stopped = Manifest.Parse(between.WithPartInConflict("2.7.0", parts).Serialize());
 
@@ -224,3 +224,4 @@ internal sealed class UpgradeByPartTests
 
     private static string Read(string root, string path) => File.ReadAllText(Path.Combine(root, path));
 }
+

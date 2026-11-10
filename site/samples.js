@@ -281,7 +281,7 @@ function entriesOf(files, dir) {
 }
 
 // In the path, a folder named after the one it sits in plus a suffix, as projects in a .NET solution are
-// (Shop.Orders / Shop.Orders.Tests), is shown as "…" and the suffix; the full name stays in the title.
+// (Demo.Orders / Demo.Orders.Tests), is shown as "…" and the suffix; the full name stays in the title.
 // The list of a folder keeps full names: there the suffixes alone would all read the same.
 function shortName(name, parent) {
   return parent && name.startsWith(parent + ".") && name.length > parent.length + 1 ? "…" + name.slice(parent.length) : name;
@@ -877,3 +877,4 @@ async function start() {
   writeCache(currentCopy());
 }
 start();
+

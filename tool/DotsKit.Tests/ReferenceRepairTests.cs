@@ -11,33 +11,33 @@ namespace DotsKit.Tests;
 internal sealed class ReferenceRepairTests
 {
     private const string Root = "/s";
-    private const string Common = "src/common/Acme.Shop.Common/Acme.Shop.Common.csproj";
-    private const string Framework = "src/framework/Acme.Shop.Framework.Events/Acme.Shop.Framework.Events.csproj";
-    private const string Orders = "/s/src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Acme.Shop.Orders.Domain.csproj";
-    private const string OrderFile = "/s/src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs";
+    private const string Common = "src/common/ST.Demo.Common/ST.Demo.Common.csproj";
+    private const string Framework = "src/framework/ST.Demo.Framework.Events/ST.Demo.Framework.Events.csproj";
+    private const string Orders = "/s/src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/ST.Demo.Orders.Domain.csproj";
+    private const string OrderFile = "/s/src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Order.cs";
 
     private static readonly TypeIndex Before = TypeIndex.Of([
-        (Common, "namespace Acme.Shop.Common.Events;\n\npublic sealed class DomainEvent;\n"),
-        (Common, "namespace Acme.Shop.Common\n{\n    public static class Marker { }\n}\n"),
+        (Common, "namespace ST.Demo.Common.Events;\n\npublic sealed class DomainEvent;\n"),
+        (Common, "namespace ST.Demo.Common\n{\n    public static class Marker { }\n}\n"),
     ]);
 
     private static readonly TypeIndex After = TypeIndex.Of([
-        (Framework, "namespace Acme.Shop.Framework.Events;\n\npublic sealed class DomainEvent;\n"),
-        (Common, "namespace Acme.Shop.Common\n{\n    public static class Marker { }\n}\n"),
+        (Framework, "namespace ST.Demo.Framework.Events;\n\npublic sealed class DomainEvent;\n"),
+        (Common, "namespace ST.Demo.Common\n{\n    public static class Marker { }\n}\n"),
     ]);
 
     private static BuildError Error(string code, string message) => new(OrderFile, code, message, Orders);
 
     /// <summary>Order.cs as the team wrote it, with the using of the namespace the template gave up.</summary>
     private static string Text(string file) =>
-        file == OrderFile ? "using System;\nusing Acme.Shop.Common.Events;\n\nnamespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{\n    public DomainEvent? Last { get; set; }\n}\n" : "";
+        file == OrderFile ? "using System;\nusing ST.Demo.Common.Events;\n\nnamespace ST.Demo.Orders.Domain;\n\npublic sealed class Order\n{\n    public DomainEvent? Last { get; set; }\n}\n" : "";
 
     [Test]
     public void TheIndex_HoldsThePublicTypes_WithTheirProjectAndNamespace_AndLeavesOutTheInternalOnes()
     {
-        var index = TypeIndex.Of([(Common, "namespace Acme.Shop.Common;\n\npublic sealed record Money(decimal Amount);\npublic interface IClock { }\ninternal sealed class Hidden { }\n")]);
+        var index = TypeIndex.Of([(Common, "namespace ST.Demo.Common;\n\npublic sealed record Money(decimal Amount);\npublic interface IClock { }\ninternal sealed class Hidden { }\n")]);
 
-        index.Find("Money").ShouldBe([new TypeHome("Money", "Acme.Shop.Common", Common)]);
+        index.Find("Money").ShouldBe([new TypeHome("Money", "ST.Demo.Common", Common)]);
         index.Find("IClock").ShouldHaveSingleItem();
         index.Find("Hidden").ShouldBeEmpty();
     }
@@ -48,44 +48,44 @@ internal sealed class ReferenceRepairTests
         var map = TypeMap.Between(Before, After);
 
         map.Moves.ShouldBe([new TypeMove(
-            new TypeHome("DomainEvent", "Acme.Shop.Common.Events", Common),
-            new TypeHome("DomainEvent", "Acme.Shop.Framework.Events", Framework))]);
-        map.OutOf("Acme.Shop.Common.Events").ShouldHaveSingleItem();
-        map.OutOf("Acme.Shop.Common").ShouldBeEmpty();
+            new TypeHome("DomainEvent", "ST.Demo.Common.Events", Common),
+            new TypeHome("DomainEvent", "ST.Demo.Framework.Events", Framework))]);
+        map.OutOf("ST.Demo.Common.Events").ShouldHaveSingleItem();
+        map.OutOf("ST.Demo.Common").ShouldBeEmpty();
     }
 
     [Test]
     public void AServicesCopyOfAMovedType_LeadsToItsOwnServiceOnly()
     {
-        const string ordersApp = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Application/Acme.Shop.Orders.Application.csproj";
-        const string ordersDomain = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Acme.Shop.Orders.Domain.csproj";
-        const string billingApp = "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Application/Acme.Shop.Billing.Application.csproj";
-        const string billingDomain = "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Domain/Acme.Shop.Billing.Domain.csproj";
-        const string ordersFile = "/s/src/services/Acme.Shop.Orders/Acme.Shop.Orders.API/Endpoint.cs";
-        const string ordersApi = "/s/src/services/Acme.Shop.Orders/Acme.Shop.Orders.API/Acme.Shop.Orders.API.csproj";
+        const string ordersApp = "src/services/ST.Demo.Orders/ST.Demo.Orders.Application/ST.Demo.Orders.Application.csproj";
+        const string ordersDomain = "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/ST.Demo.Orders.Domain.csproj";
+        const string billingApp = "src/services/ST.Demo.Billing/ST.Demo.Billing.Application/ST.Demo.Billing.Application.csproj";
+        const string billingDomain = "src/services/ST.Demo.Billing/ST.Demo.Billing.Domain/ST.Demo.Billing.Domain.csproj";
+        const string ordersFile = "/s/src/services/ST.Demo.Orders/ST.Demo.Orders.API/Endpoint.cs";
+        const string ordersApi = "/s/src/services/ST.Demo.Orders/ST.Demo.Orders.API/ST.Demo.Orders.API.csproj";
         var before = TypeIndex.Of([
-            (ordersApp, "namespace Acme.Shop.Orders.Application.Events;\npublic class Handler { }\n"),
-            (billingApp, "namespace Acme.Shop.Billing.Application.Events;\npublic class Handler { }\n"),
+            (ordersApp, "namespace ST.Demo.Orders.Application.Events;\npublic class Handler { }\n"),
+            (billingApp, "namespace ST.Demo.Billing.Application.Events;\npublic class Handler { }\n"),
         ]);
         var after = TypeIndex.Of([
-            (ordersDomain, "namespace Acme.Shop.Orders.Domain.Events;\npublic class Handler { }\n"),
-            (billingDomain, "namespace Acme.Shop.Billing.Domain.Events;\npublic class Handler { }\n"),
+            (ordersDomain, "namespace ST.Demo.Orders.Domain.Events;\npublic class Handler { }\n"),
+            (billingDomain, "namespace ST.Demo.Billing.Domain.Events;\npublic class Handler { }\n"),
         ]);
         var map = TypeMap.Between(before, after);
 
-        const string endpoint = "using Acme.Shop.Orders.Application.Events;\n\npublic class Endpoint\n{\n    public Handler? H { get; set; }\n}\n";
+        const string endpoint = "using ST.Demo.Orders.Application.Events;\n\npublic class Endpoint\n{\n    public Handler? H { get; set; }\n}\n";
         var given = ReferenceRepairs.Decide(
-            [new BuildError(ordersFile, "CS0234", "The type or namespace name 'Events' does not exist in the namespace 'Acme.Shop.Orders.Application'", ordersApi)],
+            [new BuildError(ordersFile, "CS0234", "The type or namespace name 'Events' does not exist in the namespace 'ST.Demo.Orders.Application'", ordersApi)],
             map, Root, _ => endpoint);
         var type = ReferenceRepairs.Decide(
             [new BuildError(ordersFile, "CS0246", "The type or namespace name 'Handler' could not be found", ordersApi)], map, Root, _ => endpoint);
         var teams = ReferenceRepairs.Decide(
             [new BuildError(ordersFile, "CS0246", "The type or namespace name 'Handler' could not be found", ordersApi)], map, Root,
-            _ => "using Acme.Shop.Orders.Team;\n\npublic class Endpoint\n{\n    public Handler? H { get; set; }\n}\n");
+            _ => "using ST.Demo.Orders.Team;\n\npublic class Endpoint\n{\n    public Handler? H { get; set; }\n}\n");
 
         Repair[] expected = [new AddReference(Path.GetFullPath(ordersApi), Path.GetFullPath(Path.Combine(Root, ordersDomain)))];
-        given.ShouldBe([new ReplaceUsing(ordersFile, "Acme.Shop.Orders.Application.Events", "Acme.Shop.Orders.Domain.Events"), .. expected]);
-        type.ShouldBe([new AddUsing(ordersFile, "Acme.Shop.Orders.Domain.Events"), .. expected]);
+        given.ShouldBe([new ReplaceUsing(ordersFile, "ST.Demo.Orders.Application.Events", "ST.Demo.Orders.Domain.Events"), .. expected]);
+        type.ShouldBe([new AddUsing(ordersFile, "ST.Demo.Orders.Domain.Events"), .. expected]);
         teams.ShouldBeEmpty();
     }
 
@@ -97,9 +97,9 @@ internal sealed class ReferenceRepairTests
         // files a move breaks: PostgresDbTestExecutionContext and the moved ServiceDbTestExecutionContext.
         var localized = ReferenceRepairs.Decide(
             [new BuildError(OrderFile, "CS0246", "Не удалось найти тип или имя пространства имен \"DomainEvent\" (возможно, отсутствует директива using или ссылка на сборку).", Orders)],
-            Split, Root, _ => "namespace Acme.Shop.Common.Events;\npublic class Order\n{\n}\n");
+            Split, Root, _ => "namespace ST.Demo.Common.Events;\npublic class Order\n{\n}\n");
 
-        localized.ShouldBe([new AddUsing(OrderFile, "Acme.Shop.Common.Domain.Events"),
+        localized.ShouldBe([new AddUsing(OrderFile, "ST.Demo.Common.Domain.Events"),
             new AddReference(Path.GetFullPath(Orders), Path.GetFullPath(Path.Combine(Root, CommonDomain)))]);
     }
 
@@ -108,15 +108,15 @@ internal sealed class ReferenceRepairTests
     {
         // MSBuild names the receiver first, the method second, in the machine's locale.
         var extensions = TypeMap.Between(
-            TypeIndex.Of([(Common, "namespace Acme.Shop.Common.Tests;\npublic static class Setup\n{\n    public static IServiceCollection AddDomainEvents(this IServiceCollection services) => services;\n}\n")]),
-            TypeIndex.Of([(Framework, "namespace Acme.Shop.Framework.Testing;\npublic static class Setup\n{\n    public static IServiceCollection AddDomainEvents(this IServiceCollection services) => services;\n}\n")]));
-        var services = Path.Combine(Root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.API/Acme.Shop.Orders.API.csproj");
+            TypeIndex.Of([(Common, "namespace ST.Demo.Common.Tests;\npublic static class Setup\n{\n    public static IServiceCollection AddDomainEvents(this IServiceCollection services) => services;\n}\n")]),
+            TypeIndex.Of([(Framework, "namespace ST.Demo.Framework.Testing;\npublic static class Setup\n{\n    public static IServiceCollection AddDomainEvents(this IServiceCollection services) => services;\n}\n")]));
+        var services = Path.Combine(Root, "src/services/ST.Demo.Orders/ST.Demo.Orders.API/ST.Demo.Orders.API.csproj");
 
         var repairs = ReferenceRepairs.Decide(
             [new BuildError(OrderFile, "CS1061", "\"IServiceCollection\" не содержит определения \"AddDomainEvents\"", services)],
-            extensions, Root, _ => "namespace Acme.Shop.Common.Tests.Integration;\npublic class Endpoint\n{\n}\n");
+            extensions, Root, _ => "namespace ST.Demo.Common.Tests.Integration;\npublic class Endpoint\n{\n}\n");
 
-        repairs.ShouldBe([new AddUsing(OrderFile, "Acme.Shop.Framework.Testing"),
+        repairs.ShouldBe([new AddUsing(OrderFile, "ST.Demo.Framework.Testing"),
             new AddReference(Path.GetFullPath(services), Path.GetFullPath(Path.Combine(Root, Framework)))]);
     }
 
@@ -124,11 +124,11 @@ internal sealed class ReferenceRepairTests
     public void AUsingOfAGivenUpNamespace_IsReplaced_AndTheProjectItsTypesWentToIsReferenced()
     {
         var repairs = ReferenceRepairs.Decide(
-            [Error("CS0234", "The type or namespace name 'Events' does not exist in the namespace 'Acme.Shop.Common' (are you missing an assembly reference?)")],
+            [Error("CS0234", "The type or namespace name 'Events' does not exist in the namespace 'ST.Demo.Common' (are you missing an assembly reference?)")],
             TypeMap.Between(Before, After), Root, Text);
 
         repairs.ShouldBe([
-            new ReplaceUsing(OrderFile, "Acme.Shop.Common.Events", "Acme.Shop.Framework.Events"),
+            new ReplaceUsing(OrderFile, "ST.Demo.Common.Events", "ST.Demo.Framework.Events"),
             new AddReference(Path.GetFullPath(Orders), Path.GetFullPath(Path.Combine(Root, Framework))),
         ]);
     }
@@ -137,10 +137,10 @@ internal sealed class ReferenceRepairTests
     public void TheCompilersFirstMissingSegment_FindsTheFilesUsingOfAGivenUpNamespace()
     {
         var repairs = ReferenceRepairs.Decide(
-            [Error("CS0234", "The type or namespace name 'Common' does not exist in the namespace 'Acme.Shop' (are you missing an assembly reference?)")],
+            [Error("CS0234", "The type or namespace name 'Common' does not exist in the namespace 'ST.Demo' (are you missing an assembly reference?)")],
             TypeMap.Between(Before, After), Root, Text);
 
-        repairs.ShouldContain(new ReplaceUsing(OrderFile, "Acme.Shop.Common.Events", "Acme.Shop.Framework.Events"));
+        repairs.ShouldContain(new ReplaceUsing(OrderFile, "ST.Demo.Common.Events", "ST.Demo.Framework.Events"));
     }
 
     [Test]
@@ -148,27 +148,27 @@ internal sealed class ReferenceRepairTests
     {
         var files = new[]
         {
-            new SourceFile(OrderFile, Orders, ["System", "Acme.Shop.Common.Events", "Acme.Shop.Common"], ["Acme.Shop.Orders.Domain"]),
-            new SourceFile("/s/src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Other.cs", Orders, ["Acme.Shop.Common"], []),
+            new SourceFile(OrderFile, Orders, ["System", "ST.Demo.Common.Events", "ST.Demo.Common"], ["ST.Demo.Orders.Domain"]),
+            new SourceFile("/s/src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Other.cs", Orders, ["ST.Demo.Common"], []),
         };
 
         ReferenceRepairs.FromText(files, TypeMap.Between(Before, After), Root).ShouldBe([
-            new ReplaceUsing(OrderFile, "Acme.Shop.Common.Events", "Acme.Shop.Framework.Events"),
+            new ReplaceUsing(OrderFile, "ST.Demo.Common.Events", "ST.Demo.Framework.Events"),
             new AddReference(Path.GetFullPath(Orders), Path.GetFullPath(Path.Combine(Root, Framework))),
         ]);
     }
 
-    private const string CommonDomain = "src/common/Acme.Shop.Common.Domain/Acme.Shop.Common.Domain.csproj";
-    private const string CommonInfrastructure = "src/common/Acme.Shop.Common.Infrastructure/Acme.Shop.Common.Infrastructure.csproj";
+    private const string CommonDomain = "src/common/ST.Demo.Common.Domain/ST.Demo.Common.Domain.csproj";
+    private const string CommonInfrastructure = "src/common/ST.Demo.Common.Infrastructure/ST.Demo.Common.Infrastructure.csproj";
 
     /// <summary>2.x Common.Events holds two types; the next version takes them apart, to the domain and the infrastructure.</summary>
     private static readonly TypeMap Split = TypeMap.Between(
         TypeIndex.Of([
-            (Common, "namespace Acme.Shop.Common.Events;\n\npublic sealed class DomainEvent;\npublic static class EventDispatcher { }\n"),
+            (Common, "namespace ST.Demo.Common.Events;\n\npublic sealed class DomainEvent;\npublic static class EventDispatcher { }\n"),
         ]),
         TypeIndex.Of([
-            (CommonDomain, "namespace Acme.Shop.Common.Domain.Events;\n\npublic sealed class DomainEvent;\n"),
-            (CommonInfrastructure, "namespace Acme.Shop.Common.Infrastructure.Events;\n\npublic static class EventDispatcher { }\n"),
+            (CommonDomain, "namespace ST.Demo.Common.Domain.Events;\n\npublic sealed class DomainEvent;\n"),
+            (CommonInfrastructure, "namespace ST.Demo.Common.Infrastructure.Events;\n\npublic static class EventDispatcher { }\n"),
         ]));
 
     [Test]
@@ -176,12 +176,12 @@ internal sealed class ReferenceRepairTests
     {
         var files = new[]
         {
-            new SourceFile(OrderFile, Orders, ["Acme.Shop.Common.Events"], ["Acme.Shop.Orders.Domain"],
-                "using Acme.Shop.Common.Events;\n\nnamespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{\n    public DomainEvent? Last { get; set; }\n    // EventDispatcher in a comment does not count\n    public string Kind = \"EventDispatcher\";\n}\n"),
+            new SourceFile(OrderFile, Orders, ["ST.Demo.Common.Events"], ["ST.Demo.Orders.Domain"],
+                "using ST.Demo.Common.Events;\n\nnamespace ST.Demo.Orders.Domain;\n\npublic sealed class Order\n{\n    public DomainEvent? Last { get; set; }\n    // EventDispatcher in a comment does not count\n    public string Kind = \"EventDispatcher\";\n}\n"),
         };
 
         ReferenceRepairs.FromText(files, Split, Root).ShouldBe([
-            new ReplaceUsing(OrderFile, "Acme.Shop.Common.Events", "Acme.Shop.Common.Domain.Events"),
+            new ReplaceUsing(OrderFile, "ST.Demo.Common.Events", "ST.Demo.Common.Domain.Events"),
             new AddReference(Path.GetFullPath(Orders), Path.GetFullPath(Path.Combine(Root, CommonDomain))),
         ]);
     }
@@ -191,13 +191,13 @@ internal sealed class ReferenceRepairTests
     {
         var files = new[]
         {
-            new SourceFile(OrderFile, Orders, ["Acme.Shop.Common.Events"], ["Acme.Shop.Orders.Domain"],
-                "using Acme.Shop.Common.Events;\n\nnamespace Acme.Shop.Orders.Domain;\n\npublic sealed class Order\n{\n    public void Raise(object e) => e.Dispatch();\n}\n"),
+            new SourceFile(OrderFile, Orders, ["ST.Demo.Common.Events"], ["ST.Demo.Orders.Domain"],
+                "using ST.Demo.Common.Events;\n\nnamespace ST.Demo.Orders.Domain;\n\npublic sealed class Order\n{\n    public void Raise(object e) => e.Dispatch();\n}\n"),
         };
 
         var repairs = ReferenceRepairs.FromText(files, Split, Root);
 
-        repairs.OfType<ReplaceUsing>().Select(r => r.With).ShouldBe(["Acme.Shop.Common.Domain.Events", "Acme.Shop.Common.Infrastructure.Events"], ignoreOrder: true);
+        repairs.OfType<ReplaceUsing>().Select(r => r.With).ShouldBe(["ST.Demo.Common.Domain.Events", "ST.Demo.Common.Infrastructure.Events"], ignoreOrder: true);
         repairs.OfType<AddReference>().Count().ShouldBe(2);
     }
 
@@ -205,11 +205,11 @@ internal sealed class ReferenceRepairTests
     public void ATypeDeleted_BesideANamesakeTheBaseAlreadyHad_IsNoMove()
     {
         var before = TypeIndex.Of([
-            (Common, "namespace Acme.Shop.Common.Events;\n\npublic sealed class Marker;\n"),
-            (CommonDomain, "namespace Acme.Shop.Common.Domain;\n\npublic sealed class Marker;\n"),
+            (Common, "namespace ST.Demo.Common.Events;\n\npublic sealed class Marker;\n"),
+            (CommonDomain, "namespace ST.Demo.Common.Domain;\n\npublic sealed class Marker;\n"),
         ]);
         var after = TypeIndex.Of([
-            (CommonDomain, "namespace Acme.Shop.Common.Domain;\n\npublic sealed class Marker;\n"),
+            (CommonDomain, "namespace ST.Demo.Common.Domain;\n\npublic sealed class Marker;\n"),
         ]);
 
         TypeMap.Between(before, after).Moves.ShouldBeEmpty();
@@ -220,8 +220,8 @@ internal sealed class ReferenceRepairTests
     {
         var files = new[]
         {
-            new SourceFile(OrderFile, Orders, ["Acme.Shop.Common.Events"], []),
-            new SourceFile("/s/src/common/Acme.Shop.Common/Events/OrderShipped.cs", "/s/" + Common, [], ["Acme.Shop.Common.Events"]),
+            new SourceFile(OrderFile, Orders, ["ST.Demo.Common.Events"], []),
+            new SourceFile("/s/src/common/ST.Demo.Common/Events/OrderShipped.cs", "/s/" + Common, [], ["ST.Demo.Common.Events"]),
         };
 
         ReferenceRepairs.FromText(files, TypeMap.Between(Before, After), Root).ShouldBeEmpty();
@@ -249,7 +249,7 @@ internal sealed class ReferenceRepairTests
     public async Task BeforeTheBuild_AFileInConflict_AFileOfAProjectInConflict_AndAFolderOfTwoProjects_AreLeftAlone()
     {
         var root = Io.Folders.NewTemp("repair-before");
-        const string given = "using Acme.Shop.Common.Events;\n";
+        const string given = "using ST.Demo.Common.Events;\n";
         string Put(string path, string text)
         {
             var full = Path.Combine(root, path);
@@ -258,17 +258,17 @@ internal sealed class ReferenceRepairTests
             return Path.GetFullPath(full);
         }
         Put(Orders[3..], "<Project />");
-        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs", given);
-        var free = Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Free.cs", given);
-        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Api/Acme.Shop.Orders.Api.csproj", "<Project />");
-        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Api/Api.cs", given);
-        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Twin/A.csproj", "<Project />");
-        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Twin/B.csproj", "<Project />");
-        Put("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Twin/Twin.cs", given);
+        Put("src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Order.cs", given);
+        var free = Put("src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Free.cs", given);
+        Put("src/services/ST.Demo.Orders/ST.Demo.Orders.Api/ST.Demo.Orders.Api.csproj", "<Project />");
+        Put("src/services/ST.Demo.Orders/ST.Demo.Orders.Api/Api.cs", given);
+        Put("src/services/ST.Demo.Orders/ST.Demo.Orders.Twin/A.csproj", "<Project />");
+        Put("src/services/ST.Demo.Orders/ST.Demo.Orders.Twin/B.csproj", "<Project />");
+        Put("src/services/ST.Demo.Orders/ST.Demo.Orders.Twin/Twin.cs", given);
         var writer = new RecordingWriter();
 
         await new ReferenceRepair(writer, new NoBuilder()).BeforeBuildAsync(root, TypeMap.Between(Before, After),
-            ["src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs", "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Api/Acme.Shop.Orders.Api.csproj"],
+            ["src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Order.cs", "src/services/ST.Demo.Orders/ST.Demo.Orders.Api/ST.Demo.Orders.Api.csproj"],
             CancellationToken.None);
 
         writer.Repairs.OfType<ReplaceUsing>().Select(r => r.File).ShouldBe([free]);
@@ -282,7 +282,7 @@ internal sealed class ReferenceRepairTests
             TypeMap.Between(Before, After), Root, Text);
 
         repairs.ShouldBe([
-            new AddUsing(OrderFile, "Acme.Shop.Framework.Events"),
+            new AddUsing(OrderFile, "ST.Demo.Framework.Events"),
             new AddReference(Path.GetFullPath(Orders), Path.GetFullPath(Path.Combine(Root, Framework))),
         ]);
     }
@@ -331,11 +331,11 @@ internal sealed class ReferenceRepairTests
     public async Task TheTemplatesFilesOfAPartNotMergedYet_AreRepairedToo_WhenTheBuildNamesThem_TheTypeIsGoneFromItsOldHome()
     {
         var root = Io.Folders.NewTemp("repair-waiting");
-        var templates = Path.Combine(root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs");
-        var teams = Path.Combine(root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Refund.cs");
+        var templates = Path.Combine(root, "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Order.cs");
+        var teams = Path.Combine(root, "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Refund.cs");
         Directory.CreateDirectory(Path.GetDirectoryName(templates)!);
-        File.WriteAllText(templates, "using Acme.Shop.Common.Events;\n");
-        File.WriteAllText(teams, "using Acme.Shop.Common.Events;\n");
+        File.WriteAllText(templates, "using ST.Demo.Common.Events;\n");
+        File.WriteAllText(teams, "using ST.Demo.Common.Events;\n");
         var project = Path.Combine(root, Orders[3..]);
         var failed = new Io.ProcessResult(1,
             $"{templates}(1,7): error CS0246: The type or namespace name 'DomainEvent' could not be found [{project}]\n"
@@ -356,9 +356,9 @@ internal sealed class ReferenceRepairTests
     {
         // The repair reads the file's usings: Order.cs of a solution on disk.
         var root = Io.Folders.NewTemp("repair-stop");
-        var file = Path.Combine(root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Order.cs");
+        var file = Path.Combine(root, "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Order.cs");
         Directory.CreateDirectory(Path.GetDirectoryName(file)!);
-        File.WriteAllText(file, "using Acme.Shop.Common.Events;\n");
+        File.WriteAllText(file, "using ST.Demo.Common.Events;\n");
         var failed = new Io.ProcessResult(1, $"{file}(1,7): error CS0246: The type or namespace name 'DomainEvent' could not be found [{Path.Combine(root, Orders[3..])}]\n", "");
 
         var result = await new ReferenceRepair(new FailingWriter(), new NoBuilder()).RunAsync(root, TypeMap.Between(Before, After), failed, CancellationToken.None);
@@ -371,20 +371,20 @@ internal sealed class ReferenceRepairTests
     [Test]
     public void AUsing_GoesAfterTheLastUsing_OnceOnly_KeepingTheLineEndings()
     {
-        var text = "using System;\r\nusing Acme.Shop.Common;\r\n\r\nnamespace X;\r\n";
+        var text = "using System;\r\nusing ST.Demo.Common;\r\n\r\nnamespace X;\r\n";
 
-        var added = UsingLines.Add(text, "Acme.Shop.Framework.Events");
+        var added = UsingLines.Add(text, "ST.Demo.Framework.Events");
 
-        added.ShouldBe("using System;\r\nusing Acme.Shop.Common;\r\nusing Acme.Shop.Framework.Events;\r\n\r\nnamespace X;\r\n");
-        UsingLines.Add(added, "Acme.Shop.Framework.Events").ShouldBe(added);
+        added.ShouldBe("using System;\r\nusing ST.Demo.Common;\r\nusing ST.Demo.Framework.Events;\r\n\r\nnamespace X;\r\n");
+        UsingLines.Add(added, "ST.Demo.Framework.Events").ShouldBe(added);
         UsingLines.Add("namespace X;\n", "N").ShouldBe("using N;\n\nnamespace X;\n");
     }
 
     [Test]
     public void TheUsingsOfAFile_AreItsNamespaces_WithoutAliasesAndStaticOnes()
     {
-        UsingLines.Of("using System;\r\nusing static System.Math;\r\nusing Io = System.IO;\r\nusing Acme.Shop.Common;\r\n").ShouldBe(["System", "Acme.Shop.Common"]);
-        UsingLines.Of("global using Acme.Shop.Common.Tests;\n").ShouldBe(["Acme.Shop.Common.Tests"]);
+        UsingLines.Of("using System;\r\nusing static System.Math;\r\nusing Io = System.IO;\r\nusing ST.Demo.Common;\r\n").ShouldBe(["System", "ST.Demo.Common"]);
+        UsingLines.Of("global using ST.Demo.Common.Tests;\n").ShouldBe(["ST.Demo.Common.Tests"]);
     }
 
     [Test]
@@ -396,3 +396,4 @@ internal sealed class ReferenceRepairTests
         UsingLines.Replace("using New.A;\nnamespace X;\n", "Old.Ns", "New.B").ShouldBe("using New.A;\nusing New.B;\n\nnamespace X;\n");
     }
 }
+

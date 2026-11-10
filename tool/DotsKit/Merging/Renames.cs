@@ -46,7 +46,7 @@ internal sealed class GitRenames(IProcessRunner runner) : IRenames
         var kept = renames.Where(r => !AcrossServices(r.Key, r.Value)).ToDictionary(r => r.Key, r => r.Value, StringComparer.Ordinal);
         foreach (var (moved, old) in renames.Where(r => AcrossServices(r.Key, r.Value)))
         {
-            // The other service's name is in its project folders too: Acme.Shop.Billing/Acme.Shop.Billing.Tests.
+            // The other service's name is in its project folders too: ST.Demo.Billing/ST.Demo.Billing.Tests.
             var (to, from) = (Layout.ServiceFolderOf(moved)!, Layout.ServiceFolderOf(old)!);
             var own = from + moved[to.Length..].Replace(NameOf(to), NameOf(from), StringComparison.Ordinal);
             if (existsInNew(own) && !kept.ContainsKey(own))
@@ -88,3 +88,4 @@ internal sealed class GitRenames(IProcessRunner runner) : IRenames
         return at < 0 ? normal : normal[(at + prefix.Length)..];
     }
 }
+

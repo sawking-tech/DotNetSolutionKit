@@ -8,24 +8,24 @@ namespace DotsKit.Tests;
 [Parallelizable(ParallelScope.All)]
 internal sealed class RepairReportTests
 {
-    private const string Domain = "src/common/Acme.Shop.Common.Domain/Acme.Shop.Common.Domain.csproj";
-    private const string Application = "src/common/Acme.Shop.Common.Application/Acme.Shop.Common.Application.csproj";
+    private const string Domain = "src/common/ST.Demo.Common.Domain/ST.Demo.Common.Domain.csproj";
+    private const string Application = "src/common/ST.Demo.Common.Application/ST.Demo.Common.Application.csproj";
 
     /// <summary>The event moves from Common.Application to Common.Domain: two parts of the upgrade.</summary>
     private static readonly TypeMap Moved = TypeMap.Between(
-        TypeIndex.Of([(Application, "namespace Acme.Shop.Common.Application.Events;\npublic sealed class DomainEvent;\n")]),
-        TypeIndex.Of([(Domain, "namespace Acme.Shop.Common.Domain.Events;\npublic sealed class DomainEvent;\n")]));
+        TypeIndex.Of([(Application, "namespace ST.Demo.Common.Application.Events;\npublic sealed class DomainEvent;\n")]),
+        TypeIndex.Of([(Domain, "namespace ST.Demo.Common.Domain.Events;\npublic sealed class DomainEvent;\n")]));
 
     [Test]
     public void AMoveBetweenTwoParts_IsFollowedOnceItsTargetIsMerged_AndItsNamespaceIsKeptTill()
     {
-        var applicationOnly = Moved.Within(project => UpgradeParts.Of(project) == "common/Acme.Shop.Common.Application");
-        var domainOnly = Moved.Within(project => UpgradeParts.Of(project) == "common/Acme.Shop.Common.Domain");
+        var applicationOnly = Moved.Within(project => UpgradeParts.Of(project) == "common/ST.Demo.Common.Application");
+        var domainOnly = Moved.Within(project => UpgradeParts.Of(project) == "common/ST.Demo.Common.Domain");
         var both = Moved.Within(project => UpgradeParts.Of(project).StartsWith("common/", StringComparison.Ordinal));
 
-        Moved.OutOf("Acme.Shop.Common.Application.Events").ShouldHaveSingleItem();
+        Moved.OutOf("ST.Demo.Common.Application.Events").ShouldHaveSingleItem();
         applicationOnly.Moves.ShouldBeEmpty();
-        applicationOnly.OutOf("Acme.Shop.Common.Application.Events").ShouldBeEmpty();
+        applicationOnly.OutOf("ST.Demo.Common.Application.Events").ShouldBeEmpty();
         domainOnly.ShouldBeSameAs(Moved);
         both.ShouldBeSameAs(Moved);
     }
@@ -34,19 +34,20 @@ internal sealed class RepairReportTests
     public void TheReport_IsALinePerProject_WithEachChangeOnceAndTheFilesItTook()
     {
         var root = Io.Folders.NewTemp("repair-report");
-        var project = Path.Combine(root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Acme.Shop.Orders.Domain.csproj");
+        var project = Path.Combine(root, "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/ST.Demo.Orders.Domain.csproj");
         Directory.CreateDirectory(Path.GetDirectoryName(project)!);
         File.WriteAllText(project, "<Project />");
         var order = Path.Combine(Path.GetDirectoryName(project)!, "Order.cs");
         var refund = Path.Combine(Path.GetDirectoryName(project)!, "Refunds", "Refund.cs");
 
         var lines = RepairReport.ByProject([
-            new ReplaceUsing(order, "Acme.Shop.Common.Events", "Acme.Shop.Common.Domain.Events"),
-            new ReplaceUsing(refund, "Acme.Shop.Common.Events", "Acme.Shop.Common.Domain.Events"),
-            new AddUsing(order, "Acme.Shop.Common.Domain"),
+            new ReplaceUsing(order, "ST.Demo.Common.Events", "ST.Demo.Common.Domain.Events"),
+            new ReplaceUsing(refund, "ST.Demo.Common.Events", "ST.Demo.Common.Domain.Events"),
+            new AddUsing(order, "ST.Demo.Common.Domain"),
             new AddReference(project, Path.Combine(root, Domain)),
         ]);
 
-        lines.ShouldBe(["  Acme.Shop.Orders.Domain: using Acme.Shop.Common.Events -> Acme.Shop.Common.Domain.Events (2 files); using Acme.Shop.Common.Domain added; reference to Acme.Shop.Common.Domain"]);
+        lines.ShouldBe(["  ST.Demo.Orders.Domain: using ST.Demo.Common.Events -> ST.Demo.Common.Domain.Events (2 files); using ST.Demo.Common.Domain added; reference to ST.Demo.Common.Domain"]);
     }
 }
+

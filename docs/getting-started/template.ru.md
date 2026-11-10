@@ -90,10 +90,10 @@ dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 Любой из `-N`, `-P` и `-S` может содержать точки:
 
 ```bash
-dotnet new DotNetSolutionKit -N Acme.Corp -P Shop.Online -S Sales.Orders --Solution
+dotnet new DotNetSolutionKit -N ST.Corp -P Demo.Online -S Sales.Orders --Solution
 ```
 
-Эта команда генерирует `Acme.Corp.Shop.Online.Sales.Orders.API` и остальные проекты под тем же именем.
+Эта команда генерирует `ST.Corp.Demo.Online.Sales.Orders.API` и остальные проекты под тем же именем.
 Название сервиса с точкой позволяет разбить домен на небольшие сервисы, например `Sales.Orders` и
 `Sales.Invoicing`, вместо одного общего проекта на весь `Sales`. Название продукта с точкой сохраняет
 происхождение кода в каждом пространстве имён форка или скачанной копии, где названия репозитория уже нет.
@@ -102,7 +102,7 @@ dotnet new DotNetSolutionKit -N Acme.Corp -P Shop.Online -S Sales.Orders --Solut
 
 | Где | Форма | Пример |
 |---|---|---|
-| Пространства имён, проекты, папки | как задано | `Acme.Corp.Shop.Online.Sales.Orders` |
+| Пространства имён, проекты, папки | как задано | `ST.Corp.Demo.Online.Sales.Orders` |
 | Идентификаторы C# | без точек | `SalesOrdersDbContext` |
 | Схема базы данных, папка Infisical, имена очередей | в нижнем регистре, точки заменены подчёркиваниями | `sales_orders` |
 
@@ -150,3 +150,4 @@ dotnet run --project src/services/MyCompany.MyProduct.Orders/MyCompany.MyProduct
 
 Чтобы запустить сервис раньше, чем появятся его база данных, брокер или хранилище секретов, отключите их в
 конфигурации, например `Database__Enabled=false`; см. [отключение зависимостей](../operations/switching-dependencies-off.md).
+

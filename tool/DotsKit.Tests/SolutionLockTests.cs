@@ -37,6 +37,7 @@ internal sealed class SolutionLockTests
 
         second.Code.ShouldBe((int)ExitCode.Failed);
         second.Error.ShouldContain("Another dotskit is running in this solution");
-        solution.Exists("src/services/Acme.Shop.Billing").ShouldBeFalse();
+        solution.Exists("src/services/ST.Demo.Billing").ShouldBeFalse();
     }
 }
+

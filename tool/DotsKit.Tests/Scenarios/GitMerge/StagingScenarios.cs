@@ -21,7 +21,7 @@ internal sealed class StagingScenarios
     public async Task ThousandsOfFiles_AreStaged_PastTheLengthOfACommandLine()
     {
         var root = await SolutionAsync();
-        var paths = Enumerable.Range(0, Files).Select(n => $"src/services/Acme.Shop.Orders/Repaired/AFileTheRepairChanged{n:D4}.cs").ToList();
+        var paths = Enumerable.Range(0, Files).Select(n => $"src/services/ST.Demo.Orders/Repaired/AFileTheRepairChanged{n:D4}.cs").ToList();
         foreach (var path in paths)
         {
             Write(root, path, "class A;\n");
@@ -33,3 +33,4 @@ internal sealed class StagingScenarios
             .Split('\n', StringSplitOptions.RemoveEmptyEntries).Length.ShouldBe(Files);
     }
 }
+

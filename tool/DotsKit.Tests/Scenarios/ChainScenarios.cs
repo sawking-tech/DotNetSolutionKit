@@ -21,13 +21,13 @@ internal sealed class ChainScenarios
     /// <summary>The last patch of every minor of 2.x, in order.</summary>
     private static readonly string[] Releases = ["2.0.0", "2.1.3", "2.2.0", "2.3.0", "2.4.0", "2.5.0", "2.6.2", "2.7.0", "2.8.0", "2.9.1"];
 
-    private const string TeamFile = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Application/Team/OrderAudit.cs";
+    private const string TeamFile = "src/services/ST.Demo.Orders/ST.Demo.Orders.Application/Team/OrderAudit.cs";
 
     private const string TeamCode = """
-        using Acme.Shop.Common.Contracts.Domain.Context;
-        using Acme.Shop.Common.Domain.Persistence;
+        using ST.Demo.Common.Contracts.Domain.Context;
+        using ST.Demo.Common.Domain.Persistence;
 
-        namespace Acme.Shop.Orders.Application.Team;
+        namespace ST.Demo.Orders.Application.Team;
 
         // The team's own code: it uses types of Common that later versions of the template may move.
         public sealed class OrderAudit(IUserContext user, IUnitOfWork unitOfWork)
@@ -47,7 +47,7 @@ internal sealed class ChainScenarios
         (await solution.DotnetAsync("new", "install", template, "--debug:custom-hive", hive)).Code.ShouldBe(0);
         foreach (var args in new[] { new[] { "-S", "Orders", "-M", "false" }, ["-S", "Billing"] })
         {
-            await solution.DotnetAsync(["new", "DotNetSolutionKit", "-N", "Acme", "-P", "Shop", .. args, "--debug:custom-hive", hive]);
+            await solution.DotnetAsync(["new", "DotNetSolutionKit", "-N", "ST", "-P", "Demo", .. args, "--debug:custom-hive", hive]);
         }
 
         await new Solutions.SolutionProjects(new ProcessRunner()).AddMissingAsync(solution.Root, CancellationToken.None);
@@ -76,3 +76,4 @@ internal sealed class ChainScenarios
         solution.Read(TeamFile).ShouldContain("public sealed class OrderAudit");
     }
 }
+

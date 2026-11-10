@@ -10,13 +10,13 @@ namespace DotsKit.Tests;
 [Parallelizable(ParallelScope.All)]
 internal sealed class PlanWriterTests
 {
-    private const string Common = "src/common/Acme.Shop.Common/Acme.Shop.Common.csproj";
-    private const string Framework = "src/framework/Acme.Shop.Framework.Events/Acme.Shop.Framework.Events.csproj";
-    private const string Domain = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain";
+    private const string Common = "src/common/ST.Demo.Common/ST.Demo.Common.csproj";
+    private const string Framework = "src/framework/ST.Demo.Framework.Events/ST.Demo.Framework.Events.csproj";
+    private const string Domain = "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain";
 
     private static readonly TypeMap Moved = TypeMap.Between(
-        TypeIndex.Of([(Common, "namespace Acme.Shop.Common.Events;\n\npublic sealed class DomainEvent;\n")]),
-        TypeIndex.Of([(Framework, "namespace Acme.Shop.Framework.Events;\n\npublic sealed class DomainEvent;\n")]));
+        TypeIndex.Of([(Common, "namespace ST.Demo.Common.Events;\n\npublic sealed class DomainEvent;\n")]),
+        TypeIndex.Of([(Framework, "namespace ST.Demo.Framework.Events;\n\npublic sealed class DomainEvent;\n")]));
 
     /// <summary>The repair, stopped by Ctrl+C at its first file.</summary>
     private sealed class Cancelled : IRepairWriter
@@ -49,9 +49,9 @@ internal sealed class PlanWriterTests
     {
         var root = Folders.NewTemp("plan-writer");
         Directory.CreateDirectory(Path.Combine(root, Domain));
-        await File.WriteAllTextAsync(Path.Combine(root, Domain, "Acme.Shop.Orders.Domain.csproj"), "<Project />\n");
-        await File.WriteAllTextAsync(Path.Combine(root, Domain, "Order.cs"), "using Acme.Shop.Common.Events;\n");
-        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"], Services = [] };
+        await File.WriteAllTextAsync(Path.Combine(root, Domain, "ST.Demo.Orders.Domain.csproj"), "<Project />\n");
+        await File.WriteAllTextAsync(Path.Combine(root, Domain, "Order.cs"), "using ST.Demo.Common.Events;\n");
+        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "ST", "--ProductName", "Demo"], Services = [] };
         var plan = new Plan(root, manifest, [], new MembershipChange([], []), Types: Moved);
         var writer = new PlanWriter(new SolutionProjects(new ProcessRunner()), new NoGit(), new ReferenceRepair(new Cancelled(), new NoBuild()));
 
@@ -62,3 +62,4 @@ internal sealed class PlanWriterTests
         File.Exists(Path.Combine(root, Layout.ManifestPath)).ShouldBeTrue();
     }
 }
+

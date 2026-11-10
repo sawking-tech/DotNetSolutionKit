@@ -41,7 +41,7 @@ internal static class Markers
     public const string HangfireEnvLine = "HANGFIRE_DASHBOARD_PASSWORD";
     public const string RabbitMqEnvLine = "RABBITMQ_";
 
-    /// <summary>The script that names each image after the product in lower case with underscores: Retail.Shop -> retail_shop.</summary>
+    /// <summary>The script that names each image after the product in lower case with underscores: Retail.Demo -> retail_shop.</summary>
     public const string BuildImagesPath = "deploy/build-images.sh";
 
     /// <summary>
@@ -90,3 +90,4 @@ internal static class Markers
     public static string Of(string path, string prefix, string? service = null) =>
         path.Replace(Prefix, prefix, StringComparison.Ordinal).Replace(Service, service ?? "", StringComparison.Ordinal);
 }
+

@@ -89,10 +89,10 @@ then wires what `Common` and `src/capabilities` already have. A service generate
 Any of `-N`, `-P` and `-S` may contain dots:
 
 ```bash
-dotnet new DotNetSolutionKit -N Acme.Corp -P Shop.Online -S Sales.Orders --Solution
+dotnet new DotNetSolutionKit -N ST.Corp -P Demo.Online -S Sales.Orders --Solution
 ```
 
-generates `Acme.Corp.Shop.Online.Sales.Orders.API` and the rest of the projects under that name. A dotted
+generates `ST.Corp.Demo.Online.Sales.Orders.API` and the rest of the projects under that name. A dotted
 service name lets a domain be split into small services, such as `Sales.Orders` and `Sales.Invoicing`,
 instead of one shared project for the whole of `Sales`. A dotted product name keeps the origin in every
 namespace of a fork or a downloaded copy, where the repository name is gone.
@@ -101,7 +101,7 @@ Where a dot cannot go, the name is derived from the service name:
 
 | Where | Form | Example |
 |---|---|---|
-| Namespaces, projects, folders | as given | `Acme.Corp.Shop.Online.Sales.Orders` |
+| Namespaces, projects, folders | as given | `ST.Corp.Demo.Online.Sales.Orders` |
 | C# identifiers | without dots | `SalesOrdersDbContext` |
 | Database schema, Infisical folder, queue names | lower case, dots replaced by underscores | `sales_orders` |
 
@@ -148,3 +148,4 @@ A misconfigured service stops at startup rather than at the first request; see
 
 To run the service before its database, broker or secret store exist, switch them off in configuration,
 for example `Database__Enabled=false`; see [switching dependencies off](../operations/switching-dependencies-off.md).
+

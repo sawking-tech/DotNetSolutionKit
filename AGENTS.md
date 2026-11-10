@@ -62,8 +62,8 @@ Check a template change locally on a generated solution:
 
 ```bash
 dotnet new install ./template --debug:custom-hive /tmp/hive --force
-dotnet new DotNetSolutionKit -N Acme -P Shop -S Orders --Solution -o /tmp/acme --debug:custom-hive /tmp/hive
-dotnet build /tmp/acme/src/services/Acme.Shop.All.sln -warnaserror
+dotnet new DotNetSolutionKit -N ST -P Demo -S Orders --Solution -o /tmp/ST --debug:custom-hive /tmp/hive
+dotnet build /tmp/ST/src/services/ST.Demo.All.sln -warnaserror
 
 eval "$(bash tests/servers/up.sh)" && dotnet test src/services/*.All.sln --filter "TestCategory=Integration"
 ```
@@ -127,7 +127,7 @@ file-byte violations and C# style violations in the tool.
 - Verify template changes on a generated solution with every affected flag on and off, `-warnaserror`,
   and passing tests.
 - A parameter's `replaces` rewrites every occurrence of its token, including inside a literal argument
-  name ("--NamespaceRoot" becomes "--Acme"): hold literal names in generated constant symbols and a bool in
+  name ("--NamespaceRoot" becomes "--ST"): hold literal names in generated constant symbols and a bool in
   lowercase through a casing generated symbol. Replacement is a single pass — a value one symbol inserts
   is not re-scanned by another.
 - A file the template starts writing that the tool also writes (like `.dotskit/manifest.json`) is not the
@@ -198,3 +198,4 @@ file-byte violations and C# style violations in the tool.
 
 ## Plan-first (the law of sessions)
 Work strictly from plan.kdl: 1) an item in the plan (`plan.mjs add`), 2) its why/how/done_when, 3) priority by position, 4) `plan.mjs take` - only then action. A hotfix without a plan item is forbidden, with no "it's small" exceptions. Progress is marked with plan.mjs done + check.
+

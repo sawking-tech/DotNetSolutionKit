@@ -49,11 +49,11 @@ public class AggregateRootTests
     {
         var account = new Account();
 
-        account.Rename(new TestContext(), "Acme");
+        account.Rename(new TestContext(), "ST");
 
         account.DomainEvents.ShouldHaveSingleItem()
             .ShouldBeOfType<Renamed>()
-            .Name.ShouldBe("Acme");
+            .Name.ShouldBe("ST");
     }
 
     [Test]
@@ -61,7 +61,7 @@ public class AggregateRootTests
     {
         var account = new Account();
 
-        account.Rename(new TestContext(), "Acme");
+        account.Rename(new TestContext(), "ST");
 
         account.DomainEvents.Single().OccurredAt.ShouldBe(Noon,
             "otherwise a test cannot place an event in time and handlers cannot trust the ordering");
@@ -89,7 +89,7 @@ public class AggregateRootTests
     public void Collected_events_are_forgotten_so_they_are_not_dispatched_twice()
     {
         var account = new Account();
-        account.Rename(new TestContext(), "Acme");
+        account.Rename(new TestContext(), "ST");
 
         ((IHasDomainEvents)account).ClearDomainEvents();
 
@@ -110,3 +110,4 @@ public class AggregateRootTests
             "the shared repository stores aggregate roots and nothing else");
     }
 }
+

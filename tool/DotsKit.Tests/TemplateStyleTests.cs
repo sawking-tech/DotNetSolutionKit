@@ -22,7 +22,7 @@ internal sealed class TemplateStyleTests
         var solution = new FileText("Project  \n", Bom: true);
         var binary = new FileText(string.Empty, false, [0, 1, 32, 32]);
 
-        TemplateStyle.Of("src/services/Acme.Shop.All.sln", solution).ShouldBeSameAs(solution);
+        TemplateStyle.Of("src/services/ST.Demo.All.sln", solution).ShouldBeSameAs(solution);
         TemplateStyle.Of("a.png", binary).ShouldBeSameAs(binary);
     }
 
@@ -66,3 +66,4 @@ internal sealed class TemplateStyleTests
             Task.FromResult(new TextMergeResult(string.Empty, 0, "no merge"));
     }
 }
+

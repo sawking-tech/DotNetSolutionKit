@@ -30,8 +30,8 @@ internal sealed class SolutionTextTests
 [Parallelizable(ParallelScope.All)]
 internal sealed class SolutionReaderTests
 {
-    private const string Prefix = "Acme.Shop";
-    private const string Orders = "Acme.Shop.Orders";
+    private const string Prefix = "ST.Demo";
+    private const string Orders = "ST.Demo.Orders";
 
     /// <summary>A solution as a set of files: a path with null text is a folder or a file whose text is not read.</summary>
     private sealed class Files : ISolutionFiles
@@ -76,39 +76,39 @@ internal sealed class SolutionReaderTests
     {
         var manifest = Read(Solution().With("deploy/compose/.env.example", "HANGFIRE_DASHBOARD_PASSWORD=").With(".claude/rules.md"));
 
-        manifest.Solution.ShouldBe(["--NamespaceRoot", "Acme", "--ProductName", "Shop"]);
+        manifest.Solution.ShouldBe(["--NamespaceRoot", "ST", "--ProductName", "Demo"]);
         manifest.Services.ShouldBe([["--ServiceNameOrCustom", "Orders", "--HttpPort", "5000"]]);
     }
 
     [Test]
     public void TheNamesOfADottedProduct_AreToldApartByTheImageNames()
     {
-        var files = new Files().WithService("Acme.Corp.Retail.Shop.Orders", 5000, "HangfireSettings")
-            .With("deploy/build-images.sh", "        name=\"retail_shop-$(echo \"$service\" | tr)\"");
+        var files = new Files().WithService("ST.Corp.Retail.Demo.Orders", 5000, "HangfireSettings")
+            .With("deploy/build-images.sh", "        name=\"retail_demo-$(echo \"$service\" | tr)\"");
 
-        var manifest = SolutionReader.Read(files, "Acme.Corp.Retail.Shop", "2.8.0", TemplateArgs.Empty);
+        var manifest = SolutionReader.Read(files, "ST.Corp.Retail.Demo", "2.8.0", TemplateArgs.Empty);
 
-        manifest.SolutionArgs["NamespaceRoot"].ShouldBe("Acme.Corp");
-        manifest.SolutionArgs["ProductName"].ShouldBe("Retail.Shop");
+        manifest.SolutionArgs["NamespaceRoot"].ShouldBe("ST.Corp");
+        manifest.SolutionArgs["ProductName"].ShouldBe("Retail.Demo");
     }
 
     [Test]
     public void AProductWithAnUnderscore_IsToldApartByTheWholeImageName()
     {
-        var files = new Files().WithService("Acme.Corp.Retail_Shop.Orders", 5000, "HangfireSettings")
+        var files = new Files().WithService("ST.Corp.Retail_Shop.Orders", 5000, "HangfireSettings")
             .With("deploy/build-images.sh", "        name=\"retail_shop-$(echo \"$service\" | tr)\"");
 
-        var manifest = SolutionReader.Read(files, "Acme.Corp.Retail_Shop", "2.8.0", TemplateArgs.Empty);
+        var manifest = SolutionReader.Read(files, "ST.Corp.Retail_Shop", "2.8.0", TemplateArgs.Empty);
 
-        manifest.SolutionArgs["NamespaceRoot"].ShouldBe("Acme.Corp");
+        manifest.SolutionArgs["NamespaceRoot"].ShouldBe("ST.Corp");
         manifest.SolutionArgs["ProductName"].ShouldBe("Retail_Shop");
     }
 
     [Test]
     public void TheFirstServiceOfA27Solution_IsTheOneItsScriptNames_NotOneItsNameStartsWith()
     {
-        var files = Solution().WithService("Acme.Shop.OrdersArchive", 5001, "HangfireSettings")
-            .With("src/services/manual-add-projects.sh", "    full_folder=$(basename \"$service_dir\")    # Acme.Shop.OrdersArchive\n");
+        var files = Solution().WithService("ST.Demo.OrdersArchive", 5001, "HangfireSettings")
+            .With("src/services/manual-add-projects.sh", "    full_folder=$(basename \"$service_dir\")    # ST.Demo.OrdersArchive\n");
 
         Read(files).ServiceArgs[0].Service.ShouldBe("OrdersArchive");
     }
@@ -116,27 +116,27 @@ internal sealed class SolutionReaderTests
     [Test]
     public void NamesNothingTellsApart_AreAskedFor()
     {
-        var files = new Files().WithService("Acme.Corp.Shop.Orders", 5000);
+        var files = new Files().WithService("ST.Corp.Demo.Orders", 5000);
 
-        Should.Throw<ArgumentException>(() => SolutionReader.Read(files, "Acme.Corp.Shop", "2.8.0", TemplateArgs.Empty))
+        Should.Throw<ArgumentException>(() => SolutionReader.Read(files, "ST.Corp.Demo", "2.8.0", TemplateArgs.Empty))
             .Message.ShouldContain("-N <NamespaceRoot> -P <ProductName>");
-        SolutionReader.Read(files, "Acme.Corp.Shop", "2.8.0", TemplateArgs.Parse(["-N", "Acme", "-P", "Corp.Shop"]))
-            .SolutionArgs["ProductName"].ShouldBe("Corp.Shop");
+        SolutionReader.Read(files, "ST.Corp.Demo", "2.8.0", TemplateArgs.Parse(["-N", "ST", "-P", "Corp.Demo"]))
+            .SolutionArgs["ProductName"].ShouldBe("Corp.Demo");
     }
 
     [Test]
     public void NamesThatDoNotMakeThePrefix_AreRefused()
     {
-        Should.Throw<ArgumentException>(() => Read(Solution(), "-N", "Acme", "-P", "Store")).Message.ShouldContain("Acme.Shop");
+        Should.Throw<ArgumentException>(() => Read(Solution(), "-N", "ST", "-P", "Store")).Message.ShouldContain("ST.Demo");
     }
 
     [Test]
     public void AServiceFlag_IsReadFromItsSectionOfAppSettings_AndTheSolutionsFromCommon()
     {
-        var files = Solution().WithService("Acme.Shop.Billing", 5001, "HangfireSettings", "S3", "MongoDB", "Email")
-            .With("src/common/Acme.Shop.Common.Infrastructure/Storage/DependencyInjection.cs")
-            .With("src/capabilities/Acme.Shop.Capabilities.Persistence.Mongo/Mongo.csproj")
-            .With("src/capabilities/Acme.Shop.Capabilities.Messaging.Notifications/Notifications.csproj");
+        var files = Solution().WithService("ST.Demo.Billing", 5001, "HangfireSettings", "S3", "MongoDB", "Email")
+            .With("src/common/ST.Demo.Common.Infrastructure/Storage/DependencyInjection.cs")
+            .With("src/capabilities/ST.Demo.Capabilities.Persistence.Mongo/Mongo.csproj")
+            .With("src/capabilities/ST.Demo.Capabilities.Messaging.Notifications/Notifications.csproj");
 
         var billing = Read(files).FindService("Billing")!;
 
@@ -151,9 +151,9 @@ internal sealed class SolutionReaderTests
     public void TheBus_IsTheOutboxWhereTheServiceNeedsTheDatabaseForIt_AndDirectOtherwise()
     {
         var files = Solution()
-            .WithService("Acme.Shop.Billing", 5001, "HangfireSettings", "RabbitMq")
-            .With("src/services/Acme.Shop.Billing/Acme.Shop.Billing.API/Setup/ApplicationConfiguration.cs", "AddDependencyOverrides(busNeedsDatabase: true);")
-            .WithService("Acme.Shop.Stock", 5002, "HangfireSettings", "RabbitMq");
+            .WithService("ST.Demo.Billing", 5001, "HangfireSettings", "RabbitMq")
+            .With("src/services/ST.Demo.Billing/ST.Demo.Billing.API/Setup/ApplicationConfiguration.cs", "AddDependencyOverrides(busNeedsDatabase: true);")
+            .WithService("ST.Demo.Stock", 5002, "HangfireSettings", "RabbitMq");
 
         var manifest = Read(files);
 
@@ -175,8 +175,8 @@ internal sealed class SolutionReaderTests
     [Test]
     public void AGateway_IsReadAsOne_WithItsPort()
     {
-        var files = Solution().WithService("Acme.Shop.Gate", 5005)
-            .With("src/services/Acme.Shop.Gate/Acme.Shop.Gate.API/Setup/GatewayTransforms.cs");
+        var files = Solution().WithService("ST.Demo.Gate", 5005)
+            .With("src/services/ST.Demo.Gate/ST.Demo.Gate.API/Setup/GatewayTransforms.cs");
 
         var gate = Read(files).FindService("Gate")!;
 
@@ -188,11 +188,11 @@ internal sealed class SolutionReaderTests
     public void TheSolutionsChoices_AreReadFromWhatOnlyThatChoiceGenerates()
     {
         var files = Solution()
-            .With("src/common/Acme.Shop.Common.Infrastructure/Persistence/SqlServer/SqlServerErrors.cs")
+            .With("src/common/ST.Demo.Common.Infrastructure/Persistence/SqlServer/SqlServerErrors.cs")
             .With("deploy/k8s/namespace.yaml")
             .With(".opencode/rules.md")
-            .With("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Tests/Acme.Shop.Orders.Tests.csproj", "<PackageReference Include=\"xunit.v3\" />")
-            .With("src/capabilities/Acme.Shop.Capabilities.Security.CredentialStore/VaultOptions.cs")
+            .With("src/services/ST.Demo.Orders/ST.Demo.Orders.Tests/ST.Demo.Orders.Tests.csproj", "<PackageReference Include=\"xunit.v3\" />")
+            .With("src/capabilities/ST.Demo.Capabilities.Security.CredentialStore/VaultOptions.cs")
             .With(".github/workflows/ci.yml");
 
         var solution = Read(files).SolutionArgs;
@@ -209,7 +209,7 @@ internal sealed class SolutionReaderTests
     [Test]
     public void AFolderOfTheTeam_WithoutAnApiProjectOfItsName_IsNotAService()
     {
-        var files = Solution().With("src/services/Acme.Shop.Tools/Acme.Shop.Tools.Cli/Acme.Shop.Tools.Cli.csproj");
+        var files = Solution().With("src/services/ST.Demo.Tools/ST.Demo.Tools.Cli/ST.Demo.Tools.Cli.csproj");
 
         Read(files).Services.Count.ShouldBe(1);
     }
@@ -226,3 +226,4 @@ internal sealed class SolutionReaderTests
         SolutionReader.Version(new Files()).ShouldBeNull();
     }
 }
+

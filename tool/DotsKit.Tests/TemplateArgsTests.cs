@@ -35,7 +35,7 @@ internal sealed class TemplateArgsTests
     [Test]
     public void Should_SplitACommand_Into_TheSolutionsAndTheServicesParts()
     {
-        var command = Parse("-N", "Acme", "-P", "Shop", "-S", "Orders", "--Solution", "--Database", "mssql", "-H", "true", "--HttpPort", "5001");
+        var command = Parse("-N", "ST", "-P", "Demo", "-S", "Orders", "--Solution", "--Database", "mssql", "-H", "true", "--HttpPort", "5001");
 
         var solution = command.SolutionPart();
         var service = command.ServicePart();
@@ -54,7 +54,7 @@ internal sealed class TemplateArgsTests
     [Test]
     public void Should_WidenTheSolution_By_WhatAServiceBringsOutsideItsFolder()
     {
-        var solution = Parse("-N", "Acme", "-P", "Shop", "--Messaging", "direct", "--Notify", "email");
+        var solution = Parse("-N", "ST", "-P", "Demo", "--Messaging", "direct", "--Notify", "email");
         var service = Parse("-S", "Billing", "--Storage", "true", "-H", "true", "--Messaging", "outbox", "--Notify", "sms");
 
         var widened = solution.WidenBy(service);
@@ -74,7 +74,7 @@ internal sealed class TemplateArgsTests
     [TestCase("2.7.0", "Minimal")]
     public void Should_AskForTheSolution_In_TheWordsOfTheVersion(string version, string mode)
     {
-        var command = TemplateArgs.ForSolution(Parse("-N", "Acme"), Parse("-S", "Orders"), version);
+        var command = TemplateArgs.ForSolution(Parse("-N", "ST"), Parse("-S", "Orders"), version);
 
         command.Has(mode).ShouldBeTrue();
         command.AsksForSolution.ShouldBeTrue();
@@ -84,7 +84,7 @@ internal sealed class TemplateArgsTests
     [Test]
     public void Should_GenerateAServiceWithItsOwnFlags_NotTheSolutionsWidenedOnes()
     {
-        var solution = Parse("-N", "Acme", "--Database", "mssql", "--Storage", "true", "--Messaging", "outbox");
+        var solution = Parse("-N", "ST", "--Database", "mssql", "--Storage", "true", "--Messaging", "outbox");
 
         var command = TemplateArgs.ForService(solution, Parse("-S", "Billing", "-H", "true"));
 
@@ -99,7 +99,7 @@ internal sealed class TemplateArgsTests
     [TestCase("Vault")]
     public void Should_InheritTheSolutionsSecretStore(string store)
     {
-        var solution = Parse("-N", "Acme", "--" + store, "true", "--Storage", "true");
+        var solution = Parse("-N", "ST", "--" + store, "true", "--Storage", "true");
 
         var service = Parse("-S", "Billing").WithInfrastructureOf(solution);
 
@@ -111,7 +111,7 @@ internal sealed class TemplateArgsTests
     [TestCase("Vault")]
     public void Should_KeepTheServicesOwnSecretStoreChoice(string store)
     {
-        var solution = Parse("-N", "Acme", "--" + store, "true");
+        var solution = Parse("-N", "ST", "--" + store, "true");
         var service = Parse("-S", "Billing", "--" + store, "false");
 
         var inherited = service.WithInfrastructureOf(solution);
@@ -119,3 +119,4 @@ internal sealed class TemplateArgsTests
         inherited[store].ShouldBe("false");
     }
 }
+

@@ -197,8 +197,8 @@ internal sealed class GitModeTests
         const string moved = "src/services/Stock/Stock.API/New.cs";
         var root = Folders.NewTemp("left-out");
         Directory.CreateDirectory(Path.Combine(root, "src", "services"));
-        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "services", "Acme.Shop.All.sln"), "");
-        var manifest = new Manifest { Template = "2.9.0", Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"], Services = [] };
+        await System.IO.File.WriteAllTextAsync(Path.Combine(root, "src", "services", "ST.Demo.All.sln"), "");
+        var manifest = new Manifest { Template = "2.9.0", Solution = ["--NamespaceRoot", "ST", "--ProductName", "Demo"], Services = [] };
         Change[] added = [new(secrets, ChangeKind.Add, Text("{}\n"), "new in the template"), new(moved, ChangeKind.Add, Text("class New;\n"), "new in the template")];
         var plan = new Planning.Plan(root, manifest, added, new Solutions.MembershipChange([], []), ByGit: (new TemplateCommit("base", "2.8.0"), new TemplateCommit("next", "2.9.0")));
         var writer = new Planning.PlanWriter(new Solutions.SolutionProjects(new ProcessRunner()), new LeavingOut(secrets),
@@ -210,3 +210,4 @@ internal sealed class GitModeTests
         System.IO.File.Exists(Path.Combine(root, moved)).ShouldBeFalse();
     }
 }
+

@@ -40,7 +40,7 @@ REGISTRY=registry.example.com TAG=1.4.0 PUSH=1 deploy/build-images.sh
 ```
 
 An image is named `<REGISTRY>/<product>-<service>:<TAG>`, both in lower case with underscores for dots
-(`Retail.Shop` and `Sales.Orders` make `retail_shop-sales_orders`), so two solutions on one host do not
+(`Retail.Demo` and `Sales.Orders` make `retail_shop-sales_orders`), so two solutions on one host do not
 take each other's `orders` image. The script reads the name from the service's own deploy files: a
 service generated before 2.1.3, named `<REGISTRY>/<service>`, keeps its name. `GIT_SHA` is the last commit that touched the service's inputs, so an
 unchanged service gets the same image; see [Docker](docker.md).
@@ -126,7 +126,7 @@ REGISTRY=registry.example.com TAG=1.4.0 deploy/k8s/apply.sh
 ```
 
 `apply.sh` fills the registry and the tag into every `src/services/*/deploy/k8s.yaml` and applies it to the
-current `kubectl` context; further arguments go to `kubectl apply` (`--namespace shop`).
+current `kubectl` context; further arguments go to `kubectl apply` (`--namespace Demo`).
 
 - The Deployment runs two replicas and updates them one at a time: a new pod takes traffic once
   `/ready` answers, and an old one leaves only then (`maxUnavailable: 0`).
@@ -145,3 +145,4 @@ current `kubectl` context; further arguments go to `kubectl apply` (`--namespace
 Both were run end to end on a generated solution: compose with two services, one generated later without
 `--Solution`, each answering `/ready` with its own commit; Kubernetes on k3s with four replicas of a service
 with a dotted name on a fresh database, all ready without a restart.
+

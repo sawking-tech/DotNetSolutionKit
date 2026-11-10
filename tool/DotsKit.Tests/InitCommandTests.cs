@@ -24,7 +24,7 @@ internal sealed class InitCommandTests
     }
 
     private const string ToolVersion = "2.8.0";
-    private const string Orders = "Acme.Shop.Orders";
+    private const string Orders = "ST.Demo.Orders";
 
     private sealed class Fakes
     {
@@ -107,11 +107,11 @@ internal sealed class InitCommandTests
     private static string Solution(string? version = "2.8.0", bool common = true)
     {
         var root = Folders.NewTemp("init-command");
-        Write(root, "src/services/Acme.Shop.All.sln", "");
+        Write(root, "src/services/ST.Demo.All.sln", "");
         Service(root, Orders, 5000);
         if (common)
         {
-            Write(root, "src/common/Acme.Shop.Common/Acme.Shop.Common.csproj", "<Project />");
+            Write(root, "src/common/ST.Demo.Common/ST.Demo.Common.csproj", "<Project />");
         }
 
         if (version is not null)
@@ -315,7 +315,7 @@ internal sealed class InitCommandTests
     {
         var root = Solution();
         await new Fakes().RunAsync(root);
-        Service(root, "Acme.Shop.Billing", 5001);
+        Service(root, "ST.Demo.Billing", 5001);
         var fakes = new Fakes();
 
         (await fakes.RunAsync(root)).ShouldBe(ExitCode.Done);
@@ -343,7 +343,7 @@ internal sealed class InitCommandTests
     public async Task AServiceOfAnotherVersion_IsNamed_AndNothingWritten()
     {
         var root = Solution("2.8.0");
-        Service(root, "Acme.Shop.Billing", 5001, version: "2.7.0");
+        Service(root, "ST.Demo.Billing", 5001, version: "2.7.0");
 
         var refused = await Should.ThrowAsync<InvalidOperationException>(() => new Fakes().RunAsync(root));
 
@@ -356,7 +356,7 @@ internal sealed class InitCommandTests
     public async Task AServiceOfAnotherVersion_IsDescribedByTheVersionTheCommandNames()
     {
         var root = Solution("2.8.0");
-        Service(root, "Acme.Shop.Billing", 5001, version: "2.8.1");
+        Service(root, "ST.Demo.Billing", 5001, version: "2.8.1");
 
         (await new Fakes().RunAsync(root, "--template-version", "2.8.0")).ShouldBe(ExitCode.Done);
 
@@ -368,7 +368,7 @@ internal sealed class InitCommandTests
     {
         var root = Solution();
         await new Fakes().RunAsync(root);
-        Service(root, "Acme.Shop.Billing", 5001, version: "2.8.1");
+        Service(root, "ST.Demo.Billing", 5001, version: "2.8.1");
 
         (await Should.ThrowAsync<InvalidOperationException>(() => new Fakes().RunAsync(root))).Message.ShouldContain("Billing is 2.8.1");
     }
@@ -378,7 +378,7 @@ internal sealed class InitCommandTests
     {
         var root = Solution();
         await new Fakes().RunAsync(root);
-        Service(root, "Acme.Shop.Billing", 5001);
+        Service(root, "ST.Demo.Billing", 5001);
 
         (await Should.ThrowAsync<ArgumentException>(() => new Fakes().RunAsync(root, "--template-version", "2.7.0"))).Message.ShouldContain("The manifest is 2.8.0");
     }
@@ -411,3 +411,4 @@ internal sealed class InitCommandTests
         Options.Parse("init", ["--template-version", "2.7.0"]).TemplateVersion.ShouldBe("2.7.0");
     }
 }
+

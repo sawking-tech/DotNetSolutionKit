@@ -9,9 +9,9 @@ namespace DotsKit.Tests.Scenarios.GitMerge;
 /// </summary>
 internal static class GitSolution
 {
-    public const string ProgramFile = "src/services/Acme.Shop.Orders/Program.cs";
-    public const string Secrets = "src/services/Acme.Shop.Orders/appsettings.Secrets.json";
-    public const string Solution = "src/services/Acme.Shop.All.sln";
+    public const string ProgramFile = "src/services/ST.Demo.Orders/Program.cs";
+    public const string Secrets = "src/services/ST.Demo.Orders/appsettings.Secrets.json";
+    public const string Solution = "src/services/ST.Demo.All.sln";
 
     /// <summary>Program.cs as the template 1.0 gave it.</summary>
     public const string BaseProgram = "a\nb\nc\nd\ne\n";
@@ -78,3 +78,4 @@ internal static class GitSolution
     public static string Base() =>
         Tree((".gitignore", "appsettings.Secrets.json\n"), (ProgramFile, BaseProgram), (Solution, "the template's All.sln\n"), (Secrets, "the template's secret\n"));
 }
+

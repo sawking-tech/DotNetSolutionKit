@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Common", "NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj", "{A9C0F473-2F7D-4D5C-A77F-F5B4B982FE1C}"
 #if (MongoDB)

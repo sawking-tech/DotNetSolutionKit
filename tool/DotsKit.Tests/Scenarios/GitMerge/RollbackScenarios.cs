@@ -144,12 +144,12 @@ internal sealed class RollbackScenarios
     public async Task AStageThatFails_OverAManifestInGit_LeavesNoMergeNoCommitAndTheManifestAsItWas()
     {
         var root = await SolutionAsync();
-        const string described = """{ "template": "1.0.0", "solution": ["--NamespaceRoot", "Acme", "--ProductName", "Shop"], "services": [] }""";
+        const string described = """{ "template": "1.0.0", "solution": ["--NamespaceRoot", "ST", "--ProductName", "Demo"], "services": [] }""";
         Write(root, Layout.ManifestPath, described + "\n");
         await Git(root, "add", "-A");
         await Git(root, "commit", "-q", "-m", "described by dotskit init");
         var head = await HeadAsync(root);
-        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"], Services = [] };
+        var manifest = new Manifest { Template = "2.0.0", Solution = ["--NamespaceRoot", "ST", "--ProductName", "Demo"], Services = [] };
         var plan = new Planning.Plan(root, manifest, [], new Solutions.MembershipChange([], []),
             ByGit: (new TemplateCommit(Base(), "1.0.0"), new TemplateCommit(Tree((ProgramFile, NextProgram)), "2.0.0")));
         var writer = new Planning.PlanWriter(new Solutions.SolutionProjects(Runner), new FailingAfterStage(new GitTemplateMerge(Runner, Sandbox.Self)),
@@ -163,3 +163,4 @@ internal sealed class RollbackScenarios
         Read(root, Layout.ManifestPath).ShouldBe(described + "\n");
     }
 }
+

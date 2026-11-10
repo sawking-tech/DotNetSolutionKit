@@ -19,7 +19,7 @@ internal sealed class MergeScenarios
     public async Task AFileBothAdded_GainsTheSolutionsSideAsBase_SoTheIDEShowsItsPanes()
     {
         var root = await SolutionAsync();
-        const string both = "src/services/Acme.Shop.Orders/notes.md";
+        const string both = "src/services/ST.Demo.Orders/notes.md";
         Write(root, both, "the team's notes\n");
         await Git(root, "add", "-A");
         await Git(root, "commit", "-q", "-m", "the team's notes");
@@ -54,7 +54,7 @@ internal sealed class MergeScenarios
     public async Task AFileBothAdded_ResolvedAndCommitted_LeavesTheIndexCleanForTheNextRun()
     {
         var root = await SolutionAsync();
-        const string both = "src/services/Acme.Shop.Orders/notes.md";
+        const string both = "src/services/ST.Demo.Orders/notes.md";
         Write(root, both, "the team's notes\n");
         await Git(root, "add", "-A");
         await Git(root, "commit", "-q", "-m", "the team's notes");
@@ -132,8 +132,8 @@ internal sealed class MergeScenarios
     public async Task ASecretANestedGitignoreHides_IsNotBroughtByTheTemplate()
     {
         var root = await SolutionAsync();
-        const string local = "src/services/Acme.Shop.Orders/appsettings.Local.json";
-        Write(root, "src/services/Acme.Shop.Orders/.gitignore", "appsettings.Local.json\n");
+        const string local = "src/services/ST.Demo.Orders/appsettings.Local.json";
+        Write(root, "src/services/ST.Demo.Orders/.gitignore", "appsettings.Local.json\n");
         Write(root, local, "the team's local secret\n");
         await Git(root, "add", "-A");
         await Git(root, "commit", "-q", "-m", "a nested ignore");
@@ -174,7 +174,7 @@ internal sealed class MergeScenarios
     [TestCase("a\nb\n", "a\nB by the template\n", true)]
     public async Task AFileTheTeamRemoved_StaysRemoved_WhenTheTemplateOnlyRestyledIt(string before, string after, bool conflicts)
     {
-        const string removed = "src/services/Acme.Shop.Orders/Removed.cs";
+        const string removed = "src/services/ST.Demo.Orders/Removed.cs";
         var root = await SolutionAsync();
         (string, string)[] common = [(".gitignore", "appsettings.Secrets.json\n"), (ProgramFile, BaseProgram), (Solution, "the template's All.sln\n"), (Secrets, "the template's secret\n")];
         var baseTree = Tree([.. common, (removed, before)]);
@@ -231,3 +231,4 @@ internal sealed class MergeScenarios
         merge.Taken.ShouldBe([ProgramFile]);
     }
 }
+

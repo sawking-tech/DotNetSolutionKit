@@ -10,7 +10,7 @@ namespace DotsKit.Tests.Scenarios;
 internal sealed class Sandbox
 {
     public const string Category = "Scenario";
-    public const string Prefix = "Acme.Shop";
+    public const string Prefix = "ST.Demo";
 
     private const string SourcesVariable = "DOTSKIT_TEMPLATE_SOURCE";
 
@@ -115,7 +115,7 @@ internal sealed class Sandbox
     {
         var root = Path.Combine(Folders.NewTemp("reference"), "solution");
         Directory.CreateDirectory(root);
-        var made = await DotskitIn(root, ["new", "-N", "Acme", "-P", "Shop", "-S", "Orders", "--yes", "--no-build"]);
+        var made = await DotskitIn(root, ["new", "-N", "ST", "-P", "Demo", "-S", "Orders", "--yes", "--no-build"]);
         if (made.Code != 0)
         {
             throw new InvalidOperationException($"The reference solution was not made:\n{made.Output}{made.Error}");
@@ -131,3 +131,4 @@ internal sealed class Sandbox
         return hive;
     }
 }
+

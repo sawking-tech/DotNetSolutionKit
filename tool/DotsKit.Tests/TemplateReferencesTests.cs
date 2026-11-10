@@ -8,16 +8,16 @@ namespace DotsKit.Tests;
 [Parallelizable(ParallelScope.All)]
 internal sealed class TemplateReferencesTests
 {
-    private const string Common = "src/common/Acme.Shop.Common/Acme.Shop.Common.csproj";
-    private const string Contracts = "src/common/Acme.Shop.Common.Contracts/Acme.Shop.Common.Contracts.csproj";
-    private const string Orders = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Domain/Acme.Shop.Orders.Domain.csproj";
-    private const string Billing = "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Contracts/Acme.Shop.Billing.Contracts.csproj";
+    private const string Common = "src/common/ST.Demo.Common/ST.Demo.Common.csproj";
+    private const string Contracts = "src/common/ST.Demo.Common.Contracts/ST.Demo.Common.Contracts.csproj";
+    private const string Orders = "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/ST.Demo.Orders.Domain.csproj";
+    private const string Billing = "src/services/ST.Demo.Billing/ST.Demo.Billing.Contracts/ST.Demo.Billing.Contracts.csproj";
 
-    private const string ToCommon = @"..\Acme.Shop.Common\Acme.Shop.Common.csproj";
-    private const string ToContracts = @"..\Acme.Shop.Common.Contracts\Acme.Shop.Common.Contracts.csproj";
-    private const string OrdersToCommon = @"..\..\..\common\Acme.Shop.Common\Acme.Shop.Common.csproj";
-    private const string OrdersToContracts = @"..\..\..\common\Acme.Shop.Common.Contracts\Acme.Shop.Common.Contracts.csproj";
-    private const string OrdersToBilling = @"..\..\Acme.Shop.Billing\Acme.Shop.Billing.Contracts\Acme.Shop.Billing.Contracts.csproj";
+    private const string ToCommon = @"..\ST.Demo.Common\ST.Demo.Common.csproj";
+    private const string ToContracts = @"..\ST.Demo.Common.Contracts\ST.Demo.Common.Contracts.csproj";
+    private const string OrdersToCommon = @"..\..\..\common\ST.Demo.Common\ST.Demo.Common.csproj";
+    private const string OrdersToContracts = @"..\..\..\common\ST.Demo.Common.Contracts\ST.Demo.Common.Contracts.csproj";
+    private const string OrdersToBilling = @"..\..\ST.Demo.Billing\ST.Demo.Billing.Contracts\ST.Demo.Billing.Contracts.csproj";
 
     private static string Project(params string[] references) =>
         "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <ItemGroup>\n"
@@ -68,7 +68,8 @@ internal sealed class TemplateReferencesTests
 
         added.ShouldContain($"    <ProjectReference Include=\"{OrdersToCommon}\" />\r\n    <ProjectReference Include=\"{OrdersToContracts}\" />\r\n");
         ProjectReferences.Add(added, orders, Path.Combine(root, Contracts)).ShouldBe(added);
-        removed.ShouldNotContain("Acme.Shop.Common\\Acme.Shop.Common.csproj");
+        removed.ShouldNotContain("ST.Demo.Common\\ST.Demo.Common.csproj");
         removed.ShouldContain(OrdersToContracts);
     }
 }
+

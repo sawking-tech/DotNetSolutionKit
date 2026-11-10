@@ -98,7 +98,7 @@ internal sealed class NewCommandTests
     {
         var root = Folders.NewTemp("new-command");
         Directory.CreateDirectory(Layout.ServicesOf(root));
-        File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "Acme.Shop" + Layout.SolutionSuffix), "");
+        File.WriteAllText(Path.Combine(Layout.ServicesOf(root), "ST.Demo" + Layout.SolutionSuffix), "");
         if (template is null)
         {
             return root;
@@ -107,7 +107,7 @@ internal sealed class NewCommandTests
         var manifest = new Manifest
         {
             Template = template,
-            Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"],
+            Solution = ["--NamespaceRoot", "ST", "--ProductName", "Demo"],
             Services = [["--ServiceNameOrCustom", "Orders", "--HttpPort", "5000"]],
         };
         Directory.CreateDirectory(Path.Combine(root, ".dotskit"));
@@ -198,7 +198,7 @@ internal sealed class NewCommandTests
         File.WriteAllText(Path.Combine(folder, "notes.txt"), "the team's");
         var fakes = new Fakes { Clean = false };
 
-        await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Args("-N", "Acme", "-S", "Orders"), folder, CancellationToken.None));
+        await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Args("-N", "ST", "-S", "Orders"), folder, CancellationToken.None));
 
         fakes.Planned.ShouldBe(0);
     }
@@ -210,7 +210,7 @@ internal sealed class NewCommandTests
         File.WriteAllText(Path.Combine(folder, "notes.txt"), "the team's");
         var fakes = new Fakes { Repository = false };
 
-        var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Args("-N", "Acme", "-S", "Orders"), folder, CancellationToken.None));
+        var refused = await Should.ThrowAsync<InvalidOperationException>(() => fakes.Command().RunAsync(Args("-N", "ST", "-S", "Orders"), folder, CancellationToken.None));
 
         refused.Message.ShouldContain("git init");
         refused.Message.ShouldContain("gitleaks");
@@ -224,7 +224,7 @@ internal sealed class NewCommandTests
         File.WriteAllText(Path.Combine(folder, "notes.txt"), "the team's");
         var fakes = new Fakes { Answer = true };
 
-        var code = await fakes.Command().RunAsync(Args("-N", "Acme", "-S", "Orders"), folder, CancellationToken.None);
+        var code = await fakes.Command().RunAsync(Args("-N", "ST", "-S", "Orders"), folder, CancellationToken.None);
 
         code.ShouldBe(ExitCode.Done);
         fakes.Planned.ShouldBe(1);
@@ -238,7 +238,7 @@ internal sealed class NewCommandTests
         File.WriteAllText(Path.Combine(folder, "notes.txt"), "the team's");
         var fakes = new Fakes { Clean = false, Answer = true };
 
-        var code = await fakes.Command().RunAsync(Args("-N", "Acme", "-S", "Orders", "--allow-dirty"), folder, CancellationToken.None);
+        var code = await fakes.Command().RunAsync(Args("-N", "ST", "-S", "Orders", "--allow-dirty"), folder, CancellationToken.None);
 
         code.ShouldBe(ExitCode.Done);
         fakes.TakenUncommitted.ShouldBe(1);
@@ -250,7 +250,7 @@ internal sealed class NewCommandTests
     {
         var fakes = new Fakes { Clean = false, Answer = true };
 
-        var code = await fakes.Command().RunAsync(Args("-N", "Acme", "-S", "Orders"), Folders.NewTemp("new-command"), CancellationToken.None);
+        var code = await fakes.Command().RunAsync(Args("-N", "ST", "-S", "Orders"), Folders.NewTemp("new-command"), CancellationToken.None);
 
         code.ShouldBe(ExitCode.Done);
         fakes.Written.ShouldBe(1);
@@ -277,3 +277,4 @@ internal sealed class NewCommandTests
         Should.Throw<InvalidOperationException>(() => SolutionRoot.HasSolution(root)).Message.ShouldContain("2");
     }
 }
+

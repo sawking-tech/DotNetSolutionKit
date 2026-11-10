@@ -1,13 +1,13 @@
 # The layout of a solution
 
 What a generated solution looks like on disk, which file matters and where the team's code goes. The names below
-come from the generation: `-N Acme -P Shop -S Orders` gives `Acme.Shop.Common`, `Acme.Shop.Orders` and
-`src/services/Acme.Shop.All.sln`.
+come from the generation: `-N ST -P Demo -S Orders` gives `ST.Demo.Common`, `ST.Demo.Orders` and
+`src/services/ST.Demo.All.sln`.
 
 ## The folders
 
 ```
-acme-shop/
+ST-Demo/
 ├── .dotskit/manifest.json         what the solution was generated from; dotskit reads it on every run
 ├── Directory.Build.props          the properties of every project, and DotNetSolutionKitVersion
 ├── Dockerfile                     one image for every service
@@ -16,17 +16,17 @@ acme-shop/
 │   ├── Directory.Packages.props   the version of every package, declared once
 │   ├── package-versions/*.props   the versions a flag brings, a file per flag
 │   ├── common/                    what the services share
-│   │   ├── Acme.Shop.Common/                  the domain's primitives: entities, aggregates, events, Money
-│   │   ├── Acme.Shop.Common.Contracts/        what crosses the boundary: requests, responses, bus messages
-│   │   ├── Acme.Shop.Common.Application/      use cases over the domain, the ports they need
-│   │   ├── Acme.Shop.Common.Infrastructure/   EF Core, the bus, the secret store, the outside world
-│   │   ├── Acme.Shop.Common.Web/              the host: pipeline, errors, Swagger, authentication
-│   │   ├── Acme.Shop.Common.Testing/          the test harness, with no test framework
-│   │   └── Acme.Shop.Common.Tests/            the tests of Common
+│   │   ├── ST.Demo.Common/                  the domain's primitives: entities, aggregates, events, Money
+│   │   ├── ST.Demo.Common.Contracts/        what crosses the boundary: requests, responses, bus messages
+│   │   ├── ST.Demo.Common.Application/      use cases over the domain, the ports they need
+│   │   ├── ST.Demo.Common.Infrastructure/   EF Core, the bus, the secret store, the outside world
+│   │   ├── ST.Demo.Common.Web/              the host: pipeline, errors, Swagger, authentication
+│   │   ├── ST.Demo.Common.Testing/          the test harness, with no test framework
+│   │   └── ST.Demo.Common.Tests/            the tests of Common
 │   ├── capabilities/              a project per flag: Capabilities.Mongo, Capabilities.ClickHouse, Capabilities.Storage, Capabilities.Notifications
 │   └── services/
-│       ├── Acme.Shop.All.sln      every project of the solution
-│       └── Acme.Shop.Orders/      one service, four projects (below)
+│       ├── ST.Demo.All.sln      every project of the solution
+│       └── ST.Demo.Orders/      one service, four projects (below)
 ├── gateway/                       the API gateway, with --ApiGateway
 ├── deploy/
 │   ├── compose/                   docker compose: the services, and infra/ a file per part
@@ -60,11 +60,11 @@ flowchart TD
 
 | Project | What is in it | What the team writes here |
 |---|---|---|
-| `Acme.Shop.Orders` | the domain: entities, aggregates, domain events, specifications | the model of the product |
-| `Acme.Shop.Orders.Application` | use cases, the ports they call | what the product does, step by step |
-| `Acme.Shop.Orders.Infrastructure` | the `DbContext`, repositories, the bus, integrations | how it reaches the outside |
-| `Acme.Shop.Orders.API` | controllers, `Program.cs`, the settings | the endpoints |
-| `Acme.Shop.Orders.Tests` | the tests of this service | what proves the above |
+| `ST.Demo.Orders` | the domain: entities, aggregates, domain events, specifications | the model of the product |
+| `ST.Demo.Orders.Application` | use cases, the ports they call | what the product does, step by step |
+| `ST.Demo.Orders.Infrastructure` | the `DbContext`, repositories, the bus, integrations | how it reaches the outside |
+| `ST.Demo.Orders.API` | controllers, `Program.cs`, the settings | the endpoints |
+| `ST.Demo.Orders.Tests` | the tests of this service | what proves the above |
 
 ## The template and a solution
 
@@ -74,7 +74,7 @@ was generated and merges a newer version of the template into the solution later
 ```mermaid
 flowchart LR
     T["The template<br/>dotnet new DotNetSolutionKit"] -->|"--Solution"| Root["The root and Common<br/>src/common, deploy, scripts, CI"]
-    T -->|"-S Orders"| S1["A service<br/>src/services/Acme.Shop.Orders"]
+    T -->|"-S Orders"| S1["A service<br/>src/services/ST.Demo.Orders"]
     T -->|"-S Billing"| S2["One more service"]
     Root --> M[".dotskit/manifest.json"]
     S1 --> M
@@ -84,3 +84,4 @@ flowchart LR
 
 A flag adds its own project under `src/capabilities` and its versions under `src/package-versions`, and the
 services that use it reference it - so a service carries only the packages of its own flags.
+

@@ -19,7 +19,7 @@ internal sealed class NewSolutionScenarios
     private static Manifest Next() => new()
     {
         Template = "2.8.0",
-        Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"],
+        Solution = ["--NamespaceRoot", "ST", "--ProductName", "Demo"],
         Services = [["--ServiceNameOrCustom", "Orders", "--HttpPort", "5000"]],
     };
 
@@ -96,7 +96,7 @@ internal sealed class NewSolutionScenarios
         {
             var root = Folders.NewTemp("new-solution-output");
             Write(root, "notes.md", "the template's notes\n");
-            Write(root, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.csproj", "<Project />\n");
+            Write(root, "src/services/ST.Demo.Orders/ST.Demo.Orders.csproj", "<Project />\n");
             return Task.FromResult(root);
         }
     }
@@ -114,3 +114,4 @@ internal sealed class NewSolutionScenarios
 
     private static async Task Git(string root, params string[] args) => await Runner.RunCheckedAsync("git", args, root, CancellationToken.None);
 }
+

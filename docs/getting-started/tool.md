@@ -214,7 +214,7 @@ reads the solution, checks the reading and writes `.dotskit/manifest.json`, and 
 What it reads:
 
 - the version of the template from `DotNetSolutionKitVersion` in `Directory.Build.props`, there since 2.7.0;
-- the names from `src/services/*.All.sln`; where a dot can belong to either name (`Acme.Corp.Shop`), from the
+- the names from `src/services/*.All.sln`; where a dot can belong to either name (`ST.Corp.Demo`), from the
   image names of `deploy/build-images.sh`, or from `-N` and `-P` given to the command;
 - the database, the deployment, the test framework and the agent by the files only one choice generates;
 - the flags of `Common` and the root by the files each flag adds;
@@ -281,3 +281,4 @@ come from their tags on GitHub, and `DOTSKIT_TEMPLATE_SOURCE` still stands the s
 - The merge needs the solution at the root of its git repository. A solution in a folder of a larger
   repository is refused before the plan: move it to its own repository. The clean working tree is checked over
   the whole repository.
+

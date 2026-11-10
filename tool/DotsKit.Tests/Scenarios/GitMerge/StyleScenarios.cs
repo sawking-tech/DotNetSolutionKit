@@ -36,7 +36,7 @@ internal sealed class StyleScenarios
     [Test]
     public async Task ASolutionFileBothChanged_KeepsItsByteOrderMark_EvenWithASpaceInItsPath()
     {
-        const string solutionFile = "src/services/Acme Shop/Orders.sln";
+        const string solutionFile = "src/services/ST Demo/Orders.sln";
         var root = Folders.NewTemp("git-merge-sln");
         WriteWithBom(root, solutionFile, "a\nb\nteam\n");
         await Git(root, "init", "-q");
@@ -70,3 +70,4 @@ internal sealed class StyleScenarios
         File.ReadAllText(Path.Combine(root, ProgramFile)).ShouldBe("template\r\na\r\nb\r\nteam\r\n");
     }
 }
+

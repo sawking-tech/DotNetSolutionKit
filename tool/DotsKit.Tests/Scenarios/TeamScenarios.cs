@@ -36,7 +36,7 @@ internal sealed class TeamScenarios
         var solution = await Sandbox.SolutionAsync();
         await AddHandProjectAsync(solution);
 
-        (await solution.DotnetNewAsync("-N", "Acme", "-P", "Shop", "-S", "Stock", "--allow-scripts", "yes")).Code.ShouldBe(0);
+        (await solution.DotnetNewAsync("-N", "ST", "-P", "Demo", "-S", "Stock", "--allow-scripts", "yes")).Code.ShouldBe(0);
 
         (await solution.ProjectsAsync()).ShouldContain(HandProject);
         solution.SolutionFolders().ShouldContain(HandFolder);
@@ -89,10 +89,10 @@ internal sealed class TeamScenarios
     public async Task ServiceLeftOutOfTheSolution_IsAddedAndNamed_When_TheTemplateAddsTheNextService()
     {
         var solution = await Sandbox.SolutionAsync();
-        await solution.DotnetNewAsync("-N", "Acme", "-P", "Shop", "-S", "Sales.Billing", "--allow-scripts", "no");
+        await solution.DotnetNewAsync("-N", "ST", "-P", "Demo", "-S", "Sales.Billing", "--allow-scripts", "no");
         (await solution.ProjectsAsync()).ShouldNotContain(p => p.Contains("Billing"));
 
-        var next = await solution.DotnetNewAsync("-N", "Acme", "-P", "Shop", "-S", "Stock", "--allow-scripts", "yes");
+        var next = await solution.DotnetNewAsync("-N", "ST", "-P", "Demo", "-S", "Stock", "--allow-scripts", "yes");
 
         (await solution.ProjectsAsync()).Count(p => p.Contains("Sales.Billing")).ShouldBe(5);
         solution.SolutionFolders().ShouldContain("Billing");
@@ -106,7 +106,7 @@ internal sealed class TeamScenarios
         var program = $"src/services/{Orders}/{Orders}.API/Program.cs";
         var before = solution.Read(program);
 
-        var again = await solution.DotnetNewAsync("-N", "Acme", "-P", "Shop", "-S", "Orders", "--MongoDB", "true", "--allow-scripts", "yes");
+        var again = await solution.DotnetNewAsync("-N", "ST", "-P", "Demo", "-S", "Orders", "--MongoDB", "true", "--allow-scripts", "yes");
 
         again.Code.ShouldBe(WouldOverwrite);
         solution.Read(program).ShouldBe(before);
@@ -147,7 +147,7 @@ internal sealed class TeamScenarios
     {
         var solution = await Sandbox.SolutionAsync();
 
-        var again = await solution.DotnetNewAsync("-N", "Acme", "-P", "Shop", "-S", "orders", "--allow-scripts", "yes");
+        var again = await solution.DotnetNewAsync("-N", "ST", "-P", "Demo", "-S", "orders", "--allow-scripts", "yes");
 
         if (OperatingSystem.IsLinux())
         {
@@ -220,7 +220,7 @@ internal sealed class TeamScenarios
         var folder = Path.Combine(Folders.NewTemp("scenario-gateway"), "solution");
         Directory.CreateDirectory(folder);
 
-        var made = await Sandbox.DotskitIn(folder, ["new", "-N", "Acme", "-P", "Shop", "-S", "Gate", "--ApiGateway", "true", "--yes"]);
+        var made = await Sandbox.DotskitIn(folder, ["new", "-N", "ST", "-P", "Demo", "-S", "Gate", "--ApiGateway", "true", "--yes"]);
 
         made.Code.ShouldBe((int)ExitCode.Done, made.Output + made.Error);
     }
@@ -248,3 +248,4 @@ internal sealed class TeamScenarios
         refused.Error.ShouldContain("uncommitted");
     }
 }
+

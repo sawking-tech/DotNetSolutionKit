@@ -9,7 +9,7 @@ internal sealed class ManifestTests
     private static readonly Manifest Orders = new()
     {
         Template = "2.8.0",
-        Solution = ["--NamespaceRoot", "Acme", "--ProductName", "Shop"],
+        Solution = ["--NamespaceRoot", "ST", "--ProductName", "Demo"],
         Services = [["--ServiceNameOrCustom", "Orders", "--HttpPort", "5000"]],
     };
 
@@ -83,9 +83,9 @@ internal sealed class ManifestTests
     public void Should_Refuse_When_TheManifestCannotRebuildTheSolution(string text) =>
         Should.Throw<InvalidOperationException>(() => Manifest.Parse(text)).Message.ShouldContain("put it back from git");
 
-    [TestCase("--NamespaceRoot", "Acme; } public class X { } namespace Y")]
+    [TestCase("--NamespaceRoot", "ST; } public class X { } namespace Y")]
     [TestCase("-S", "../Orders")]
-    [TestCase("-P", "Shop/x")]
+    [TestCase("-P", "Demo/x")]
     [TestCase("--HttpPort", "5000;x")]
     [TestCase("--Database", "postgres\"")]
     public void Should_Refuse_When_AValueOfTheManifestIsNoValueOfItsParameter(string name, string value) =>
@@ -142,3 +142,4 @@ internal sealed class ManifestTests
         MembershipChange.Of(solution, @base, unchanged).IsEmpty.ShouldBeTrue();
     }
 }
+

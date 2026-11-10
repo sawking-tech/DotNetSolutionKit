@@ -56,7 +56,7 @@ internal sealed class UpgradePartsTests
         var step = Folders.NewTemp("p-step");
         Put(before, Central, Props(("Npgsql", "8.0.4"), ("Polly", "8.4.1"), ("Gone", "1.0.0")));
         Put(step, Central, Props(("Npgsql", "8.0.11")));
-        Put(step, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Infrastructure/Acme.Shop.Orders.Infrastructure.csproj",
+        Put(step, "src/services/ST.Demo.Orders/ST.Demo.Orders.Infrastructure/ST.Demo.Orders.Infrastructure.csproj",
             "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Polly\" />\n    <PackageReference Include=\"Npgsql\" />\n  </ItemGroup>\n</Project>\n");
 
         var solution = Folders.NewTemp("p-solution");
@@ -78,7 +78,7 @@ internal sealed class UpgradePartsTests
         var solution = Folders.NewTemp("t-solution");
         Put(before, Central, Props(("Npgsql", "8.0.4"), ("Moq", "4.20.0")));
         Put(next, Central, Props(("Npgsql", "8.0.11")));
-        Put(solution, "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Reports/Acme.Shop.Orders.Reports.csproj",
+        Put(solution, "src/services/ST.Demo.Orders/ST.Demo.Orders.Reports/ST.Demo.Orders.Reports.csproj",
             "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Moq\" />\n  </ItemGroup>\n</Project>\n");
 
         PackageVersions.KeepReferenced(next, before, solution);
@@ -95,7 +95,7 @@ internal sealed class UpgradePartsTests
         Put(before, Central, Props(("Npgsql", "8.0.4")));
         Put(next, Central, Props(("Npgsql", "8.0.11")));
         Put(solution, Central, Props(("Npgsql", "8.0.4"), ("Scriban", "5.10.0")));
-        Put(solution, "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Application/Acme.Shop.Billing.Application.csproj",
+        Put(solution, "src/services/ST.Demo.Billing/ST.Demo.Billing.Application/ST.Demo.Billing.Application.csproj",
             "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Scriban\" />\n  </ItemGroup>\n</Project>\n");
 
         PackageVersions.KeepReferenced(next, before, solution);
@@ -113,7 +113,7 @@ internal sealed class UpgradePartsTests
         Put(next, Central, Props(("Npgsql", "8.0.11")));
         // A solution of 1.x declares its versions in Directory.Packages.props at the root, not under src.
         Put(solution, "Directory.Packages.props", Props(("Npgsql", "8.0.4"), ("Scriban", "7.0.0")));
-        Put(solution, "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Application/Acme.Shop.Billing.Application.csproj",
+        Put(solution, "src/services/ST.Demo.Billing/ST.Demo.Billing.Application/ST.Demo.Billing.Application.csproj",
             "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Scriban\" />\n  </ItemGroup>\n</Project>\n");
 
         PackageVersions.KeepReferenced(next, before, solution);
@@ -172,10 +172,10 @@ internal sealed class UpgradePartsTests
     [Test]
     public void AVersion_IsGivenOnlyTheParametersItHas()
     {
-        var args = TemplateArgs.Parse(["-N", "Acme", "--Agent", "none", "--Storage", "true", "--MongoDB", "true"]);
+        var args = TemplateArgs.Parse(["-N", "ST", "--Agent", "none", "--Storage", "true", "--MongoDB", "true"]);
 
-        args.ForVersion("2.0.0").ToArgs().ShouldBe(["--NamespaceRoot", "Acme"]);
-        args.ForVersion("2.7.0").ToArgs().ShouldBe(["--NamespaceRoot", "Acme", "--Agent", "none", "--Storage", "true"]);
+        args.ForVersion("2.0.0").ToArgs().ShouldBe(["--NamespaceRoot", "ST"]);
+        args.ForVersion("2.7.0").ToArgs().ShouldBe(["--NamespaceRoot", "ST", "--Agent", "none", "--Storage", "true"]);
         args.ForVersion(TemplateSource.SourcesVersion).ToArgs().Count.ShouldBe(8);
     }
 
@@ -309,8 +309,8 @@ internal sealed class UpgradePartsTests
     public void AMoveGitPairsAcrossTwoServices_IsTakenToTheSameMoveInsideTheOldPathsService()
     {
         // Both services moved Stabs/ to Stubs/; git paired Orders' old file with Billing's new one.
-        const string orders = "src/services/Acme.Shop.Orders/Acme.Shop.Orders.Tests/Misc/";
-        const string billing = "src/services/Acme.Shop.Billing/Acme.Shop.Billing.Tests/Misc/";
+        const string orders = "src/services/ST.Demo.Orders/ST.Demo.Orders.Tests/Misc/";
+        const string billing = "src/services/ST.Demo.Billing/ST.Demo.Billing.Tests/Misc/";
         var renames = new Dictionary<string, string>
         {
             [billing + "Stubs/UserContextMock.cs"] = orders + "Stabs/UserContextMock.cs",
@@ -353,3 +353,4 @@ internal sealed class UpgradePartsTests
         UpgradeGuide.Of("2.8.0", TemplateSource.SourcesVersion).ShouldContain($"to {TemplateSource.SourcesVersion}: ");
     }
 }
+
