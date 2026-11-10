@@ -25,7 +25,7 @@ using NamespaceRoot.ProductName.Capabilities.Persistence.Mongo;
 using NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
 //#endif
 //#if (Storage)
-using NamespaceRoot.ProductName.Common.Infrastructure.Storage;
+using NamespaceRoot.ProductName.Capabilities.Persistence.S3;
 //#endif
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Application;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.EntityFramework;

@@ -618,9 +618,7 @@
         {
           "condition": "(!Storage)",
           "exclude": [
-            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Storage/**",
             "src/common/NamespaceRoot.ProductName.Common/Exceptions/StorageException.cs",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/S3ObjectStorageTests.cs",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.S3/**",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests/**"
           ]

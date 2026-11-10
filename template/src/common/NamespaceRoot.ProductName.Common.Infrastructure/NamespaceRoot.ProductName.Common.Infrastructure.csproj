@@ -9,7 +9,6 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
         <!--#if (Storage) -->
-        <PackageReference Include="AWSSDK.S3" />
         <!--#endif -->
         <PackageReference Include="Hangfire.Core" />
         <PackageReference Include="MassTransit.RabbitMQ" />

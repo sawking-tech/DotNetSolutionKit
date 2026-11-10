@@ -7,7 +7,7 @@ using Moq;
 using NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Notifications;
 //#if (Storage)
-using NamespaceRoot.ProductName.Common.Infrastructure.Storage;
+using NamespaceRoot.ProductName.Capabilities.Persistence.S3;
 //#endif
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.Messaging.Consumers;
 

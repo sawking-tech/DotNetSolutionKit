@@ -18,6 +18,9 @@
       <!--#if (NotifyEmail) -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.csproj" />
       <!--#endif -->
+      <!--#if (Storage) -->
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3\NamespaceRoot.ProductName.Capabilities.Persistence.S3.csproj" />
+      <!--#endif -->
       <!--#if (ClickHouse) -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.csproj" />
       <!--#endif -->

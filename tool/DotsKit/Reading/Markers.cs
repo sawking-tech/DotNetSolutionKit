@@ -15,7 +15,7 @@ internal static class Markers
     /// <summary>The flags of the solution by what Common, the capabilities and the root have only with them.</summary>
     public static readonly IReadOnlyList<(string Flag, string Path)> SolutionFlags =
     [
-        ("Storage", "src/common/{P}.Common.Infrastructure/Storage"),
+        ("Storage", "src/capabilities/{P}.Capabilities.Persistence.S3"),
         ("ClickHouse", "src/capabilities/{P}.Capabilities.Analytics.ClickHouse"),
         ("MongoDB", "src/capabilities/{P}.Capabilities.Persistence.Mongo"),
         ("Infisical", "src/capabilities/{P}.Capabilities.Security.CredentialStore/Infisical*"),
