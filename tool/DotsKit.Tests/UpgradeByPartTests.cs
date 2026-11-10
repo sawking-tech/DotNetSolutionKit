@@ -17,12 +17,12 @@ internal sealed class UpgradeByPartTests
         UpgradeParts.Of($"src/services/{Orders}/{Orders}.API/Setup/ApplicationSetup.cs").ShouldBe(Orders);
         UpgradeParts.Of("src/common/Acme.Shop.Common/Domain/Entity.cs").ShouldBe("common/Acme.Shop.Common");
         UpgradeParts.Of("src/common/Directory.Build.props").ShouldBe(UpgradeParts.Common);
-        UpgradeParts.Of("src/capabilities/Acme.Shop.Capabilities.Mongo/MongoSetup.cs").ShouldBe(UpgradeParts.Capabilities);
+        UpgradeParts.Of("src/capabilities/Acme.Shop.Capabilities.Persistence.Mongo/MongoSetup.cs").ShouldBe(UpgradeParts.Capabilities);
         UpgradeParts.Of("src/Directory.Packages.props").ShouldBe(UpgradeParts.Shared);
         UpgradeParts.Of("src/services/Acme.Shop.All.sln").ShouldBe(UpgradeParts.Shared);
         UpgradeParts.Of("deploy/compose/compose.yml").ShouldBe(UpgradeParts.Shared);
         UpgradeParts.OrderablePartOf("src/common/Acme.Shop.Common.Infrastructure/Acme.Shop.Common.Infrastructure.csproj").ShouldBe("common/Acme.Shop.Common.Infrastructure");
-        UpgradeParts.OrderablePartOf("src/capabilities/Acme.Shop.Capabilities.ClickHouse/Acme.Shop.Capabilities.ClickHouse.csproj").ShouldBe(UpgradeParts.Capabilities);
+        UpgradeParts.OrderablePartOf("src/capabilities/Acme.Shop.Capabilities.Analytics.ClickHouse/Acme.Shop.Capabilities.Analytics.ClickHouse.csproj").ShouldBe(UpgradeParts.Capabilities);
         UpgradeParts.OrderablePartOf($"src/services/{Orders}/{Orders}.API/{Orders}.API.csproj").ShouldBeNull();
         UpgradeParts.OrderablePartOf("Directory.Build.props").ShouldBeNull();
     }
@@ -31,7 +31,7 @@ internal sealed class UpgradeByPartTests
     public void TheParts_AreTheSharedOneFirst_ThenTheServiceFoldersInOrder()
     {
         UpgradeParts.In([$"src/services/{Orders}/a.cs", "Directory.Build.props", $"src/services/{Billing}/b.cs", "src/common/Acme.Shop.Common.Web/w.cs",
-                "src/common/Acme.Shop.Common/c.cs", "src/capabilities/Acme.Shop.Capabilities.Mongo/m.cs"])
+                "src/common/Acme.Shop.Common/c.cs", "src/capabilities/Acme.Shop.Capabilities.Persistence.Mongo/m.cs"])
             .ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common", "common/Acme.Shop.Common.Web", UpgradeParts.Capabilities, Billing, Orders]);
     }
 
@@ -63,7 +63,7 @@ internal sealed class UpgradeByPartTests
     [Test]
     public void TheCapabilities_ByDefaultGoAfterTheProjectsOfCommon()
     {
-        string[] paths = ["src/common/Acme.Shop.Common.Infrastructure/i.cs", "src/capabilities/Acme.Shop.Capabilities.ClickHouse/c.cs",
+        string[] paths = ["src/common/Acme.Shop.Common.Infrastructure/i.cs", "src/capabilities/Acme.Shop.Capabilities.Analytics.ClickHouse/c.cs",
             "src/common/Acme.Shop.Common.Web/w.cs"];
 
         UpgradeParts.In(paths).ShouldBe([UpgradeParts.Shared, "common/Acme.Shop.Common.Infrastructure", "common/Acme.Shop.Common.Web", UpgradeParts.Capabilities]);
@@ -72,7 +72,7 @@ internal sealed class UpgradeByPartTests
     [Test]
     public void TheCapabilities_GoBeforeTheProjectOfCommonATypeLeavesToThem()
     {
-        string[] paths = ["src/common/Acme.Shop.Common.Infrastructure/i.cs", "src/capabilities/Acme.Shop.Capabilities.ClickHouse/c.cs",
+        string[] paths = ["src/common/Acme.Shop.Common.Infrastructure/i.cs", "src/capabilities/Acme.Shop.Capabilities.Analytics.ClickHouse/c.cs",
             "src/common/Acme.Shop.Common.Web/w.cs"];
         var references = new Dictionary<string, IReadOnlySet<string>>
         {
@@ -86,7 +86,7 @@ internal sealed class UpgradeByPartTests
     [Test]
     public void AProjectOfCommon_GoesBeforeTheCapabilitiesATypeLeavesToIt()
     {
-        string[] paths = ["src/common/Acme.Shop.Common.Domain/d.cs", "src/capabilities/Acme.Shop.Capabilities.ClickHouse/c.cs"];
+        string[] paths = ["src/common/Acme.Shop.Common.Domain/d.cs", "src/capabilities/Acme.Shop.Capabilities.Analytics.ClickHouse/c.cs"];
         var references = new Dictionary<string, IReadOnlySet<string>>
         {
             [UpgradeParts.Capabilities] = new HashSet<string> { "common/Acme.Shop.Common.Domain" },

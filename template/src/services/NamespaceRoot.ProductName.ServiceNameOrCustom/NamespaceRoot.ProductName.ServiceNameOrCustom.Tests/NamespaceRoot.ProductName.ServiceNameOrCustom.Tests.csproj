@@ -43,13 +43,13 @@
       <ProjectReference Include="../../../framework/NamespaceRoot.ProductName.Framework.Testing/NamespaceRoot.ProductName.Framework.Testing.csproj" />
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
       <!--#if (MongoDB) -->
-      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Mongo\NamespaceRoot.ProductName.Capabilities.Mongo.csproj" />
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.csproj" />
       <!--#endif -->
       <!--#if (NotifyEmail) -->
-      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Notifications\NamespaceRoot.ProductName.Capabilities.Notifications.csproj" />
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.csproj" />
       <!--#endif -->
       <!--#if (ClickHouse) -->
-      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.ClickHouse\NamespaceRoot.ProductName.Capabilities.ClickHouse.csproj" />
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.csproj" />
       <!--#endif -->
     </ItemGroup>
 

@@ -29,7 +29,7 @@
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
       <!--#if (SecretStore) -->
-      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Secrets\NamespaceRoot.ProductName.Capabilities.Secrets.csproj" />
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.csproj" />
       <!--#endif -->
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Web\NamespaceRoot.ProductName.Common.Web.csproj" />
       <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Application\NamespaceRoot.ProductName.ServiceNameOrCustom.Application.csproj" />

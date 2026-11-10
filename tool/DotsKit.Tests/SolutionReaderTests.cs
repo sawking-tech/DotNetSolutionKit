@@ -135,8 +135,8 @@ internal sealed class SolutionReaderTests
     {
         var files = Solution().WithService("Acme.Shop.Billing", 5001, "HangfireSettings", "S3", "MongoDB", "Email")
             .With("src/common/Acme.Shop.Common.Infrastructure/Storage/DependencyInjection.cs")
-            .With("src/capabilities/Acme.Shop.Capabilities.Mongo/Mongo.csproj")
-            .With("src/capabilities/Acme.Shop.Capabilities.Notifications/Notifications.csproj");
+            .With("src/capabilities/Acme.Shop.Capabilities.Persistence.Mongo/Mongo.csproj")
+            .With("src/capabilities/Acme.Shop.Capabilities.Messaging.Notifications/Notifications.csproj");
 
         var billing = Read(files).FindService("Billing")!;
 
@@ -192,7 +192,7 @@ internal sealed class SolutionReaderTests
             .With("deploy/k8s/namespace.yaml")
             .With(".opencode/rules.md")
             .With("src/services/Acme.Shop.Orders/Acme.Shop.Orders.Tests/Acme.Shop.Orders.Tests.csproj", "<PackageReference Include=\"xunit.v3\" />")
-            .With("src/capabilities/Acme.Shop.Capabilities.Secrets/VaultOptions.cs")
+            .With("src/capabilities/Acme.Shop.Capabilities.Security.CredentialStore/VaultOptions.cs")
             .With(".github/workflows/ci.yml");
 
         var solution = Read(files).SolutionArgs;

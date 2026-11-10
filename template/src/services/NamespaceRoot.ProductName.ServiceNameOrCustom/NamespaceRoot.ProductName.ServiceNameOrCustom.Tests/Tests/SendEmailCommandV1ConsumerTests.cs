@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using NamespaceRoot.ProductName.Capabilities.Notifications;
+using NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Notifications;
 //#if (Storage)
 using NamespaceRoot.ProductName.Common.Infrastructure.Storage;

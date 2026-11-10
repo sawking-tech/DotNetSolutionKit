@@ -16,10 +16,10 @@ internal static class Markers
     public static readonly IReadOnlyList<(string Flag, string Path)> SolutionFlags =
     [
         ("Storage", "src/common/{P}.Common.Infrastructure/Storage"),
-        ("ClickHouse", "src/capabilities/{P}.Capabilities.ClickHouse"),
-        ("MongoDB", "src/capabilities/{P}.Capabilities.Mongo"),
-        ("Infisical", "src/capabilities/{P}.Capabilities.Secrets/Infisical*"),
-        ("Vault", "src/capabilities/{P}.Capabilities.Secrets/Vault*"),
+        ("ClickHouse", "src/capabilities/{P}.Capabilities.Analytics.ClickHouse"),
+        ("MongoDB", "src/capabilities/{P}.Capabilities.Persistence.Mongo"),
+        ("Infisical", "src/capabilities/{P}.Capabilities.Security.CredentialStore/Infisical*"),
+        ("Vault", "src/capabilities/{P}.Capabilities.Security.CredentialStore/Vault*"),
         ("DiffApi", "src/common/{P}.Common.Web/Setup/SchemaDump.cs"),
         ("FeatureFlags", "src/common/{P}.Common/FeatureManagement"),
         ("HierarchyRules", "src/common/{P}.Common/Domain/IHierarchicalEntity.cs"),
@@ -30,7 +30,7 @@ internal static class Markers
     public const string AuditPath = "src/common/{P}.Common.Application/Auditing";
 
     /// <summary>The email channel of --Notify, in the capability of its own since 2.8.</summary>
-    public const string NotifyEmailPath = "src/capabilities/{P}.Capabilities.Notifications";
+    public const string NotifyEmailPath = "src/capabilities/{P}.Capabilities.Messaging.Notifications";
 
     public const string SqlServerPath = "src/common/{P}.Common.Infrastructure/Persistence/SqlServer";
     public const string ComposePath = "deploy/compose";

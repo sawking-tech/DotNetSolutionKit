@@ -134,7 +134,7 @@
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false",
-      "description": "MongoDB beside the main database: Capabilities.Mongo - the client, the service's database, readiness - referenced by the service"
+      "description": "MongoDB beside the main database: Capabilities.Persistence.Mongo - the client, the service's database, readiness - referenced by the service"
     },
     "Notify": {
       "type": "parameter",
@@ -584,22 +584,22 @@
         {
           "condition": "(!ClickHouse)",
           "exclude": [
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.ClickHouse/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.ClickHouse.Tests/**"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests/**"
           ]
         },
         {
           "condition": "(!MongoDB)",
           "exclude": [
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Mongo/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Mongo.Tests/**"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.Mongo/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests/**"
           ]
         },
         {
           "condition": "(!NotifyEmail)",
           "exclude": [
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Notifications/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Notifications.Tests/**"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests/**"
           ]
         },
         {
@@ -621,8 +621,8 @@
             "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Storage/**",
             "src/common/NamespaceRoot.ProductName.Common/Exceptions/StorageException.cs",
             "src/common/NamespaceRoot.ProductName.Common.Tests/Integration/S3ObjectStorageTests.cs",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Storage/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Storage.Tests/**"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.S3/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests/**"
           ]
         },
         {
@@ -661,23 +661,23 @@
         {
           "condition": "(!SecretStore)",
           "exclude": [
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/**"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/**"
           ]
         },
         {
           "condition": "(!Infisical)",
           "exclude": [
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets/Infisical*.cs",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/Secrets/SecretsConfigurationTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/Infisical*.cs",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Secrets/SecretsConfigurationTests.cs"
           ]
         },
         {
           "condition": "(!Vault)",
           "exclude": [
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets/Vault*.cs",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/Secrets/VaultConfigurationTests.cs",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/VaultSecretStoreTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/Vault*.cs",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Secrets/VaultConfigurationTests.cs",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/VaultSecretStoreTests.cs"
           ]
         },
         {
@@ -706,7 +706,7 @@
             "src/common/NamespaceRoot.ProductName.Common.Application/FeatureManagement/**",
             "src/common/NamespaceRoot.ProductName.Common.Web/FeatureManagement/**",
             "src/common/NamespaceRoot.ProductName.Common.Tests/FeatureManagement/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Secrets.Tests/Secrets/FeatureFlagsStoreOutageTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Secrets/FeatureFlagsStoreOutageTests.cs"
           ]
         },
         {

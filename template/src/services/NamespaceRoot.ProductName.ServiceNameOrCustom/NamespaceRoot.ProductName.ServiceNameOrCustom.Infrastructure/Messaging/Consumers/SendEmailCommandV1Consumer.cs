@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using NamespaceRoot.ProductName.Common.Application.Messaging.Consumers;
-using NamespaceRoot.ProductName.Capabilities.Notifications;
+using NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Notifications;
 using NamespaceRoot.ProductName.Common.Infrastructure.Messaging.Consumers;
 //#if (Storage)

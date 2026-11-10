@@ -16,13 +16,13 @@ using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramewor
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
 //#if (ClickHouse)
-using NamespaceRoot.ProductName.Capabilities.ClickHouse;
+using NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse;
 //#endif
 //#if (MongoDB)
-using NamespaceRoot.ProductName.Capabilities.Mongo;
+using NamespaceRoot.ProductName.Capabilities.Persistence.Mongo;
 //#endif
 //#if (NotifyEmail)
-using NamespaceRoot.ProductName.Capabilities.Notifications;
+using NamespaceRoot.ProductName.Capabilities.Messaging.Notifications;
 //#endif
 //#if (Storage)
 using NamespaceRoot.ProductName.Common.Infrastructure.Storage;
