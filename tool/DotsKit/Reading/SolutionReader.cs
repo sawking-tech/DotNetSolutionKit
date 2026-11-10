@@ -172,12 +172,12 @@ internal static partial class SolutionReader
         args = NotDefault(args, "Deploy", files.Exists(Markers.ComposePath) ? "compose" : files.Exists(Markers.KubernetesPath) ? "k8s" : "none");
         args = NotDefault(args, "Agent", files.Exists(Markers.ClaudePath) ? "claude" : files.Exists(Markers.OpenCodePath) ? "opencode" : "none");
         args = NotDefault(args, "TestFramework", Contains(files, ServicePath(Markers.TestsProject, prefix, firstService), Markers.XunitLine) ? "xunit" : "nunit");
-        foreach (var (flag, path) in Markers.SolutionFlags.Where(m => files.Exists(Markers.Of(m.Path, prefix))))
+        foreach (var (flag, paths) in Markers.SolutionFlags.Where(m => m.Paths.Any(p => files.Exists(Markers.Of(p, prefix)))))
         {
             args = args.With(flag, On);
         }
 
-        if (files.Exists(Markers.Of(Markers.NotifyEmailPath, prefix)))
+        if (Markers.NotifyEmailPaths.Any(p => files.Exists(Markers.Of(p, prefix))))
         {
             args = args.With("Notify", "email");
         }

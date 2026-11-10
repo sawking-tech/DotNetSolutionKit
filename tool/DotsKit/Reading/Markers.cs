@@ -12,25 +12,30 @@ internal static class Markers
     public const string Prefix = "{P}";
     public const string Service = "{S}";
 
-    /// <summary>The flags of the solution by what Common, the capabilities and the root have only with them.</summary>
-    public static readonly IReadOnlyList<(string Flag, string Path)> SolutionFlags =
+    /// <summary>
+    /// The flags of the solution by what Common, the capabilities and the root have only with them. The first
+    /// path of a flag is the layout since 3.0, the second the one of 2.x that init of a solution of an old
+    /// base still reads; the 2.x paths go with the 2.x support in 3.0.
+    /// </summary>
+    public static readonly IReadOnlyList<(string Flag, string[] Paths)> SolutionFlags =
     [
-        ("Storage", "src/capabilities/{P}.Capabilities.Persistence.S3"),
-        ("ClickHouse", "src/capabilities/{P}.Capabilities.Analytics.ClickHouse"),
-        ("MongoDB", "src/capabilities/{P}.Capabilities.Persistence.Mongo"),
-        ("Infisical", "src/capabilities/{P}.Capabilities.Security.CredentialStore/Infisical*"),
-        ("Vault", "src/capabilities/{P}.Capabilities.Security.CredentialStore/Vault*"),
-        ("DiffApi", "src/common/{P}.Common.Web/Setup/SchemaDump.cs"),
-        ("FeatureFlags", "src/common/{P}.Common/FeatureManagement"),
-        ("HierarchyRules", "src/common/{P}.Common/Domain/IHierarchicalEntity.cs"),
-        ("GitHubCiCd", ".github/workflows/ci.yml"),
+        ("Storage", ["src/capabilities/{P}.Capabilities.Persistence.S3", "src/common/{P}.Common.Infrastructure/Storage"]),
+        ("ClickHouse", ["src/capabilities/{P}.Capabilities.Analytics.ClickHouse", "src/capabilities/{P}.Capabilities.ClickHouse"]),
+        ("MongoDB", ["src/capabilities/{P}.Capabilities.Persistence.Mongo", "src/capabilities/{P}.Capabilities.Mongo"]),
+        ("Infisical", ["src/capabilities/{P}.Capabilities.Security.CredentialStore/Infisical*", "src/capabilities/{P}.Capabilities.Secrets/Infisical*"]),
+        ("Vault", ["src/capabilities/{P}.Capabilities.Security.CredentialStore/Vault*", "src/capabilities/{P}.Capabilities.Secrets/Vault*"]),
+        ("DiffApi", ["src/common/{P}.Common.Web/Setup/SchemaDump.cs"]),
+        ("FeatureFlags", ["src/common/{P}.Common/FeatureManagement"]),
+        ("HierarchyRules", ["src/common/{P}.Common/Domain/IHierarchicalEntity.cs"]),
+        ("GitHubCiCd", [".github/workflows/ci.yml"]),
     ];
 
     /// <summary>Audit leaves files only with the outbox, which is what the template turns it on with.</summary>
     public const string AuditPath = "src/common/{P}.Common.Application/Auditing";
 
-    /// <summary>The email channel of --Notify, in the capability of its own since 2.8.</summary>
-    public const string NotifyEmailPath = "src/capabilities/{P}.Capabilities.Messaging.Notifications";
+    /// <summary>The email channel of --Notify, in the capability of its own since 2.8; the second path is the 2.x layout, gone in 3.0.</summary>
+    public static readonly string[] NotifyEmailPaths =
+        ["src/capabilities/{P}.Capabilities.Messaging.Notifications", "src/capabilities/{P}.Capabilities.Notifications"];
 
     public const string SqlServerPath = "src/common/{P}.Common.Infrastructure/Persistence/SqlServer";
     public const string ComposePath = "deploy/compose";
