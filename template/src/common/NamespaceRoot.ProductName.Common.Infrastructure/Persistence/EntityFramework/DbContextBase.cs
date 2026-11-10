@@ -13,6 +13,9 @@ namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFram
     {
         private IDbContextTransaction? _currentTransaction;
 
+        // ADR-009 violation, tracked: the kernel calls the domain event pipeline directly (the
+        // completion calls below and the event cleanup on discard). Unhook through a neutral
+        // lifecycle notification: https://github.com/sawking-tech/DotNetSolutionKit/issues/223
         protected DbContextBase(DbContextOptions options)
             : base(options)
         {
