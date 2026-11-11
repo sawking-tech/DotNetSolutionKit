@@ -23,6 +23,7 @@ ST-Demo/
 │   │   ├── ST.Demo.Common.Web/              хост: конвейер, ошибки, Swagger, аутентификация
 │   │   ├── ST.Demo.Common.Testing/          тестовая оснастка, без тестового фреймворка
 │   │   └── ST.Demo.Common.Tests/            тесты Common
+│   ├── framework/                  собственные модули шаблона над чужими пакетами: ST.Demo.Framework.FeatureFlags с --FeatureFlags
 │   ├── capabilities/              проект на флаг, сгруппированы по системе: Persistence (база данных, Mongo, S3), Analytics (ClickHouse), Messaging (Notifications), Security (CredentialStore), рядом .Abstractions и .Tests
 │   └── services/
 │       ├── ST.Demo.All.sln      все проекты решения

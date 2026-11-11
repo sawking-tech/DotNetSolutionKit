@@ -11,7 +11,7 @@ using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 using NamespaceRoot.ProductName.Common.Web.Gateway;
 using NamespaceRoot.ProductName.Common.Web.Pagination;
 //#if (FeatureFlags)
-using NamespaceRoot.ProductName.Common.Web.FeatureManagement;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 //#endif
 using NamespaceRoot.ProductName.Common.Web.Swagger.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;

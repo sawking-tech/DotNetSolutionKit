@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace NamespaceRoot.ProductName.Common.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 
 /// <summary>
 /// Marks code that exists only because a feature flag does.

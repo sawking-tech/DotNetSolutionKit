@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 
-namespace NamespaceRoot.ProductName.Common.Tests.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags.Tests;
 
 /// <summary>
 /// Runs a test with a feature in a stated state.

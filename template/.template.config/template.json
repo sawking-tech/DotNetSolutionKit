@@ -703,10 +703,8 @@
         {
           "condition": "(!FeatureFlags)",
           "exclude": [
-            "src/common/NamespaceRoot.ProductName.Common/FeatureManagement/**",
-            "src/common/NamespaceRoot.ProductName.Common.Application/FeatureManagement/**",
-            "src/common/NamespaceRoot.ProductName.Common.Web/FeatureManagement/**",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/FeatureManagement/**",
+            "src/framework/NamespaceRoot.ProductName.Framework.FeatureFlags/**",
+            "src/framework/NamespaceRoot.ProductName.Framework.FeatureFlags.Tests/**",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Secrets/FeatureFlagsStoreOutageTests.cs"
           ]
         },

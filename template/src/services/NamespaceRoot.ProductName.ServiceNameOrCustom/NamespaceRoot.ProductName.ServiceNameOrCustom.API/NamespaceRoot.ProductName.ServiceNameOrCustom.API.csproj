@@ -35,6 +35,9 @@
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.csproj" />
       <!--#endif -->
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Web\NamespaceRoot.ProductName.Common.Web.csproj" />
+      <!--#if (FeatureFlags) -->
+      <ProjectReference Include="..\..\..\framework\NamespaceRoot.ProductName.Framework.FeatureFlags\NamespaceRoot.ProductName.Framework.FeatureFlags.csproj" />
+      <!--#endif -->
       <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Application\NamespaceRoot.ProductName.ServiceNameOrCustom.Application.csproj" />
       <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure\NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.csproj" />
     </ItemGroup>

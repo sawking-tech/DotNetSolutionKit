@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
-namespace NamespaceRoot.ProductName.Common.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 
 /// <summary>
 /// A feature as it stands right now: what was declared about it, what it currently evaluates to, and

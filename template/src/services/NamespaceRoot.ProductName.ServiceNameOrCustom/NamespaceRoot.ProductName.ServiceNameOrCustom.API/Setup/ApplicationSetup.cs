@@ -1,5 +1,5 @@
 //#if (FeatureFlags)
-using NamespaceRoot.ProductName.Common.Application.FeatureManagement;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 //#endif
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 //#if (DiffApi)

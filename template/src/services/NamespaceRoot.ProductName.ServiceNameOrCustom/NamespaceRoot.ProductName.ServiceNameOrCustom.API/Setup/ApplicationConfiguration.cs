@@ -1,6 +1,6 @@
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 //#if (FeatureFlags)
-using NamespaceRoot.ProductName.Common.Application.FeatureManagement;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 //#endif
 //#if (SecretStore)
 using NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
@@ -16,8 +16,8 @@ internal static class ApplicationConfiguration
         this IConfigurationBuilder builder, IHostEnvironment env, string[] args)
     {
 //#if (FeatureFlags)
-        // Platform feature flags, shipped from Common so every service reads the same file and a
-        // feature means one thing across the platform. First, so everything below can override it.
+        // Platform feature flags, shipped from the FeatureFlags module so every service reads the same
+        // file and a feature means one thing across the platform. First, so everything below can override it.
         builder.AddPlatformFeatures();
 
 //#endif

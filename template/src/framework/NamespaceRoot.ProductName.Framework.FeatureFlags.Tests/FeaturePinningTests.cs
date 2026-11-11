@@ -2,10 +2,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NamespaceRoot.ProductName.Common.Application.FeatureManagement;
-using NamespaceRoot.ProductName.Common.FeatureManagement;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 
-namespace NamespaceRoot.ProductName.Common.Tests.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags.Tests;
 
 /// <summary>
 /// A flag pinned in the shared file takes its value from the file, over the store and environment

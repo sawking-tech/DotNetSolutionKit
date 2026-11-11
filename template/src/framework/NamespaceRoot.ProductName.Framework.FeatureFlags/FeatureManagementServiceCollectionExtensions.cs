@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.FeatureManagement;
 
-namespace NamespaceRoot.ProductName.Common.Application.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 
 public static class FeatureManagementServiceCollectionExtensions
 {

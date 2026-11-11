@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace NamespaceRoot.ProductName.Common.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 
 /// <summary>
 /// Keys of the flags this platform's code reads.

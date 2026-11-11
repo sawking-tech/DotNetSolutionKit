@@ -1,8 +1,6 @@
-using NamespaceRoot.ProductName.Common.Application.FeatureManagement;
-using NamespaceRoot.ProductName.Common.FeatureManagement;
-using NamespaceRoot.ProductName.Framework.Testing;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 
-namespace NamespaceRoot.ProductName.Common.Tests.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags.Tests;
 
 /// <summary>
 /// A catalogue a test controls directly.

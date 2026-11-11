@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using NamespaceRoot.ProductName.Common.Application.FeatureManagement;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 using NamespaceRoot.ProductName.Common.Exceptions;
-using NamespaceRoot.ProductName.Common.FeatureManagement;
 using NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
 
 namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.Secrets;

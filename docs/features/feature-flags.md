@@ -14,8 +14,8 @@ services then disagree about the same feature, and a flag that spans them - a mi
 a redesign visible in three places - has to be set in three files, in the right order, without anyone
 forgetting the third.
 
-So flags live in a single `features.json` that ships from `Common`. It travels with the project
-reference, lands in every service's output, and is read by all of them. Each flag has one meaning and is
+So flags live in a single `features.json` that ships from the `Framework.FeatureFlags` module. It travels
+with the project reference, lands in every service's output, and is read by all of them. Each flag has one meaning and is
 changed in one place. Adding a flag that only the UI reacts to needs no code at all - a new entry in the
 file is the whole change.
 
@@ -68,7 +68,7 @@ Values resolve through `IConfiguration`, so they are layered in this order:
 
 ```mermaid
 flowchart LR
-    F["features.json<br/>ships from Common"] --> A["appsettings*.json"]
+    F["features.json<br/>ships from the module"] --> A["appsettings*.json"]
     A --> E["Environment variables<br/>Features__checkout.new-flow__enabled"]
     E --> S["External store<br/>optional: Infisical with -I"]
     S --> C["IFeatureCatalog"]
@@ -200,7 +200,7 @@ so a parallel run has nothing shared to race over and nothing left behind for th
 Two guard tests check that every constant in `FeatureKeys` names a flag that exists,
 and every declared key keeps the agreed shape.
 
-With a secret store (`-I` or `--Vault`), `FeatureFlagsStoreOutageTests` in `Common.Tests` runs the layers
+With a secret store (`-I` or `--Vault`), `FeatureFlagsStoreOutageTests` in `CredentialStore.Tests` runs the layers
 above end to end on the store's real configuration provider, with only the store faked: a flag set in the
 store decides, a change applies on the next read, a store that goes down leaves the flags as they were, a
 pinned flag keeps the file's value over the store, and a start with the store down does not happen.

@@ -63,6 +63,8 @@ flowchart BT
 | `Common.Testing` | Тестовые помощники, привязанные к аудит-pipeline: аудит-верификаторы и `TestCategories`; без тестового фреймворка | все перечисленные выше, `Framework.Testing` |
 | `Framework.Testing` | Переносимая тестовая система: тестовые контексты, тестовые серверы реальных СУБД решения (`PostgresDbTestExecutionContext`, `SqlServerDbTestExecutionContext`), `TestDatabase`, заглушки, проверки правил; без тестового фреймворка | `Common`, `Common.Application`, `Common.Infrastructure`, `Framework.DomainEvents`, модуль провайдера |
 | `Common.Tests` | Тесты `Common` | все перечисленные выше, `Common.Testing` |
+| `Framework.FeatureFlags`, с `--FeatureFlags` | Платформенные фича-флаги: общий каталог `features.json`, обвязка Microsoft.FeatureManagement, `GET /api/v1/features`, Swagger-фильтры для `[FeatureGate]`. На него ссылается сервис с флагом | ничего из `Common` |
+| `Framework.FeatureFlags.Tests` | Тесты фича-флагов | `Framework.FeatureFlags` |
 | `Capabilities.Messaging.Notifications` | Почта `--Notify email`: порт, транспорты SMTP и Graph, песочница. На него ссылается сервис с флагом, поэтому MailKit и Graph SDK есть только у этого сервиса | ничего из `Common` |
 | `Capabilities.Messaging.Notifications.Tests` | Тесты почты | `Capabilities.Messaging.Notifications`, `Common.Testing` |
 | `Capabilities.Persistence.Mongo` | MongoDB `--MongoDB`: хранилище, его настройки, проверка здоровья. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |

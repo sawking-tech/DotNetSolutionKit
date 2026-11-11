@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NamespaceRoot.ProductName.Common.Application.FeatureManagement;
-using NamespaceRoot.ProductName.Common.FeatureManagement;
 
-namespace NamespaceRoot.ProductName.Common.Web.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 
 /// <summary>
 /// The platform's feature flags: what exists, what is on, and where each value came from.

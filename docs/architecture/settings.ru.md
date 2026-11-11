@@ -2,7 +2,7 @@
 
 Сервис читает настройки из этих источников, каждый перекрывает предыдущие:
 
-1. `features.json` из Common, с `--FeatureFlags`;
+1. `features.json` из модуля `Framework.FeatureFlags`, с `--FeatureFlags`;
 2. `appsettings.json`, затем `appsettings.<Environment>.json`, затем `appsettings.Secrets.json` в `Local`;
 3. переменные окружения;
 4. хранилище секретов, с `-I` или `--Vault`: общая папка, затем папка сервиса

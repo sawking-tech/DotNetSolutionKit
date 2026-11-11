@@ -1,11 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using NamespaceRoot.ProductName.Common.Application.FeatureManagement;
-using NamespaceRoot.ProductName.Common.FeatureManagement;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 using NUnit.Framework;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Common.Tests.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags.Tests;
 
 /// <summary>
 /// The catalogue decides what every service believes about a feature. What is pinned here is the part

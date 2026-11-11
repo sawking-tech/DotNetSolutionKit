@@ -32,6 +32,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.Testing", "..\framework\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj", "{8F5B0E42-9C3D-4F6A-B4E7-2D6F8A0C3D59}"
 EndProject
+#if (FeatureFlags)
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.FeatureFlags", "..\framework\NamespaceRoot.ProductName.Framework.FeatureFlags\NamespaceRoot.ProductName.Framework.FeatureFlags.csproj", "{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.FeatureFlags.Tests", "..\framework\NamespaceRoot.ProductName.Framework.FeatureFlags.Tests\NamespaceRoot.ProductName.Framework.FeatureFlags.Tests.csproj", "{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}"
+EndProject
+#endif
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions.csproj", "{D4E8A3F1-5C27-4B69-9A03-8E1F6B2C7D50}"
 EndProject
 #if (NotifyEmail)
@@ -512,6 +518,32 @@ Global
 		{5D30102B-EE73-4ED4-B87D-F091FAC68989}.Release|x86.ActiveCfg = Release|Any CPU
 		{5D30102B-EE73-4ED4-B87D-F091FAC68989}.Release|x86.Build.0 = Release|Any CPU
 #endif
+#if (FeatureFlags)
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Debug|x64.Build.0 = Debug|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Debug|x86.Build.0 = Debug|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Release|x64.ActiveCfg = Release|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Release|x64.Build.0 = Release|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Release|x86.ActiveCfg = Release|Any CPU
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36}.Release|x86.Build.0 = Release|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Debug|x64.Build.0 = Debug|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Debug|x86.Build.0 = Debug|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Release|x64.ActiveCfg = Release|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Release|x64.Build.0 = Release|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Release|x86.ActiveCfg = Release|Any CPU
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482}.Release|x86.Build.0 = Release|Any CPU
+#endif
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -549,6 +581,10 @@ Global
 		{E59A3F27-8B14-4C96-A07D-3F81B2D94E6C} = {8519937F-6A2B-4441-9591-06640B035553}
 		{7B3D5E18-9F2A-4C6B-8D47-2E5A1F9C3B68} = {8519937F-6A2B-4441-9591-06640B035553}
 		{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91} = {8519937F-6A2B-4441-9591-06640B035553}
+#endif
+#if (FeatureFlags)
+		{2C7D9E14-3F6A-4B58-9D21-8E4C0A5B7F36} = {8519937F-6A2B-4441-9591-06640B035553}
+		{4E9A1B58-6D2F-4C73-A815-9B3C7E20D482} = {8519937F-6A2B-4441-9591-06640B035553}
 #endif
 	EndGlobalSection
 EndGlobal

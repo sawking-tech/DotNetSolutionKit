@@ -59,7 +59,7 @@ public static class SchemaHost
 //#if (FeatureFlags)
             // The feature list endpoint ships with the platform, so every service answers about flags
             // the same way instead of each writing its own endpoint.
-            mvc.AddApplicationPart(typeof(Common.Web.FeatureManagement.FeaturesController).Assembly);
+            mvc.AddApplicationPart(typeof(Framework.FeatureFlags.FeaturesController).Assembly);
 //#endif
         });
 

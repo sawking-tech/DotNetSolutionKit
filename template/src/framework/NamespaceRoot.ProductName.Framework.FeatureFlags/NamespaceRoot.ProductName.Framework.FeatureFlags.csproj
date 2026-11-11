@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      The platform's feature flags: the catalogue of FeatureDescriptor entries, the shared
+      features.json, the reading of the flags over Microsoft.FeatureManagement, and the Web
+      parts (the /api/v1/features endpoint and the Swagger filters for [FeatureGate]).
+      The template carries the module; the team edits the file and adds its FeatureKeys.
+      See the Readme and template/src/framework/README.md.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" />
+        <!-- IFeatureManager, [FeatureGate] and the snapshots are already written and tested; what we add
+             is the schema, the shared file and the source reporting, not another evaluation engine. -->
+        <PackageReference Include="Microsoft.FeatureManagement" />
+        <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" />
+        <!-- The [FeatureGate] filters and the FeaturesController shape the Swagger document. -->
+        <PackageReference Include="Swashbuckle.AspNetCore" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- The shared feature file: travels with the project reference and lands in the output of
+             everything that references the module, where FeatureConfigurationExtensions reads it. -->
+        <Content Include="features.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>features.json</TargetPath>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Common.Web registers the Swagger filters in its SwaggerSetup. -->
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.Common.Web</_Parameter1>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.Framework.FeatureFlags.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+</Project>

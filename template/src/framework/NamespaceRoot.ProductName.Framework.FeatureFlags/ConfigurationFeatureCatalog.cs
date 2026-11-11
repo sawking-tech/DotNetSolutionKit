@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using NamespaceRoot.ProductName.Common.FeatureManagement;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 
-namespace NamespaceRoot.ProductName.Common.Application.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 
 /// <summary>
 /// Reads the platform's features out of configuration on every call.

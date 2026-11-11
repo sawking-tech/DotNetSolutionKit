@@ -21,6 +21,7 @@ files=(
     "Dockerfile"
     "src/framework/*.Framework.DomainEvents/DomainEventDispatcher.cs"
     "src/framework/*.Framework.DomainEvents/Readme.md"
+    "?src/framework/*.Framework.FeatureFlags/Readme.md"
     "$common.Infrastructure/Persistence/EntityFramework/Events/DomainEventTransactionInterceptor.cs"
     "src/capabilities/*.Capabilities.Persistence/*/*SchemaGuard.cs"
     "$common.Web/Setup/PlatformWebHost.cs"

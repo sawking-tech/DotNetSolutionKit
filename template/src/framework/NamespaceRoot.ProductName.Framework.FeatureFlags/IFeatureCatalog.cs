@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
-using NamespaceRoot.ProductName.Common.FeatureManagement;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 
-namespace NamespaceRoot.ProductName.Common.Application.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 
 /// <summary>
 /// The platform's feature flags: what is declared, and what each one currently evaluates to.

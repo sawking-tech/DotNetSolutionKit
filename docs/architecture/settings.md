@@ -2,7 +2,7 @@
 
 A service reads its settings from these sources, each overriding the ones before it:
 
-1. `features.json` from Common, with `--FeatureFlags`;
+1. `features.json` from the `Framework.FeatureFlags` module, with `--FeatureFlags`;
 2. `appsettings.json`, then `appsettings.<Environment>.json`, then `appsettings.Secrets.json` in `Local`;
 3. environment variables;
 4. the secret store, with `-I` or `--Vault`: the shared folder, then the service's

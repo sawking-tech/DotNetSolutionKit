@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Text.Json;
-using NamespaceRoot.ProductName.Common.FeatureManagement;
+using NamespaceRoot.ProductName.Framework.FeatureFlags;
 using NUnit.Framework;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Common.Tests.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags.Tests;
 
 /// <summary>
 /// Keeps the constants and the file honest with each other.
@@ -22,7 +22,7 @@ public class FeatureKeysTests
     {
         var path = Path.Combine(AppContext.BaseDirectory, "features.json");
         File.Exists(path).ShouldBeTrue(
-            $"'{path}' should have been copied beside the tests — it ships from Common so every " +
+            $"'{path}' should have been copied beside the tests — it ships from the FeatureFlags module " +
             "service reads the same flags, and its absence means that copy is broken.");
 
         using var document = JsonDocument.Parse(File.ReadAllText(path));

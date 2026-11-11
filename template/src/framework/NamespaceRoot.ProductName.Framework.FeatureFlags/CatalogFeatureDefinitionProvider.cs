@@ -1,6 +1,6 @@
 using Microsoft.FeatureManagement;
 
-namespace NamespaceRoot.ProductName.Common.Application.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 
 /// <summary>
 /// Feeds <c>Microsoft.FeatureManagement</c> from the platform catalogue.

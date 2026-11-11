@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 
-namespace NamespaceRoot.ProductName.Common.Application.FeatureManagement;
+namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 
 /// <summary>
 /// Puts the platform's feature file into a service's configuration.
@@ -16,7 +16,7 @@ public static class FeatureConfigurationExtensions
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The file ships from <c>Common</c> and travels with the project reference, so it lands next to the
+    /// The file ships from this module and travels with the project reference, so it lands next to the
     /// assemblies rather than in the project directory. A plain relative path would not find it there:
     /// configuration resolves relative paths against the content root, which is the project directory
     /// under <c>dotnet run</c> and the application directory in a container. Anchoring the provider to
