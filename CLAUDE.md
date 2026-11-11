@@ -124,8 +124,11 @@ file-byte violations and C# style violations in the tool.
 
 ## Template and tool changes
 
-- Verify template changes on a generated solution with every affected flag on and off, `-warnaserror`,
-  and passing tests.
+- Verify a template change on a generated solution when it is ready for the PR, not at every step: a new
+  feature or flag is generated with every affected flag on and off, built `-warnaserror` and tested; a
+  refactor or a move of existing code is built and its tests run. The Samples rehearsal
+  (`.samples/generate.sh` of DotNetSolutionKit.Samples from the PR ref) always runs before the merge:
+  the showcase is public and every row of it must stay green.
 - A parameter's `replaces` rewrites every occurrence of its token, including inside a literal argument
   name ("--NamespaceRoot" becomes "--ST"): hold literal names in generated constant symbols and a bool in
   lowercase through a casing generated symbol. Replacement is a single pass — a value one symbol inserts
@@ -177,10 +180,9 @@ file-byte violations and C# style violations in the tool.
 - Definition of done: `template.yml` is green, behaviour tests accompany the change, docs and release notes
   are updated, generated-solution skills are updated where needed (`scaffold-service` first), and an agent
   that knows only the issue and diff reviews the PR.
-- A PR that changes service generation (tool `new`/`upgrade`, staging or manifest): rehearse
-  `generate.sh` of DotNetSolutionKit.Samples from the PR ref before merging. The script builds the
-  tool from the ref's sources, so a broken `dev` breaks the Samples regeneration the day the PR
-  lands; a check after the merge is an autopsy.
+- A PR that changes service generation (tool `new`/`upgrade`, staging or manifest) is the heavy case of
+  the rehearsal above: the script builds the tool from the ref's sources, so a broken `dev` breaks the
+  Samples regeneration the day the PR lands; a check after the merge is an autopsy.
 - Every commit on `dev` ships green: a red check is a stop, not noise. Find the cause to its root and fix it
   in the source, not where it surfaced. Never merge or push on top of red, and never restart a failed run
   without a fix — a bare restart only proves the failure is deterministic. Cancelled, stale or hung runs
@@ -205,5 +207,5 @@ decision exists only where a primary source records it: the author's words, a co
 file, the plan. Before acting on a claim, trace its justification; if the reason does not hold together
 and the plan says nothing about it, the claim is the model's invention wearing the author's name. That
 detection is a stop signal: ask the author what the claim rests on, or start a session over (a new
-context: `/clear`), reload it with `load-context`, and rebuild the picture from the sources - not
+context: `/new`), reload it with `load-context`, and rebuild the picture from the sources - not
 continue on the summary.
