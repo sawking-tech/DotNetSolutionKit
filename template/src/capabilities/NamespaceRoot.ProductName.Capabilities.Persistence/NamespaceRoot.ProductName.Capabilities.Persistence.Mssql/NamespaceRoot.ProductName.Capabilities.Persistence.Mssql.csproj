@@ -16,7 +16,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
-        <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+        <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions.csproj" />
     </ItemGroup>
 
     <ItemGroup>

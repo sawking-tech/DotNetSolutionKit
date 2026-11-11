@@ -1,6 +1,6 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
-using NamespaceRoot.ProductName.Common.Application.Persistence;
+using NamespaceRoot.ProductName.Capabilities.Persistence;
 using Npgsql;
 
 namespace NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;

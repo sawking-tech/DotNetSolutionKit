@@ -1,6 +1,6 @@
 using System.Data.Common;
 
-namespace NamespaceRoot.ProductName.Common.Application.Persistence;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence;
 
 /// <summary>
 /// The SQL of the outbox statistics query in one database's dialect: the totals of the outbox table and a
@@ -22,3 +22,4 @@ public interface IOutboxStatsDialect
     /// <summary>The @filter (null for none) and @sampleSize parameters of <see cref="SampleSql"/>.</summary>
     DbParameter[] SampleParameters(string? filter, int sampleSize);
 }
+

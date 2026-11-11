@@ -1,5 +1,5 @@
 using Shouldly;
-using NamespaceRoot.ProductName.Common.Application.Persistence;
+using NamespaceRoot.ProductName.Capabilities.Persistence;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Persistence;
 

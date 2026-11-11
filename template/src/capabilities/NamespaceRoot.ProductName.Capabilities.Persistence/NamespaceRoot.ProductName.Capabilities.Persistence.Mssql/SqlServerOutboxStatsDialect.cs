@@ -1,6 +1,6 @@
 using System.Data;
 using System.Data.Common;
-using NamespaceRoot.ProductName.Common.Application.Persistence;
+using NamespaceRoot.ProductName.Capabilities.Persistence;
 using Microsoft.Data.SqlClient;
 
 namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;

@@ -1,6 +1,6 @@
 using System.Data.Common;
 
-namespace NamespaceRoot.ProductName.Common.Application.Persistence;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence;
 
 /// <summary>
 /// A lock that lets one replica of a service migrate its schema while the others wait: taken on its own
@@ -17,3 +17,4 @@ public interface IMigrationLock
     /// <summary>Gives the lock back before the connection closes.</summary>
     void Release(DbConnection connection, long key);
 }
+

@@ -1,6 +1,6 @@
 using System.Data.Common;
 using Npgsql;
-using NamespaceRoot.ProductName.Common.Application.Persistence;
+using NamespaceRoot.ProductName.Capabilities.Persistence;
 
 namespace NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;
 

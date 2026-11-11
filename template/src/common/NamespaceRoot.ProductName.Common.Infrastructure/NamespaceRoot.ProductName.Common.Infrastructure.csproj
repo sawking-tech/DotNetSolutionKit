@@ -24,6 +24,9 @@
         <ProjectReference Include="..\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
         <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
         <ProjectReference Include="..\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+        <!-- TODO(#NNN): the kernel takes the persistence contracts from the capability until the
+             provider switch is inverted - the services must reference the module themselves. -->
+        <ProjectReference Include="..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions.csproj" />
         <!--#if (Database != "mssql") -->
         <ProjectReference Include="..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres.csproj" />
         <!--#endif -->

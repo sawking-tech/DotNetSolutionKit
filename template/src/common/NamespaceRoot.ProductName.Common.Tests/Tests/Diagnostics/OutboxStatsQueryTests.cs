@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using NamespaceRoot.ProductName.Common.Application.Persistence;
+using NamespaceRoot.ProductName.Capabilities.Persistence;
 using NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
 using NamespaceRoot.ProductName.Common.Infrastructure.Messaging;

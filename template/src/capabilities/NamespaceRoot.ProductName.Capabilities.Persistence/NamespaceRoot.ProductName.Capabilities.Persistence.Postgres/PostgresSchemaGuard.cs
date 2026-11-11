@@ -1,7 +1,7 @@
 // Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
 
 using System.Net.Sockets;
-using NamespaceRoot.ProductName.Common.Application.Persistence;
+using NamespaceRoot.ProductName.Capabilities.Persistence;
 using Npgsql;
 
 namespace NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;
