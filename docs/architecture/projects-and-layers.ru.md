@@ -60,7 +60,8 @@ flowchart BT
 | `Common.Application` | Абстракции приложения: диспетчер доменных событий, `IPermissionService`, интерфейсы сообщений и трассировки | `Common` |
 | `Common.Infrastructure` | Базовые классы EF Core, interceptor'ы, репозитории, миграции, schema guard, сообщения на MassTransit, безопасность | `Common`, `Common.Application`, `Common.Contracts` |
 | `Common.Web` | Веб-слой сервиса: pipeline, ошибки, валидация, Swagger, аутентификация, права, здоровье | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure` |
-| `Common.Testing` | Тестовая инфраструктура для тестов сервисов: контексты, тестовые базы, заглушки, проверки правил; без тестового фреймворка | все перечисленные выше |
+| `Common.Testing` | Тестовые помощники, привязанные к аудит-pipeline: аудит-верификаторы и `TestCategories`; без тестового фреймворка | все перечисленные выше, `Framework.Testing` |
+| `Framework.Testing` | Переносимая тестовая система: тестовые контексты, тестовые серверы реальных СУБД решения (`PostgresDbTestExecutionContext`, `SqlServerDbTestExecutionContext`), `TestDatabase`, заглушки, проверки правил; без тестового фреймворка | `Common`, `Common.Application`, `Common.Infrastructure`, `Framework.DomainEvents`, модуль провайдера |
 | `Common.Tests` | Тесты `Common` | все перечисленные выше, `Common.Testing` |
 | `Capabilities.Messaging.Notifications` | Почта `--Notify email`: порт, транспорты SMTP и Graph, песочница. На него ссылается сервис с флагом, поэтому MailKit и Graph SDK есть только у этого сервиса | ничего из `Common` |
 | `Capabilities.Messaging.Notifications.Tests` | Тесты почты | `Capabilities.Messaging.Notifications`, `Common.Testing` |
@@ -68,6 +69,7 @@ flowchart BT
 | `Capabilities.Persistence.Mongo.Tests` | Тесты MongoDB | `Capabilities.Persistence.Mongo`, `Common`, `Common.Testing` |
 | `Capabilities.Analytics.ClickHouse` | ClickHouse флага `--ClickHouse`: подключения, страж схемы, проверка готовности. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
 | `Capabilities.Analytics.ClickHouse.Tests` | Тесты ClickHouse | `Capabilities.Analytics.ClickHouse`, `Common`, `Common.Testing` |
+| `Capabilities.Persistence.Abstractions` | Контракты персистенции, общие для ядра и провайдеров: `IMigrationLock`, `IShortIdGenerator`, `IOutboxStatsDialect`, `MigrationLockKey` | ни на что |
 | `Capabilities.Persistence.S3` | Объектное хранилище флага `--Storage`: `IS3ObjectStorage`, его настройки, null-заглушка. На него ссылается сервис с флагом, поэтому AWS SDK есть только у этого сервиса | `Common` |
 | `Capabilities.Persistence.S3.Tests` | Тесты объектного хранилища | `Capabilities.Persistence.S3`, `Common`, `Common.Testing` |
 
@@ -79,7 +81,7 @@ flowchart BT
 | `<Service>.Application` | Use case'ы, обработчики доменных событий, порты, которые реализует инфраструктура | `Common`, `Common.Application`, `Common.Contracts`, домен |
 | `<Service>.Infrastructure` | `DbContext`, конфигурации сущностей, репозитории, фоновые задачи, консьюмеры | домен, `Common`, `Common.Application`, `Common.Contracts`, `Common.Infrastructure`, приложение |
 | `<Service>.API` | Контроллеры, `Program`, настройка хоста | проекты `Common`, приложение, инфраструктура |
-| `<Service>.Tests` | Тесты сервиса | `Common.Testing`, проекты `Common`, проекты сервиса |
+| `<Service>.Tests` | Тесты сервиса | `Framework.Testing`, `Common.Testing`, проекты `Common`, проекты сервиса |
 
 Проект API не ссылается на домен: он работает с доменом через слой приложения, который регистрирует и
 доменные сервисы. Слой приложения отвечает типами запросов и ответов из `Common.Contracts` и бросает

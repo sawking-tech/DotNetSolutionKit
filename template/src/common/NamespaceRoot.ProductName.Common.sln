@@ -53,6 +53,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.Tests.csproj", "{404B20DA-926C-4945-B891-4D6F41C5C146}"
 EndProject
 #endif
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions.csproj", "{D4E8A3F1-5C27-4B69-9A03-8E1F6B2C7D50}"
+EndProject
 #if (Storage)
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3\NamespaceRoot.ProductName.Capabilities.Persistence.S3.csproj", "{7B3D5E18-9F2A-4C6B-8D47-2E5A1F9C3B68}"
 EndProject
@@ -82,7 +84,11 @@ Global
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+ GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4E8A3F1-5C27-4B69-9A03-8E1F6B2C7D50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU.ActiveCfg
+		{D4E8A3F1-5C27-4B69-9A03-8E1F6B2C7D50}.Debug|Any CPU.Build.0 = Debug|Any CPU.Build.0
+		{D4E8A3F1-5C27-4B69-9A03-8E1F6B2C7D50}.Release|Any CPU.ActiveCfg = Release|Any CPU.ActiveCfg
+		{D4E8A3F1-5C27-4B69-9A03-8E1F6B2C7D50}.Release|Any CPU.Build.0 = Release|Any CPU.Build.0
 #if (SecretStore)
 		{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU.ActiveCfg
 		{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}.Debug|Any CPU.Build.0 = Debug|Any CPU.Build.0

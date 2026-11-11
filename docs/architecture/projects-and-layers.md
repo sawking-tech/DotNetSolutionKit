@@ -59,7 +59,8 @@ flowchart BT
 | `Common.Application` | Application abstractions: the domain event dispatcher, `IPermissionService`, messaging and tracing interfaces | `Common` |
 | `Common.Infrastructure` | EF Core base classes, interceptors, repositories, migrations, the schema guard, messaging on MassTransit, security | `Common`, `Common.Application`, `Common.Contracts` |
 | `Common.Web` | The web layer of a service: pipeline, errors, validation, Swagger, authentication, permissions, health | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure` |
-| `Common.Testing` | Test infrastructure for the services' tests: the test contexts, the test databases, stubs, rule checks; no test framework | all of the above |
+| `Common.Testing` | Test helpers tied to the audit pipeline: the audit verifiers and `TestCategories`; no test framework | all of the above, `Framework.Testing` |
+| `Framework.Testing` | The portable testing harness: the test contexts, the real-database test servers of the solution's database (`PostgresDbTestExecutionContext`, `SqlServerDbTestExecutionContext`), `TestDatabase`, the stubs, the rule checks; no test framework | `Common`, `Common.Application`, `Common.Infrastructure`, `Framework.DomainEvents`, the provider module |
 | `Common.Tests` | The tests of `Common` | all of the above, `Common.Testing` |
 | `Capabilities.Messaging.Notifications` | Email of `--Notify email`: the port, the SMTP and Graph transports, the sandbox. A service with the flag references it, so only that service carries MailKit and the Graph SDK | nothing of `Common` |
 | `Capabilities.Messaging.Notifications.Tests` | The tests of email | `Capabilities.Messaging.Notifications`, `Common.Testing` |
@@ -67,6 +68,7 @@ flowchart BT
 | `Capabilities.Persistence.Mongo.Tests` | The tests of MongoDB | `Capabilities.Persistence.Mongo`, `Common`, `Common.Testing` |
 | `Capabilities.Analytics.ClickHouse` | ClickHouse of `--ClickHouse`: connections, the schema guard, the readiness check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
 | `Capabilities.Analytics.ClickHouse.Tests` | The tests of ClickHouse | `Capabilities.Analytics.ClickHouse`, `Common`, `Common.Testing` |
+| `Capabilities.Persistence.Abstractions` | The persistence contracts the kernel and the providers share: `IMigrationLock`, `IShortIdGenerator`, `IOutboxStatsDialect`, `MigrationLockKey` | nothing |
 | `Capabilities.Persistence.S3` | Object storage of `--Storage`: `IS3ObjectStorage`, its settings, the null double. A service with the flag references it, so only that service carries the AWS SDK | `Common` |
 | `Capabilities.Persistence.S3.Tests` | The tests of object storage | `Capabilities.Persistence.S3`, `Common`, `Common.Testing` |
 
@@ -78,7 +80,7 @@ flowchart BT
 | `<Service>.Application` | Use cases, domain event handlers, ports the infrastructure implements | `Common`, `Common.Application`, `Common.Contracts`, the domain |
 | `<Service>.Infrastructure` | The `DbContext`, entity configurations, repositories, jobs, consumers | the domain, `Common`, `Common.Application`, `Common.Contracts`, `Common.Infrastructure`, the application |
 | `<Service>.API` | Controllers, `Program`, the host setup | the `Common` projects, the application, the infrastructure |
-| `<Service>.Tests` | The service's tests | `Common.Testing`, the `Common` projects, the service's projects |
+| `<Service>.Tests` | The service's tests | `Framework.Testing`, `Common.Testing`, the `Common` projects, the service's projects |
 
 The API project does not reference the domain: it works with the domain through the application layer,
 which registers the domain services too. The application layer answers with the request and response

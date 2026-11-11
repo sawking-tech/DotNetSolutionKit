@@ -3,10 +3,10 @@
 Which kind of test a piece of code gets, and why most of them run on an in-memory database:
 [ADR-005](../adr/005-testing-a-service.md). This page is how to start.
 
-The service's test project references `Common.Testing`: the test contexts, the test databases of the solution's database,
-stubs for time and the user, and the rule checks. It carries no test framework; the service's test
-project picks one, and sets `TestSkip.Handler` to how that framework skips a test. `Common.Tests` is the
-test project of `Common` itself.
+The service's test project references `Framework.Testing` and `Common.Testing`: the test contexts, the real-database
+test servers of the solution's database, the audit verifiers, stubs for time and the user, and the rule checks.
+They carry no test framework; the service's test project picks one, and sets `TestSkip.Handler` to how that
+framework skips a test. `Common.Tests` is the test project of `Common` itself.
 
 `--TestFramework xunit` generates the service's tests on xUnit v3 instead of NUnit; the infrastructure
 is the same, and so are the tests. One file in the test project, `TestFramework.cs`, knows the framework:
