@@ -2,13 +2,12 @@ using System.Data;
 using LinqSpecs;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 using NamespaceRoot.ProductName.Common.Domain.Specifications;
-using NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Specifications;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.SqlServer;
+using NamespaceRoot.ProductName.Common.Tests.Integration;
 using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Integration;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.Tests.Integration;
 
 /// <summary>
 /// The SQL Server pieces against a real SQL Server, from <c>TEST_SQLSERVER</c>, in a database of the fixture's

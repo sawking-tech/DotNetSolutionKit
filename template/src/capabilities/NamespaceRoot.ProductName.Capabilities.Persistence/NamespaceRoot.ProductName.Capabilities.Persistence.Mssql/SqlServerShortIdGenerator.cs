@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using NamespaceRoot.ProductName.Common.Application.Persistence;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.SqlServer;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 
 /// <summary>
 /// <see cref="IShortIdGenerator"/> on a SQL Server sequence, read through the connection of

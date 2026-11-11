@@ -3,7 +3,7 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.SqlServer;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 
 /// <summary>
 /// The schema guard on SQL Server: a schema is either empty or owned by the service that claims it, by the

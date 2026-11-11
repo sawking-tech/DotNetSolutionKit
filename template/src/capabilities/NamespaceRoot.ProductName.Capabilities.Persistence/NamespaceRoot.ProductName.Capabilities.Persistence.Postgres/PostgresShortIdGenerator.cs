@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Application.Persistence;
 using Npgsql;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.Postgres;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;
 
 /// <summary>
 /// <see cref="IShortIdGenerator"/> on a PostgreSQL sequence, read through the connection of

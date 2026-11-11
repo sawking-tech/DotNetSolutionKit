@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using LinqSpecs;
 using NamespaceRoot.ProductName.Common.Domain.Specifications;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Specifications;
+using NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;
 
 namespace NamespaceRoot.ProductName.Framework.Testing.Stubs;
 

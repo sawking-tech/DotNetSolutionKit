@@ -4,7 +4,7 @@ using NamespaceRoot.ProductName.Common.Domain.Specifications;
 using LinqSpecs;
 using Microsoft.EntityFrameworkCore;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Specifications;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;
 
 /// <summary>
 /// PostgreSQL implementation for case-insensitive search using Npgsql ILIKE.

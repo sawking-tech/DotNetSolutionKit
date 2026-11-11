@@ -24,6 +24,12 @@
         <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
         <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
         <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+        <!--#if (Database != "mssql") -->
+        <ProjectReference Include="..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres.csproj" />
+        <!--#endif -->
+        <!--#if (Database == "mssql") -->
+        <ProjectReference Include="..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.csproj" />
+        <!--#endif -->
         <ProjectReference Include="..\NamespaceRoot.ProductName.Framework.DomainEvents\NamespaceRoot.ProductName.Framework.DomainEvents.csproj" />
     </ItemGroup>
 

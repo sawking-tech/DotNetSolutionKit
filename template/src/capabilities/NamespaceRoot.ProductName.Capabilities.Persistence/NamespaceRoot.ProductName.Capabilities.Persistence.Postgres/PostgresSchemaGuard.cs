@@ -1,10 +1,10 @@
 // Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
 
 using System.Net.Sockets;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
+using NamespaceRoot.ProductName.Common.Application.Persistence;
 using Npgsql;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.Postgres;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;
 
 /// <summary>
 /// Provides PostgreSQL-specific safety checks for database schema isolation across microservices.
@@ -38,7 +38,7 @@ public static class PostgresSchemaGuard
             // the second replica wait and then find everything in place.
             using (var cmd = new NpgsqlCommand("SELECT pg_advisory_xact_lock(@key)", conn, transaction))
             {
-                cmd.Parameters.AddWithValue("key", MigrationRunner.ComputeLockKey($"schema-guard:{schemaName}"));
+                cmd.Parameters.AddWithValue("key", MigrationLockKey.Compute($"schema-guard:{schemaName}"));
                 cmd.ExecuteNonQuery();
             }
 

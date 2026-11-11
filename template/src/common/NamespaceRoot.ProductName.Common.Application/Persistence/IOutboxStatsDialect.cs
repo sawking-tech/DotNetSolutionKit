@@ -1,9 +1,9 @@
 using System.Data.Common;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
+namespace NamespaceRoot.ProductName.Common.Application.Persistence;
 
 /// <summary>
-/// The SQL of <see cref="OutboxStatsQuery"/> in one database's dialect: the totals of the outbox table and a
+/// The SQL of the outbox statistics query in one database's dialect: the totals of the outbox table and a
 /// sample of its latest rows.
 /// </summary>
 /// <remarks>
@@ -11,7 +11,7 @@ namespace NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
 /// (0001-01-01) for rows that haven't been delivered yet, so a "pending" row is one with "SentTime" at or
 /// before 1900-01-01, in every dialect.
 /// </remarks>
-internal interface IOutboxStatsDialect
+public interface IOutboxStatsDialect
 {
     /// <summary>Pending, Sent, OldestPendingAt and LastSentAt of <paramref name="outboxTable"/>, one row.</summary>
     string TotalsSql(string outboxTable);

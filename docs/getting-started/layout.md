@@ -23,7 +23,7 @@ ST-Demo/
 │   │   ├── ST.Demo.Common.Web/              the host: pipeline, errors, Swagger, authentication
 │   │   ├── ST.Demo.Common.Testing/          the test harness, with no test framework
 │   │   └── ST.Demo.Common.Tests/            the tests of Common
-│   ├── capabilities/              a project per flag, grouped by system: Persistence (Mongo, S3), Analytics (ClickHouse), Messaging (Notifications), Security (CredentialStore), each with .Abstractions and .Tests beside it
+│   ├── capabilities/              a project per flag, grouped by system: Persistence (the database, Mongo, S3), Analytics (ClickHouse), Messaging (Notifications), Security (CredentialStore), each with .Abstractions and .Tests beside it
 │   └── services/
 │       ├── ST.Demo.All.sln      every project of the solution
 │       └── ST.Demo.Orders/      one service, four projects (below)

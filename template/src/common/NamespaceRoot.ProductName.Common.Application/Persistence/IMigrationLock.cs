@@ -1,6 +1,6 @@
 using System.Data.Common;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
+namespace NamespaceRoot.ProductName.Common.Application.Persistence;
 
 /// <summary>
 /// A lock that lets one replica of a service migrate its schema while the others wait: taken on its own

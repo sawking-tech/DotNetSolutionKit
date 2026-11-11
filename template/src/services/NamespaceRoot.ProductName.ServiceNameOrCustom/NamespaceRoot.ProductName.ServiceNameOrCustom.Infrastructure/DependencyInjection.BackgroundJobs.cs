@@ -4,7 +4,7 @@ using Hangfire.PostgreSql;
 //#endif
 //#if (Database == "mssql")
 using Hangfire.SqlServer;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.SqlServer;
+using NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 //#endif
 using Microsoft.Extensions.DependencyInjection;
 using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;

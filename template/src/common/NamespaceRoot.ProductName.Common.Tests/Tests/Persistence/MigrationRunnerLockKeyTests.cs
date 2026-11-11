@@ -1,5 +1,5 @@
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
 using Shouldly;
+using NamespaceRoot.ProductName.Common.Application.Persistence;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Persistence;
 
@@ -9,8 +9,8 @@ public class MigrationRunnerLockKeyTests
     [Test]
     public void ComputeLockKey_SameInput_ProducesSameKey()
     {
-        var key1 = MigrationRunner.ComputeLockKey("orders");
-        var key2 = MigrationRunner.ComputeLockKey("orders");
+        var key1 = MigrationLockKey.Compute("orders");
+        var key2 = MigrationLockKey.Compute("orders");
 
         key2.ShouldBe(key1);
     }
@@ -18,11 +18,11 @@ public class MigrationRunnerLockKeyTests
     [Test]
     public void ComputeLockKey_DifferentSchemas_ProduceDifferentKeys()
     {
-        var orders = MigrationRunner.ComputeLockKey("orders");
-        var payments = MigrationRunner.ComputeLockKey("payments");
-        var inventory = MigrationRunner.ComputeLockKey("inventory");
-        var notifications = MigrationRunner.ComputeLockKey("notifications");
-        var reports = MigrationRunner.ComputeLockKey("reports");
+        var orders = MigrationLockKey.Compute("orders");
+        var payments = MigrationLockKey.Compute("payments");
+        var inventory = MigrationLockKey.Compute("inventory");
+        var notifications = MigrationLockKey.Compute("notifications");
+        var reports = MigrationLockKey.Compute("reports");
 
         var keys = new[] { orders, payments, inventory, notifications, reports };
         keys.Distinct().Count().ShouldBe(keys.Length);
@@ -31,8 +31,8 @@ public class MigrationRunnerLockKeyTests
     [Test]
     public void ComputeLockKey_IsCaseSensitive()
     {
-        var lower = MigrationRunner.ComputeLockKey("orders");
-        var upper = MigrationRunner.ComputeLockKey("ORDERS");
+        var lower = MigrationLockKey.Compute("orders");
+        var upper = MigrationLockKey.Compute("ORDERS");
 
         upper.ShouldNotBe(lower);
     }

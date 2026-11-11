@@ -1,7 +1,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.SqlServer;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 
 /// <summary>What a SQL Server error means to the platform.</summary>
 public static class SqlServerErrors

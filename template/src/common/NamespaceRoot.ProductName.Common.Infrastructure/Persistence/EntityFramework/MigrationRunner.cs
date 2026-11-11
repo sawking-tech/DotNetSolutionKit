@@ -1,8 +1,7 @@
 using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NamespaceRoot.ProductName.Common.Application.Persistence;
 
 namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
 
@@ -18,7 +17,7 @@ public sealed class MigrationRunner
         Action<DbContext>? preMigrationHook = null)
     {
         var lockName = context.Model.GetDefaultSchema() ?? context.GetType().Name;
-        var lockKey = ComputeLockKey(lockName);
+        var lockKey = MigrationLockKey.Compute(lockName);
         var connectionString = context.Database.GetDbConnection().ConnectionString;
 
         logger.LogInformation(
@@ -90,11 +89,5 @@ public sealed class MigrationRunner
                     lockName, lockKey);
             }
         }
-    }
-
-    internal static long ComputeLockKey(string scope)
-    {
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(scope));
-        return BitConverter.ToInt64(hash, 0);
     }
 }

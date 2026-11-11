@@ -1,8 +1,9 @@
 using System.Data;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
+using NamespaceRoot.ProductName.Common.Application.Persistence;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.SqlServer;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 
 /// <summary>
 /// The migration lock on SQL Server: an application lock owned by the session, released explicitly and by

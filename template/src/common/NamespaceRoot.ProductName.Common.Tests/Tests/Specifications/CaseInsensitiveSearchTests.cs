@@ -1,12 +1,10 @@
-using System.Linq.Expressions;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Specifications;
 using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Specifications;
 
 /// <summary>
-/// Case-insensitive search: what the in-memory double selects, which is what service tests rely on, and
-/// the pattern the PostgreSQL implementation hands to ILIKE.
+/// Case-insensitive search: what the in-memory double selects, which is what service tests rely on.
+/// The pattern a provider hands to its server lives with the provider, in its capability's tests.
 /// </summary>
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
@@ -66,21 +64,5 @@ internal class CaseInsensitiveSearchTests
         var spec = new InMemoryCaseInsensitiveSearch().GetArraySpecification<Customer>(c => c.Tags, "adopter");
 
         Customers.AsQueryable().Where(spec.ToExpression()).Select(c => c.Name).ShouldBe(["Anna Smith"]);
-    }
-
-    [TestCase("smith", "%smith%", TestName = "A term is wrapped for a contains search")]
-    [TestCase("50%", "%50/%%", TestName = "A percent sign is escaped")]
-    [TestCase("a_b", "%a/_b%", TestName = "An underscore is escaped")]
-    [TestCase("a/b", "%a//b%", TestName = "The escape character is escaped")]
-    [TestCase("", "%", TestName = "An empty term matches everything")]
-    [TestCase(" a ", "% a %", TestName = "Spaces around the term are kept")]
-    public void Should_EscapeThePatternForIlike(string term, string expected)
-    {
-        var expression = new PostgresCaseInsensitiveSearch().GetSpecification<Customer>(c => c.Name, term).ToExpression();
-
-        var ilike = (MethodCallExpression)expression.Body;
-        ilike.Method.Name.ShouldBe("ILike");
-        ((ConstantExpression)ilike.Arguments[2]).Value.ShouldBe(expected);
-        ((ConstantExpression)ilike.Arguments[3]).Value.ShouldBe("/");
     }
 }

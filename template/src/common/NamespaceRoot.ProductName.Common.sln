@@ -41,6 +41,18 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.Tests.csproj", "{5D1B8F27-4C3A-4E96-B7A2-1E9C0D5F6A48}"
 EndProject
 #endif
+#if (Database != "mssql")
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Postgres", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres.csproj", "{C73A7E2E-E947-4C42-8721-B78890E886AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Postgres.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres.Tests.csproj", "{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}"
+EndProject
+#endif
+#if (Database == "mssql")
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Mssql", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.csproj", "{897452AF-6B58-474E-AF00-6CB86759CC1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.Tests.csproj", "{404B20DA-926C-4945-B891-4D6F41C5C146}"
+EndProject
+#endif
 #if (Storage)
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3\NamespaceRoot.ProductName.Capabilities.Persistence.S3.csproj", "{7B3D5E18-9F2A-4C6B-8D47-2E5A1F9C3B68}"
 EndProject
@@ -248,6 +260,58 @@ Global
 		{5D1B8F27-4C3A-4E96-B7A2-1E9C0D5F6A48}.Release|x64.Build.0 = Release|Any CPU
 		{5D1B8F27-4C3A-4E96-B7A2-1E9C0D5F6A48}.Release|x86.ActiveCfg = Release|Any CPU
 		{5D1B8F27-4C3A-4E96-B7A2-1E9C0D5F6A48}.Release|x86.Build.0 = Release|Any CPU
+#endif
+#if (Database != "mssql")
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Debug|x64.ActiveCfg = Debug|x64
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Debug|x64.Build.0 = Debug|x64
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Debug|x86.ActiveCfg = Debug|x86
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Debug|x86.Build.0 = Debug|x86
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Release|x64.ActiveCfg = Release|x64
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Release|x64.Build.0 = Release|x64
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Release|x86.ActiveCfg = Release|x86
+		{C73A7E2E-E947-4C42-8721-B78890E886AF}.Release|x86.Build.0 = Release|x86
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Debug|x64.ActiveCfg = Debug|x64
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Debug|x64.Build.0 = Debug|x64
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Debug|x86.ActiveCfg = Debug|x86
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Debug|x86.Build.0 = Debug|x86
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Release|x64.ActiveCfg = Release|x64
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Release|x64.Build.0 = Release|x64
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Release|x86.ActiveCfg = Release|x86
+		{C0DE72BE-ED34-4A2B-917E-5851B7CF0F32}.Release|x86.Build.0 = Release|x86
+#endif
+#if (Database == "mssql")
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Debug|x64.ActiveCfg = Debug|x64
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Debug|x64.Build.0 = Debug|x64
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Debug|x86.ActiveCfg = Debug|x86
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Debug|x86.Build.0 = Debug|x86
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Release|x64.ActiveCfg = Release|x64
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Release|x64.Build.0 = Release|x64
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Release|x86.ActiveCfg = Release|x86
+		{897452AF-6B58-474E-AF00-6CB86759CC1E}.Release|x86.Build.0 = Release|x86
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Debug|x64.ActiveCfg = Debug|x64
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Debug|x64.Build.0 = Debug|x64
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Debug|x86.ActiveCfg = Debug|x86
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Debug|x86.Build.0 = Debug|x86
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Release|Any CPU.Build.0 = Release|Any CPU
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Release|x64.ActiveCfg = Release|x64
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Release|x64.Build.0 = Release|x64
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Release|x86.ActiveCfg = Release|x86
+		{404B20DA-926C-4945-B891-4D6F41C5C146}.Release|x86.Build.0 = Release|x86
 #endif
 #if (ClickHouse)
 		{3CA2EB4C-A041-485C-837A-985EB0323B4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

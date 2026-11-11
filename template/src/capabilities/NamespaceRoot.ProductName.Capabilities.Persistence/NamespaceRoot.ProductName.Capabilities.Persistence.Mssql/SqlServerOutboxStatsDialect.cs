@@ -1,10 +1,11 @@
 using System.Data;
 using System.Data.Common;
+using NamespaceRoot.ProductName.Common.Application.Persistence;
 using Microsoft.Data.SqlClient;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 
-internal sealed class SqlServerOutboxStatsDialect : IOutboxStatsDialect
+public sealed class SqlServerOutboxStatsDialect : IOutboxStatsDialect
 {
     public string TotalsSql(string outboxTable) => $@"
                 SELECT

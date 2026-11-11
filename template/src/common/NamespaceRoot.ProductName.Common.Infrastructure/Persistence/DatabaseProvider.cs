@@ -4,14 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using NamespaceRoot.ProductName.Common.Application.Persistence;
 using NamespaceRoot.ProductName.Common.Domain.Specifications;
 using NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Specifications;
 //#if (Database != "mssql")
 using Npgsql;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.Postgres;
+using NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;
 //#endif
 //#if (Database != "postgres")
 using Microsoft.Data.SqlClient;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.SqlServer;
+using NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 //#endif
 
 namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence;

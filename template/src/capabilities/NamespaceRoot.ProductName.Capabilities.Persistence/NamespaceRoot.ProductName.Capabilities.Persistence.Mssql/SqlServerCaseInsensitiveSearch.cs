@@ -4,7 +4,7 @@ using LinqSpecs;
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Domain.Specifications;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Specifications;
+namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 
 /// <summary>
 /// SQL Server implementation of a case-insensitive "contains" search: <c>LIKE</c> under a case-insensitive
