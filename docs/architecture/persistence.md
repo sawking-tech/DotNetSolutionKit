@@ -151,9 +151,11 @@ behind the same seam, and only one of the two goes into a generated solution:
 
 Which of the two a solution has is known in one place, `DatabaseProvider` in `Common.Infrastructure`: the
 service and `Common` ask it for the EF provider, the schema guard, the migration lock, the outbox's lock
-statements and statistics, the search and the readable numbers, and never name a provider themselves.
-Hangfire keeps a storage package per database, so a service's `DependencyInjection.BackgroundJobs.cs` is the
-second place that knows it. A third database touches these two files and the implementations behind them.
+statements and statistics, the search and the readable numbers, and never name a provider themselves. The
+implementations behind those answers live in the database's capability module, `Capabilities.Persistence.Postgres`
+or `.Mssql`, which also carries the provider's EF package. Hangfire keeps a storage package per database, so a
+service's `DependencyInjection.BackgroundJobs.cs` is the second place that knows it. A third database is a new
+capability module beside these two files.
 
 What a team notices:
 
