@@ -22,7 +22,7 @@ files=(
     "src/framework/*.Framework.DomainEvents/DomainEventDispatcher.cs"
     "src/framework/*.Framework.DomainEvents/Readme.md"
     "$common.Infrastructure/Persistence/EntityFramework/Events/DomainEventTransactionInterceptor.cs"
-    "src/capabilities/*/*/*SchemaGuard.cs"
+    "src/capabilities/*.Capabilities.Persistence/*/*SchemaGuard.cs"
     "$common.Web/Setup/PlatformWebHost.cs"
     "$common/Domain/Specifications/QuerySpecification.cs"
     "$common.Infrastructure/Persistence/EntityFramework/EntityFrameworkRepository.cs"
