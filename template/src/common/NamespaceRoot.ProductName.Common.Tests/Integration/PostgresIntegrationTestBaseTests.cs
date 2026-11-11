@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 
+using NamespaceRoot.ProductName.Framework.Testing;
+using NamespaceRoot.ProductName.Framework.Testing.Integration;
+
 namespace NamespaceRoot.ProductName.Common.Tests.Integration;
 
 /// <summary>

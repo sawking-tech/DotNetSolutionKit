@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
 
-namespace NamespaceRoot.ProductName.Common.Tests;
+namespace NamespaceRoot.ProductName.Framework.Testing;
 
 /// <summary>
 /// The provider of the solution's database, for a context a unit test builds without connecting to it:

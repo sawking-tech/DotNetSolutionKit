@@ -2,9 +2,10 @@
 
     <!--
       The portable testing harness: execution contexts (TestExecutionContext and its ladder up to
-      InMemoryTestExecutionContext), the domain event test wiring, stubs for the ports that leave a
-      service and the code rules. Helpers tied to an external system (the PostgreSQL and SQL Server
-      test databases and the audit verifiers) stay in Common.Testing; see
+      InMemoryTestExecutionContext), the domain event test wiring, the real-database test servers
+      (Integration/Postgres and Integration/SqlServer, tied to the database provider module this
+      project references conditionally), stubs for the ports that leave a service and the code rules.
+      Helpers tied to the audit pipeline stay in Common.Testing; see
       template/src/framework/README.md.
     -->
     <PropertyGroup>

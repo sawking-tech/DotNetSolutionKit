@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 
-namespace NamespaceRoot.ProductName.Common.Tests;
+namespace NamespaceRoot.ProductName.Framework.Testing;
 
 /// <summary>
 /// SQL Server admin operations used by the template database and the per-test databases.

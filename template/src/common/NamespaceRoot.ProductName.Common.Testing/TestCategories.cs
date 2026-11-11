@@ -6,7 +6,7 @@ namespace NamespaceRoot.ProductName.Common.Tests;
 /// </summary>
 public static class TestCategories
 {
-    /// <summary>Needs a real PostgreSQL; see <see cref="Integration.Postgres"/>.</summary>
+    /// <summary>Needs a real PostgreSQL; see <c>Framework.Testing.Integration.Postgres</c>.</summary>
     public const string Integration = "Integration";
 
     /// <summary>

@@ -1,6 +1,6 @@
 using NamespaceRoot.ProductName.Framework.Testing;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Integration;
+namespace NamespaceRoot.ProductName.Framework.Testing.Integration;
 
 /// <summary>
 /// The PostgreSQL an integration test runs against, from the <c>TEST_POSTGRES</c> environment variable.

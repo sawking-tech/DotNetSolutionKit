@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 using NamespaceRoot.ProductName.Common.Domain.Specifications;
-using NamespaceRoot.ProductName.Common.Tests.Integration;
+using NamespaceRoot.ProductName.Framework.Testing.Integration;
 using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
 namespace NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.Tests.Integration;

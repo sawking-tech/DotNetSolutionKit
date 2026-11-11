@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 
+using NamespaceRoot.ProductName.Framework.Testing;
+using NamespaceRoot.ProductName.Framework.Testing.Integration;
+
 namespace NamespaceRoot.ProductName.Common.Tests.Integration;
 
 [TestFixture]

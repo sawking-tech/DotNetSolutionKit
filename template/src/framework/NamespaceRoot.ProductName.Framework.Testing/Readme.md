@@ -18,11 +18,15 @@ test wiring, stubs for the ports that leave a service, and the code rules.
 - `TestSkip`, `TestHelpers`, `TestDomainExecutionContext`: the small helpers every test project
   sets up or reaches for.
 
-What stays in `NamespaceRoot.ProductName.Common.Testing`, because it is tied to an external system
-or to the audit pipeline rather than to the way of testing:
-
 - `PostgresDbTestExecutionContext` / `SqlServerDbTestExecutionContext` with `Integration/Postgres`
-  and `Integration/SqlServer` — the real-database test servers.
+  and `Integration/SqlServer` — the real-database test servers, and `TestDatabase.UseSolutionDatabase`
+  that points a context at the database of the test. They are tied to the database provider module the
+  solution was generated with, so this project references it conditionally, the same way
+  `Common.Infrastructure` does.
+
+What stays in `NamespaceRoot.ProductName.Common.Testing`, because it is tied to the audit pipeline
+rather than to the way of testing:
+
 - The audit verifiers (`AuditMarkerVerifier`, `AuditRedactionVerifier`, `SetBasedWriteVerifier`)
   and `TestCategories` alongside them.
 

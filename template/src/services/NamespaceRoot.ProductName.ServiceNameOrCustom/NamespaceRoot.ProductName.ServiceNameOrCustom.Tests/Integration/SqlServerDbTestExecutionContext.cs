@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using NamespaceRoot.ProductName.Common.Tests;
-using NamespaceRoot.ProductName.Common.Tests.Integration;
+using NamespaceRoot.ProductName.Framework.Testing;
+using NamespaceRoot.ProductName.Framework.Testing.Integration;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.EntityFramework;
 
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.Tests.Integration;

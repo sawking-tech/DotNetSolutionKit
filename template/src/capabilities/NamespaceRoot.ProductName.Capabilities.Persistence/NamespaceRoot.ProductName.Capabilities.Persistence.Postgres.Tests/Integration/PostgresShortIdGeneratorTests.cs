@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;
-using PostgresServer = NamespaceRoot.ProductName.Common.Tests.Integration.Postgres;
+using PostgresServer = NamespaceRoot.ProductName.Framework.Testing.Integration.Postgres;
 
 namespace NamespaceRoot.ProductName.Capabilities.Persistence.Postgres.Tests.Integration;
 

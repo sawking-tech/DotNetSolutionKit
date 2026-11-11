@@ -18,6 +18,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
         <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Testing\NamespaceRoot.ProductName.Common.Testing.csproj" />
+        <ProjectReference Include="..\..\..\framework\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj" />
         <ProjectReference Include="..\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres\NamespaceRoot.ProductName.Capabilities.Persistence.Postgres.csproj" />
     </ItemGroup>
 

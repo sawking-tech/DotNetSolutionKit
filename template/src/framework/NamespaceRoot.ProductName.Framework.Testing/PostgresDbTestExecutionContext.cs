@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using Npgsql;
 
-namespace NamespaceRoot.ProductName.Common.Tests;
+namespace NamespaceRoot.ProductName.Framework.Testing;
 
 /// <summary>
 /// Low-level Postgres admin operations used by template management and per-test DB lifecycle.

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using static NamespaceRoot.ProductName.Common.Tests.Tests.Events.DomainEventPhasesOnSaveTests;
 using NamespaceRoot.ProductName.Framework.DomainEvents;
 using NamespaceRoot.ProductName.Framework.Testing;
+using NamespaceRoot.ProductName.Framework.Testing.Integration;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Integration;
 

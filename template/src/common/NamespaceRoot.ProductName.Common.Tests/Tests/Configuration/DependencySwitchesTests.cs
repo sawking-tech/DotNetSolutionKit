@@ -4,6 +4,8 @@ using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Exceptions;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
 
+using NamespaceRoot.ProductName.Framework.Testing;
+
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Configuration;
 
 /// <summary>

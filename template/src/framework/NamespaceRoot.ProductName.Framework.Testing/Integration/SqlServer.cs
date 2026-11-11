@@ -1,6 +1,6 @@
 using NamespaceRoot.ProductName.Framework.Testing;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Integration;
+namespace NamespaceRoot.ProductName.Framework.Testing.Integration;
 
 /// <summary>
 /// The SQL Server an integration test runs against, from the <c>TEST_SQLSERVER</c> environment variable.

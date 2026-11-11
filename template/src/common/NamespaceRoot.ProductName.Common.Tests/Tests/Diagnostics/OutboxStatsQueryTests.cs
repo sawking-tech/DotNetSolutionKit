@@ -4,6 +4,8 @@ using NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
 using NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
 
+using NamespaceRoot.ProductName.Framework.Testing;
+
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Diagnostics;
 
 /// <summary>
