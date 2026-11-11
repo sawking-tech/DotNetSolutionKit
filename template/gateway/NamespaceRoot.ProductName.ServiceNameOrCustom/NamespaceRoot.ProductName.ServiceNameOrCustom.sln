@@ -1,4 +1,4 @@
-﻿﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Common.Infrastructure", "..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj", "{D49EF91C-2795-4072-B609-CAD3831E0BC1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Common.Web", "..\..\common\NamespaceRoot.ProductName.Common.Web\NamespaceRoot.ProductName.Common.Web.csproj", "{67E0EB86-55EE-48AE-A394-BFDB6B2A7FCA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.Auth", "..\..\framework\NamespaceRoot.ProductName.Framework.Auth\NamespaceRoot.ProductName.Framework.Auth.csproj", "{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.DomainEvents", "..\..\framework\NamespaceRoot.ProductName.Framework.DomainEvents\NamespaceRoot.ProductName.Framework.DomainEvents.csproj", "{9A6C1F53-0D4E-4A7B-B5C8-3E7F1A2D4860}"
 EndProject
@@ -105,6 +107,18 @@ Global
 		{67E0EB86-55EE-48AE-A394-BFDB6B2A7FCA}.Release|x64.Build.0 = Release|Any CPU
 		{67E0EB86-55EE-48AE-A394-BFDB6B2A7FCA}.Release|x86.ActiveCfg = Release|Any CPU
 		{67E0EB86-55EE-48AE-A394-BFDB6B2A7FCA}.Release|x86.Build.0 = Release|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Debug|Any CPU|x64.ActiveCfg = Debug|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Debug|Any CPU|x64.Build.0 = Debug|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Debug|Any CPU|x86.ActiveCfg = Debug|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Debug|Any CPU|x86.Build.0 = Debug|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Release|Any CPU|x64.ActiveCfg = Release|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Release|Any CPU|x64.Build.0 = Release|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Release|Any CPU|x86.ActiveCfg = Release|Any CPU
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67}.Release|Any CPU|x86.Build.0 = Release|Any CPU
 		{9A6C1F53-0D4E-4A7B-B5C8-3E7F1A2D4860}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9A6C1F53-0D4E-4A7B-B5C8-3E7F1A2D4860}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A6C1F53-0D4E-4A7B-B5C8-3E7F1A2D4860}.Debug|Any CPU|x64.ActiveCfg = Debug|Any CPU
@@ -151,6 +165,7 @@ Global
 		{4F7D830D-0E4D-4CFD-8C93-B7350D840C63} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
 		{D49EF91C-2795-4072-B609-CAD3831E0BC1} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
 		{67E0EB86-55EE-48AE-A394-BFDB6B2A7FCA} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
+		{7C2D4E91-8A3F-4B6D-9E15-2F8A0C5D3B67} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
 		{9A6C1F53-0D4E-4A7B-B5C8-3E7F1A2D4860} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
 		{0B7D2A64-1E5F-4B8C-C6D9-4F8A0B1E5971} = {881589EE-639B-0A35-DBCE-5D94E4FC90C0}
 	EndGlobalSection

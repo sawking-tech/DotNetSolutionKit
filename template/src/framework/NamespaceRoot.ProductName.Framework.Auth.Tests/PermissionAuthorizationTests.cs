@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
-using NamespaceRoot.ProductName.Common.Web.Authorization;
+using NamespaceRoot.ProductName.Framework.Auth.Authorization;
 using NamespaceRoot.ProductName.Common.Web.Setup;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;

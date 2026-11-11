@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using NamespaceRoot.ProductName.Common.Exceptions;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 
-namespace NamespaceRoot.ProductName.Common.Web.Authentication;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authentication;
 
 /// <summary>
 /// Refuses a state-changing request that a token cookie would authenticate, unless it carries the

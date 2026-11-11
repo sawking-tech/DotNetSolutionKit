@@ -1,4 +1,4 @@
-using NamespaceRoot.ProductName.Common.Web.Authentication;
+using NamespaceRoot.ProductName.Framework.Auth.Authentication;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.Security.Handlers;
 
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;

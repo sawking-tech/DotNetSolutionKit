@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NamespaceRoot.ProductName.Common.Application.Authorization;
 using NamespaceRoot.ProductName.Common.Exceptions;
 
-namespace NamespaceRoot.ProductName.Common.Web.Authorization;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authorization;
 
 /// <summary>
 /// Refuses an action marked <see cref="RequiredPermissionsAttribute"/> unless the current user holds

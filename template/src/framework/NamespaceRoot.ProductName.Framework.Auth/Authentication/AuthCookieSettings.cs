@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 using NamespaceRoot.ProductName.Common.Exceptions;
 using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
 
-namespace NamespaceRoot.ProductName.Common.Web.Authentication;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authentication;
 
 /// <summary>
 /// How the token cookies are sent, stated by configuration for the deployment the service runs in.

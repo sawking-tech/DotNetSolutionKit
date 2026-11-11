@@ -7,7 +7,7 @@ using Moq;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Exceptions;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
-using NamespaceRoot.ProductName.Common.Web.Authentication;
+using NamespaceRoot.ProductName.Framework.Auth.Authentication;
 using NamespaceRoot.ProductName.Common.Web.Setup;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;

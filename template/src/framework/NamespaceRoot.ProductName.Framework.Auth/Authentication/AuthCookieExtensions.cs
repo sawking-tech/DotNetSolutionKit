@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 
-namespace NamespaceRoot.ProductName.Common.Web.Authentication;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authentication;
 
 /// <summary>
 /// The token cookies of the login, refresh and logout flow, in one place, so no endpoint writes cookie

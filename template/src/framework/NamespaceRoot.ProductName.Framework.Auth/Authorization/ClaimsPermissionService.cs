@@ -3,7 +3,7 @@ using NamespaceRoot.ProductName.Common.Application.Authorization;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 
-namespace NamespaceRoot.ProductName.Common.Web.Authorization;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authorization;
 
 /// <summary>
 /// Reads the current user's permissions from the <c>permissions</c> claims of the token.

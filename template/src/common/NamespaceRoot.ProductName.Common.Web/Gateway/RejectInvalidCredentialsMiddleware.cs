@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using NamespaceRoot.ProductName.Common.Web.Authentication;
+using NamespaceRoot.ProductName.Framework.Auth.Authentication;
 
 namespace NamespaceRoot.ProductName.Common.Web.Gateway;
 

@@ -1,6 +1,6 @@
 using System.Reflection;
 using Microsoft.OpenApi.Models;
-using NamespaceRoot.ProductName.Common.Web.Authorization;
+using NamespaceRoot.ProductName.Framework.Auth.Authorization;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace NamespaceRoot.ProductName.Common.Web.Swagger.Filters;

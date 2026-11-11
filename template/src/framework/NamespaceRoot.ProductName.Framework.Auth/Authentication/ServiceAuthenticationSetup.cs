@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 
-namespace NamespaceRoot.ProductName.Common.Web.Authentication;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authentication;
 
 /// <summary>
 /// Unified authentication setup for all services: one composite scheme. A request with a token - the

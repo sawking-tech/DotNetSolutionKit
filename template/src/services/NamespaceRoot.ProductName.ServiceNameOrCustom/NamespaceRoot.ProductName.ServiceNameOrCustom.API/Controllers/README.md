@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NamespaceRoot.ProductName.Common.Contracts.ServiceNameOrCustomService.Samples;
 using NamespaceRoot.ProductName.Common.Contracts.ServiceNameOrCustomService.Samples.Models;
-using NamespaceRoot.ProductName.Common.Web.Authorization;
+using NamespaceRoot.ProductName.Framework.Auth.Authorization;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Application.Services.Samples;
 
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.API.Controllers;

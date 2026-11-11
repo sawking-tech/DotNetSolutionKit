@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using NamespaceRoot.ProductName.Common.Application.Authorization;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Framework.Testing.Stubs;
-using NamespaceRoot.ProductName.Common.Web.Authorization;
+using NamespaceRoot.ProductName.Framework.Auth.Authorization;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;
 
