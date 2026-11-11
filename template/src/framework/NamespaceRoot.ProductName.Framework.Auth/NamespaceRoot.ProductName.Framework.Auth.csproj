@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      The platform's authentication and authorization over JwtBearer: the composite
+      ApiKey_Or_Jwt scheme, the token cookie settings with their CSRF contract, the
+      CSRF protection middleware, and the permission check ([RequiredPermissions] plus
+      the claims-based and remote IPermissionService implementations).
+      The template carries the module; the team registers its own API key handler and,
+      when it needs one, its own IPermissionService.
+      See the Readme and template/src/framework/README.md.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" />
+        <!-- The composite scheme routes a request with an API key header to the service's own
+             handler and everything else to JwtBearer. -->
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.Framework.Auth.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+</Project>

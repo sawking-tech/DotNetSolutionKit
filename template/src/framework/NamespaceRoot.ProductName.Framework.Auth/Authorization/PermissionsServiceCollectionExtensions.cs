@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using NamespaceRoot.ProductName.Common.Application.Authorization;
 using NamespaceRoot.ProductName.Common.Infrastructure.Http.Internal;
 
-namespace NamespaceRoot.ProductName.Common.Web.Authorization;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authorization;
 
 public static class PermissionsServiceCollectionExtensions
 {

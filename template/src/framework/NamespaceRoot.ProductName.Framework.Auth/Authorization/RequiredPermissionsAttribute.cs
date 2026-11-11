@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Web.Authorization;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authorization;
 
 /// <summary>
 /// Specifies that access to a controller or action requires the specified permissions

@@ -6,7 +6,7 @@ using NamespaceRoot.ProductName.Common.Application.Authorization;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Exceptions;
 
-namespace NamespaceRoot.ProductName.Common.Web.Authorization;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authorization;
 
 /// <summary>
 /// Asks a separate service for the current user's permissions, for a product whose permissions are kept

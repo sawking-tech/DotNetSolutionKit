@@ -2,7 +2,7 @@
 
 using System.Reflection;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
-using NamespaceRoot.ProductName.Common.Web.Authentication;
+using NamespaceRoot.ProductName.Framework.Auth.Authentication;
 using NamespaceRoot.ProductName.Common.Web.Gateway;
 using NamespaceRoot.ProductName.Common.Web.Setup;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;

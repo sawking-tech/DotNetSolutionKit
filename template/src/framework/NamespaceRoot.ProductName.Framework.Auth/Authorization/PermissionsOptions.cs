@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NamespaceRoot.ProductName.Common.Web.Authorization;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authorization;
 
 /// <summary>
 /// Where a service takes the user's permissions from: the <c>Permissions</c> section.
