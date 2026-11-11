@@ -32,7 +32,7 @@ files=(
     "$common.Web/Tracing/CorrelationIdMiddleware.cs"
     "$common.Infrastructure/Http/Internal/InternalServiceHttpExtensions.cs"
     "$common.Infrastructure/Messaging/README.md"
-    "$common.Testing/*DbTestExecutionContext.cs"
+    "src/framework/*.Framework.Testing/*DbTestExecutionContext.cs"
     "src/services/*/*.API/Controllers/README.md"
     "?$common.Web/Setup/SchemaDump.cs"
     "?$common.Web/Setup/SchemaOnlyMode.cs"
