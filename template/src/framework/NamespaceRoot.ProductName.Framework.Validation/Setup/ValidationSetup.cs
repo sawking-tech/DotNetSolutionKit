@@ -6,16 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using NamespaceRoot.ProductName.Common.Web.Pagination;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Results;
 
-namespace NamespaceRoot.ProductName.Common.Web.Setup;
+namespace NamespaceRoot.ProductName.Framework.Validation.Setup;
 
 /// <summary>
 /// FluentValidation for controllers: every validator in the given assemblies runs before the action,
 /// and an invalid request is answered with 422 and <c>ValidationProblemDetails</c>. Model binding errors
-/// and page bounds (<see cref="PaginationContract"/>) are answered the same way.
+/// are answered the same way.
 /// </summary>
 public static class ValidationSetup
 {
@@ -47,7 +46,6 @@ public static class ValidationSetup
                 .CreateValidationProblemDetails(
                     context.HttpContext, context.ModelState, StatusCodes.Status422UnprocessableEntity)));
 
-        services.Configure<MvcOptions>(options => options.Filters.Add<PaginationValidationFilter>());
         return services;
     }
 

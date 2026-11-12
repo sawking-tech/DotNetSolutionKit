@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using NamespaceRoot.ProductName.Common.Web.Setup;
+using NamespaceRoot.ProductName.Framework.Validation.Setup;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Validation;
+namespace NamespaceRoot.ProductName.Framework.Validation.Tests;
 
 /// <summary>
 /// What AddValidation promises a controller: its arguments are validated before the action runs.

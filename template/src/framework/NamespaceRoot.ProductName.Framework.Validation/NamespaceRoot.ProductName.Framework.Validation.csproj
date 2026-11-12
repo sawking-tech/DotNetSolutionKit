@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      The FluentValidation wiring over SharpGrip: AddValidation registers the validators
+      found in the given assemblies, validates action arguments automatically and answers
+      an invalid argument with 422 and ValidationProblemDetails. The validators themselves
+      stay with the team's code in Common.
+      See the Readme and template/src/framework/README.md.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+        <PackageReference Include="SharpGrip.FluentValidation.AutoValidation.Mvc" />
+    </ItemGroup>
+
+</Project>
