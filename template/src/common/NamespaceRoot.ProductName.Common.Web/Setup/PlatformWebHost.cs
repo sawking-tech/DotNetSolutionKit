@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -15,6 +16,7 @@ using NamespaceRoot.ProductName.Common.Web.Errors;
 using NamespaceRoot.ProductName.Common.Web.Health;
 using NamespaceRoot.ProductName.Common.Web.Pagination;
 using NamespaceRoot.ProductName.Framework.OpenApi.Swagger;
+using NamespaceRoot.ProductName.Framework.Validation.Setup;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace NamespaceRoot.ProductName.Common.Web.Setup;
@@ -56,7 +58,10 @@ public static class PlatformWebHost
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddPlatformPermissions(builder.Configuration);
 
+        // The validators and the 422 answer come from Framework.Validation; the page-bounds filter
+        // stays here beside PaginationContract, whose shape it guards.
         builder.Services.AddValidation(serviceAssembly);
+        builder.Services.Configure<MvcOptions>(options => options.Filters.Add<PaginationValidationFilter>());
         builder.SetupSwaggerPage(serviceAssembly, options => options.OperationFilter<PaginationOperationFilter>());
         builder.AddPlatformCors();
 

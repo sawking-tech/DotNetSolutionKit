@@ -23,17 +23,17 @@
         <PackageReference Include="Serilog.Enrichers.Environment" />
         <PackageReference Include="Serilog.Enrichers.Span" />
         <PackageReference Include="Serilog.Settings.Configuration" />
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-        <PackageReference Include="SharpGrip.FluentValidation.AutoValidation.Mvc" />
+        <PackageReference Include="FluentValidation" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
     </ItemGroup>
 
-    <!-- The web pipeline is assembled here (PlatformWebHost), and its auth parts live in the
-         mandatory Framework.Auth module (ADR-009): the kernel references the module the way
-         DbContextBase references Framework.DomainEvents. -->
+    <!-- The web pipeline is assembled here (PlatformWebHost), and its auth and validation wiring
+         live in the mandatory Framework modules (ADR-009): the kernel references the modules the
+         way DbContextBase references Framework.DomainEvents. -->
     <ItemGroup>
         <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Auth\NamespaceRoot.ProductName.Framework.Auth.csproj" />
         <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.OpenApi\NamespaceRoot.ProductName.Framework.OpenApi.csproj" />
+        <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Validation\NamespaceRoot.ProductName.Framework.Validation.csproj" />
     </ItemGroup>
 
     <!-- The Swagger document leaves the endpoints behind a closed [FeatureGate] out; the filters

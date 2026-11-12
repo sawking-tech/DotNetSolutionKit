@@ -29,6 +29,7 @@
       <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj" />
       <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.DomainEvents\NamespaceRoot.ProductName.Framework.DomainEvents.csproj" />
       <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.OpenApi\NamespaceRoot.ProductName.Framework.OpenApi.csproj" />
+      <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Validation\NamespaceRoot.ProductName.Framework.Validation.csproj" />
     </ItemGroup>
 
 </Project>

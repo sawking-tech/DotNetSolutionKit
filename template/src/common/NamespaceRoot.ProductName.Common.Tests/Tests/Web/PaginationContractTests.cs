@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using Moq;
 using NamespaceRoot.ProductName.Common.Domain.Querying;
 using NamespaceRoot.ProductName.Framework.OpenApi;
+using NamespaceRoot.ProductName.Framework.Validation.Setup;
 using NamespaceRoot.ProductName.Common.Web.Errors;
 using NamespaceRoot.ProductName.Common.Web.Pagination;
 using NamespaceRoot.ProductName.Common.Web.Setup;
@@ -34,6 +35,9 @@ internal sealed class PaginationContractTests
         builder.WebHost.UseTestServer();
         builder.Services.AddControllers().AddApplicationPart(typeof(PaginationContractTests).Assembly);
         builder.Services.AddValidation(typeof(PaginationContractTests).Assembly);
+        // The filter is the platform's to register beside AddValidation (PlatformWebHost does it);
+        // this host builds the pieces by hand, so it registers the pagination filter itself.
+        builder.Services.Configure<MvcOptions>(options => options.Filters.Add<PaginationValidationFilter>());
         builder.Services.AddPlatformErrorHandling(builder.Environment);
 
         _app = builder.Build();
