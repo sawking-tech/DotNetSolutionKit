@@ -57,12 +57,20 @@ flowchart BT
 |---|---|---|
 | `Common` | Доменное ядро: `Entity`, `AggregateRoot`, доменные события, `IUnitOfWork`, спецификации, пользователь и контекст выполнения, исключения | ни на что |
 | `Common.Contracts` | То, что пересекает границу сервиса: маршруты, модели запросов и ответов, константы проверок здоровья | `Common` |
-| `Common.Application` | Абстракции приложения: диспетчер доменных событий, `IPermissionService`, интерфейсы сообщений и трассировки | `Common` |
+| `Common.Application` | Абстракции приложения: диспетчер доменных событий, `IPermissionService`, интерфейсы сообщений | `Common` |
 | `Common.Infrastructure` | Базовые классы EF Core, interceptor'ы, репозитории, миграции, schema guard, сообщения на MassTransit, безопасность | `Common`, `Common.Application`, `Common.Contracts` |
 | `Common.Web` | Веб-слой сервиса: pipeline, ошибки, валидация, Swagger, аутентификация, права, здоровье | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure` |
 | `Common.Testing` | Тестовые помощники, привязанные к аудит-pipeline: аудит-верификаторы и `TestCategories`; без тестового фреймворка | все перечисленные выше, `Framework.Testing` |
 | `Framework.Testing` | Переносимая тестовая система: тестовые контексты, тестовые серверы реальных СУБД решения (`PostgresDbTestExecutionContext`, `SqlServerDbTestExecutionContext`), `TestDatabase`, заглушки, проверки правил; без тестового фреймворка | `Common`, `Common.Application`, `Common.Infrastructure`, `Framework.DomainEvents`, модуль провайдера |
 | `Common.Tests` | Тесты `Common` | все перечисленные выше, `Common.Testing` |
+| `Framework.Auth` | Аутентификация и авторизация платформы над JwtBearer: составная схема API-ключа или JWT, cookie токена с CSRF-контрактом, проверка прав | `Common`, `Common.Application`, `Common.Infrastructure` |
+| `Framework.Auth.Tests` | Тесты аутентификации и прав | `Framework.Auth` |
+| `Framework.OpenApi` | Стек Swagger: настройка документа, фильтры, дамп схемы `--ApiDiff` | `Common`, `Common.Contracts` |
+| `Framework.OpenApi.Tests` | Тесты стека Swagger | `Framework.OpenApi` |
+| `Framework.Validation` | Обвязка FluentValidation над SharpGrip: валидаторы сборки сервиса и ответ 422 | ничего из `Common` |
+| `Framework.Validation.Tests` | Тесты обвязки валидации | `Framework.Validation` |
+| `Framework.Observability` | Идентификатор корреляции: ambient-значение, имя заголовка, middleware, который читает или создаёт его на запрос, и обработчик, кладущий его в исходящий вызов | ничего из `Common` |
+| `Framework.Observability.Tests` | Тесты идентификатора корреляции | `Framework.Observability` |
 | `Framework.FeatureFlags`, с `--FeatureFlags` | Платформенные фича-флаги: общий каталог `features.json`, обвязка Microsoft.FeatureManagement, `GET /api/v1/features`, Swagger-фильтры для `[FeatureGate]`. На него ссылается сервис с флагом | ничего из `Common` |
 | `Framework.FeatureFlags.Tests` | Тесты фича-флагов | `Framework.FeatureFlags` |
 | `Capabilities.Messaging.Notifications` | Почта `--Notify email`: порт, транспорты SMTP и Graph, песочница. На него ссылается сервис с флагом, поэтому MailKit и Graph SDK есть только у этого сервиса | ничего из `Common` |

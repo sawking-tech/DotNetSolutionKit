@@ -65,7 +65,9 @@ they enqueued and the calls to other services, each line under the `CorrelationI
 
 The trace (`traceparent`) crosses the same boundaries. The identifier travels separately because a caller
 that sent its own searches by it, and the trace does not carry it past the first service.
-Inside the process the identifier of the running work is `Correlation.Current`.
+Inside the process the identifier of the running work is `Correlation.Current`. The value, the header
+name and the middleware live in `Framework.Observability`; the pipeline in `Common.Web` calls
+`UsePlatformTracing`.
 
 ## Behind a proxy
 
