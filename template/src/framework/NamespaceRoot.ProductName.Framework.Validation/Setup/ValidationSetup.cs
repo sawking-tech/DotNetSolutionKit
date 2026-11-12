@@ -1,3 +1,5 @@
+// Part of DotNetSolutionKit (https://dotskit.sawking.tech/). MIT License, Copyright (c) 2025 Vladimir Savkin.
+
 using System.Reflection;
 using FluentValidation;
 using FluentValidation.Results;
