@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace NamespaceRoot.ProductName.Common.Web.Swagger.Filters;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Swagger.Filters;
 
 /// <summary>
 /// Adds authentication method descriptions to authorized endpoints in Swagger docs.

@@ -7,7 +7,7 @@ using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Writers;
 using Swashbuckle.AspNetCore.Swagger;
 
-namespace NamespaceRoot.ProductName.Common.Web.Setup;
+namespace NamespaceRoot.ProductName.Framework.OpenApi;
 
 /// <summary>
 /// Writes the service's own OpenAPI document to a file and ends the run.

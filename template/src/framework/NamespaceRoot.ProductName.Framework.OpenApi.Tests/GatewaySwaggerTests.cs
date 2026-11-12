@@ -1,8 +1,8 @@
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Configuration;
-using NamespaceRoot.ProductName.Common.Web.Gateway;
+using NamespaceRoot.ProductName.Framework.OpenApi;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Tests;
 
 /// <summary>
 /// The services' Swagger documents the gateway lists come from its /swagger/&lt;cluster&gt;/ routes, and each

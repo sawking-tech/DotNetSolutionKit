@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using NamespaceRoot.ProductName.Common.Web.Swagger;
+using NamespaceRoot.ProductName.Framework.OpenApi.Swagger;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Tests;
 
 /// <summary>
 /// Which Swagger document a route lands in: its version's, or only "all" when it has none.

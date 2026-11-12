@@ -13,7 +13,9 @@ using NamespaceRoot.ProductName.Framework.Auth.Authentication;
 using NamespaceRoot.ProductName.Framework.Auth.Authorization;
 using NamespaceRoot.ProductName.Common.Web.Errors;
 using NamespaceRoot.ProductName.Common.Web.Health;
-using NamespaceRoot.ProductName.Common.Web.Swagger;
+using NamespaceRoot.ProductName.Common.Web.Pagination;
+using NamespaceRoot.ProductName.Framework.OpenApi.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace NamespaceRoot.ProductName.Common.Web.Setup;
 
@@ -55,7 +57,7 @@ public static class PlatformWebHost
         builder.Services.AddPlatformPermissions(builder.Configuration);
 
         builder.Services.AddValidation(serviceAssembly);
-        builder.SetupSwaggerPage(serviceAssembly);
+        builder.SetupSwaggerPage(serviceAssembly, options => options.OperationFilter<PaginationOperationFilter>());
         builder.AddPlatformCors();
 
         // How the token cookies are sent is the deployment's to state; a combination the browser or the

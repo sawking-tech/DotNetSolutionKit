@@ -33,6 +33,7 @@
          DbContextBase references Framework.DomainEvents. -->
     <ItemGroup>
         <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Auth\NamespaceRoot.ProductName.Framework.Auth.csproj" />
+        <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.OpenApi\NamespaceRoot.ProductName.Framework.OpenApi.csproj" />
     </ItemGroup>
 
     <!-- The Swagger document leaves the endpoints behind a closed [FeatureGate] out; the filters

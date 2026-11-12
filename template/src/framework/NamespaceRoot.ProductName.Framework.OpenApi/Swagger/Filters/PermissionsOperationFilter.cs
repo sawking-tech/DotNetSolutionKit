@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 using NamespaceRoot.ProductName.Framework.Auth.Authorization;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace NamespaceRoot.ProductName.Common.Web.Swagger.Filters;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Swagger.Filters;
 
 /// <summary>
 /// Adds required permissions from <see cref="RequiredPermissionsAttribute"/> to Swagger operation descriptions.

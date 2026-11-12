@@ -5,6 +5,7 @@ using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Framework.Auth.Authentication;
 using NamespaceRoot.ProductName.Common.Web.Gateway;
 using NamespaceRoot.ProductName.Common.Web.Setup;
+using NamespaceRoot.ProductName.Framework.OpenApi;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;
 using Serilog;
 

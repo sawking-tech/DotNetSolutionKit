@@ -26,5 +26,6 @@
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Web\NamespaceRoot.ProductName.Common.Web.csproj" />
       <ProjectReference Include="..\..\..\framework\NamespaceRoot.ProductName.Framework.Auth\NamespaceRoot.ProductName.Framework.Auth.csproj" />
+      <ProjectReference Include="..\..\..\framework\NamespaceRoot.ProductName.Framework.OpenApi\NamespaceRoot.ProductName.Framework.OpenApi.csproj" />
     </ItemGroup>
 </Project>

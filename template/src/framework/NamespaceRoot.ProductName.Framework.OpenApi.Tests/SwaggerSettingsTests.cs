@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.OpenApi.Models;
-using NamespaceRoot.ProductName.Common.Web.Swagger;
-using NamespaceRoot.ProductName.Common.Web.Swagger.Filters;
+using NamespaceRoot.ProductName.Framework.OpenApi.Swagger;
+using NamespaceRoot.ProductName.Framework.OpenApi.Swagger.Filters;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Tests;
 
 /// <summary>
 /// Swagger:PublicServers and Swagger:ScrubPatterns: checked at startup, and applied to the documents.

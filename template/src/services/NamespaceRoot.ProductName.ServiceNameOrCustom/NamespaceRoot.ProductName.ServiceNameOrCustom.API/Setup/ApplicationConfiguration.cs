@@ -7,6 +7,7 @@ using NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
 //#endif
 //#if (DiffApi)
 using NamespaceRoot.ProductName.Common.Web.Setup;
+using NamespaceRoot.ProductName.Framework.OpenApi;
 //#endif
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;
 

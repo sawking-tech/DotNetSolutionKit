@@ -1,7 +1,7 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace NamespaceRoot.ProductName.Common.Web.Swagger.Filters;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Swagger.Filters;
 
 /// <summary>
 /// Removes endpoints from versioned Swagger documents that don't belong to that version.
