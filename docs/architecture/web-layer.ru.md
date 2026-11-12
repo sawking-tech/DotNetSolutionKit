@@ -67,7 +67,8 @@ flowchart LR
 
 Трасса (`traceparent`) пересекает те же границы. Идентификатор передаётся отдельно, потому что
 вызывающий, приславший свой, ищет по нему, а трасса не несёт его дальше первого сервиса. Внутри процесса
-идентификатор текущей работы - `Correlation.Current`.
+идентификатор текущей работы - `Correlation.Current`. Значение, имя заголовка и middleware живут в
+`Framework.Observability`; pipeline в `Common.Web` зовёт `UsePlatformTracing`.
 
 <a id="behind-a-proxy"></a>
 ## За прокси
