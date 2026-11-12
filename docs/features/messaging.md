@@ -61,5 +61,5 @@ Registration, contracts, publishing, the outbox and consumers in detail:
 
 ## Tests
 
-`Common.Tests` covers the endpoint naming, command addresses, and the propagation of the actor and the
+`Capabilities.Messaging.RabbitMQ.Tests` covers the endpoint naming, command addresses, and the propagation of the actor and the
 trace. A consumer is tested like a service, see [ADR-005](../adr/005-testing-a-service.md).

@@ -82,6 +82,10 @@ flowchart BT
 | `Capabilities.Persistence.Abstractions` | Контракты персистенции, общие для ядра и провайдеров: `IMigrationLock`, `IShortIdGenerator`, `IOutboxStatsDialect`, `MigrationLockKey` | ни на что |
 | `Capabilities.Persistence.S3` | Объектное хранилище флага `--Storage`: `IS3ObjectStorage`, его настройки, null-заглушка. На него ссылается сервис с флагом, поэтому AWS SDK есть только у этого сервиса | `Common` |
 | `Capabilities.Persistence.S3.Tests` | Тесты объектного хранилища | `Capabilities.Persistence.S3`, `Common`, `Common.Testing` |
+| `Capabilities.Messaging.RabbitMQ` | Шина сообщений `--Messaging outbox` или `direct`: транспорт MassTransit на RabbitMQ, транзакционный outbox и его diagnostics-эндпоинт, консюмеры. На неё ссылается сервис с флагом, поэтому пакеты брокера есть только у этого сервиса | `Common`, `Common.Application`, `Common.Contracts`, `Common.Infrastructure`, `Capabilities.Persistence.Abstractions`, `Framework.Observability` |
+| `Capabilities.Messaging.RabbitMQ.Tests` | Тесты шины: перенос актора и трейса, имена эндпоинтов, диагностика outbox | `Capabilities.Messaging.RabbitMQ`, `Common`, `Common.Infrastructure`, `Framework.Testing` |
+| `Capabilities.Background.Hangfire` | Фоновые задачи `--Hangfire`: хранилище в схеме сервиса, дашборд, фильтры, переносящие актора и область доменных событий в задачу | `Common`, `Common.Infrastructure`, `Framework.DomainEvents`, `Framework.Observability` |
+| `Capabilities.Background.Hangfire.Tests` | Тесты фоновых задач: область доменных событий задачи и переносимый актор | `Capabilities.Background.Hangfire`, `Common`, `Framework.Testing` |
 
 ## Сервис
 

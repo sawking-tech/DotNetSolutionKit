@@ -67,5 +67,5 @@ CronJob, a hosted service, delayed messages on the bus).
 ## Tests
 
 A job only orchestrates; its tests mock the ports it calls and verify the calls, and the logic it calls is
-tested as a service. See [ADR-005](../adr/005-testing-a-service.md). `Common.Tests` covers the job
+tested as a service. See [ADR-005](../adr/005-testing-a-service.md). `Capabilities.Background.Hangfire.Tests` covers the job
 activator.
