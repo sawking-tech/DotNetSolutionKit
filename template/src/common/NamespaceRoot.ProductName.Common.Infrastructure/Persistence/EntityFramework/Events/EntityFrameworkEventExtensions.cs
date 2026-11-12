@@ -1,7 +1,6 @@
 using System.Reflection;
 using NamespaceRoot.ProductName.Framework.DomainEvents;
 using NamespaceRoot.ProductName.Framework.DomainEvents.Handlers;
-using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -59,27 +58,6 @@ public static class EntityFrameworkEventExtensions
         return services;
     }
 
-    /// <summary>
-    /// Makes Hangfire jobs publish their DI scope as the ambient domain-event scope, so events raised
-    /// by a background job reach the dispatcher instead of being dropped.
-    /// </summary>
-    /// <remarks>
-    /// Registration order against <c>AddHangfire</c> does not matter: Hangfire registers its own
-    /// activator with <c>TryAddSingleton</c> (so it yields to an earlier registration), and a later
-    /// one wins resolution outright.
-    /// </remarks>
-    public static IServiceCollection AddDomainEventJobActivator(this IServiceCollection services)
-    {
-        services.AddSingleton<JobActivator>(sp =>
-            new DomainEventJobActivator(sp.GetRequiredService<IServiceScopeFactory>()));
-
-        // Carries the operator who triggered a job on demand into the job itself, so work started
-        // from an internal endpoint is attributed to the person who started it rather than to the
-        // platform. Scheduled runs carry nothing and stay system-attributed.
-        services.AddSingleton<JobActorPropagationFilter>();
-
-        return services;
-    }
 
     /// <summary>
     /// Comprehensive registration of the domain event system.
@@ -91,8 +69,7 @@ public static class EntityFrameworkEventExtensions
         return services
             .AddDomainEventCore()
             .AddDomainEventHandlers(assemblies)
-            .AddDomainEventPersistence()
-            .AddDomainEventJobActivator();
+            .AddDomainEventPersistence();
     }
 
     /// <summary>

@@ -6,6 +6,9 @@ using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 //#endif
 using NamespaceRoot.ProductName.Common.Web.Setup;
 using NamespaceRoot.ProductName.Framework.OpenApi;
+//#if (Hangfire)
+using NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
+//#endif
 using NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.EntityFramework;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.EntityFramework.DataSeeding;

@@ -8,11 +8,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Domain.Context;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
+using NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Persistence;
+namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire.Tests;
 
 /// <summary>
 /// A job runs on a Hangfire thread long after the request that enqueued it is gone. Whatever the

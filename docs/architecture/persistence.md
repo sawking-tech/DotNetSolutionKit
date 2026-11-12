@@ -154,7 +154,7 @@ service and `Common` ask it for the EF provider, the schema guard, the migration
 statements and statistics, the search and the readable numbers, and never name a provider themselves. The
 implementations behind those answers live in the database's capability module, `Capabilities.Persistence.Postgres`
 or `.Mssql`, which also carries the provider's EF package. Hangfire keeps a storage package per database, so a
-service's `DependencyInjection.BackgroundJobs.cs` is the second place that knows it. A third database is a new
+the Hangfire module's `DependencyInjection.cs` is the second place that knows it. A third database is a new
 capability module beside these two files.
 
 What a team notices:

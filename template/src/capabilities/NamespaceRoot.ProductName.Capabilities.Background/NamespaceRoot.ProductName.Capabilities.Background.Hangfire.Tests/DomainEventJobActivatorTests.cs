@@ -1,9 +1,10 @@
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
+using NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 using Hangfire;
+using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Events;
+namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire.Tests;
 
 /// <summary>
 /// a Hangfire job runs with no HTTP context and outside the MassTransit consume filter, so

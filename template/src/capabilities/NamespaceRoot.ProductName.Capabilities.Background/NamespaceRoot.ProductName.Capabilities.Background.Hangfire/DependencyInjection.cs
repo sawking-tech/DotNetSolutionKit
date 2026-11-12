@@ -7,33 +7,31 @@ using Hangfire.SqlServer;
 using NamespaceRoot.ProductName.Capabilities.Persistence.Mssql;
 //#endif
 using Microsoft.Extensions.DependencyInjection;
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
-using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.EntityFramework;
 
-namespace NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure;
+namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 
 // Hangfire, with its storage in the service's own schema of the solution's database. Hangfire keeps a
-// storage package per database, so this part of the wiring is the one place of the service, beside
-// DatabaseProvider, that knows which database it is.
-public static partial class DependencyInjection
+// storage package per database, so this wiring and the database provider switch in Common are the two
+// places that know which database the solution uses.
+public static class DependencyInjection
 {
 //#if (Database == "mssql")
     // "Hangfire" in ASCII: one key for every service of the database.
     private const long HangfireInstallLockKey = 0x48616E6766697265;
 
 //#endif
-    /// <summary>
-    /// Register Hangfire and background job services.
-    /// </summary>
-    private static IServiceCollection AddBackgroundJobs(this IServiceCollection services, string connectionString)
+    /// <summary>Register Hangfire, its storage in the service's schema, and the job filters.</summary>
+    /// <param name="serviceName">The service that owns the schema, named in the guard's message.</param>
+    /// <param name="schemaName">The schema of the job storage, the service's own name and a suffix.</param>
+    public static IServiceCollection AddHangfireJobs(
+        this IServiceCollection services,
+        string connectionString,
+        string serviceName,
+        string schemaName)
     {
-        var serviceName = typeof(DomainMarker).Namespace!;
-        var hangfireSchemaName = $"{ServiceIdentifierDbContext.DefaultSchemaName}_hangfire";
-
         // Guard for Hangfire Schema
-        DatabaseProvider.EnsureExclusiveSchema(connectionString, hangfireSchemaName, serviceName);
+        DatabaseProvider.EnsureExclusiveSchema(connectionString, schemaName, serviceName);
 //#if (Database == "mssql")
 
         // Hangfire.SqlServer installs its tables in a transaction that deadlocks with another service
@@ -43,7 +41,7 @@ public static partial class DependencyInjection
         using (var connection = installLock.Connect(connectionString))
         {
             installLock.Acquire(connection, HangfireInstallLockKey);
-            SqlServerObjectsInstaller.Install(connection, hangfireSchemaName);
+            SqlServerObjectsInstaller.Install(connection, schemaName);
             installLock.Release(connection, HangfireInstallLockKey);
         }
 //#endif
@@ -58,14 +56,14 @@ public static partial class DependencyInjection
             config.UsePostgreSqlStorage(c =>
                 c.UseNpgsqlConnection(connectionString), new PostgreSqlStorageOptions
             {
-                SchemaName = hangfireSchemaName,
+                SchemaName = schemaName,
                 PrepareSchemaIfNecessary = true
             });
 //#endif
 //#if (Database == "mssql")
             config.UseSqlServerStorage(connectionString, new SqlServerStorageOptions
             {
-                SchemaName = hangfireSchemaName,
+                SchemaName = schemaName,
                 // Installed above, under the lock.
                 PrepareSchemaIfNecessary = false
             });
@@ -80,7 +78,9 @@ public static partial class DependencyInjection
 
         // Jobs run in a scope the domain event interceptors can see, so events a job raises are not
         // dropped; the filter carries the person who enqueued a job into it, for attribution.
-        services.AddDomainEventJobActivator();
+        services.AddSingleton<JobActivator>(sp =>
+            new DomainEventJobActivator(sp.GetRequiredService<IServiceScopeFactory>()));
+        services.AddSingleton<JobActorPropagationFilter>();
         services.AddHostedService(sp => new HangfireFilterInstaller(sp));
 
         return services;

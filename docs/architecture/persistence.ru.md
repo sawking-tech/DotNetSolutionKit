@@ -155,7 +155,7 @@ services.AddIdempotency<OrdersDbContext>();
 `Common` берут у него провайдер EF, guard схемы, блокировку миграций, блокировки и статистику outbox, поиск
 и читаемые номера и сами провайдер не называют. Реализации за этими ответами живут в capability-модуле базы,
 `Capabilities.Persistence.Postgres` или `.Mssql`, он же несёт EF-пакет провайдера. У Hangfire своё хранилище
-на каждую базу, поэтому `DependencyInjection.BackgroundJobs.cs` сервиса - второе место, которое её знает.
+на каждую базу, поэтому `DependencyInjection.cs` модуля Hangfire - второе место, которое её знает.
 Третья база - новый capability-модуль рядом с этими двумя файлами.
 
 Что заметит команда:

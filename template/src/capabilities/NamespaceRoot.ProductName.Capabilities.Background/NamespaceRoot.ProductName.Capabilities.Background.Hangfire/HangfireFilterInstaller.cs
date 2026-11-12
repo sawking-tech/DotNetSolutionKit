@@ -4,7 +4,7 @@ using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
+namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 
 /// <summary>
 /// Registers Hangfire filters that need the built service provider.

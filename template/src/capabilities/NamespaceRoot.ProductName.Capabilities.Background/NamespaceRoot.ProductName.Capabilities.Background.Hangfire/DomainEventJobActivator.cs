@@ -1,7 +1,8 @@
 using Hangfire;
+using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
+namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 
 /// <summary>
 /// Hangfire job activator that publishes the job's DI scope as the ambient

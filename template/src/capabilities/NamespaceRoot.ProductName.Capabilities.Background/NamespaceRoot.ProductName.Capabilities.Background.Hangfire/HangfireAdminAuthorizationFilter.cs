@@ -1,9 +1,9 @@
 using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Http;
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
+using NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 
-namespace NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.Security.Filters;
+namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 
 public class HangfireAdminAuthorizationFilter : IDashboardAuthorizationFilter
 {

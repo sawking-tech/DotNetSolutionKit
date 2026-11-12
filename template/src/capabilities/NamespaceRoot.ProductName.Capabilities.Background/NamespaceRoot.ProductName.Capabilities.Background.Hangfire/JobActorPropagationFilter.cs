@@ -8,7 +8,7 @@ using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
+namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 
 /// <summary>
 /// Carries the operator who enqueued a job into the job itself, along with the trace and the

@@ -10,6 +10,9 @@ using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
 using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 //#endif
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
+//#if (Hangfire)
+using NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
+//#endif
 //#if (AuditEnabled)
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
 //#endif
@@ -145,7 +148,10 @@ public static partial class DependencyInjection
         if (switches.Jobs)
         {
             services.AddValidatedOptions<IHangfireSettings, HangfireSettings>(HangfireSettings.SectionName);
-            services.AddBackgroundJobs(connectionString);
+            services.AddHangfireJobs(
+                connectionString,
+                typeof(DomainMarker).Namespace!,
+                $"{ServiceIdentifierDbContext.DefaultSchemaName}_hangfire");
         }
 
 //#endif

@@ -35,6 +35,9 @@
       <!--#if (Messaging != "none") -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.csproj" />
       <!--#endif -->
+      <!--#if (Hangfire) -->
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Background\NamespaceRoot.ProductName.Capabilities.Background.Hangfire\NamespaceRoot.ProductName.Capabilities.Background.Hangfire.csproj" />
+      <!--#endif -->
       <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Application\NamespaceRoot.ProductName.ServiceNameOrCustom.Application.csproj" />
     </ItemGroup>
 
@@ -45,15 +48,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!--#if (Hangfire) -->
-        <PackageReference Include="Hangfire.AspNetCore" />
-        <PackageReference Include="Hangfire.Console" />
-        <!--#if (Database == "mssql") -->
-        <PackageReference Include="Hangfire.SqlServer" />
-        <!--#else -->
-        <PackageReference Include="Hangfire.PostgreSql" />
-        <!--#endif -->
-        <!--#endif -->
+
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <PrivateAssets>all</PrivateAssets>

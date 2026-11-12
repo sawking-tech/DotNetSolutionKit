@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
+namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 
 /// <summary>
 /// Settings interface for Hangfire background jobs and dashboard authorization

@@ -1,20 +1,20 @@
 using Hangfire;
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
-using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.Security.Filters;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;
+namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 
 /// <summary>
 /// Extensions for configuring Hangfire background jobs and dashboard.
 /// </summary>
-internal static class BackgroundJobsSetup
+public static class HangfireDashboard
 {
     /// <summary>
     /// Configures Hangfire dashboard with administrative authorization.
     /// </summary>
     /// <param name="app">Application builder.</param>
     /// <returns>Updated application builder.</returns>
-    internal static WebApplication UseAppHangfire(this WebApplication app)
+    public static WebApplication UseAppHangfire(this WebApplication app)
     {
         var settings = app.Services.GetRequiredService<IHangfireSettings>();
 

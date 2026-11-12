@@ -536,9 +536,8 @@
         {
           "condition": "(!Hangfire)",
           "exclude": [
-            "**/Setup/BackgroundJobsSetup.cs",
-            "**/Security/Filters/HangfireAdminAuthorizationFilter.cs",
-            "**/DependencyInjection.BackgroundJobs.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Background/NamespaceRoot.ProductName.Capabilities.Background.Hangfire/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Background/NamespaceRoot.ProductName.Capabilities.Background.Hangfire.Tests/**"
           ]
         },
         {
@@ -855,9 +854,8 @@
         {
           "condition": "(!Hangfire)",
           "exclude": [
-            "**/Setup/BackgroundJobsSetup.cs",
-            "**/Security/Filters/HangfireAdminAuthorizationFilter.cs",
-            "**/DependencyInjection.BackgroundJobs.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Background/NamespaceRoot.ProductName.Capabilities.Background.Hangfire/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Background/NamespaceRoot.ProductName.Capabilities.Background.Hangfire.Tests/**"
           ]
         },
         {
