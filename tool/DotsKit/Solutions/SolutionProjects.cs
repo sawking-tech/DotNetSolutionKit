@@ -39,6 +39,19 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
     };
 
     /// <summary>
+    /// A newer SDK adds a project's references along with it unless told not to: the second project of the same
+    /// folder is then already there, which the SDK reports as a failure. Newer SDKs know the switch, older ones
+    /// never add references; both come out of the attempts below, the imports left out only as the last resort.
+    /// </summary>
+    private static readonly (string[] Extra, IReadOnlyDictionary<string, string>? Environment)[] AddAttempts =
+    [
+        (["--include-references", "false"], null),
+        ([], null),
+        (["--include-references", "false"], WithoutDirectoryImports),
+        ([], WithoutDirectoryImports),
+    ];
+
+    /// <summary>
     /// The projects a generated tree has, as All.sln lists them, relative to it: the template's All.sln lists every
     /// project under src, so the files say it without a <c>dotnet sln list</c>.
     /// </summary>
@@ -136,7 +149,7 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
             string[] command = ["sln", solutionFile, "add"], options = ["--solution-folder", folder.Key];
             foreach (var batch in CommandLine.Batches(folder.Order(StringComparer.Ordinal), [.. command, .. options]))
             {
-                await AddBatchAsync(solutionFile, [.. command, .. batch, .. options], ct);
+                await AddBatchAsync(solutionFile, command, batch, options, ct);
             }
         }
     }
@@ -151,13 +164,32 @@ internal sealed class SolutionProjects(IProcessRunner runner) : ISolutionProject
         }
     }
 
-    /// <summary>One batch of <c>dotnet sln add</c>, again without the Directory imports when it fails; an add that fails writes nothing.</summary>
-    private async Task AddBatchAsync(string solutionFile, string[] args, CancellationToken ct)
+    /// <summary>One batch of <c>dotnet sln add</c>; the attempts cover the SDK versions and a props file in conflict.</summary>
+    private async Task AddBatchAsync(string solutionFile, string[] command, IReadOnlyList<string> batch, string[] options, CancellationToken ct)
     {
-        if ((await runner.RunAsync("dotnet", args, DirectoryOf(solutionFile), ct)).Code != 0)
+        string[] args = [.. command, .. batch, .. options];
+        InvalidOperationException? failure = null;
+        foreach (var (extra, environment) in AddAttempts)
         {
-            await runner.RunCheckedAsync("dotnet", args, DirectoryOf(solutionFile), ct, WithoutDirectoryImports);
+            try
+            {
+                await runner.RunCheckedAsync("dotnet", [.. args, .. extra], DirectoryOf(solutionFile), ct, environment);
+                return;
+            }
+            catch (InvalidOperationException ex)
+            {
+                failure = ex;
+            }
         }
+
+        // What the SDK calls a failure may be a project it has just added as a reference of another in the batch.
+        var listed = await ListAsync(solutionFile, ct);
+        if (batch.All(listed.Contains))
+        {
+            return;
+        }
+
+        throw failure!;
     }
 
     private static IEnumerable<string> ServiceProjects(string root) =>
