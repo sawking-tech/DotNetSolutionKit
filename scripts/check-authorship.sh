@@ -33,7 +33,7 @@ files=(
     "src/framework/*.Framework.Validation/Setup/ValidationSetup.cs"
     "src/framework/*.Framework.Observability/Tracing/CorrelationIdMiddleware.cs"
     "$common.Infrastructure/Http/Internal/InternalServiceHttpExtensions.cs"
-    "$common.Infrastructure/Messaging/README.md"
+    "src/capabilities/*.Capabilities.Messaging/*.Capabilities.Messaging.RabbitMQ/README.md"
     "src/framework/*.Framework.Testing/*DbTestExecutionContext.cs"
     "src/services/*/*.API/Controllers/README.md"
     "?src/framework/*.Framework.OpenApi/SchemaDump.cs"
