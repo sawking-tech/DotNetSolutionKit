@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Reads the MassTransit EF outbox table of a service: pending and sent counts and a sample of the

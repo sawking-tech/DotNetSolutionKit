@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 using RabbitMQ.Client;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests;
 
 /// <summary>
 /// The readiness check of the broker: a broker that cannot be reached fails readiness quickly, with

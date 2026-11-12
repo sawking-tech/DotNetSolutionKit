@@ -604,6 +604,12 @@
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications/**",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests/**"
           ]
+        },        {
+          "condition": "(Messaging == \"none\")",
+          "exclude": [
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ/**",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests/**"
+          ]
         },
         {
           "condition": "(!AuditEnabled)",

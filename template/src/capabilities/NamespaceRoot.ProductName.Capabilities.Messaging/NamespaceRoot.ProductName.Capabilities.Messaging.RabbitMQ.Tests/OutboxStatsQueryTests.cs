@@ -1,12 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Capabilities.Persistence;
-using NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
+using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
-using NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
-
 using NamespaceRoot.ProductName.Framework.Testing;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Diagnostics;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests;
 
 /// <summary>
 /// The outbox diagnostics put the table name into raw SQL, so it has to come from the model of the

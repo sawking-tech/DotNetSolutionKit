@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Diagnostic announcer: builds the configured <see cref="DbContextOptions{TContext}"/>

@@ -1,6 +1,6 @@
 # Messaging (MassTransit + RabbitMQ)
 
-`Common.Infrastructure.Messaging` wires MassTransit for every service through one call, `AddMessaging`;
+`Capabilities.Messaging.RabbitMQ` wires MassTransit for every service through one call, `AddMessaging`;
 a service installs no MassTransit package of its own. The examples below use an `orders` service.
 
 ## Registration

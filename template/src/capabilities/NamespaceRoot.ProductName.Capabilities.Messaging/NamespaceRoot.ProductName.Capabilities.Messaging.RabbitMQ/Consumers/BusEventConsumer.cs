@@ -3,7 +3,7 @@ using NamespaceRoot.ProductName.Common.Domain.Messaging;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging.Consumers;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Consumers;
 
 /// <summary>
 /// Base class for event consumers. Provides structured logging,

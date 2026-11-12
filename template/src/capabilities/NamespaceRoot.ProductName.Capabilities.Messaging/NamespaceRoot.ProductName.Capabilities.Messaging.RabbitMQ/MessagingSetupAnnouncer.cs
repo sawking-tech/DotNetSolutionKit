@@ -1,10 +1,9 @@
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Prints one structured log line at host startup describing how the message-bus

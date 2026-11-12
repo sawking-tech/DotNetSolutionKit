@@ -1,5 +1,5 @@
 using NamespaceRoot.ProductName.Capabilities.Persistence;
-using NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
+using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace NamespaceRoot.ProductName.Common.Web.Diagnostics;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Minimal API endpoint that exposes the MassTransit EF Outbox state for live debugging.

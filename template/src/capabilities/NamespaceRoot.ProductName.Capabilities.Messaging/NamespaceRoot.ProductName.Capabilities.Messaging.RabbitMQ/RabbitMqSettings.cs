@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Settings interface for RabbitMQ transport configuration.

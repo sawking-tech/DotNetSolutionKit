@@ -57,7 +57,7 @@ latest ones; `?filter=` matches a message body, an order id for instance. The en
 Production only.
 
 Registration, contracts, publishing, the outbox and consumers in detail:
-[Messaging/README.md](../../template/src/common/NamespaceRoot.ProductName.Common.Infrastructure/Messaging/README.md).
+[Messaging/README.md](../../template/src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ/README.md).
 
 ## Tests
 

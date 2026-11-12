@@ -1,9 +1,9 @@
 using NamespaceRoot.ProductName.Common.Domain.Messaging;
-using NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 using MassTransit;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests;
 
 [TestFixture]
 [TestOf(typeof(PrefixedEventEndpointNameFormatter))]

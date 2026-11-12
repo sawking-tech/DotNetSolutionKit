@@ -1,8 +1,7 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
 using RabbitMQ.Client;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Readiness of the broker itself: the service holds a connection to RabbitMQ, or opens one now.

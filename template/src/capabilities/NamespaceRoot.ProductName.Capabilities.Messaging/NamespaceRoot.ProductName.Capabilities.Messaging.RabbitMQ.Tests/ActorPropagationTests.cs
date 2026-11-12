@@ -6,11 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NamespaceRoot.ProductName.Common.Domain.Context;
-using NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests;
 
 /// <summary>
 /// Work that crosses the bus is still somebody's work. Without the acting person travelling with the

@@ -114,6 +114,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.csproj", "{5D30102B-EE73-4ED4-B87D-F091FAC68989}"
 EndProject
 #endif
+#if (Messaging != "none")
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.csproj", "{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests.csproj", "{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}"
+EndProject
+	#endif
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -124,6 +130,32 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+#if (Messaging != "none")
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|x64.Build.0 = Debug|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|x86.Build.0 = Debug|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Release|x64.ActiveCfg = Release|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Release|x64.Build.0 = Release|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Release|x86.ActiveCfg = Release|Any CPU
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Release|x86.Build.0 = Release|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Debug|x64.Build.0 = Debug|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Debug|x86.Build.0 = Debug|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Release|x64.ActiveCfg = Release|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Release|x64.Build.0 = Release|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Release|x86.ActiveCfg = Release|Any CPU
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}.Release|x86.Build.0 = Release|Any CPU
+#endif
 		{5A5DD699-1BBB-40B6-A9FB-8B2269A9A74D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5A5DD699-1BBB-40B6-A9FB-8B2269A9A74D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A5DD699-1BBB-40B6-A9FB-8B2269A9A74D}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -662,6 +694,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+#if (Messaging != "none")
+		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57} = {8519937F-6A2B-4441-9591-06640B035553}
+		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64} = {8519937F-6A2B-4441-9591-06640B035553}
+#endif
 		{5A5DD699-1BBB-40B6-A9FB-8B2269A9A74D} = {121B974B-9C00-47EC-8961-469C6E1596EB}
 		{E313F870-A3F7-44CA-A02D-E2FD74B77D51} = {121B974B-9C00-47EC-8961-469C6E1596EB}
 		{59B65D9A-7010-4AD1-9F5E-616704CF7E88} = {121B974B-9C00-47EC-8961-469C6E1596EB}

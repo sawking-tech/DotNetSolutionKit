@@ -1,6 +1,7 @@
 using MassTransit;
+using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// MassTransit consume filter that sets the ambient DI scope for domain event infrastructure resolution.

@@ -5,8 +5,6 @@ using NamespaceRoot.ProductName.Common.Application.Messaging;
 using NamespaceRoot.ProductName.Common.Contracts;
 using NamespaceRoot.ProductName.Common.Contracts.Health;
 using NamespaceRoot.ProductName.Common.Domain.Messaging;
-using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Extension methods for registering message bus infrastructure into the DI container.

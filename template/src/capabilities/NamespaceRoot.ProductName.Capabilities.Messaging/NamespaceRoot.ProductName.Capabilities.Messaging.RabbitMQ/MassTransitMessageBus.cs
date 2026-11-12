@@ -3,7 +3,7 @@ using NamespaceRoot.ProductName.Common.Domain.Messaging;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 internal sealed class MassTransitMessageBus(
     IPublishEndpoint publishEndpoint,

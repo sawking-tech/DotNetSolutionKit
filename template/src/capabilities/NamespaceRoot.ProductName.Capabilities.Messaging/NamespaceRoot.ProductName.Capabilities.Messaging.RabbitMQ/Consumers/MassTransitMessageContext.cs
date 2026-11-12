@@ -2,7 +2,7 @@ using NamespaceRoot.ProductName.Common.Application.Messaging.Consumers;
 using NamespaceRoot.ProductName.Common.Domain.Messaging;
 using MassTransit;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging.Consumers;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Consumers;
 
 /// <summary>
 /// Adapts MassTransit's <see cref="ConsumeContext{T}"/> to the platform's

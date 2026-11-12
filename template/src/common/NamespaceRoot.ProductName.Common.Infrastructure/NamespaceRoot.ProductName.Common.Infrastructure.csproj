@@ -8,11 +8,7 @@
 
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
-        <!--#if (Storage) -->
-        <!--#endif -->
         <PackageReference Include="Hangfire.Core" />
-        <PackageReference Include="MassTransit.RabbitMQ" />
-        <PackageReference Include="MassTransit.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
@@ -40,6 +36,9 @@
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
             <_Parameter1>NamespaceRoot.ProductName.Common.Tests</_Parameter1>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ</_Parameter1>
         </AssemblyAttribute>
         <!--#if (Database != "mssql") -->
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">

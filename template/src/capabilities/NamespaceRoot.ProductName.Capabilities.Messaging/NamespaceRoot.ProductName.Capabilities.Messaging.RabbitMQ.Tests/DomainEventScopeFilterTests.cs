@@ -1,9 +1,10 @@
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
+using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 using MassTransit;
+using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Events;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests;
 
 [TestFixture]
 [TestOf(typeof(DomainEventScopeFilter<>))]

@@ -1,9 +1,7 @@
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NamespaceRoot.ProductName.Capabilities.Persistence;
 using NamespaceRoot.ProductName.Common.Domain.Specifications;
-using NamespaceRoot.ProductName.Common.Infrastructure.Diagnostics;
 //#if (Database != "mssql")
 using Npgsql;
 using NamespaceRoot.ProductName.Capabilities.Persistence.Postgres;
@@ -150,17 +148,6 @@ public static class DatabaseProvider
 //#endif
     }
 
-    /// <summary>The lock statements the MassTransit outbox runs against the solution's database.</summary>
-    public static IEntityFrameworkOutboxConfigurator UseDatabaseLocks(this IEntityFrameworkOutboxConfigurator outbox)
-    {
-//#if (Database != "mssql")
-        outbox.UsePostgres();
-//#endif
-//#if (Database == "mssql")
-        outbox.UseSqlServer();
-//#endif
-        return outbox;
-    }
 
     /// <summary>How the outbox statistics are read from the solution's database.</summary>
     internal static IOutboxStatsDialect CreateOutboxStatsDialect()

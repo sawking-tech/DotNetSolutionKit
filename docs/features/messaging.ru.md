@@ -58,7 +58,7 @@ public sealed class PublishOrderPlaced(IMessageBus bus) : IDomainPreSaveHandler<
 Production.
 
 Регистрация, контракты, публикация, outbox и консьюмеры подробно:
-[Messaging/README.md](../../template/src/common/NamespaceRoot.ProductName.Common.Infrastructure/Messaging/README.md).
+[Messaging/README.md](../../template/src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ/README.md).
 
 ## Тесты
 

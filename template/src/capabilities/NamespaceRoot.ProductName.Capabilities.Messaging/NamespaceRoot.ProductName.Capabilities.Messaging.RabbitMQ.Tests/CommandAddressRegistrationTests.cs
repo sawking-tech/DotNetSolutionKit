@@ -1,7 +1,7 @@
 using NamespaceRoot.ProductName.Common.Contracts;
 using NamespaceRoot.ProductName.Common.Domain.Messaging;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests;
 
 /// <summary>
 /// Where the bus looks for the commands it has to know an address for.

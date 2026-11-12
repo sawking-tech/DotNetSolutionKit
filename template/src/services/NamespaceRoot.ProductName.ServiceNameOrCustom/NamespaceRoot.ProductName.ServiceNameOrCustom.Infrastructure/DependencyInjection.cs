@@ -7,7 +7,7 @@ using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Domain.Persistence;
 using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
 //#if (Messaging != "none")
-using NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 //#endif
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
 //#if (AuditEnabled)

@@ -1,7 +1,7 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Extension methods for configuring MassTransit Transactional Outbox tables in EF Core model.

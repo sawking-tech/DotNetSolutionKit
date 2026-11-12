@@ -1,7 +1,7 @@
 using NamespaceRoot.ProductName.Common.Domain.Messaging;
 using MassTransit;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Endpoint formatter that prefixes <em>event</em> consumer queues with a per-service token

@@ -2,7 +2,7 @@ using System.Reflection;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
 //#if (Messaging == "outbox")
-using NamespaceRoot.ProductName.Common.Web.Diagnostics;
+using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 //#endif
 using NamespaceRoot.ProductName.Common.Web.Setup;
 using NamespaceRoot.ProductName.Framework.OpenApi;

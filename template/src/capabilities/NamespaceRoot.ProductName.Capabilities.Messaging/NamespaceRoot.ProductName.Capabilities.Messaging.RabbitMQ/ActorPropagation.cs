@@ -6,7 +6,7 @@ using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+namespace NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 
 /// <summary>
 /// Names the message carries the acting person under.

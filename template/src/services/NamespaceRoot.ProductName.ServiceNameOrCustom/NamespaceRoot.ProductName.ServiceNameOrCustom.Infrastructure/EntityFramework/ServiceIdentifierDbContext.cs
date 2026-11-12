@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Domain.Persistence;
 //#if (Messaging == "outbox")
-using NamespaceRoot.ProductName.Common.Infrastructure.Messaging;
+using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 //#endif
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
 
