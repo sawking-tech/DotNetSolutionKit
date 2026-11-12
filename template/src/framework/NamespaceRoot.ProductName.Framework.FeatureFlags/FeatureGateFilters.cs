@@ -26,7 +26,7 @@ namespace NamespaceRoot.ProductName.Framework.FeatureFlags;
 /// keeps every operation.
 /// </para>
 /// </remarks>
-internal sealed class FeatureGateFilters(IServiceProvider services) : IOperationFilter, IDocumentFilter
+public sealed class FeatureGateFilters(IServiceProvider services) : IOperationFilter, IDocumentFilter
 {
     private const string Closed = "x-feature-gate-closed";
 
