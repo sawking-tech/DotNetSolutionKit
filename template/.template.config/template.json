@@ -934,7 +934,7 @@
       "description": "Add the service's projects to All.sln, each service in a solution folder named after the last segment of its name",
       "args": {
         "executable": "powershell",
-        "args": "-NoProfile -Command \"$s = (Get-ChildItem src/services/*.All.sln)[0].FullName; $l = dotnet sln $s list; Get-ChildItem src/services/*/*/*.csproj | Where-Object { $l -notcontains $_.FullName.Substring((Split-Path $s).Length + 1) } | ForEach-Object { dotnet sln $s add $_.FullName --solution-folder ($_.Directory.Parent.Name -replace '.*\\.', '') }\"",
+        "args": "-NoProfile -Command \"$s = (Get-ChildItem src/services/*.All.sln)[0].FullName; $l = dotnet sln $s list; Get-ChildItem src/services/*/*/*.csproj | Where-Object { $l -notcontains $_.FullName.Substring((Split-Path $s).Length + 1) } | ForEach-Object { $f = $_.Directory.Parent.Name -replace '.*\\.', ''; dotnet sln $s add $_.FullName --solution-folder $f --include-references false 2>$null; if ($LASTEXITCODE -ne 0) { dotnet sln $s add $_.FullName --solution-folder $f } }\"",
         "redirectStandardOutput": false
       },
       "manualInstructions": [ { "text": "Add the service's projects to src/services/*.All.sln: dotnet sln <All.sln> add <project> --solution-folder <service>" } ]
@@ -946,7 +946,7 @@
       "description": "Add the service's projects to All.sln, each service in a solution folder named after the last segment of its name",
       "args": {
         "executable": "sh",
-        "args": "-c \"d=$(ls src/services | tr A-Z a-z | sort | uniq -d); if [ -n \\\"$d\\\" ]; then echo \\\"A service named $d is there already, in another case: remove the new folder and name the service as it is named.\\\" >&2; exit 1; fi; s=$(ls src/services/*.All.sln); l=$(dotnet sln $s list); for p in src/services/*/*/*.csproj; do echo \\\"$l\\\" | grep -qxF ${p#src/services/} && continue; d=$(basename $(dirname $(dirname $p))); dotnet sln $s add $p --solution-folder ${d##*.}; done\"",
+        "args": "-c \"d=$(ls src/services | tr A-Z a-z | sort | uniq -d); if [ -n \\\"$d\\\" ]; then echo \\\"A service named $d is there already, in another case: remove the new folder and name the service as it is named.\\\" >&2; exit 1; fi; s=$(ls src/services/*.All.sln); l=$(dotnet sln $s list | tr '\\\\' '/'); for p in src/services/*/*/*.csproj; do echo \\\"$l\\\" | grep -qxF ${p#src/services/} && continue; d=$(basename $(dirname $(dirname $p))); dotnet sln $s add $p --solution-folder ${d##*.} --include-references false 2>/dev/null || dotnet sln $s add $p --solution-folder ${d##*.} || true; done\"",
         "redirectStandardOutput": false
       },
       "manualInstructions": [ { "text": "Add the service's projects to src/services/*.All.sln: dotnet sln <All.sln> add <project> --solution-folder <service>" } ]
