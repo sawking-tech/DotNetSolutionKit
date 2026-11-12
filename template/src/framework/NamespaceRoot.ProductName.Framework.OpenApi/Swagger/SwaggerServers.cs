@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace NamespaceRoot.ProductName.Common.Web.Swagger;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Swagger;
 
 /// <summary>
 /// Puts <see cref="ISwaggerSettings.PublicServers"/> into the generated documents. An

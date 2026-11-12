@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace NamespaceRoot.ProductName.Common.Web.Swagger.Filters;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Swagger.Filters;
 
 /// <summary>
 /// Removes the matches of <see cref="ISwaggerSettings.ScrubPatterns"/> from the descriptions of the

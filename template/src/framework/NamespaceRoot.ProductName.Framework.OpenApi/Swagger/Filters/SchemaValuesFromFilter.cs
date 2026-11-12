@@ -6,7 +6,7 @@ using Microsoft.OpenApi.Models;
 using NamespaceRoot.ProductName.Common.Contracts.Schema;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace NamespaceRoot.ProductName.Common.Web.Swagger.Filters;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Swagger.Filters;
 
 /// <summary>
 /// Fills in the accepted values of a property marked with <see cref="SchemaValuesFromAttribute"/>,

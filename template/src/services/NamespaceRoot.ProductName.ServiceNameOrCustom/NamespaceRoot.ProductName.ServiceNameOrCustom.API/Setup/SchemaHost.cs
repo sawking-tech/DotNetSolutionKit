@@ -1,4 +1,5 @@
 using NamespaceRoot.ProductName.Common.Web.Setup;
+using NamespaceRoot.ProductName.Framework.OpenApi;
 
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;
 

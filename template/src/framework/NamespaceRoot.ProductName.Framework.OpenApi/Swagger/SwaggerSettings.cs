@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace NamespaceRoot.ProductName.Common.Web.Swagger;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Swagger;
 
 /// <summary>
 /// What the service's and the gateway's Swagger documents say beyond the code: the servers a reader

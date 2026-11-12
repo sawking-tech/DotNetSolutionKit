@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceNameOrCustom", "ServiceNameOrCustom", "{121B974B-9C00-47EC-8961-469C6E1596EB}"
 EndProject
@@ -31,6 +31,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.Auth", "..\framework\NamespaceRoot.ProductName.Framework.Auth\NamespaceRoot.ProductName.Framework.Auth.csproj", "{3B8E2C61-7D4A-4F19-9E2B-6A0D8C5F1E47}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.Auth.Tests", "..\framework\NamespaceRoot.ProductName.Framework.Auth.Tests\NamespaceRoot.ProductName.Framework.Auth.Tests.csproj", "{5E1D9A73-2B6C-4D84-8F3A-9C7E1B4D2F58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.OpenApi", "..\framework\NamespaceRoot.ProductName.Framework.OpenApi\NamespaceRoot.ProductName.Framework.OpenApi.csproj", "{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.OpenApi.Tests", "..\framework\NamespaceRoot.ProductName.Framework.OpenApi.Tests\NamespaceRoot.ProductName.Framework.OpenApi.Tests.csproj", "{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Framework.DomainEvents", "..\framework\NamespaceRoot.ProductName.Framework.DomainEvents\NamespaceRoot.ProductName.Framework.DomainEvents.csproj", "{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}"
 EndProject
@@ -280,6 +284,30 @@ Global
 		{5E1D9A73-2B6C-4D84-8F3A-9C7E1B4D2F58}.Release|Any CPU|x64.Build.0 = Release|Any CPU
 		{5E1D9A73-2B6C-4D84-8F3A-9C7E1B4D2F58}.Release|Any CPU|x86.ActiveCfg = Release|Any CPU
 		{5E1D9A73-2B6C-4D84-8F3A-9C7E1B4D2F58}.Release|Any CPU|x86.Build.0 = Release|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Debug|Any CPU|x64.ActiveCfg = Debug|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Debug|Any CPU|x64.Build.0 = Debug|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Debug|Any CPU|x86.ActiveCfg = Debug|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Debug|Any CPU|x86.Build.0 = Debug|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Release|Any CPU|x64.ActiveCfg = Release|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Release|Any CPU|x64.Build.0 = Release|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Release|Any CPU|x86.ActiveCfg = Release|Any CPU
+		{B1D4F6A2-3E8C-4A97-9D5B-7C2E0F8A1D46}.Release|Any CPU|x86.Build.0 = Release|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Debug|Any CPU|x64.ActiveCfg = Debug|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Debug|Any CPU|x64.Build.0 = Debug|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Debug|Any CPU|x86.ActiveCfg = Debug|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Debug|Any CPU|x86.Build.0 = Debug|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Release|Any CPU|x64.ActiveCfg = Release|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Release|Any CPU|x64.Build.0 = Release|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Release|Any CPU|x86.ActiveCfg = Release|Any CPU
+		{D6A2E8B4-5F9D-4C31-8E7A-9B4D1C6F0E52}.Release|Any CPU|x86.Build.0 = Release|Any CPU
 		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E4A9D31-8B2C-4E5F-A3D6-1C5E7F9A2B48}.Debug|Any CPU|x64.ActiveCfg = Debug|Any CPU

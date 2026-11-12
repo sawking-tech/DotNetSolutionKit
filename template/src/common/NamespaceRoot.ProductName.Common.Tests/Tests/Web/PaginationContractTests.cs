@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Moq;
 using NamespaceRoot.ProductName.Common.Domain.Querying;
+using NamespaceRoot.ProductName.Framework.OpenApi;
 using NamespaceRoot.ProductName.Common.Web.Errors;
 using NamespaceRoot.ProductName.Common.Web.Pagination;
 using NamespaceRoot.ProductName.Common.Web.Setup;

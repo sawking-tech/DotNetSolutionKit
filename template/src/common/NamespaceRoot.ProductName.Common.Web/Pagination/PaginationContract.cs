@@ -1,5 +1,6 @@
 using System.Reflection;
 using NamespaceRoot.ProductName.Common.Domain.Querying;
+using NamespaceRoot.ProductName.Framework.OpenApi;
 
 namespace NamespaceRoot.ProductName.Common.Web.Pagination;
 

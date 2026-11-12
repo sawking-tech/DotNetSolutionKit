@@ -1,10 +1,10 @@
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using NamespaceRoot.ProductName.Common.Contracts.Schema;
-using NamespaceRoot.ProductName.Common.Web.Swagger.Filters;
+using NamespaceRoot.ProductName.Framework.OpenApi.Swagger.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Tests;
 
 /// <summary>
 /// The schema lists the values a string property accepts, read from the same member the code checks

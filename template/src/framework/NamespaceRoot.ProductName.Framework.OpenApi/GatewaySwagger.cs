@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NamespaceRoot.ProductName.Common.Web.Swagger;
+using NamespaceRoot.ProductName.Framework.OpenApi.Swagger;
 
-namespace NamespaceRoot.ProductName.Common.Web.Gateway;
+namespace NamespaceRoot.ProductName.Framework.OpenApi;
 
 /// <summary>
 /// The Swagger documents of the services behind the gateway, shown in the gateway's own Swagger page.

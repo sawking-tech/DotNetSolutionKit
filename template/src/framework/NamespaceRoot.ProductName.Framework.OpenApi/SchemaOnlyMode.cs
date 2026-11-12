@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace NamespaceRoot.ProductName.Common.Web.Setup;
+namespace NamespaceRoot.ProductName.Framework.OpenApi;
 
 /// <summary>
 /// Starts a service for its metadata only - no database, no broker, no background jobs.

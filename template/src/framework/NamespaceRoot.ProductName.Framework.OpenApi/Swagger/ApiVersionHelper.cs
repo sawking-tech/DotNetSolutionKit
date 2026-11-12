@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NamespaceRoot.ProductName.Common.Web.Swagger;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Swagger;
 
 /// <summary>
 /// Discovers API versions from controller route attributes.

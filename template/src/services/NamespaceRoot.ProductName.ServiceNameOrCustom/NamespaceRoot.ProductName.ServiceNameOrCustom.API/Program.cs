@@ -5,6 +5,7 @@ using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramewor
 using NamespaceRoot.ProductName.Common.Web.Diagnostics;
 //#endif
 using NamespaceRoot.ProductName.Common.Web.Setup;
+using NamespaceRoot.ProductName.Framework.OpenApi;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.EntityFramework;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.EntityFramework.DataSeeding;

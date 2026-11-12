@@ -4,6 +4,7 @@ using NamespaceRoot.ProductName.Framework.FeatureFlags;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 //#if (DiffApi)
 using NamespaceRoot.ProductName.Common.Web.Setup;
+using NamespaceRoot.ProductName.Framework.OpenApi;
 //#endif
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Application;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure;

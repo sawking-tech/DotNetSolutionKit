@@ -8,15 +8,14 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
-using NamespaceRoot.ProductName.Common.Web.Gateway;
-using NamespaceRoot.ProductName.Common.Web.Pagination;
+using NamespaceRoot.ProductName.Framework.OpenApi;
 //#if (FeatureFlags)
 using NamespaceRoot.ProductName.Framework.FeatureFlags;
 //#endif
-using NamespaceRoot.ProductName.Common.Web.Swagger.Filters;
+using NamespaceRoot.ProductName.Framework.OpenApi.Swagger.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace NamespaceRoot.ProductName.Common.Web.Swagger;
+namespace NamespaceRoot.ProductName.Framework.OpenApi.Swagger;
 
 /// <summary>
 /// Standard Swagger setup for internal services (Core, Billing, Auth, etc.).
@@ -29,9 +28,11 @@ public static class SwaggerSetup
     /// </summary>
     /// <param name="builder">The web application builder.</param>
     /// <param name="serviceAssembly">The service's own assembly, used for version discovery and XML comments.</param>
+    /// <param name="configure">Extra SwaggerGen configuration of the caller, applied after the standard filters.</param>
     public static WebApplicationBuilder SetupSwaggerPage(
         this WebApplicationBuilder builder,
-        Assembly serviceAssembly)
+        Assembly serviceAssembly,
+        Action<SwaggerGenOptions>? configure = null)
     {
         builder.Services.AddEndpointsApiExplorer();
 
@@ -112,7 +113,6 @@ public static class SwaggerSetup
 
             options.OperationFilter<AuthorizationOperationFilter>();
             options.OperationFilter<PermissionsOperationFilter>();
-            options.OperationFilter<PaginationOperationFilter>();
             options.SchemaFilter<SchemaValuesFromFilter>();
             options.DocumentFilter<VersionedDocumentFilter>();
             options.DocumentFilter<ScrubDescriptionsFilter>();
@@ -135,6 +135,8 @@ public static class SwaggerSetup
 
             options.DescribeAllParametersInCamelCase();
             options.SupportNonNullableReferenceTypes();
+
+            configure?.Invoke(options);
         });
 
         return builder;
