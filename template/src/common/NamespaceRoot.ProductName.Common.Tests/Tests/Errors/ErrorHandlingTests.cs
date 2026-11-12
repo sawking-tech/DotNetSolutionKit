@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Exceptions;
 using NamespaceRoot.ProductName.Common.Web.Errors;
 using NamespaceRoot.ProductName.Framework.Validation.Setup;

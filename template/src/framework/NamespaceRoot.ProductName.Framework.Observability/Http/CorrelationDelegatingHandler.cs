@@ -1,6 +1,6 @@
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Http.Internal;
+namespace NamespaceRoot.ProductName.Framework.Observability.Http;
 
 /// <summary>
 /// Puts the correlation identifier of the running work on an outgoing call, so the called service logs

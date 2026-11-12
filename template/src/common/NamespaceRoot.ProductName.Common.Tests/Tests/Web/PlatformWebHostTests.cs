@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Web.Setup;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;

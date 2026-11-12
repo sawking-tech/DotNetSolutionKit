@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 
-namespace NamespaceRoot.ProductName.Common.Web.Tracing;
+namespace NamespaceRoot.ProductName.Framework.Observability.Tracing;
 
 /// <summary>
 /// Reads the correlation identifier the middleware put on the request.

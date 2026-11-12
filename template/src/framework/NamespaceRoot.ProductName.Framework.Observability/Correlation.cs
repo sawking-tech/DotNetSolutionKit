@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Application.Tracing;
+namespace NamespaceRoot.ProductName.Framework.Observability;
 
 /// <summary>
 /// The correlation identifier of the work running now, wherever it runs: a request, a consumer, a job.

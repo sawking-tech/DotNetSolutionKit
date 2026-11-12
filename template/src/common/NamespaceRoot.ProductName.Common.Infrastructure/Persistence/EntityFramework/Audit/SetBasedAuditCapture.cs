@@ -2,7 +2,7 @@
 
 using System.Diagnostics;
 using System.Linq.Expressions;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Application.Auditing;
 using NamespaceRoot.ProductName.Common.Application.Messaging;
 using NamespaceRoot.ProductName.Common.Domain.Context;

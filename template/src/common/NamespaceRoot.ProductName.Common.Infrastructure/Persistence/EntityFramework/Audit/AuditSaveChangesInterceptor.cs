@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Attributes;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Audit;
 using Microsoft.EntityFrameworkCore;

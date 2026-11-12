@@ -3,9 +3,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Serilog.Context;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 
-namespace NamespaceRoot.ProductName.Common.Web.Tracing;
+namespace NamespaceRoot.ProductName.Framework.Observability.Tracing;
 
 /// <summary>
 /// Gives every request a correlation identifier, puts it and the trace identifiers on the log, and returns

@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
-using NamespaceRoot.ProductName.Common.Web.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
+using NamespaceRoot.ProductName.Framework.Observability.Tracing;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tracing;
+namespace NamespaceRoot.ProductName.Framework.Observability.Tests;
 
 /// <summary>
 /// The correlation identifier is what turns a pile of log lines from several services back into one story,

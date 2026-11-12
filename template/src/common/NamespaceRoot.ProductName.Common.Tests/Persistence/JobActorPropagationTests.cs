@@ -6,7 +6,7 @@ using Hangfire.Server;
 using Hangfire.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
