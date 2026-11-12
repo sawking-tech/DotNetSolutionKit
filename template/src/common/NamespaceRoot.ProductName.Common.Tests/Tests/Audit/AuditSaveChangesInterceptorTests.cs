@@ -55,7 +55,7 @@ public class AuditSaveChangesInterceptorTests
     {
         await using var harness = new AuditHarness();
 
-        using (NamespaceRoot.ProductName.Common.Application.Tracing.Correlation.Use("client-chosen-42"))
+        using (NamespaceRoot.ProductName.Framework.Observability.Correlation.Use("client-chosen-42"))
         {
             await harness.ExecuteAsync(async (db, execution) =>
             {

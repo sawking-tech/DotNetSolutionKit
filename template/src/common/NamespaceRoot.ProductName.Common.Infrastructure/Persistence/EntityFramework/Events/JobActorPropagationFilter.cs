@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 using Hangfire.Client;

@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Application.Tracing;
+namespace NamespaceRoot.ProductName.Framework.Observability;
 
 /// <summary>
 /// Header names carrying the trace across a service boundary.

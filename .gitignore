@@ -273,3 +273,6 @@ ModelManifest.xml
 
 # Python bytecode the tests of the scripts leave
 __pycache__/
+
+# Local sandboxes for checks: generated solutions and the template hive live here
+/tmp/

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      The correlation identifier the template puts on every piece of work it logs: the
+      Ambient value carried across a request, a job and a bus message, the header that
+      carries it between services, and the middleware that reads or creates it per request.
+      The trace and span identifiers come from Serilog's span enricher and the Activity it
+      reads; the logging configuration itself stays with the team in Common.
+      See the Readme and template/src/framework/README.md.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Serilog.AspNetCore" />
+    </ItemGroup>
+
+</Project>

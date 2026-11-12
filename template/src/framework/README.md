@@ -11,6 +11,10 @@ package of their own. A namespace names its kind: `NamespaceRoot.ProductName.Fra
   (`IDomainEvent`, `IHasDomainEvents`, `EventfulEntity`, `AggregateRoot` in `Common`) stay where
   they are entangled with the `DbContext` pipeline and the core execution context; see the project
   Readme.
+- `NamespaceRoot.ProductName.Framework.Observability` — the correlation identifier: the ambient
+  value carried across a request, a job and a bus message, the header that carries it between
+  services, and the middleware that reads or creates it per request. The logging configuration
+  stays with the team in Common; see the project Readme.
 - `NamespaceRoot.ProductName.Framework.Testing` — the portable testing harness (ADR-005): the
   execution contexts, the domain event test wiring, stubs and code rules. Helpers tied to an
   external system (the PostgreSQL and SQL Server test databases) and the audit verifiers stay in

@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Application.Tracing;
+namespace NamespaceRoot.ProductName.Framework.Observability;
 
 /// <summary>
 /// The identifier tying everything that happened because of one external request together — across

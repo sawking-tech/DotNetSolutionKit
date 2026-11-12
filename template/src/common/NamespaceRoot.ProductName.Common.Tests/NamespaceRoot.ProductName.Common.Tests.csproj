@@ -30,6 +30,7 @@
       <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.DomainEvents\NamespaceRoot.ProductName.Framework.DomainEvents.csproj" />
       <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.OpenApi\NamespaceRoot.ProductName.Framework.OpenApi.csproj" />
       <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Validation\NamespaceRoot.ProductName.Framework.Validation.csproj" />
+      <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Observability\NamespaceRoot.ProductName.Framework.Observability.csproj" />
     </ItemGroup>
 
 </Project>

@@ -34,6 +34,7 @@
         <ProjectReference Include="..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.csproj" />
         <!--#endif -->
         <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.DomainEvents\NamespaceRoot.ProductName.Framework.DomainEvents.csproj" />
+        <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Observability\NamespaceRoot.ProductName.Framework.Observability.csproj" />
     </ItemGroup>
 
     <ItemGroup>

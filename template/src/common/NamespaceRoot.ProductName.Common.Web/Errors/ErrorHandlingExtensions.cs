@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using NamespaceRoot.ProductName.Common.Application.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Contracts.Responses;
-using NamespaceRoot.ProductName.Common.Web.Tracing;
+using NamespaceRoot.ProductName.Framework.Observability.Tracing;
 
 namespace NamespaceRoot.ProductName.Common.Web.Errors;
 
