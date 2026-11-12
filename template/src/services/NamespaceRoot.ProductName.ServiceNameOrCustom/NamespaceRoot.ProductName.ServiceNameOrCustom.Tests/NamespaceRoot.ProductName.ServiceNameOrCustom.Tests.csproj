@@ -42,6 +42,9 @@
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Testing\NamespaceRoot.ProductName.Common.Testing.csproj" />
       <ProjectReference Include="../../../framework/NamespaceRoot.ProductName.Framework.Testing/NamespaceRoot.ProductName.Framework.Testing.csproj" />
       <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+      <!--#if (NotifyEmail && Messaging != "none") -->
+      <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.csproj" />
+      <!--#endif -->
       <!--#if (MongoDB) -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo\NamespaceRoot.ProductName.Capabilities.Persistence.Mongo.csproj" />
       <!--#endif -->
