@@ -89,9 +89,10 @@ internal static partial class PackageVersions
     /// <param name="tree">A tree of the template's output; its Directory.Packages.props is written in place.</param>
     /// <param name="before">The template's whole output before the upgrade, where a kept version is read.</param>
     /// <param name="solution">
-    /// The solution's root: a project of the team's that references a package the template drops keeps the package's
-    /// version too, as the merge would otherwise take the line the team never touched out of the central file; a
-    /// package of the team's own, which no output of the template declares, keeps its line the same way.
+    /// The solution's root: a project of the team's - one the template's output does not have - that references a
+    /// package the template drops keeps the package's version too, as the merge would otherwise take the line the
+    /// team never touched out of the central file; a package of the team's own, which no output of the template
+    /// declares, keeps its line the same way.
     /// </param>
     public static void KeepReferenced(string tree, string before, string solution)
     {
@@ -110,7 +111,7 @@ internal static partial class PackageVersions
             had.TryAdd(name, version);
         }
 
-        var kept = ReferencedIn(tree).Concat(ReferencedIn(solution))
+        var kept = ReferencedIn(tree).Concat(ReferencedInTeamProjects(tree, solution))
             .Where(name => !declared.ContainsKey(name) && had.ContainsKey(name))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
@@ -134,7 +135,20 @@ internal static partial class PackageVersions
     private static IEnumerable<string> ReferencedIn(string root) =>
         Folders.RelativeFiles(root)
             .Where(p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".props", StringComparison.OrdinalIgnoreCase))
-            .SelectMany(p => Reference().Matches(FileText.Read(root, p)?.Text ?? "").Select(m => m.Groups["name"].Value));
+            .SelectMany(p => References(root, p));
+
+    /// <summary>
+    /// The packages the projects of the team reference: one the template's output does not have. A project of the
+    /// template's that an older release had is replaced by the merge, so its reference goes with it; keeping the
+    /// package for it would put a line at the end of the central file that a team's line there collides with.
+    /// </summary>
+    private static IEnumerable<string> ReferencedInTeamProjects(string tree, string solution) =>
+        Folders.RelativeFiles(solution)
+            .Where(p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && !File.Exists(Path.Combine(tree, p)))
+            .SelectMany(p => References(solution, p));
+
+    private static IEnumerable<string> References(string root, string path) =>
+        Reference().Matches(FileText.Read(root, path)?.Text ?? "").Select(m => m.Groups["name"].Value);
 
     /// <summary>Every package the version files of a tree declare, the central file and each flag's, with its version.</summary>
     public static Dictionary<string, string> All(string root)

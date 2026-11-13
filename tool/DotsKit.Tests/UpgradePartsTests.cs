@@ -87,6 +87,25 @@ internal sealed class UpgradePartsTests
     }
 
     [Test]
+    public void APackageTheTemplateDrops_IsNotKeptForAProjectOfItsOwnThatTheUpgradeReplaces()
+    {
+        var before = Folders.NewTemp("replaced-before");
+        var next = Folders.NewTemp("replaced-next");
+        var solution = Folders.NewTemp("replaced-solution");
+        const string project = "src/common/ST.Demo.Common.Infrastructure/ST.Demo.Common.Infrastructure.csproj";
+        Put(before, Central, Props(("Npgsql", "8.0.4"), ("MassTransit.RabbitMQ", "8.4.1")));
+        Put(next, Central, Props(("Npgsql", "8.0.11")));
+        Put(before, project, "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"MassTransit.RabbitMQ\" />\n  </ItemGroup>\n</Project>\n");
+        Put(next, project, "<Project>\n  <ItemGroup>\n  </ItemGroup>\n</Project>\n");
+        Put(solution, project, "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"MassTransit.RabbitMQ\" />\n  </ItemGroup>\n</Project>\n");
+
+        PackageVersions.KeepReferenced(next, before, solution);
+
+        PackageVersions.Read(File.ReadAllText(Path.Combine(next, Central)))
+            .ShouldBe(new Dictionary<string, string> { ["Npgsql"] = "8.0.11" });
+    }
+
+    [Test]
     public void APackageOfTheTeamsOwn_KeepsItsCentralLine_WhichNoOutputOfTheTemplateDeclares()
     {
         var before = Folders.NewTemp("own-before");
