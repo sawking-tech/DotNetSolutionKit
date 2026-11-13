@@ -258,7 +258,7 @@ dotskit upgrade
 Every file of the template - `Common`, the capabilities, the root, `deploy`,
 the scripts, the workflows, the test servers, the package versions - is merged by the tool, whatever release
 the solution comes from. The releases before 3.0 ask nothing of a team that uses the template as it is; 3.0
-asks for one line of the manifest, the value of `Messaging` (below).
+asks for one thing in the manifest - the value of `Messaging` in every line (below).
 
 What stays with the team - its own code and its own call:
 
