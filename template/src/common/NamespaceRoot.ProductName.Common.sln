@@ -97,7 +97,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Analytics\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.Tests.csproj", "{62959F8A-9FAF-4C0D-B50B-995DDC7E1CE7}"
 EndProject
 #endif
-#if (Messaging != "none")
+#if (MessagingTransport != "none")
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.csproj", "{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests.csproj", "{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}"
@@ -145,7 +145,7 @@ Global
 		{D3A8F1B6-2C5E-4A79-9B4D-8F1C6E3A0D72}.Release|x86.ActiveCfg = Release|Any CPU
 		{D3A8F1B6-2C5E-4A79-9B4D-8F1C6E3A0D72}.Release|x86.Build.0 = Release|Any CPU
 #endif
-#if (Messaging != "none")
+#if (MessagingTransport != "none")
 		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|x64.ActiveCfg = Debug|Any CPU

@@ -32,7 +32,7 @@
       <!--#if (ClickHouse) -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Analytics\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse\NamespaceRoot.ProductName.Capabilities.Analytics.ClickHouse.csproj" />
       <!--#endif -->
-      <!--#if (Messaging != "none") -->
+      <!--#if (MessagingTransport != "none") -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.csproj" />
       <!--#endif -->
       <!--#if (Hangfire) -->

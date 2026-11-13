@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Domain.Persistence;
 using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
-//#if (Messaging != "none")
+//#if (MessagingTransport != "none")
 using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 //#endif
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
@@ -93,7 +93,7 @@ public static partial class DependencyInjection
 
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ServiceIdentifierDbContext>());
 
-//#if (Messaging == "outbox")
+//#if (MessagingDelivery == "outbox")
         // The bus, with the outbox in this service's schema: a message and the change that caused it
         // commit together. Consumers are found in this assembly.
         services.AddMessaging<ServiceIdentifierDbContext>(
@@ -107,7 +107,7 @@ public static partial class DependencyInjection
         services.AddAuditRecorder<ServiceIdentifierDbContext>("servicenameorcustom");
 //#endif
 
-//#elif (Messaging == "direct")
+//#elif (MessagingDelivery == "direct")
         // The bus without an outbox: a message goes straight to RabbitMQ and is lost if the broker is
         // down. Consumers are found in this assembly.
         services.AddMessaging(configuration, "servicenameorcustom", typeof(InfrastructureMarker).Assembly);

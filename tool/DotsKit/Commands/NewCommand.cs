@@ -27,6 +27,11 @@ internal sealed class NewCommand(IPlanner planner, PlanExecution execution, IGit
             throw new ArgumentException("Name the service with -S.");
         }
 
+        if (TemplateVersions.WhyNotATransport(command["Messaging"], Target) is { } whyNotATransport)
+        {
+            throw new ArgumentException(whyNotATransport);
+        }
+
         var root = SolutionRoot.Find(folder);
         var empty = root is null && SolutionRoot.IsEmpty(folder);
         if (root is null && !empty)

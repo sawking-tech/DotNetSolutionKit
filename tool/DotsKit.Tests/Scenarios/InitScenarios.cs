@@ -36,9 +36,9 @@ internal sealed class InitScenarios
     public async Task ASolutionWithFlagsOnItsServices_IsReproducedWhole_AndDotskitAddsToIt()
     {
         var solution = await MadeByTheTemplateAsync(
-            ["-N", "ST", "-P", "Demo", "-S", "Orders", "--Storage", "true", "--MongoDB", "true", "--Notify", "email", "--Messaging", "outbox", "--Audit", "true", "--DiffApi", "true", "--FeatureFlags", "true", "--ClickHouse", "true"],
-            ["-S", "Billing", "--Storage", "true", "--Messaging", "outbox", "--Notify", "email", "--Audit", "true"],
-            ["-S", "Stock", "--Hangfire", "false", "--Messaging", "direct", "--ClickHouse", "true", "--FeatureFlags", "true"]);
+            ["-N", "ST", "-P", "Demo", "-S", "Orders", "--Storage", "true", "--MongoDB", "true", "--Notify", "email", "--Messaging", "rabbitmq:outbox", "--Audit", "true", "--DiffApi", "true", "--FeatureFlags", "true", "--ClickHouse", "true"],
+            ["-S", "Billing", "--Storage", "true", "--Messaging", "rabbitmq:outbox", "--Notify", "email", "--Audit", "true"],
+            ["-S", "Stock", "--Hangfire", "false", "--Messaging", "rabbitmq:direct", "--ClickHouse", "true", "--FeatureFlags", "true"]);
 
         var init = await solution.DotskitAsync("init", "--yes");
 
@@ -46,7 +46,7 @@ internal sealed class InitScenarios
         init.Output.ShouldContain(Reproduced);
         var manifest = Manifest.Parse(solution.Read(Layout.ManifestPath));
         manifest.FindService("Stock")!.IsOn("Hangfire").ShouldBeFalse();
-        manifest.FindService("Billing")!["Messaging"].ShouldBe("outbox");
+        manifest.FindService("Billing")!["Messaging"].ShouldBe("rabbitmq:outbox");
         await solution.CommitAsync("described");
 
         var added = await solution.DotskitAsync("new", "-S", "Catalog", "--MongoDB", "true", "--yes");

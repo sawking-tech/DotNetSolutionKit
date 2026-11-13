@@ -78,8 +78,8 @@ internal sealed partial class TemplateArgs
     /// <summary>What says which command made the solution; a manifest keeps neither.</summary>
     private static readonly string[] Mode = [Solution, Minimal];
 
-    /// <summary>The bus of a solution is the strongest of its services': none &lt; direct &lt; outbox.</summary>
-    private static readonly string[] MessagingOrder = ["none", "direct", "outbox"];
+    /// <summary>The bus of a solution is the strongest of its services': none &lt; rabbitmq:direct &lt; rabbitmq:outbox.</summary>
+    private static readonly string[] MessagingOrder = ["none", "rabbitmq:direct", "rabbitmq:outbox"];
 
     /// <summary>
     /// The template's defaults that are not off or empty: a parameter a command does not name has this value.
@@ -112,6 +112,10 @@ internal sealed partial class TemplateArgs
     /// <summary>A port: one to five digits.</summary>
     [GeneratedRegex(@"^[0-9]{1,5}\z")]
     private static partial Regex PortNumber();
+
+    /// <summary>The bus: none, or a transport and a delivery by a colon, as the template names its choices.</summary>
+    [GeneratedRegex(@"^[A-Za-z0-9]+(:[A-Za-z0-9]+)?\z")]
+    private static partial Regex Transport();
 
     /// <summary>A bool or a choice of the template, one or several by | or a comma.</summary>
     [GeneratedRegex(@"^[A-Za-z0-9]+([|,][A-Za-z0-9]+)*\z")]
@@ -155,6 +159,7 @@ internal sealed partial class TemplateArgs
     {
         _ when Names.Contains(name) => DottedName().IsMatch(value) ? null : "a name is letters, digits and _ in parts by dots, as a namespace of C#.",
         HttpPort => PortNumber().IsMatch(value) ? null : "a port is a number.",
+        Messaging => Transport().IsMatch(value) ? null : "the bus is none, rabbitmq:outbox or rabbitmq:direct.",
         _ => Choice().IsMatch(value) ? null : "a value of the template is letters and digits.",
     };
 
@@ -268,7 +273,12 @@ internal sealed partial class TemplateArgs
         solution.Without([.. WidenedFlags, Notify, Messaging]).JoinedWith(service.Without(Mode));
 
     /// <summary>The arguments the template of <paramref name="version"/> has a parameter for (<see cref="Generation.TemplateVersions.HasParameter"/>).</summary>
-    public TemplateArgs ForVersion(string version) => new([.. _values.Where(v => Generation.TemplateVersions.HasParameter(version, v.Key))]);
+    public TemplateArgs ForVersion(string version) =>
+        new([.. _values
+            .Where(v => Generation.TemplateVersions.HasParameter(version, v.Key))
+            .Select(v => string.Equals(v.Key, Messaging, StringComparison.OrdinalIgnoreCase)
+                ? new KeyValuePair<string, string>(v.Key, Generation.TemplateVersions.TransportValueFor(version, v.Value))
+                : v)]);
 
     /// <summary>
     /// The arguments in the order the template declares its parameters: the solution's arguments are the same

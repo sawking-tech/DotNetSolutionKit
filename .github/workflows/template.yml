@@ -67,11 +67,11 @@ jobs:
             first: -N Acme -P Shop -S Orders --Solution
           - name: every flag, three services
             first: >-
-              -N Acme -P Shop -S Orders --Solution --Messaging outbox -I true --DiffApi true --FeatureFlags true
+              -N Acme -P Shop -S Orders --Solution --Messaging rabbitmq:outbox -I true --DiffApi true --FeatureFlags true
               --HierarchyRules true --Storage true --ClickHouse true --MongoDB true --Notify email --GitHubCiCd true --Audit true
             # Flags that change a service's code are passed again to a later service, as the docs say.
             # The second service by the short names, so they keep working.
-            more: -N Acme -P Shop -S Billing --Messaging outbox -I true --DiffApi true -FF true --Storage true -CH true --MongoDB true --Notify email --Audit true
+            more: -N Acme -P Shop -S Billing --Messaging rabbitmq:outbox -I true --DiffApi true -FF true --Storage true -CH true --MongoDB true --Notify email --Audit true
             gateway: -N Acme -P Shop -S Gateway --ApiGateway true
             integration: true
             # ci.yml with coverage, as coverage.yml runs it; the others run it as a pull request
@@ -82,26 +82,26 @@ jobs:
             first: -N Acme -P Shop -S Orders -M false -H false  # -M false: the hidden name of --Solution in earlier versions
             more: -N Acme -P Shop -S Billing -H false
           - name: direct bus
-            first: -N Acme -P Shop -S Orders --Solution --Messaging direct
+            first: -N Acme -P Shop -S Orders --Solution --Messaging rabbitmq:direct
           - name: vault
             first: -N Acme -P Shop -S Orders --Solution --Vault true --GitHubCiCd true --FeatureFlags true
             more: -N Acme -P Shop -S Billing --Vault true --FeatureFlags true
             integration: true
           - name: sql server
             first: >-
-              -N Acme -P Shop -S Orders --Solution --Database mssql --Messaging outbox -I true --DiffApi true
+              -N Acme -P Shop -S Orders --Solution --Database mssql --Messaging rabbitmq:outbox -I true --DiffApi true
               --FeatureFlags true --HierarchyRules true --Audit true --GitHubCiCd true
-            more: -N Acme -P Shop -S Billing --Database mssql --Messaging outbox -I true --DiffApi true --FeatureFlags true --Audit true
+            more: -N Acme -P Shop -S Billing --Database mssql --Messaging rabbitmq:outbox -I true --DiffApi true --FeatureFlags true --Audit true
             integration: true
             schemas: true
           - name: xunit tests
-            first: -N Acme -P Shop -S Orders --Solution --TestFramework xunit --Messaging outbox --Audit true
+            first: -N Acme -P Shop -S Orders --Solution --TestFramework xunit --Messaging rabbitmq:outbox --Audit true
             more: -N Acme -P Shop -S Billing --TestFramework xunit
             gateway: -N Acme -P Shop -S Gateway --ApiGateway true --TestFramework xunit
             layers: Orders
           - name: dotted names
-            first: -N Acme.Corp -P Retail.Shop -S Sales.Orders --Solution --Messaging outbox --DiffApi true
-            more: -N Acme.Corp -P Retail.Shop -S Sales.Billing --Messaging outbox --DiffApi true
+            first: -N Acme.Corp -P Retail.Shop -S Sales.Orders --Solution --Messaging rabbitmq:outbox --DiffApi true
+            more: -N Acme.Corp -P Retail.Shop -S Sales.Billing --Messaging rabbitmq:outbox --DiffApi true
           - name: kubernetes files
             first: -N Acme -P Shop -S Orders --Solution --Deploy k8s --Agent opencode
             agent: opencode

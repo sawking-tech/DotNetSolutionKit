@@ -20,7 +20,7 @@ internal sealed class CapabilityScenarios
     {
         var solution = await ASolutionWithoutCapabilitiesAsync();
 
-        var billing = await solution.DotskitAsync("new", "-S", "Billing", "--MongoDB", "true", "--Messaging", "outbox", "-H", "false", "--yes");
+        var billing = await solution.DotskitAsync("new", "-S", "Billing", "--MongoDB", "true", "--Messaging", "rabbitmq:outbox", "-H", "false", "--yes");
 
         billing.Code.ShouldBe((int)ExitCode.Done, billing.Output + billing.Error);
         billing.Output.ShouldContain("the solution builds");

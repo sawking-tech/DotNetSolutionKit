@@ -56,7 +56,17 @@ internal sealed class UpgradeScenarios
         var solution = await SolutionOfAsync(version);
         solution.Write(Program, solution.Read(Program) + "\n" + TeamsLine + "\n");
         var manifest = Manifest.Parse(solution.Read(Layout.ManifestPath));
-        var pinned = manifest with { Packages = new PackagePolicy { Pinned = new() { [Pinned] = PinnedVersion } } };
+        // 3.0 names the transport in the Messaging value: the team edits the manifest line before the upgrade.
+        var transported = manifest with
+        {
+            Services = [.. manifest.Services.Select(service => service.Select(value => value switch
+            {
+                "outbox" => "rabbitmq:outbox",
+                "direct" => "rabbitmq:direct",
+                _ => value,
+            }).ToList())],
+        };
+        var pinned = transported with { Packages = new PackagePolicy { Pinned = new() { [Pinned] = PinnedVersion } } };
         solution.Write(Layout.ManifestPath, pinned.Serialize());
         await solution.CommitAsync("the team's line and pin");
 
@@ -74,5 +84,17 @@ internal sealed class UpgradeScenarios
 
         var added = await solution.DotskitAsync("new", "-S", "Catalog", "--yes");
         added.Code.ShouldBe(0, added.Output + added.Error);
+    }
+
+    [Test]
+    public async Task ASolutionOfAnEarlierMinor_WithTheOldDelivery_IsRefusedUntilItsManifestNamesTheTransport()
+    {
+        var solution = await SolutionOfAsync("2.9.1");
+
+        var refused = await solution.DotskitAsync("upgrade", "--yes", "--all-at-once");
+
+        refused.Code.ShouldNotBe(0);
+        refused.Error.ShouldContain("--Messaging rabbitmq:outbox");
+        refused.Error.ShouldContain(Layout.ManifestPath);
     }
 }

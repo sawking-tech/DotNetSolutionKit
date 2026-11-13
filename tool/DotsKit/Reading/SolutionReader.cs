@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using DotsKit.Generation;
 
 namespace DotsKit.Reading;
 
@@ -59,9 +60,9 @@ internal static partial class SolutionReader
             throw new InvalidOperationException($"{Layout.ServicesFolder} has no service of the template: dotskit new -S <Service> adds one.");
         }
 
-        var solution = Solution(files, prefix, Names(files, prefix, given), services[0]);
+        var solution = Solution(files, prefix, Names(files, prefix, given), services[0], version);
         var manifest = new Manifest { Template = version, Solution = solution.ToArgs(), Services = [] };
-        return services.Aggregate(manifest, (m, folder) => m.WithServiceAsItIs(Service(files, prefix, folder)));
+        return services.Aggregate(manifest, (m, folder) => m.WithServiceAsItIs(Service(files, prefix, folder, version)));
     }
 
     /// <summary>The service folders with the one the solution was made with first, where the solution tells it (<see cref="Markers.FirstServiceScript"/>).</summary>
@@ -73,7 +74,7 @@ internal static partial class SolutionReader
     }
 
     /// <summary>A service of the solution by its files, to add to a manifest that does not list it.</summary>
-    public static TemplateArgs Service(ISolutionFiles files, string prefix, string folder)
+    public static TemplateArgs Service(ISolutionFiles files, string prefix, string folder, string version)
     {
         var name = ServiceName(prefix, folder);
         var args = TemplateArgs.Empty.With(TemplateArgs.ServiceName, name);
@@ -93,7 +94,7 @@ internal static partial class SolutionReader
             args = args.With("Hangfire", Off);
         }
 
-        if (Messaging(files, prefix, folder, settings) is { } messaging)
+        if (Messaging(files, prefix, folder, settings, version) is { } messaging)
         {
             args = args.With("Messaging", messaging);
         }
@@ -165,7 +166,7 @@ internal static partial class SolutionReader
             : throw new ArgumentException($"-N {root} -P {product} make {root}.{product}, the solution is {prefix}: name its own parts.");
 
     /// <summary>The parameters of the whole solution, and the flags Common and the root were generated with.</summary>
-    private static TemplateArgs Solution(ISolutionFiles files, string prefix, (string Root, string Product) names, string firstService)
+    private static TemplateArgs Solution(ISolutionFiles files, string prefix, (string Root, string Product) names, string firstService, string version)
     {
         var args = TemplateArgs.Empty.With("NamespaceRoot", names.Root).With("ProductName", names.Product);
         args = NotDefault(args, "Database", files.Exists(Markers.Of(Markers.SqlServerPath, prefix)) ? "mssql" : "postgres");
@@ -184,17 +185,17 @@ internal static partial class SolutionReader
 
         if (files.Exists(Markers.Of(Markers.AuditPath, prefix)))
         {
-            args = args.With("Audit", On).With("Messaging", "outbox");
+            args = args.With("Audit", On).With("Messaging", Transport(version, "outbox"));
         }
 
-        return RootOnly(files, args);
+        return RootOnly(files, args, version);
     }
 
     /// <summary>
     /// Hangfire and the bus of the solution show only in .env.example of compose; elsewhere the services' own
     /// give them, as dotskit new widens the solution by each service.
     /// </summary>
-    private static TemplateArgs RootOnly(ISolutionFiles files, TemplateArgs args)
+    private static TemplateArgs RootOnly(ISolutionFiles files, TemplateArgs args, string version)
     {
         if (files.Read(Markers.EnvExamplePath) is not { } env)
         {
@@ -202,17 +203,21 @@ internal static partial class SolutionReader
         }
 
         args = NotDefault(args, "Hangfire", env.Contains(Markers.HangfireEnvLine, StringComparison.Ordinal) ? On : Off);
-        return env.Contains(Markers.RabbitMqEnvLine, StringComparison.Ordinal) && !args.Has("Messaging") ? args.With("Messaging", "direct") : args;
+        return env.Contains(Markers.RabbitMqEnvLine, StringComparison.Ordinal) && !args.Has("Messaging") ? args.With("Messaging", Transport(version, "direct")) : args;
     }
 
     /// <summary>The value, given only where it is not the template's default: a manifest names what was chosen, as dotskit new writes it.</summary>
     private static TemplateArgs NotDefault(TemplateArgs args, string name, string value) =>
         string.Equals(TemplateArgs.Empty[name], value, StringComparison.OrdinalIgnoreCase) ? args : args.With(name, value);
 
-    private static string? Messaging(ISolutionFiles files, string prefix, string folder, HashSet<string> settings) =>
+    private static string? Messaging(ISolutionFiles files, string prefix, string folder, HashSet<string> settings, string version) =>
         !settings.Contains(Markers.BusSection) ? null
-        : Contains(files, ServicePath(Markers.ConfigurationFile, prefix, folder), Markers.OutboxLine) ? "outbox"
-        : "direct";
+        : Contains(files, ServicePath(Markers.ConfigurationFile, prefix, folder), Markers.OutboxLine) ? Transport(version, "outbox")
+        : Transport(version, "direct");
+
+    /// <summary>The Messaging value of the template <paramref name="version"/>: since 3.0 it names the transport too.</summary>
+    private static string Transport(string version, string delivery) =>
+        TemplateVersions.NamesTransport(version) ? $"rabbitmq:{delivery}" : delivery;
 
     private static string? Port(ISolutionFiles files, string prefix, string folder) =>
         LocalPort().Match(files.Read(ServicePath(Markers.LaunchSettings, prefix, folder)) ?? "") is { Success: true } m ? m.Groups["port"].Value : null;

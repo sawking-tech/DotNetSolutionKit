@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <!-- Messaging on RabbitMQ: the transport behind IMessageBus, the transactional outbox and the
-         consumers. A service generated with Messaging outbox or direct references it; with Messaging none it
+         consumers. A service generated with Messaging rabbitmq:outbox or rabbitmq:direct references it; with Messaging none it
          carries neither the project nor the broker packages. -->
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>

@@ -1,7 +1,7 @@
 using System.Reflection;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
-//#if (Messaging == "outbox")
+//#if (MessagingDelivery == "outbox")
 using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 //#endif
 using NamespaceRoot.ProductName.Common.Web.Setup;
@@ -83,7 +83,7 @@ try
     app.UsePlatformPipeline(typeof(Program).Assembly);
 //#endif
 
-//#if (Messaging == "outbox")
+//#if (MessagingDelivery == "outbox")
     // Outside Production: what waits in the outbox and what was sent, at /api/v1/diagnostics/outbox-stats.
     app.MapOutboxDiagnostics<ServiceIdentifierDbContext>();
 

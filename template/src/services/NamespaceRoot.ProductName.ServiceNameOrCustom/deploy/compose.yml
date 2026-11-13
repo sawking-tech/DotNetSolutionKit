@@ -20,7 +20,7 @@ services:
 #if (Hangfire)
       HangfireSettings__DashboardPassword: ${HANGFIRE_DASHBOARD_PASSWORD:?Set HANGFIRE_DASHBOARD_PASSWORD in deploy/compose/.env}
 #endif
-#if (Messaging != "none")
+#if (MessagingTransport != "none")
       RabbitMq__Host: rabbitmq
       RabbitMq__UserName: ${RABBITMQ_USER:-guest}
       RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
@@ -81,7 +81,7 @@ services:
       postgres:
         condition: service_healthy
 #endif
-#if (Messaging != "none")
+#if (MessagingTransport != "none")
       rabbitmq:
         condition: service_healthy
 #endif

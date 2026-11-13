@@ -125,7 +125,7 @@ internal sealed class InitCommand(IStaging staging, ISolutionProjects projects, 
 
         var names = string.Join(", ", unlisted.Select(f => SolutionReader.ServiceName(prefix, f)));
         terminal.Info($"The manifest does not list {names}: the template writes it only when the solution is generated. Each is added as the template made it.");
-        return unlisted.Aggregate(current, (m, f) => m.WithServiceAsItIs(SolutionReader.Service(files, prefix, f)));
+        return unlisted.Aggregate(current, (m, f) => m.WithServiceAsItIs(SolutionReader.Service(files, prefix, f, current.Template)));
     }
 
     private ExitCode Current(Manifest manifest)

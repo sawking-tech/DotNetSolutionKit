@@ -54,20 +54,20 @@ internal sealed class TemplateArgsTests
     [Test]
     public void Should_WidenTheSolution_By_WhatAServiceBringsOutsideItsFolder()
     {
-        var solution = Parse("-N", "ST", "-P", "Demo", "--Messaging", "direct", "--Notify", "email");
-        var service = Parse("-S", "Billing", "--Storage", "true", "-H", "true", "--Messaging", "outbox", "--Notify", "sms");
+        var solution = Parse("-N", "ST", "-P", "Demo", "--Messaging", "rabbitmq:direct", "--Notify", "email");
+        var service = Parse("-S", "Billing", "--Storage", "true", "-H", "true", "--Messaging", "rabbitmq:outbox", "--Notify", "sms");
 
         var widened = solution.WidenBy(service);
 
         widened.IsOn("Storage").ShouldBeTrue();
         widened.IsOn("Hangfire").ShouldBeTrue();
-        widened["Messaging"].ShouldBe("outbox");
+        widened["Messaging"].ShouldBe("rabbitmq:outbox");
         widened["Notify"].ShouldBe("email,sms");
     }
 
     [Test]
     public void Should_KeepTheSolutionsStrongerBus_When_AServiceHasAWeakerOne() =>
-        Parse("--Messaging", "outbox").WidenBy(Parse("-S", "Billing", "--Messaging", "none"))["Messaging"].ShouldBe("outbox");
+        Parse("--Messaging", "rabbitmq:outbox").WidenBy(Parse("-S", "Billing", "--Messaging", "none"))["Messaging"].ShouldBe("rabbitmq:outbox");
 
     [TestCase("2.8.0", "Solution")]
     [TestCase("source", "Solution")]
@@ -84,7 +84,7 @@ internal sealed class TemplateArgsTests
     [Test]
     public void Should_GenerateAServiceWithItsOwnFlags_NotTheSolutionsWidenedOnes()
     {
-        var solution = Parse("-N", "ST", "--Database", "mssql", "--Storage", "true", "--Messaging", "outbox");
+        var solution = Parse("-N", "ST", "--Database", "mssql", "--Storage", "true", "--Messaging", "rabbitmq:outbox");
 
         var command = TemplateArgs.ForService(solution, Parse("-S", "Billing", "-H", "true"));
 

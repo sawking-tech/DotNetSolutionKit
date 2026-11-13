@@ -114,7 +114,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.csproj", "{5D30102B-EE73-4ED4-B87D-F091FAC68989}"
 EndProject
 #endif
-#if (Messaging != "none")
+#if (MessagingTransport != "none")
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.csproj", "{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests.csproj", "{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64}"
@@ -162,7 +162,7 @@ Global
 		{D3A8F1B6-2C5E-4A79-9B4D-8F1C6E3A0D72}.Release|x86.ActiveCfg = Release|Any CPU
 		{D3A8F1B6-2C5E-4A79-9B4D-8F1C6E3A0D72}.Release|x86.Build.0 = Release|Any CPU
 #endif
-#if (Messaging != "none")
+#if (MessagingTransport != "none")
 		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -730,7 +730,7 @@ Global
 		{5B7E2C41-9A3D-4F68-8C1E-7D2A4B6F9E35} = {8519937F-6A2B-4441-9591-06640B035553}
 		{D3A8F1B6-2C5E-4A79-9B4D-8F1C6E3A0D72} = {8519937F-6A2B-4441-9591-06640B035553}
 #endif
-#if (Messaging != "none")
+#if (MessagingTransport != "none")
 		{C6F1A8D2-4B7E-4E39-9A5C-2D8F6B3A1E57} = {8519937F-6A2B-4441-9591-06640B035553}
 		{9E4B2C7A-6D1F-4A83-B5E9-0C7A3F8D2B64} = {8519937F-6A2B-4441-9591-06640B035553}
 #endif

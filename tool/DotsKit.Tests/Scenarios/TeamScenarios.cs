@@ -185,7 +185,7 @@ internal sealed class TeamScenarios
         await solution.CommitAsync("the team's note on the bus line");
 
         // The outbox turns this very line into busNeedsDatabase: true.
-        var added = await solution.DotskitAsync("new", "-S", "Orders", "--Messaging", "outbox", "--yes", "--no-build");
+        var added = await solution.DotskitAsync("new", "-S", "Orders", "--Messaging", "rabbitmq:outbox", "--yes", "--no-build");
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         added.Output.ShouldContain(configuration);

@@ -68,14 +68,14 @@ internal sealed class ManifestTests
             Services =
             [
                 Orders.Services[0],
-                ["--ServiceNameOrCustom", "Billing", "--Messaging", "outbox", "--Storage", "true", "--HttpPort", "5001"],
+                ["--ServiceNameOrCustom", "Billing", "--Messaging", "rabbitmq:outbox", "--Storage", "true", "--HttpPort", "5001"],
             ],
         };
 
         var widened = mixed.Widened();
 
         widened.Template.ShouldBe(mixed.Template);
-        widened.SolutionArgs["Messaging"].ShouldBe("outbox");
+        widened.SolutionArgs["Messaging"].ShouldBe("rabbitmq:outbox");
         widened.SolutionArgs.IsOn("Storage").ShouldBeTrue();
         widened.Widened().Solution.ShouldBe(widened.Solution);
     }

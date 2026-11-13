@@ -107,10 +107,37 @@
       "defaultValue": "none",
       "choices": [
         { "choice": "none", "description": "No message bus" },
-        { "choice": "outbox", "description": "MassTransit on RabbitMQ; messages go through a transactional outbox in the service's database" },
-        { "choice": "direct", "description": "MassTransit on RabbitMQ; messages go straight to the broker and are lost if it is down" }
+        { "choice": "rabbitmq:outbox", "description": "MassTransit on RabbitMQ; messages go through a transactional outbox in the service's database" },
+        { "choice": "rabbitmq:direct", "description": "MassTransit on RabbitMQ; messages go straight to the broker and are lost if it is down" }
       ],
-      "description": "Message bus for the service"
+      "description": "Message bus for the service: the transport and the delivery in one value"
+    },
+    "MessagingTransport": {
+      "type": "generated",
+      "generator": "switch",
+      "parameters": {
+        "evaluator": "C++",
+        "datatype": "string",
+        "cases": [
+          { "condition": "(Messaging == \"rabbitmq:outbox\" || Messaging == \"rabbitmq:direct\")", "value": "rabbitmq" },
+          { "condition": "", "value": "none" }
+        ]
+      },
+      "description": "The transport the Messaging value names"
+    },
+    "MessagingDelivery": {
+      "type": "generated",
+      "generator": "switch",
+      "parameters": {
+        "evaluator": "C++",
+        "datatype": "string",
+        "cases": [
+          { "condition": "(Messaging == \"rabbitmq:outbox\")", "value": "outbox" },
+          { "condition": "(Messaging == \"rabbitmq:direct\")", "value": "direct" },
+          { "condition": "", "value": "none" }
+        ]
+      },
+      "description": "The delivery the chosen transport gives"
     },
     "ApiGateway": {
       "type": "parameter",
@@ -156,7 +183,7 @@
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false",
-      "description": "An audit journal of entity changes, published through the outbox; takes effect only with --Messaging outbox"
+      "description": "An audit journal of entity changes, published through the outbox; takes effect only with --Messaging rabbitmq:outbox"
     },
     "TestFramework": {
       "type": "parameter",
@@ -171,7 +198,7 @@
     },
     "AuditEnabled": {
       "type": "computed",
-      "value": "(Audit && Messaging == \"outbox\")"
+      "value": "(Audit && MessagingDelivery == \"outbox\")"
     },
     "Agent": {
       "type": "parameter",
@@ -973,12 +1000,12 @@
       ]
     },
     {
-      "condition": "(Audit && Messaging != \"outbox\")",
+      "condition": "(Audit && MessagingDelivery != \"outbox\")",
       "actionId": "00000000-0000-0000-0000-000000000001",
       "continueOnError": true,
-      "description": "--Audit was not applied: it needs --Messaging outbox",
+      "description": "--Audit was not applied: it needs --Messaging rabbitmq:outbox",
       "manualInstructions": [
-        { "text": "--Audit was not applied: an audit entry has to commit with the change it describes, and only --Messaging outbox writes it in the same transaction. Generate again with --Audit true --Messaging outbox." }
+        { "text": "--Audit was not applied: an audit entry has to commit with the change it describes, and only --Messaging rabbitmq:outbox writes it in the same transaction. Generate again with --Audit true --Messaging rabbitmq:outbox." }
       ]
     },
     {

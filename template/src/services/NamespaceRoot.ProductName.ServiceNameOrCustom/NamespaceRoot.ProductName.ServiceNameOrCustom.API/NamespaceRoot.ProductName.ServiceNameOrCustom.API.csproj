@@ -40,7 +40,7 @@
       <!--#if (FeatureFlags) -->
       <ProjectReference Include="..\..\..\framework\NamespaceRoot.ProductName.Framework.FeatureFlags\NamespaceRoot.ProductName.Framework.FeatureFlags.csproj" />
       <!--#endif -->
-      <!--#if (Messaging == "outbox") -->
+      <!--#if (MessagingDelivery == "outbox") -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ\NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.csproj" />
       <!--#endif -->
       <!--#if (Hangfire) -->

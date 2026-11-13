@@ -37,7 +37,7 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
         if (current.Upgrade is { } inProgress)
         {
             // The tool may have changed since the upgrade began: the release it goes to is checked again on every run.
-            CheckTarget(current.Template, inProgress.To);
+            CheckTarget(current, inProgress.To);
             return await NextPartAsync(root, current, inProgress, options, ct);
         }
 
@@ -53,7 +53,7 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
             return ExitCode.Done;
         }
 
-        CheckTarget(current.Template, target);
+        CheckTarget(current, target);
         if (!options.AllAtOnce)
         {
             return await NextPartAsync(root, current, new UpgradeInProgress { To = target, Done = [] }, options, ct);
@@ -107,9 +107,10 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
         }
     }
 
-    /// <summary>Refuses an upgrade from <paramref name="from"/> to <paramref name="to"/> this tool cannot make, with what to do instead.</summary>
-    private void CheckTarget(string from, string to)
+    /// <summary>Refuses an upgrade to <paramref name="to"/> this tool cannot make, with what to do instead.</summary>
+    private void CheckTarget(Manifest current, string to)
     {
+        var from = current.Template;
         if (TemplateVersions.WhyNotUpgraded(from, toolVersion, onSources) is { } why)
         {
             throw new InvalidOperationException(why);
@@ -118,6 +119,12 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
         if (to != DefaultTarget && TemplateVersions.WhyNotTarget(from, to, toolVersion, onSources) is { } whyNotTo)
         {
             throw new InvalidOperationException(whyNotTo);
+        }
+
+        var messaging = current.ServiceArgs.Select(service => service["Messaging"]).Append(current.SolutionArgs["Messaging"]);
+        if (messaging.Select(value => TemplateVersions.WhyNotATransport(value, to)).FirstOrDefault(why => why is not null) is { } whyNotATransport)
+        {
+            throw new InvalidOperationException($"{whyNotATransport} Edit the value in {Layout.ManifestPath}, then run dotskit upgrade again.");
         }
     }
 

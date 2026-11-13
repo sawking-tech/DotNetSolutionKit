@@ -73,7 +73,7 @@ internal static class ApplicationConfiguration
 //#endif
         // With the database switched off, what is stored in it goes off too: the job server, and the bus
         // when it delivers through the outbox.
-//#if (Messaging == "outbox")
+//#if (MessagingDelivery == "outbox")
         builder.AddDependencyOverrides(busNeedsDatabase: true);
 //#else
         builder.AddDependencyOverrides(busNeedsDatabase: false);

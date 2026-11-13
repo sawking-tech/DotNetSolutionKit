@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using NamespaceRoot.ProductName.Common.Domain.Persistence;
-//#if (Messaging == "outbox")
+//#if (MessagingDelivery == "outbox")
 using NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ;
 //#endif
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
@@ -21,7 +21,7 @@ public class ServiceIdentifierDbContext(DbContextOptions<ServiceIdentifierDbCont
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.HasDefaultSchema(DefaultSchemaName);
-//#if (Messaging == "outbox")
+//#if (MessagingDelivery == "outbox")
 
         // Outbox tables in this service's schema: a message is stored with the change that caused it
         modelBuilder.AddTransactionalOutbox(DefaultSchemaName);
