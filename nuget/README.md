@@ -52,7 +52,7 @@ Generated solutions, regenerated from every release with their CI running:
 | `--Solution` | `false` | Generates the solution: `Common`, `All.sln` and the root files, with the first service. Without it, only the service folder, into a solution already there. |
 | `--Database` | `postgres` | [Database](https://dotskit.sawking.tech/docs.html#persistence:sql-server): `postgres` or `mssql` (SQL Server). |
 | `-H`, `--Hangfire` | `true` | [Background jobs](https://dotskit.sawking.tech/docs.html#jobs) on Hangfire. |
-| `--Messaging` | `none` | [Message bus](https://dotskit.sawking.tech/docs.html#messaging): `outbox` or `direct`. |
+| `--Messaging` | `none` | [Message bus](https://dotskit.sawking.tech/docs.html#messaging): `rabbitmq:outbox` or `rabbitmq:direct`. |
 | `-I`, `--Infisical` | `false` | [Secrets and settings from Infisical](https://dotskit.sawking.tech/docs.html#secrets). |
 | `--Vault` | `false` | [Secrets and settings from HashiCorp Vault](https://dotskit.sawking.tech/docs.html#secrets:hashicorp-vault). |
 | `--DiffApi` | `false` | [API contract diff](https://dotskit.sawking.tech/docs.html#api-diff) on pull requests. |

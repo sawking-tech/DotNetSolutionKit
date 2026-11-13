@@ -23,6 +23,8 @@ internal sealed class NewCommandTests
         public bool Repository { get; init; } = true;
 
         public bool Answer { get; init; }
+
+        public string Version { get; init; } = ToolVersion;
         public int Planned { get; private set; }
         public int Written { get; private set; }
         public int TakenUncommitted { get; private set; }
@@ -30,7 +32,7 @@ internal sealed class NewCommandTests
         public List<string> Lines { get; } = [];
 
         public NewCommand Command() =>
-            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(), new ReferenceRepair(new RepairWriter(), new Builder()), new Terminal(this), new Git(this)), new Git(this), ToolVersion, onSources: false);
+            new(new Planner(this), new PlanExecution(new PlanReport(new Terminal(this)), new Writer(this), new Builder(), new ReferenceRepair(new RepairWriter(), new Builder()), new Terminal(this), new Git(this)), new Git(this), Version, onSources: false);
 
         private sealed class Planner(Fakes fakes) : IPlanner
         {
@@ -116,6 +118,18 @@ internal sealed class NewCommandTests
     }
 
     private static string ThisVersion => ToolVersion;
+
+    [Test]
+    public async Task AnOldMessagingValue_IsRefusedBeforeAPlan()
+    {
+        var fakes = new Fakes { Version = "3.0.0" };
+
+        var refused = await Should.ThrowAsync<ArgumentException>(() =>
+            fakes.Command().RunAsync(Args("-S", "Billing", "--Messaging", "outbox"), Solution("3.0.0"), CancellationToken.None));
+
+        refused.Message.ShouldContain("--Messaging rabbitmq:outbox");
+        fakes.Planned.ShouldBe(0);
+    }
 
     [Test]
     public async Task Should_Refuse_When_TheSolutionHasNoManifest()

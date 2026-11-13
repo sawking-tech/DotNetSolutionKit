@@ -581,7 +581,7 @@
           ]
         },
         {
-          "condition": "(!NotifyEmail || Messaging == \"none\")",
+          "condition": "(!NotifyEmail || MessagingTransport == \"none\")",
           "exclude": [
             "**/Messaging/Consumers/SendEmailCommandV1Consumer.cs",
             "**/Tests/SendEmailCommandV1ConsumerTests.cs"
@@ -631,7 +631,7 @@
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Tests/**"
           ]
         },        {
-          "condition": "(Messaging == \"none\")",
+          "condition": "(MessagingTransport == \"none\")",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ/**",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Messaging/NamespaceRoot.ProductName.Capabilities.Messaging.RabbitMQ.Tests/**"
@@ -777,7 +777,7 @@
           "exclude": ["src/package-versions/mssql.props"]
         },
         {
-          "condition": "(Messaging == \"none\")",
+          "condition": "(MessagingTransport == \"none\")",
           "exclude": ["src/package-versions/messaging.props"]
         },
         {
@@ -793,7 +793,7 @@
           "exclude": ["deploy/compose/infra/sqlserver.yml"]
         },
         {
-          "condition": "(Messaging == \"none\")",
+          "condition": "(MessagingTransport == \"none\")",
           "exclude": ["deploy/compose/infra/rabbitmq.yml"]
         },
         {
@@ -900,7 +900,7 @@
           ]
         },
         {
-          "condition": "(!NotifyEmail || Messaging == \"none\")",
+          "condition": "(!NotifyEmail || MessagingTransport == \"none\")",
           "exclude": [
             "**/Messaging/Consumers/SendEmailCommandV1Consumer.cs",
             "**/Tests/SendEmailCommandV1ConsumerTests.cs"

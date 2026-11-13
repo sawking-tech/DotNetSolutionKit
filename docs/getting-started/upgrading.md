@@ -257,7 +257,8 @@ dotskit upgrade
 
 Every file of the template - `Common`, the capabilities, the root, `deploy`,
 the scripts, the workflows, the test servers, the package versions - is merged by the tool, whatever release
-the solution comes from. The releases between ask nothing of a team that uses the template as it is.
+the solution comes from. The releases before 3.0 ask nothing of a team that uses the template as it is; 3.0
+asks for one line of the manifest, the value of `Messaging` (below).
 
 What stays with the team - its own code and its own call:
 
@@ -268,6 +269,7 @@ What stays with the team - its own code and its own call:
 | `v2.8.0` | A service of the team's own added to `deploy/compose/infrastructure.yml` moves into `deploy/compose/infra/`, a file per part. |
 | `v2.8.0` | `Infisical__SnapshotPath` and `Vault__SnapshotPath` are gone: remove the key where it is set and delete the snapshot file, which holds secrets nothing updates any more. |
 | `v2.8.0` | A service of the team's that writes files in its container writes them to `/tmp`, or to object storage when they must outlive the container: the root filesystem is read-only. |
+| `v3.0.0` | The `Messaging` value names the transport: edit every `--Messaging` line in `.dotskit/manifest.json`, the solution's and each service's, from `outbox` to `rabbitmq:outbox` or from `direct` to `rabbitmq:direct`; the upgrade refuses until it is done. |
 
 Everything else these releases changed - where a file lives, which project references which, how the
 infrastructure is split, how the test servers start - the upgrade brings on its own.
@@ -294,8 +296,9 @@ reference back would be a cycle, so the tool refuses to add it and says so.
 
 - The `Messaging` value names the transport: `none`, `rabbitmq:outbox`, `rabbitmq:direct`. A solution of
   2.x says `outbox` or `direct`, where the value named the delivery alone; the upgrade refuses it and
-  names what it needs. Edit the line of the service in `.dotskit/manifest.json` from `--Messaging outbox`
-  to `--Messaging rabbitmq:outbox`, or from `direct` to `rabbitmq:direct`, then run `dotskit upgrade`.
+  names what it needs. Edit every `--Messaging` line in `.dotskit/manifest.json`, the solution's and each
+  service's, from `--Messaging outbox` to `--Messaging rabbitmq:outbox`, or from `direct` to
+  `rabbitmq:direct`, then run `dotskit upgrade`.
 
 ## The changes of v2
 

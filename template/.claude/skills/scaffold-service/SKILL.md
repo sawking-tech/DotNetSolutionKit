@@ -60,7 +60,7 @@ them passes them again: `-I`, `--Vault`, `--DiffApi`, `--FeatureFlags`, `--Stora
 already has, in `src/common` or `src/capabilities`. With `--Messaging`, `--Notify email` also gives the service the consumer of `SendEmailCommandV1`;
 keep it in the one service that owns notifications.
 
-Per service, freely: `-H` (Hangfire), `--Messaging` (`none`, `outbox`, `direct`), `--TestFramework`
+Per service, freely: `-H` (Hangfire), `--Messaging` (`none`, `rabbitmq:outbox`, `rabbitmq:direct`), `--TestFramework`
 (`nunit`, `xunit`), `--HttpPort`.
 
 Read what the solution has before choosing:

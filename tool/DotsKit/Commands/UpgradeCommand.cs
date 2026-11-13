@@ -121,10 +121,15 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
             throw new InvalidOperationException(whyNotTo);
         }
 
-        var messaging = current.ServiceArgs.Select(service => service["Messaging"]).Append(current.SolutionArgs["Messaging"]);
-        if (messaging.Select(value => TemplateVersions.WhyNotATransport(value, to)).FirstOrDefault(why => why is not null) is { } whyNotATransport)
+        var messaging = current.ServiceArgs
+            .Select(service => (Line: $"of the service {service.Service}", Value: service["Messaging"]))
+            .Append((Line: "of the solution", Value: current.SolutionArgs["Messaging"]));
+        foreach (var (line, value) in messaging)
         {
-            throw new InvalidOperationException($"{whyNotATransport} Edit the value in {Layout.ManifestPath}, then run dotskit upgrade again.");
+            if (TemplateVersions.WhyNotATransport(value, to) is { } whyNotATransport)
+            {
+                throw new InvalidOperationException($"{whyNotATransport} The line {line} in {Layout.ManifestPath}: edit it, then run dotskit upgrade again.");
+            }
         }
     }
 

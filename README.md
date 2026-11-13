@@ -93,7 +93,7 @@ shows their files and how their CI ran.
 | `--Solution` | `false` | Generates the solution: `Common`, `All.sln` and the root files, with the first service. Without it, only the service folder, into a solution already there. |
 | `--Database` | `postgres` | [Database](docs/architecture/persistence.md#sql-server): `postgres` or `mssql` (SQL Server). |
 | `-H`, `--Hangfire` | `true` | [Background jobs](docs/features/background-jobs.md) on Hangfire. |
-| `--Messaging` | `none` | [Message bus](docs/features/messaging.md): `outbox` or `direct`. |
+| `--Messaging` | `none` | [Message bus](docs/features/messaging.md): `rabbitmq:outbox` or `rabbitmq:direct`. |
 | `-I`, `--Infisical` | `false` | [Secrets and settings from Infisical](docs/features/secrets.md). |
 | `--Vault` | `false` | [Secrets and settings from HashiCorp Vault](docs/features/secrets.md#hashicorp-vault). |
 | `--DiffApi` | `false` | [API contract diff](docs/features/api-diff.md) on pull requests. |
