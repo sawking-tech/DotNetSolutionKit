@@ -956,12 +956,12 @@
       "manualInstructions": [ { "text": "Add the service's projects to src/services/*.All.sln: dotnet sln <All.sln> add <project> --solution-folder <service>" } ]
     },
     {
-      "condition": "(!IsSolution && (Infisical || Vault || DiffApi || FeatureFlags || HierarchyRules || Storage || ClickHouse || MongoDB || NotifyEmail || Audit))",
+      "condition": "(!IsSolution)",
       "actionId": "00000000-0000-0000-0000-000000000001",
       "continueOnError": true,
-      "description": "Common was left as it is: pass only the flags whose part Common already has",
+      "description": "A service alone brings only its folder: a capability the solution does not have yet is added with dotskit new",
       "manualInstructions": [
-        { "text": "dotnet new leaves the files already in the solution as they are, so Common gets nothing for a flag of this service it does not have yet: a service takes only the flags whose part Common already has." }
+        { "text": "dotnet new writes only the service folder: it leaves the solution's shared files as they are, and refuses the run when one of them is there already. A flag whose part lives outside the folder - Messaging, Hangfire, MongoDB, ClickHouse, Storage, the credential store - is added with dotskit new -S <Service> <flags>, which brings the project, its versions, its compose file and its test server. Flags that change Common - the email contract, the audit journal, --DiffApi, --FeatureFlags, --HierarchyRules, -I, --Vault - are chosen for the solution with --Solution." }
       ]
     },
     {
