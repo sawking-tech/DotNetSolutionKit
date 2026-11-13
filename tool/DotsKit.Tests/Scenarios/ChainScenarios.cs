@@ -4,9 +4,10 @@ using DotsKit.Io;
 namespace DotsKit.Tests.Scenarios;
 
 /// <summary>
-/// A solution of the first release, 1.0.0, with code of the team that uses the types of Common, upgraded by
-/// dotskit a release at a time to the last minor of each 2.x and then to the template's sources; every step
-/// builds (#117). The releases before 2.6.1 come from their tags on GitHub, so the chain needs the network.
+/// A solution of 2.0.0, the first release of the major, with code of the team that uses the types of Common,
+/// upgraded by dotskit a release at a time to 2.9.1 and then to the template's sources; every step builds
+/// (#117). A solution of 1.x is not supported (#100): the chain starts at 2.0.0, the first release the
+/// upgrade promises. The releases before 2.6.1 come from their tags on GitHub, so the chain needs the network.
 /// The scenarios of this folder and what each file checks: README.md beside this file.
 /// </summary>
 [TestFixture]
@@ -16,15 +17,20 @@ internal sealed class ChainScenarios
     /// <summary>Its own category: an hour of upgrades, run once in CI and not on every OS (template.yml).</summary>
     public const string Category = "Chain";
 
-    private const string First = "1.0.0";
+    private const string First = "2.0.0";
 
-    /// <summary>The last patch of every minor of 2.x, in order.</summary>
-    private static readonly string[] Releases = ["2.0.0", "2.1.3", "2.2.0", "2.3.0", "2.4.0", "2.5.0", "2.6.2", "2.7.0", "2.8.0", "2.9.1"];
+    /// <summary>The last patch of every minor of 2.x after the first, in order.</summary>
+    private static readonly string[] Releases = ["2.1.3", "2.2.0", "2.3.0", "2.4.0", "2.5.0", "2.6.2", "2.7.0", "2.8.0", "2.9.1"];
 
     private const string TeamFile = "src/services/ST.Demo.Orders/ST.Demo.Orders.Application/Team/OrderAudit.cs";
 
+    private const string ApplicationProject =
+        "src/services/ST.Demo.Orders/ST.Demo.Orders.Application/ST.Demo.Orders.Application.csproj";
+
+    private const string CommonProject = "src/common/ST.Demo.Common/ST.Demo.Common.csproj";
+
     private const string TeamCode = """
-        using ST.Demo.Common.Contracts.Domain.Context;
+        using ST.Demo.Common.Domain.Context;
         using ST.Demo.Common.Domain.Persistence;
 
         namespace ST.Demo.Orders.Application.Team;
@@ -37,7 +43,7 @@ internal sealed class ChainScenarios
         }
         """;
 
-    /// <summary>The solution as 1.0.0 made it: Orders with Common and All.sln (-M false), then Billing, added by its script.</summary>
+    /// <summary>The solution as 2.0.0 made it: Orders with Common and All.sln (-M false), then Billing, added by its script.</summary>
     private static async Task<Sandbox> SolutionOfTheFirstReleaseAsync()
     {
         var solution = await Sandbox.EmptyAsync();
@@ -51,6 +57,10 @@ internal sealed class ChainScenarios
         }
 
         await new Solutions.SolutionProjects(new ProcessRunner()).AddMissingAsync(solution.Root, CancellationToken.None);
+        // The team's code lives in the application project and uses the kernel's context: a project references
+        // only what it lists, so the team adds the reference to Common.
+        var added = await solution.DotnetAsync("add", ApplicationProject, "reference", CommonProject);
+        added.Code.ShouldBe(0, added.Output + added.Error);
         solution.Write(TeamFile, TeamCode);
         await solution.CommitAsync($"made by the template {First}, with the team's code");
         var init = await solution.DotskitAsync("init", "--template-version", First, "--yes");

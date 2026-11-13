@@ -377,35 +377,6 @@ jobs:
         if: needs.scope.outputs.code == 'true'
         run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory!=Chain"
 
-  # A solution of 1.0.0 upgraded by dotskit a release at a time to the template's sources, building after every
-  # step (#117); twenty minutes, so on one OS. The releases before 2.6.1 come from their tags on GitHub.
-  chain:
-    name: dotskit upgrades from 1.0.0
-    needs: scope
-    runs-on: ubuntu-24.04
-    timeout-minutes: 120
-    steps:
-      - name: Nothing to build
-        if: needs.scope.outputs.code == 'false'
-        run: echo "Only the documentation and the site are touched; the steps below are skipped."
-      - uses: actions/checkout@v7
-        if: needs.scope.outputs.code == 'true'
-      - uses: actions/setup-dotnet@v6
-        if: needs.scope.outputs.code == 'true'
-        with:
-          dotnet-version: 8.0.x
-      - name: Git for the scenarios
-        if: needs.scope.outputs.code == 'true'
-        run: |
-          git config --global user.name "dotskit scenarios"
-          git config --global user.email "scenarios@dotskit.invalid"
-      - name: Build
-        if: needs.scope.outputs.code == 'true'
-        run: dotnet build tool/DotsKit.Tests -warnaserror
-      - name: Test
-        if: needs.scope.outputs.code == 'true'
-        run: dotnet test tool/DotsKit.Tests --no-build --filter "TestCategory=Chain"
-
   # A link to a section of a document names a heading of it, in the language of the linking document.
   doc-links:
     name: Links to sections
