@@ -2,7 +2,7 @@
 
 Агрегат поднимает событие, обработчики реагируют на него в одной из трёх фаз сохранения. Почему три фазы,
 а не MediatR: [ADR-001](../adr/001-three-phase-domain-events.md). Правила каждой фазы:
-[Events/Readme.md](../../template/src/framework/NamespaceRoot.ProductName.Framework.DomainEvents/Readme.md).
+[Events/README.md](../../template/src/framework/NamespaceRoot.ProductName.Framework.DomainEvents/README.md).
 
 ## Поднять событие
 

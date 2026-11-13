@@ -50,7 +50,7 @@
   предупреждением и не исчезают молча.
 
 Подробности о каждой фазе и её правилах - в
-[Events/Readme.md](../../template/src/framework/NamespaceRoot.ProductName.Framework.DomainEvents/Readme.md).
+[Events/README.md](../../template/src/framework/NamespaceRoot.ProductName.Framework.DomainEvents/README.md).
 
 ## Рассмотренные варианты
 

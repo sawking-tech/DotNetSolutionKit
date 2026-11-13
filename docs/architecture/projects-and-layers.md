@@ -86,6 +86,17 @@ flowchart BT
 | `Capabilities.Background.Hangfire` | Background jobs of `--Hangfire`: the storage in the service's schema, the dashboard, the filters that carry the actor and the domain-event scope into a job | `Common`, `Common.Infrastructure`, `Framework.DomainEvents`, `Framework.Observability` |
 | `Capabilities.Background.Hangfire.Tests` | The tests of background jobs: the job's domain-event scope and the actor it carries | `Capabilities.Background.Hangfire`, `Common`, `Framework.Testing` |
 
+## The shape of a module
+
+A module of either family has the same skeleton: its own directory, its projects inside it, and
+the project named after the module. A contract that crosses the module's boundary takes
+`.Abstractions`; the tests take `.Tests` when the module has something to test; a module that owns
+a mechanism carries a `README.md`. The package versions the module needs are declared in
+`src/package-versions/<module>.props` and imported by `src/Directory.Packages.props`, so the flag
+that turns the module on brings them with it. The wiring - `template.json`, `All.sln` and the docs
+- names the module the same way. A difference from the skeleton is allowed, but it is recorded
+with its reason beside the module.
+
 ## A service
 
 | Project | Holds | References |

@@ -15,6 +15,9 @@ deliberately not here:
   the core `IDomainExecutionContext` and `EventfulEntity` derives from the core `Entity<TId>`, so
   extracting them would drag the execution-context core along.
 
+Its tests are the kernel's: they live in `Common.Tests`, beside the interceptors and the
+`DbContext` they exercise, not in a `.Tests` project beside this module.
+
 ### Core Architecture Principles
 
 1. Encapsulation by Design: Technical cleanup methods (ClearDomainEvents) are hidden from the Application Layer using Explicit Interface Implementation (IHasDomainEvents).

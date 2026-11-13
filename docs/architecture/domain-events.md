@@ -2,7 +2,7 @@
 
 An aggregate raises an event; handlers react to it in one of three phases of the save. Why three phases
 and not MediatR: [ADR-001](../adr/001-three-phase-domain-events.md). The rules of each phase:
-[Events/Readme.md](../../template/src/framework/NamespaceRoot.ProductName.Framework.DomainEvents/Readme.md).
+[Events/README.md](../../template/src/framework/NamespaceRoot.ProductName.Framework.DomainEvents/README.md).
 
 ## Raise
 
