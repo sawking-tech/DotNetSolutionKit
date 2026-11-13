@@ -750,6 +750,14 @@
           "exclude": ["src/package-versions/mssql.props"]
         },
         {
+          "condition": "(Messaging == \"none\")",
+          "exclude": ["src/package-versions/messaging.props"]
+        },
+        {
+          "condition": "(!Hangfire)",
+          "exclude": ["src/package-versions/hangfire.props"]
+        },
+        {
           "condition": "(Database == \"mssql\")",
           "exclude": ["deploy/compose/infra/postgres.yml"]
         },
