@@ -8,6 +8,7 @@ scenario is in the category `Sandbox.Category`, and each file's summary links ba
 |---|---|
 | `Sandbox.cs` | Not a scenario: a solution generated once from the template's sources and copied per test, the tool run as the command line a person runs, `git` around it. |
 | `TeamScenarios.cs` | A solution several people work on: a project added by hand, a service left out of `All.sln`, a service named twice, a local secret, a new service's secrets file; with the template alone and with dotskit. |
+| `CapabilityScenarios.cs` | A solution grows by need: a service arrives with MongoDB, the bus or Hangfire the solution does not have yet, and `dotskit new` brings the project, its versions, its compose file, its test server and its place in `All.sln`. |
 | `InitScenarios.cs` | A solution made without dotskit: `init` describes it, the template generates it again by that description, and dotskit adds to it. |
 | `UpgradeScenarios.cs` | A solution of an earlier release brought to the template's sources by `upgrade`, the team's changes and package pins kept. |
 | `ChainScenarios.cs` | A solution of 1.0.0 with the team's code on `Common`, upgraded a release at a time to the last minor of each 2.x and to the sources; every step builds. Needs the network for the tags before 2.6.1. |
