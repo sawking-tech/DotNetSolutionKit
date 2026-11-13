@@ -131,6 +131,17 @@ internal sealed record Manifest
     public Manifest WithTemplate(string version) => this with { Template = version };
 
     /// <summary>
+    /// The manifest with the solution's arguments widened by every service: the flags the services share, since a
+    /// capability a service uses lives outside its folder and must be generated with the solution. The base of an
+    /// upgrade keeps the manifest as it was, so only the target is widened.
+    /// </summary>
+    public Manifest Widened() =>
+        this with
+        {
+            Solution = ServiceArgs.Aggregate(SolutionArgs, (solution, service) => solution.WidenBy(service)).InTemplateOrder().ToArgs(),
+        };
+
+    /// <summary>
     /// The upgrade a part at a time this solution is in, with <paramref name="part"/> merged; the last part ends it.
     /// <paramref name="parts"/> are the parts of the upgrade in their order, kept from its first run.
     /// </summary>

@@ -61,6 +61,26 @@ internal sealed class ManifestTests
         Orders.WithService(TemplateArgs.Parse(["-S", "Billing"])).SolutionArgs.IsOn("Hangfire").ShouldBeTrue();
 
     [Test]
+    public void Should_WidenTheSolution_ByEveryService_When_TheTargetIsGenerated()
+    {
+        var mixed = Orders with
+        {
+            Services =
+            [
+                Orders.Services[0],
+                ["--ServiceNameOrCustom", "Billing", "--Messaging", "outbox", "--Storage", "true", "--HttpPort", "5001"],
+            ],
+        };
+
+        var widened = mixed.Widened();
+
+        widened.Template.ShouldBe(mixed.Template);
+        widened.SolutionArgs["Messaging"].ShouldBe("outbox");
+        widened.SolutionArgs.IsOn("Storage").ShouldBeTrue();
+        widened.Widened().Solution.ShouldBe(widened.Solution);
+    }
+
+    [Test]
     public void Should_NameASolutionValue_When_AServiceCommandGivesAnotherOne() =>
         Orders.OtherSolutionValues(TemplateArgs.Parse(["-S", "Billing", "--GitHubCiCd", "true", "--Database", "postgres"]))
             .ShouldBe(["GitHubCiCd"]);

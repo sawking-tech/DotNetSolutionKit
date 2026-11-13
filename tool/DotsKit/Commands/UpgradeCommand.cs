@@ -66,7 +66,7 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
 
             terminal.Info($"Upgrading the solution from the template {current.Template} to {target}.");
             terminal.Info(UpgradeGuide.Of(current.Template, target));
-            var plan = await planner.BuildAsync(root, current, current.WithTemplate(target), new Merging.MergeMode(options.Force, options.MarkBase), ct);
+            var plan = await planner.BuildAsync(root, current, current.WithTemplate(target).Widened(), new Merging.MergeMode(options.Force, options.MarkBase), ct);
             return await execution.RunAsync(plan, options, start, ct);
         }, ct);
     }
@@ -194,7 +194,7 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
     private async Task<(ExitCode Code, string? Merged)> RunPartAsync(string root, Manifest current, UpgradeInProgress upgrade, IReadOnlyList<string> parts, Options options, CancellationToken ct)
     {
         var start = await TreeStart.OfAsync(git, root, options, ct);
-        var target = current.WithTemplate(upgrade.To) with { Upgrade = null };
+        var target = (current.WithTemplate(upgrade.To).Widened()) with { Upgrade = null };
         if (options.Part is null && parts.All(upgrade.Done.Contains))
         {
             return (await FinishAsync(root, current, upgrade, parts, options, start, ct), null);
@@ -214,9 +214,12 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
         var last = !all.Any(p => !upgrade.Done.Contains(p) && p != part);
         terminal.Info($"Upgrading the solution from the template {current.Template} to {upgrade.To}, a part at a time: {part}, "
             + $"{upgrade.Done.Count + 1} of {all.Count}{(last ? ", the last" : "")}.");
+        var next = current.WithPartMerged(upgrade.To, part, last, all);
         var step = plan with
         {
-            Next = current.WithPartMerged(upgrade.To, part, last, all),
+            // The last part moves the solution to the target, whose flags every service widens; a part before it keeps
+            // the manifest as it was, so the parts still to merge are generated against the base they came from.
+            Next = last ? next.Widened() : next,
             OnConflicts = current.WithPartInConflict(upgrade.To, all),
         };
         var code = await execution.RunAsync(step, options, start, ct);
@@ -240,7 +243,7 @@ internal sealed class UpgradeCommand(IPlanner planner, PlanExecution execution, 
         TreeStart start, CancellationToken ct)
     {
         terminal.Info($"Finishing the upgrade from the template {current.Template} to {upgrade.To}: every part is merged; the usings are repaired and the solution builds.");
-        var target = current.WithTemplate(upgrade.To) with { Upgrade = null };
+        var target = (current.WithTemplate(upgrade.To).Widened()) with { Upgrade = null };
         // Every part merged: the two trees of the step are the next output, and the merge has nothing to write but the manifest.
         var plan = await planner.BuildAsync(root, current with { Upgrade = null }, target, new Merging.MergeMode(options.Force, options.MarkBase), ct,
             new PartStep(upgrade.Done.ToHashSet(StringComparer.Ordinal), Part: "", parts));
