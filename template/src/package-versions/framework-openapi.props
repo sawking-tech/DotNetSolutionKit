@@ -1,0 +1,9 @@
+<Project>
+  <!-- Framework.OpenApi: the generated API documents and the Swagger filters. -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.31" />
+    <!-- Held on 9: version 10 moves to Microsoft.OpenApi 2, whose types (OpenApiDocument, OpenApiOperation,
+         the Models and Writers namespaces) the Swagger filters are written against. -->
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+  </ItemGroup>
+</Project>

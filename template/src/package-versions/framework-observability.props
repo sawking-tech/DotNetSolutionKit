@@ -1,0 +1,10 @@
+<Project>
+  <!-- Framework.Observability: the Serilog the services log with. -->
+  <ItemGroup>
+    <PackageVersion Include="Serilog" Version="4.4.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageVersion Include="Serilog.Enrichers.Span" Version="3.1.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.4" />
+  </ItemGroup>
+</Project>

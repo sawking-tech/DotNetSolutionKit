@@ -1,0 +1,8 @@
+<Project>
+  <!-- Framework.Validation: FluentValidation and its MVC auto-validation. -->
+  <ItemGroup>
+    <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageVersion Include="SharpGrip.FluentValidation.AutoValidation.Mvc" Version="2.0.0" />
+  </ItemGroup>
+</Project>
