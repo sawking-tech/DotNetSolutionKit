@@ -5,11 +5,11 @@ Off by default. `--Messaging` chooses per service:
 | Value | What the service gets |
 |---|---|
 | `none` | no bus |
-| `outbox` | MassTransit on RabbitMQ, with a transactional outbox in the service's schema: a message is stored with the change that caused it and sent after the commit |
-| `direct` | MassTransit on RabbitMQ without an outbox: a message goes straight to the broker and is lost if the broker is down |
+| `rabbitmq:outbox` | MassTransit on RabbitMQ, with a transactional outbox in the service's schema: a message is stored with the change that caused it and sent after the commit |
+| `rabbitmq:direct` | MassTransit on RabbitMQ without an outbox: a message goes straight to the broker and is lost if the broker is down |
 
-Choose `outbox` when a message must not be lost and must not be sent for a change that rolled back;
-`direct` only where losing a message is acceptable.
+Choose `rabbitmq:outbox` when a message must not be lost and must not be sent for a change that rolled back;
+`rabbitmq:direct` only where losing a message is acceptable.
 
 ## Publish
 

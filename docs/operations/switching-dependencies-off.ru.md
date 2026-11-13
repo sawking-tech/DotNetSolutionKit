@@ -27,14 +27,14 @@
 ```mermaid
 flowchart LR
     DBOFF["Database:Enabled=false"] --> J["HangfireSettings:Enabled=false<br/>jobs are stored in the database"]
-    DBOFF --> O["RabbitMq:Enabled=false<br/>with --Messaging outbox"]
+    DBOFF --> O["RabbitMq:Enabled=false<br/>with --Messaging rabbitmq:outbox"]
     DBOFF --> Q["a query or a write<br/>answers 503"]
     DBOFF --> R["/ready checks no database"]
 ```
 
 Сервер задач хранит задачи в базе данных, поэтому отключается вместе с ней. То же с шиной, которая
-доставляет через outbox (`--Messaging outbox`): outbox - это таблица. Шина, которая отправляет прямо в
-брокер (`--Messaging direct`), остаётся включённой.
+доставляет через outbox (`--Messaging rabbitmq:outbox`): outbox - это таблица. Шина, которая отправляет прямо в
+брокер (`--Messaging rabbitmq:direct`), остаётся включённой.
 
 `DbContext` сервиса остаётся зарегистрированным при отключённой базе, поэтому зависящие от него
 репозитории и обработчики по-прежнему создаются, и старт не падает. Открытие соединения падает ещё до

@@ -41,7 +41,7 @@ a small, fixed set of variation points. Otherwise compose.
 | **Adapter / Anti-corruption layer** | An external system whose model must not leak in | a port in the application layer, the adapter in infrastructure |
 | **Process Manager (light) / Saga (heavy)** | A long flow across services with a correlation id that converges or fails | a state marker on the aggregate, events over the bus, a watchdog job |
 | **Event-Carried State Transfer** | A service needs a copy of another's state and must not query back | a consumer that keeps a projection table in its own schema |
-| **Transactional Outbox** | A message must go out exactly when the change commits | `--Messaging outbox`, a pre-save handler: `/add-domain-event` |
+| **Transactional Outbox** | A message must go out exactly when the change commits | `--Messaging rabbitmq:outbox`, a pre-save handler: `/add-domain-event` |
 | **Idempotent Receiver** | Redelivery from the bus, a job retry or a webhook must not repeat the effect | `IIdempotentExecutor`, a correlation log, a state marker |
 | **Rate Limiter** | Protect a downstream with a documented capacity | `System.Threading.RateLimiting`; a `DelegatingHandler` on the HTTP client |
 | **Circuit Breaker** | Fail fast while a downstream is degraded | a resilience handler on the HTTP client (`Microsoft.Extensions.Http.Resilience`); the template wires none |

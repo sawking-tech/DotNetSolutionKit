@@ -290,6 +290,13 @@ What the run did not do: the architecture `v2` changed is still the team's to ch
 of `Common` used `Common.Contracts`, which `v2` reversed, and 42 compiler errors were left for a person - a
 reference back would be a cycle, so the tool refuses to add it and says so.
 
+## The changes of 3.0
+
+- The `Messaging` value names the transport: `none`, `rabbitmq:outbox`, `rabbitmq:direct`. A solution of
+  2.x says `outbox` or `direct`, where the value named the delivery alone; the upgrade refuses it and
+  names what it needs. Edit the line of the service in `.dotskit/manifest.json` from `--Messaging outbox`
+  to `--Messaging rabbitmq:outbox`, or from `direct` to `rabbitmq:direct`, then run `dotskit upgrade`.
+
 ## The changes of v2
 
 Build and projects:

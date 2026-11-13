@@ -94,7 +94,7 @@ modules and names them that way.
 - [ClickHouse](features/clickhouse.md): `--ClickHouse`
 - [MongoDB](features/mongodb.md): `--MongoDB`
 - [Notifications](features/notifications.md): email, `--Notify`
-- [Audit journal](features/audit.md): `--Audit`, with `--Messaging outbox`
+- [Audit journal](features/audit.md): `--Audit`, with `--Messaging rabbitmq:outbox`
 - [API gateway](features/api-gateway.md): YARP, `--ApiGateway`
 
 ## Operations

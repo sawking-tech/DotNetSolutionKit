@@ -8,7 +8,8 @@
         "The domain events and the testing system move out of Common to src/framework, which the template owns the way it owns Common.",
         "The secret stores of --Infisical and --Vault move to Capabilities.Security.CredentialStore; a service with the flag carries the store's SDK, and the configuration overlay moves with it.",
         "Capabilities are named by the system they carry inside their group: Capabilities.Persistence.Mongo, Capabilities.Analytics.ClickHouse, Capabilities.Messaging.Notifications; the projects a consumer references carry .Abstractions.",
-        "dotskit upgrade retargets a solution's references and usings through every move, a part at a time, and builds after each part."
+        "dotskit upgrade retargets a solution's references and usings through every move, a part at a time, and builds after each part.",
+        "The Messaging value names the transport: --Messaging rabbitmq:outbox or rabbitmq:direct. A 2.x solution says outbox or direct, and upgrade asks for the transport before it runs."
       ],
       "ru": {
         "headline": "Внешние системы, которые включает флаг, переезжают из Common в capabilities и framework: драйвер системы живёт только в сервисе с её флагом.",
@@ -17,7 +18,8 @@
           "Доменные события и тестовая система переезжают из Common в src/framework — то, чем владеет шаблон, как Common.",
           "Хранилища секретов флагов --Infisical и --Vault переезжают в Capabilities.Security.CredentialStore; сервис с флагом несёт SDK хранилища, а провайдер конфигурации переезжает вместе с ним.",
           "Capabilities называются по системе внутри своей группы: Capabilities.Persistence.Mongo, Capabilities.Analytics.ClickHouse, Capabilities.Messaging.Notifications; проекты, на которые ссылается потребитель, несут .Abstractions.",
-          "dotskit upgrade перенацеливает ссылки и using'и решения через каждый перенос, по частям, и собирает решение после каждой части."
+          "dotskit upgrade перенацеливает ссылки и using'и решения через каждый перенос, по частям, и собирает решение после каждой части.",
+          "Значение Messaging называет транспорт: --Messaging rabbitmq:outbox или rabbitmq:direct. Решение 2.x говорит outbox или direct, и обновление просит назвать транспорт до запуска."
         ]
       }
     },

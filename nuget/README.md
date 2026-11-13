@@ -64,7 +64,7 @@ Generated solutions, regenerated from every release with their CI running:
 | `--MongoDB` | `false` | [MongoDB](https://dotskit.sawking.tech/docs.html#mongodb) beside the main database: the client, the service's database, readiness. |
 | `--Notify` | none | Channels of [notifications](https://dotskit.sawking.tech/docs.html#notifications): `email` - through SMTP or Graph API, with a sandbox outside Production; with `--Messaging` other services ask for it by a bus command. |
 | `--TestFramework` | `nunit` | Test framework of the service's tests: `nunit` or `xunit` (v3). |
-| `--Audit` | `false` | [Audit journal](https://dotskit.sawking.tech/docs.html#audit) of entity changes, through the outbox; with `--Messaging outbox`. |
+| `--Audit` | `false` | [Audit journal](https://dotskit.sawking.tech/docs.html#audit) of entity changes, through the outbox; with `--Messaging rabbitmq:outbox`. |
 | `--ApiGateway` | `false` | An [API gateway](https://dotskit.sawking.tech/docs.html#gateway) on YARP in place of a service, into a solution already there (without `--Solution`). |
 | `--Deploy` | `compose` | [Deployment files](https://dotskit.sawking.tech/docs.html#deployment): `compose`, `k8s` or `none`. |
 | `--Agent` | `claude` | [Rules and skills for an AI agent](https://dotskit.sawking.tech/docs.html#agents): `claude`, `opencode` or `none`. |

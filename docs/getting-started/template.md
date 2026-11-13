@@ -61,7 +61,7 @@ and, for a flag, from its file in [`src/package-versions/`](../../template/src/p
 | `--Solution` | `false` | Generates the solution: `Common` projects, `All.sln` and the root files, with the first service. Without it, only the service folder, into a solution already there. `-M false` of earlier versions still means the same. |
 | `--Database` | `postgres` | [Database](../architecture/persistence.md#sql-server): `postgres` or `mssql` (SQL Server). One value for the solution: pass it with `--Solution` and to every service. |
 | `-H`, `--Hangfire` | `true` | [Background jobs](../features/background-jobs.md) on Hangfire. Per service, also without `--Solution`. |
-| `--Messaging` | `none` | [Message bus](../features/messaging.md): `outbox` or `direct`. Per service. |
+| `--Messaging` | `none` | [Message bus](../features/messaging.md): `rabbitmq:outbox` or `rabbitmq:direct`. Per service. |
 | `-I`, `--Infisical` | `false` | [Secrets from Infisical](../features/secrets.md). |
 | `--Vault` | `false` | [Secrets from HashiCorp Vault](../features/secrets.md#hashicorp-vault). |
 | `--DiffApi` | `false` | [API contract diff](../features/api-diff.md) on pull requests. |
@@ -73,7 +73,7 @@ and, for a flag, from its file in [`src/package-versions/`](../../template/src/p
 | `--MongoDB` | `false` | [MongoDB](../features/mongodb.md) beside the main database: the client, the service's database, readiness. |
 | `--Notify` | none | Channels of [notifications](../features/notifications.md): `email` - through SMTP or Graph API, with a sandbox outside Production; with `--Messaging` other services ask for it by a bus command. |
 | `--TestFramework` | `nunit` | Test framework of the service's tests, `nunit` or `xunit` (v3); per service. `Common`'s own tests stay on NUnit. See [testing](../architecture/testing.md). |
-| `--Audit` | `false` | [Audit journal](../features/audit.md) of entity changes; takes effect only with `--Messaging outbox`; without it the generation says it was not applied. |
+| `--Audit` | `false` | [Audit journal](../features/audit.md) of entity changes; takes effect only with `--Messaging rabbitmq:outbox`; without it the generation says it was not applied. |
 | `--ApiGateway` | `false` | An [API gateway](../features/api-gateway.md) on YARP in place of a service. Without `--Solution` only; with it the generation says it was not applied. |
 | `--Deploy` | `compose` | [Deployment files](../operations/deployment.md): `compose`, `k8s` or `none`. One value for the solution: pass the same to every service generated later. |
 | `--Agent` | `claude` | [Rules and skills for an AI agent](agents.md): `claude`, `opencode` or `none`. With `--Solution`. |
@@ -126,7 +126,7 @@ dotnet ef migrations add Initial \
 ```
 
 The migration also creates the tables of the outbox, when the service was generated with
-`--Messaging outbox`. A service started without migrations logs a fatal line with this command, and every
+`--Messaging rabbitmq:outbox`. A service started without migrations logs a fatal line with this command, and every
 query to a missing table fails.
 
 ## Configure and run locally

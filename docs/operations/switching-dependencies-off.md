@@ -27,14 +27,14 @@ service logs one line at startup naming what is off:
 ```mermaid
 flowchart LR
     DBOFF["Database:Enabled=false"] --> J["HangfireSettings:Enabled=false<br/>jobs are stored in the database"]
-    DBOFF --> O["RabbitMq:Enabled=false<br/>with --Messaging outbox"]
+    DBOFF --> O["RabbitMq:Enabled=false<br/>with --Messaging rabbitmq:outbox"]
     DBOFF --> Q["a query or a write<br/>answers 503"]
     DBOFF --> R["/ready checks no database"]
 ```
 
 The job server stores its jobs in the database, so it goes off with it. So does a bus that delivers
-through the outbox (`--Messaging outbox`), because the outbox is a table. A bus that sends straight to the
-broker (`--Messaging direct`) stays on.
+through the outbox (`--Messaging rabbitmq:outbox`), because the outbox is a table. A bus that sends straight to the
+broker (`--Messaging rabbitmq:direct`) stays on.
 
 The service's `DbContext` stays registered while the database is off, so repositories and handlers that
 depend on it are still built and the start does not fail. Opening a connection fails before it reaches

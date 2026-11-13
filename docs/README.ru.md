@@ -89,7 +89,7 @@ mindmap
 - [ClickHouse](features/clickhouse.md): `--ClickHouse`
 - [MongoDB](features/mongodb.md): `--MongoDB`
 - [Уведомления](features/notifications.md): почта, `--Notify`
-- [Журнал аудита](features/audit.md): `--Audit`, вместе с `--Messaging outbox`
+- [Журнал аудита](features/audit.md): `--Audit`, вместе с `--Messaging rabbitmq:outbox`
 - [API-шлюз](features/api-gateway.md): YARP, `--ApiGateway`
 
 ## Эксплуатация

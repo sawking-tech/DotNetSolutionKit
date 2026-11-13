@@ -61,7 +61,7 @@ dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 | `--Solution` | `false` | Генерирует решение: проекты `Common`, `All.sln` и корневые файлы вместе с первым сервисом. Без него - только папка сервиса, в уже существующее решение. `-M false` прежних версий по-прежнему означает то же. |
 | `--Database` | `postgres` | [СУБД](../architecture/persistence.ru.md#sql-server): `postgres` или `mssql` (SQL Server). Одно значение на решение: передайте его с `--Solution` и каждому сервису. |
 | `-H`, `--Hangfire` | `true` | [Фоновые задачи](../features/background-jobs.md) на Hangfire. Задаётся для каждого сервиса, в том числе без `--Solution`. |
-| `--Messaging` | `none` | [Шина сообщений](../features/messaging.md): `outbox` или `direct`. Задаётся для каждого сервиса. |
+| `--Messaging` | `none` | [Шина сообщений](../features/messaging.md): `rabbitmq:outbox` или `rabbitmq:direct`. Задаётся для каждого сервиса. |
 | `-I`, `--Infisical` | `false` | [Секреты из Infisical](../features/secrets.md). |
 | `--Vault` | `false` | [Секреты из HashiCorp Vault](../features/secrets.ru.md#hashicorp-vault). |
 | `--DiffApi` | `false` | [Сравнение контракта API](../features/api-diff.md) в pull request. |
@@ -73,7 +73,7 @@ dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 | `--MongoDB` | `false` | [MongoDB](../features/mongodb.md) рядом с основной базой: клиент, база сервиса, готовность. |
 | `--Notify` | нет | Каналы [уведомлений](../features/notifications.md): `email` - через SMTP или Graph API, с песочницей вне Production; с `--Messaging` другие сервисы просят письмо командой шины. |
 | `--TestFramework` | `nunit` | Тестовый фреймворк для тестов сервиса, `nunit` или `xunit` (v3); задаётся для каждого сервиса. Собственные тесты `Common` остаются на NUnit. См. [тестирование](../architecture/testing.md). |
-| `--Audit` | `false` | [Журнал аудита](../features/audit.md) изменений сущностей; действует только с `--Messaging outbox`; без него генерация сообщает, что флаг не применён. |
+| `--Audit` | `false` | [Журнал аудита](../features/audit.md) изменений сущностей; действует только с `--Messaging rabbitmq:outbox`; без него генерация сообщает, что флаг не применён. |
 | `--ApiGateway` | `false` | [API-шлюз](../features/api-gateway.md) на YARP вместо сервиса. Только без `--Solution`; с ним генерация сообщает, что флаг не применён. |
 | `--Deploy` | `compose` | [Файлы развёртывания](../operations/deployment.md): `compose`, `k8s` или `none`. Одно значение на решение: передавайте то же самое каждому следующему сервису. |
 | `--Agent` | `claude` | [Правила и скиллы для ИИ-агента](agents.md): `claude`, `opencode` или `none`. С `--Solution`. |
@@ -126,7 +126,7 @@ dotnet ef migrations add Initial \
   -o EntityFramework/Migrations
 ```
 
-Если сервис сгенерирован с `--Messaging outbox`, миграция создаёт и таблицы outbox. Сервис, запущенный
+Если сервис сгенерирован с `--Messaging rabbitmq:outbox`, миграция создаёт и таблицы outbox. Сервис, запущенный
 без миграций, пишет в лог строку уровня fatal с этой командой, а каждый запрос к отсутствующей таблице
 падает.
 

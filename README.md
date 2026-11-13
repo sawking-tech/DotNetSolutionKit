@@ -105,7 +105,7 @@ shows their files and how their CI ran.
 | `--MongoDB` | `false` | [MongoDB](docs/features/mongodb.md) beside the main database: the client, the service's database, readiness. |
 | `--Notify` | none | Channels of [notifications](docs/features/notifications.md): `email` - through SMTP or Graph API, with a sandbox outside Production; with `--Messaging` other services ask for it by a bus command. |
 | `--TestFramework` | `nunit` | Test framework of the service's tests: `nunit` or `xunit` (v3). |
-| `--Audit` | `false` | [Audit journal](docs/features/audit.md) of entity changes, through the outbox; with `--Messaging outbox`. |
+| `--Audit` | `false` | [Audit journal](docs/features/audit.md) of entity changes, through the outbox; with `--Messaging rabbitmq:outbox`. |
 | `--ApiGateway` | `false` | An [API gateway](docs/features/api-gateway.md) on YARP in place of a service, into a solution already there (without `--Solution`). |
 | `--Deploy` | `compose` | [Deployment files](docs/operations/deployment.md): `compose`, `k8s` or `none`. |
 | `--Agent` | `claude` | [Rules and skills for an AI agent](docs/getting-started/agents.md): `claude`, `opencode` or `none`. |

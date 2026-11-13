@@ -102,7 +102,7 @@ public sealed class PublishOrderCancelled(IMessageBus bus, ILogger<PublishOrderC
 }
 ```
 
-**When:** publishing through the outbox (`--Messaging outbox`): the message is stored with the change
+**When:** publishing through the outbox (`--Messaging rabbitmq:outbox`): the message is stored with the change
 that raised it and is sent after the commit.
 **Errors:** a throw rolls the whole write back - that is the point.
 **Never** call `BeginTransactionAsync` / `CommitTransactionAsync` here: the handler is inside the caller's
