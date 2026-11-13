@@ -29,9 +29,11 @@ internal sealed class UpgradeScenarios
         var solution = await Sandbox.EmptyAsync();
         var hive = Io.Folders.NewTemp("hive-" + version);
         (await solution.DotnetAsync("new", "install", $"SawKing.DotNetSolutionKit::{version}", "--debug:custom-hive", hive)).Code.ShouldBe(0);
+        // Since 2.8 the template adds a service to All.sln by a post-action, which runs only when allowed to.
+        var scripts = Generation.TemplateVersions.AddsServiceToSolution(version) ? new[] { "--allow-scripts", "yes" } : [];
         foreach (var args in new[] { new[] { "-S", "Orders", "-M", "false", "--Storage", "true" }, ["-S", "Billing", "--Storage", "true", "--Messaging", "outbox"] })
         {
-            var made = await solution.DotnetAsync(["new", "DotNetSolutionKit", "-N", "ST", "-P", "Demo", .. args, "--debug:custom-hive", hive]);
+            var made = await solution.DotnetAsync(["new", "DotNetSolutionKit", "-N", "ST", "-P", "Demo", .. args, .. scripts, "--debug:custom-hive", hive]);
             made.Code.ShouldBe(0, made.Output + made.Error);
         }
         // Before 2.8 a service stayed out of All.sln until manual-add-projects.sh, which adds it as this does.
@@ -48,6 +50,7 @@ internal sealed class UpgradeScenarios
     /// <summary>The first minor of the major on nuget.org, and the previous minor (CONTRIBUTING.md, Releases).</summary>
     [TestCase("2.6.1")]
     [TestCase("2.7.0")]
+    [TestCase("2.9.1")]
     public async Task ASolutionOfAnEarlierMinor_IsUpgraded_KeepsTheTeamsChangesAndPins_BuildsPassesItsTests_AndTakesANewService(string version)
     {
         var solution = await SolutionOfAsync(version);
