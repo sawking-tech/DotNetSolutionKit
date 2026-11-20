@@ -155,7 +155,8 @@ file-byte violations and C# style violations in the tool.
 
 - Create a working branch from `dev` before committing. Never commit or push directly to `dev`; all changes
   reach it through a pull request with green CI. `master` takes release PRs from `dev` and urgent patches.
-  After 3.0, `2.x` is the .NET 8 maintenance line. The review of a pull request is an agent's local review
+  `3.x` is the line that stays on .NET 8: once `4.0` moves to .NET 10 it takes fixes only, and the branch
+  that carries it holds `3.x` under whatever name its release gives it. The review of a pull request is an agent's local review
   of the branch against its base before the PR; no approval is requested on GitHub. Green required status
   checks are the merge gate: a PR with green CI is merged without waiting for a person.
 - No more than four branches live on the remote: `dev`, `master`, the current feature branch, and one
