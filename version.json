@@ -9,6 +9,7 @@
         "The secret stores of --Infisical and --Vault move to Capabilities.Security.CredentialStore; a service with the flag carries the store's SDK, and the configuration overlay moves with it.",
         "Capabilities are named by the system they carry inside their group: Capabilities.Persistence.Mongo, Capabilities.Analytics.ClickHouse, Capabilities.Messaging.Notifications; the projects a consumer references carry .Abstractions.",
         "dotskit upgrade retargets a solution's references and usings through every move, a part at a time, and builds after each part.",
+        "A file the team wants kept out of an upgrade is named in .dotskitignore in the solution's root, with @2.9, @2 or @major to pin it; the upgrade holds what the file names and brings a spent pin back to its review.",
         "The Messaging value names the transport: --Messaging rabbitmq:outbox or rabbitmq:direct. A 2.x solution says outbox or direct, and upgrade asks for the transport before it runs."
       ],
       "ru": {
@@ -19,6 +20,7 @@
           "Хранилища секретов флагов --Infisical и --Vault переезжают в Capabilities.Security.CredentialStore; сервис с флагом несёт SDK хранилища, а провайдер конфигурации переезжает вместе с ним.",
           "Capabilities называются по системе внутри своей группы: Capabilities.Persistence.Mongo, Capabilities.Analytics.ClickHouse, Capabilities.Messaging.Notifications; проекты, на которые ссылается потребитель, несут .Abstractions.",
           "dotskit upgrade перенацеливает ссылки и using'и решения через каждый перенос, по частям, и собирает решение после каждой части.",
+          "Файл, который команда хочет уберечь от обновления, называется в .dotskitignore в корне решения, с @2.9, @2 или @major, чтобы закрепить его; обновление держит названное и возвращает потраченный пин на разбор.",
           "Значение Messaging называет транспорт: --Messaging rabbitmq:outbox или rabbitmq:direct. Решение 2.x говорит outbox или direct, и обновление просит назвать транспорт до запуска."
         ]
       }

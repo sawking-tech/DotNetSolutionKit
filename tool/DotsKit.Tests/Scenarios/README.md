@@ -15,6 +15,7 @@ scenario is in the category `Sandbox.Category`, and each file's summary links ba
 | `MovedTypeScenarios.cs` | A type of the template moved to another project and namespace, as 3.0 moves `Common`'s; the team's code that used it builds again by the repair of `upgrade`. |
 | `PartRepairScenarios.cs` | A type of `Common` moved to another namespace, the upgrade a part at a time and all at once: the part of `Common` repairs the usings of every project, and the service's part keeps that repair, also where the template changes the file beyond the using; a project the template adds to `Common` is a part of its own; a last part left in conflict is finished by the next run. |
 | `SolutionProjectsScenarios.cs` | The projects of `All.sln` added and removed by a real `dotnet sln` while `Directory.Build.props` and `Directory.Packages.props` hold the markers of a conflict. |
+| `IgnoreScenarios.cs` | `.dotskitignore`: an upgrade leaves the paths it holds - a file, a folder, a path under a pin still holding - and a pin it spent comes back to the review, commented out; a solution with no rules file is upgraded as the template brings it. |
 | `GitMerge/` | The merge by git through the branch `dotskit/template`, below. |
 
 ## GitMerge

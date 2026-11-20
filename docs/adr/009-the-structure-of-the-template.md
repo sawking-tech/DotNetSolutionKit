@@ -67,10 +67,10 @@ the file, the team's edit stands; a larger version releases the file into a norm
 holds against patches, `@2` - against minors, `@major` - the tool re-pins to the new line at
 every major: it comments the old line out, adds the new one - of the current line - commented
 out, and the team uncomments it during the review. The semantics are borrowed from the lockfiles
-of libraries. A directory with its own version line (today - a capability) is versioned by it: a
-pin on its path is read against the line of the directory; without its own version - against the
-version of the template. After an upgrade the tool reviews expired pins: no residual differences
-- the rule is removed, differences remain - the pin is re-pinned to the new version. Changes to
+of libraries. A pin is read against the version of the template; a directory that gains a version
+line of its own is read against that line instead, and no directory carries one today. After an
+upgrade the tool reviews expired pins: no residual differences - the rule is commented out,
+differences remain - the pin is re-pinned to the new version. Changes to
 the file made by the tool are brought to the upgrade review next to the conflicts; a person looks
 and confirms; a removed rule is commented out, not erased.
 

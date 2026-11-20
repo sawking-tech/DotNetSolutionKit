@@ -38,7 +38,12 @@ internal sealed record IgnoreDecision(IReadOnlySet<string> Held, IReadOnlyList<I
 /// The match is git's own (<see cref="IIgnorePatterns"/>): a pattern and the path are compared by the syntax the file
 /// is written in, so the tool and the team read the file the same way.
 /// </summary>
-internal sealed class IgnoreRules(IIgnorePatterns patterns) : IIgnoreRules
+/// <param name="patterns">The matcher the rules go to.</param>
+/// <param name="toolVersion">
+/// The version the tool is released as, which reads a pin an upgrade to the template's sources is judged by: the sources
+/// carry no version of their own, and a pin is renewed onto the tool's line there.
+/// </param>
+internal sealed class IgnoreRules(IIgnorePatterns patterns, Func<string> toolVersion) : IIgnoreRules
 {
     /// <summary>The file's name in the solution's root, beside the manifest.</summary>
     public const string FileName = ".dotskitignore";
@@ -55,13 +60,17 @@ internal sealed class IgnoreRules(IIgnorePatterns patterns) : IIgnoreRules
 
         // A pin holds until the upgrade reaches it: at the pin's precision or above, the file merges and the review
         // names the spent rule. A rule with no pin holds always, until a person removes it.
-        var spent = skip.Rules.Where(r => r.Pin is { } pin && !pin.Holds(to)).ToList();
-        var holding = skip.Rules.Where(r => r.Pin is null || r.Pin.Holds(to)).ToList();
+        var line = LineOf(to);
+        var spent = skip.Rules.Where(r => r.Pin is { } pin && !pin.Holds(line)).ToList();
+        var holding = skip.Rules.Where(r => r.Pin is null || r.Pin.Holds(line)).ToList();
         var held = holding.Count == 0
             ? new HashSet<string>()
             : await patterns.MatchAsync(root, [.. holding.Select(r => r.Pattern)], candidates, ct);
-        return new IgnoreDecision(held, spent, to);
+        return new IgnoreDecision(held, spent, line);
     }
+
+    /// <summary>The version a pin is read and renewed by: the release an upgrade goes to, or the tool's own for the sources.</summary>
+    public string LineOf(string version) => version == Generation.TemplateSource.SourcesVersion ? toolVersion() : version;
 
     private static string? Read(string root) =>
         File.Exists(PathOf(root)) ? File.ReadAllText(PathOf(root)) : null;

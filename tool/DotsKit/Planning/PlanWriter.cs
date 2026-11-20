@@ -51,7 +51,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         // A pin the upgrade spends is written back beside the merge, with the lines the team wrote around it: the
         // team sees the change in the review, git commits it with the part, and git merge --abort puts it back too.
         IReadOnlyList<string> pins = [];
-        if (PinReview.Of(DotskitIgnore.Parse(Read(IgnoreRules.PathOf(plan.Root))), Spent(plan, conflicts), plan.Next.Template) is { Lines.Count: > 0 } review)
+        if (PinReview.Of(DotskitIgnore.Parse(Read(IgnoreRules.PathOf(plan.Root))), Spent(plan, conflicts), plan.Ignore?.Version ?? plan.Next.Template) is { Lines.Count: > 0 } review)
         {
             transaction.Write(IgnoreRules.FileName, System.Text.Encoding.UTF8.GetBytes(review.Text));
             pins = review.Lines;
@@ -105,19 +105,42 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     private static string SolutionFile(string root) => Path.GetRelativePath(root, Layout.SolutionFileOf(root)).Replace('\\', '/');
 
     /// <summary>
-    /// The spent pins with whether the upgrade left a difference in the paths of each: a file in conflict counts as the
-    /// team's own, which makes the pin stand another round; a file the upgrade brought to the template's own releases it.
+    /// The spent pins with whether the solution still differs from the template there, once the merge is written: the file
+    /// the team edited differs and keeps its rule for another round; one the merge brought to the template's own text
+    /// matches it, and its rule goes. A path the solution has no file for is no difference of the team's.
     /// </summary>
     private static IReadOnlyList<(IgnoreRule Rule, bool Difference)> Spent(Plan plan, IReadOnlyList<string> conflicts) =>
-        plan.Ignore is not { Spent.Count: > 0 } ignore
+        plan.Ignore is not { Spent.Count: > 0 } ignore || plan.NextTree is null
             ? []
-            : [.. ignore.Spent.Select(rule => (rule, Difference(rule, plan, conflicts)))];
+            : [.. ignore.Spent.Select(rule => (rule, StaysDifferent(rule, plan, conflicts)))];
 
-    private static bool Difference(IgnoreRule rule, Plan plan, IReadOnlyList<string> conflicts)
+    private static bool StaysDifferent(IgnoreRule rule, Plan plan, IReadOnlyList<string> conflicts)
     {
-        var matched = conflicts.Where(c => Matches(rule.Pattern, c)).ToList();
-        return matched.Count > 0 || (plan.Changes ?? []).Any(c => Matches(rule.Pattern, c.Path) && c.Kind != ChangeKind.Add);
+        foreach (var path in ConflictsAndFiles(rule, plan, conflicts))
+        {
+            var template = Path.Combine(plan.NextTree!, path);
+            var solution = Path.Combine(plan.Root, path);
+            if (!File.Exists(solution))
+            {
+                continue;
+            }
+
+            if (!File.Exists(template) || !Same(File.ReadAllText(template), File.ReadAllText(solution)))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
+
+    /// <summary>The paths of the solution the rule names: the plan's changes and the files left in conflict.</summary>
+    private static IEnumerable<string> ConflictsAndFiles(IgnoreRule rule, Plan plan, IReadOnlyList<string> conflicts) =>
+        (plan.Changes ?? []).Select(c => c.Path).Concat(conflicts).Distinct(StringComparer.Ordinal).Where(p => Matches(rule.Pattern, p));
+
+    /// <summary>Two texts equal, whether written on two OSes: the line ends of each are read as one.</summary>
+    private static bool Same(string left, string right) =>
+        left.ReplaceLineEndings("\n").Equals(right.ReplaceLineEndings("\n"), StringComparison.Ordinal);
 
     /// <summary>Whether a path of the solution is one the rule names, as a prefix of it or as its own text; the matching of the plan's report need not be git's exact one.</summary>
     private static bool Matches(string pattern, string path)
