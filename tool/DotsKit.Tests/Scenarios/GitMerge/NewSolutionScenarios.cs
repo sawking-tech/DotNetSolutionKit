@@ -1,5 +1,6 @@
 using DotsKit.Generation;
 using DotsKit.Io;
+using DotsKit.Ignoring;
 using DotsKit.Merging;
 using DotsKit.Planning;
 using DotsKit.Solutions;
@@ -25,7 +26,7 @@ internal sealed class NewSolutionScenarios
 
     private static Planner Planner() =>
         new(new FixedOutput(), new SolutionProjects(Runner), new GitRenames(Runner), new GitIgnoredFiles(Runner),
-            new ReferenceRepair(new RepairWriter(), new DotnetBuilder(Runner)));
+            new ReferenceRepair(new RepairWriter(), new DotnetBuilder(Runner)), new IgnoreRules(new GitIgnorePatterns(Runner)));
 
     [Test]
     public async Task AnEmptyFolder_TakesThePlainWrite_WithoutGit()

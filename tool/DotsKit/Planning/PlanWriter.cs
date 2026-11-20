@@ -1,3 +1,4 @@
+using DotsKit.Ignoring;
 using DotsKit.Io;
 using DotsKit.Merging;
 using DotsKit.Solutions;
@@ -14,10 +15,15 @@ internal interface IPlanWriter
     Task<WriteResult> WriteAsync(Plan plan, CancellationToken ct);
 }
 
-/// <summary>The files left in conflict, the files --force took the template's side in, and the repairs before the build that changed a file.</summary>
-internal sealed record WriteResult(IReadOnlyList<string> Conflicts, IReadOnlyList<Repair> Repaired, IReadOnlyList<string> Taken)
+/// <summary>The files left in conflict, the files --force took the template's side in, the repairs before the build that changed a file, and what the review of .dotskitignore says.</summary>
+internal sealed record WriteResult(IReadOnlyList<string> Conflicts, IReadOnlyList<Repair> Repaired, IReadOnlyList<string> Taken, IReadOnlyList<string> Pins)
 {
-    public static readonly WriteResult Nothing = new([], [], []);
+    public WriteResult(IReadOnlyList<string> conflicts, IReadOnlyList<Repair> repaired, IReadOnlyList<string> taken)
+        : this(conflicts, repaired, taken, [])
+    {
+    }
+
+    public static readonly WriteResult Nothing = new([], [], [], []);
 }
 
 internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, ReferenceRepair repair) : IPlanWriter
@@ -42,6 +48,15 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
             conflicts = [];
         }
         transaction.Write(Layout.ManifestPath, System.Text.Encoding.UTF8.GetBytes(plan.Written(conflicts.Count > 0).Serialize()));
+        // A pin the upgrade spends is written back beside the merge, with the lines the team wrote around it: the
+        // team sees the change in the review, git commits it with the part, and git merge --abort puts it back too.
+        IReadOnlyList<string> pins = [];
+        if (PinReview.Of(DotskitIgnore.Parse(Read(IgnoreRules.PathOf(plan.Root))), Spent(plan, conflicts), plan.Next.Template) is { Lines.Count: > 0 } review)
+        {
+            transaction.Write(IgnoreRules.FileName, System.Text.Encoding.UTF8.GetBytes(review.Text));
+            pins = review.Lines;
+        }
+
         if (!plan.Membership.IsEmpty)
         {
             transaction.Guard(SolutionFile(plan.Root));
@@ -50,11 +65,10 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         if (plan.ByGit is null)
         {
             await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
-            return new(conflicts, await RepairWrittenAsync(plan, conflicts, ct), []);
+            return new(conflicts, await RepairWrittenAsync(plan, conflicts, ct), [], pins);
         }
-        return new(conflicts, await WriteBesideTheMergeAsync(plan, transaction, conflicts, SolutionFile(plan.Root), ct), git.Taken);
+        return new(conflicts, await WriteBesideTheMergeAsync(plan, transaction, conflicts, SolutionFile(plan.Root), ct), git.Taken, pins);
     }
-
     /// <summary>
     /// The usings of namespaces the template gave up, repaired from the text before any build, in every project of
     /// the solution; a part of an upgrade a part at a time repairs by the moves of the parts merged so far.
@@ -91,6 +105,30 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     private static string SolutionFile(string root) => Path.GetRelativePath(root, Layout.SolutionFileOf(root)).Replace('\\', '/');
 
     /// <summary>
+    /// The spent pins with whether the upgrade left a difference in the paths of each: a file in conflict counts as the
+    /// team's own, which makes the pin stand another round; a file the upgrade brought to the template's own releases it.
+    /// </summary>
+    private static IReadOnlyList<(IgnoreRule Rule, bool Difference)> Spent(Plan plan, IReadOnlyList<string> conflicts) =>
+        plan.Ignore is not { Spent.Count: > 0 } ignore
+            ? []
+            : [.. ignore.Spent.Select(rule => (rule, Difference(rule, plan, conflicts)))];
+
+    private static bool Difference(IgnoreRule rule, Plan plan, IReadOnlyList<string> conflicts)
+    {
+        var matched = conflicts.Where(c => Matches(rule.Pattern, c)).ToList();
+        return matched.Count > 0 || (plan.Changes ?? []).Any(c => Matches(rule.Pattern, c.Path) && c.Kind != ChangeKind.Add);
+    }
+
+    /// <summary>Whether a path of the solution is one the rule names, as a prefix of it or as its own text; the matching of the plan's report need not be git's exact one.</summary>
+    private static bool Matches(string pattern, string path)
+    {
+        var prefix = pattern.TrimEnd('/', '*', '.', '!');
+        return prefix.Length > 0 && path.StartsWith(prefix, StringComparison.Ordinal);
+    }
+
+    private static string? Read(string path) => File.Exists(path) ? File.ReadAllText(path) : null;
+
+    /// <summary>
     /// The manifest, All.sln and the files the repair changed join git's merge, so committing it takes them and
     /// <c>git merge --abort</c> puts them back; a failure here undoes the merge as well as the files. Staging and the
     /// repair run inside the transaction, so a failure of either takes back what it wrote - the manifest, All.sln and
@@ -106,6 +144,10 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
             {
                 await ApplyMembershipAsync(plan, ct);
                 await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
+                if (File.Exists(IgnoreRules.PathOf(plan.Root)))
+                {
+                    await git.StageAsync(plan.Root, [IgnoreRules.FileName], ct);
+                }
                 repaired = await RepairAsync(plan, conflicts, ct);
                 var written = repaired.Select(RepairReport.FileOf).Concat(repaired.OfType<CentralizeVersion>().Select(c => c.Central))
                     .Select(f => Path.GetRelativePath(plan.Root, f).Replace('\\', '/')).Distinct().ToList();
