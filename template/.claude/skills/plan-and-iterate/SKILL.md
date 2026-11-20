@@ -49,6 +49,11 @@ within a few hours; the plan does not.
 dies with the session; committed, it travels to every copy as someone else's clutter. Its place is
 `.claude/session-context/`, which `.gitignore` keeps out of the repository.
 
+**The plan is the queue; the state of the session is written beside it.** `/save-context` keeps the list
+of tasks, the standing rules and the progress of each in the same folder, so a session that ends does not
+take with it what it learned; `/load-context` reads them back at the start of the next one. The plan of
+the current work is one of those files, not a copy of them.
+
 **The disk is the source of truth, always.** Only what outlives the plan goes elsewhere: a decision taken,
 an analysis, a technique - into the issue tracker or the docs. The plan has no second store.
 

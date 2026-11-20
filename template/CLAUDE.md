@@ -61,6 +61,8 @@ before writing code, so the user can stop you if it is the wrong one.
 | Your own commits before a push | `/self-review` |
 | Someone else's pull request | `/code-review` |
 | Work that spans sessions | `/plan-and-iterate` |
+| The start of a session | `/load-context` |
+| The end of a session, before a long pause | `/save-context` |
 
 A review of a service class, a repository or a specification uses the review flags of the matching skill.
 
@@ -114,6 +116,10 @@ dotskit upgrade
 
 Work that does not finish in one go keeps its plan in `.claude/session-context/`, which `.gitignore` keeps
 out of the repository: `/plan-and-iterate`.
+
+A session starts by loading that folder and ends by saving it: `/load-context` reads the tasks in work and
+the details of the one we take, `/save-context` writes the progress back - the list, the rules, the file of
+each task. A loop of sessions carries the work and loses nothing between them.
 
 ---
 

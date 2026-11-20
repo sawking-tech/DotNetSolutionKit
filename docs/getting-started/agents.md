@@ -48,6 +48,8 @@ kind of work:
 | `self-review` | a check of your own commits |
 | `code-review` | a review of someone else's pull request |
 | `plan-and-iterate` | the plan of long work |
+| `load-context` | the state of the session at its start |
+| `save-context` | the state of the session at its end |
 
 The skills are part of the solution. The author of the project designed each of them deliberately, as a
 "DSL layer" for an AI agent. A `SKILL.md` describes the operations allowed on the system and what their
@@ -62,4 +64,7 @@ description. A skill goes step by step and points to the documentation of the me
 the work the way this site describes it.
 
 Run long work with `plan-and-iterate`: the agent keeps the plan in a file and does not lose it between
-sessions.
+sessions. The two skills beside it close the session: `save-context` writes the state of the session into
+`.claude/session-context/` - the tasks in work, the standing rules, the progress of each in prose - and
+`load-context` reads it back at the start of the next one and asks which task we take. The folder stays out
+of git; nothing in it is shared with the team, and none of it is needed for the solution to build.
