@@ -1,3 +1,4 @@
+using DotsKit.Ignoring;
 using DotsKit.Io;
 using DotsKit.Planning;
 using DotsKit.Solutions;
@@ -28,6 +29,14 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
 
         var written = await writer.WriteAsync(plan, ct);
         ShowRepairs("before the build, for the namespaces the template gave up", written.Repaired);
+        if (written.Pins.Count > 0)
+        {
+            terminal.Info($"{IgnoreRules.FileName}: {written.Pins.Count} pin(s) the upgrade spent, the file brings them to the review:");
+            foreach (var line in written.Pins)
+            {
+                terminal.Info($"  {line}");
+            }
+        }
         if (written.Taken.Count > 0)
         {
             terminal.Info($"By --force, the template's side took over in {written.Taken.Count} file(s):");

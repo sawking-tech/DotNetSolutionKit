@@ -1,4 +1,5 @@
 using DotsKit.Generation;
+using DotsKit.Ignoring;
 using DotsKit.Io;
 using DotsKit.Merging;
 using DotsKit.PackageUpdates;
@@ -16,7 +17,8 @@ internal interface IPlanner
     Task<Plan> BuildAsync(string root, Manifest? current, Manifest next, MergeMode mode, CancellationToken ct, PartStep? step = null);
 }
 
-internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRenames renames, IIgnoredFiles ignored, ReferenceRepair repair) : IPlanner
+internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRenames renames, IIgnoredFiles ignored, ReferenceRepair repair,
+    IIgnoreRules rules) : IPlanner
 {
     /// <param name="root">The solution's root, or the folder a new solution is made in.</param>
     /// <param name="current">The solution's manifest; null when there is no solution yet, and the base is empty.</param>
@@ -32,6 +34,10 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
         // The two trees do not depend on each other: generated side by side.
         var baseDir = current is null ? null : await BaseAsync(current, ct);
         var nextDir = await staging.BuildAsync(next, withSolutionFile: current is null, ct);
+        // The rules of .dotskitignore hold the paths a person took out of the template's reach: the next output takes
+        // them from the base, so the merge finds nothing of the template there. Read before any move, so a held file
+        // is no move either.
+        var ignore = await IgnoredAsync(root, current, next, nextDir, baseDir, ct);
         // The types the template moves are read from the whole outputs: a part's repair follows the moves of every part.
         var types = baseDir is null ? null : TypeMap.Between(TypeIndex.Read(baseDir), TypeIndex.Read(nextDir));
         IReadOnlyList<string>? parts = null;
@@ -89,13 +95,13 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
         {
             return new Plan(root, next, changes, new MembershipChange([], []), packages,
                 ByGit: byGit ? (new TemplateCommit(baseTree!, "a new solution"), new TemplateCommit(nextDir, next.Template)) : null,
-                PreferTemplate: mode.PreferTemplate, MarkBase: mode.MarkBase, NextTree: nextDir);
+                PreferTemplate: mode.PreferTemplate, MarkBase: mode.MarkBase, NextTree: nextDir, Ignore: ignore);
         }
 
         var membership = await MembershipAsync(root, baseDir!, nextDir, ct);
         return new Plan(root, next, [.. changes.Where(c => !IsSolutionFile(c.Path))], membership, packages, types,
             (new TemplateCommit(baseDir!, current!.Template), new TemplateCommit(nextDir, next.Template)), mode.PreferTemplate, mode.MarkBase,
-            Parts: parts, Waiting: waiting, BaseTree: baseDir, NextTree: nextDir);
+            Parts: parts, Waiting: waiting, BaseTree: baseDir, NextTree: nextDir, Ignore: ignore);
     }
 
     /// <summary>
@@ -127,6 +133,29 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
     }
 
     private async Task<string?> BaseAsync(Manifest current, CancellationToken ct) => await staging.BuildAsync(current, withSolutionFile: false, ct);
+
+    /// <summary>
+    /// The rules of <c>.dotskitignore</c> read at the version the solution goes to, and their effect on the template's
+    /// next output: the held paths take the base's text, and a held path the template adds leaves the output. The
+    /// decision goes with the plan, so the report shows what a rule held and which pins the upgrade spent.
+    /// </summary>
+    private async Task<IgnoreDecision> IgnoredAsync(string root, Manifest? current, Manifest next, string nextDir, string? baseDir, CancellationToken ct)
+    {
+        if (current is null)
+        {
+            return IgnoreDecision.None;
+        }
+
+        // Every path the upgrade could write: the solution's own, the template's next output, and the base's, so a held
+        // path the template removes is held too.
+        IReadOnlyList<string> candidates = [.. Folders.RelativeFiles(root)
+            .Concat(Folders.RelativeFiles(nextDir))
+            .Concat(baseDir is null ? [] : Folders.RelativeFiles(baseDir))
+            .Distinct(StringComparer.Ordinal)];
+        var decision = await rules.DecideAsync(root, next.Template, candidates, ct);
+        HeldFiles.Apply(nextDir, baseDir, decision.Held);
+        return decision;
+    }
 
     private async Task<MembershipChange> MembershipAsync(string root, string baseDir, string nextDir, CancellationToken ct) =>
         MembershipChange.Of(

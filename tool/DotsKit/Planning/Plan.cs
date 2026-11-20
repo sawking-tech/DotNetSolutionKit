@@ -1,3 +1,4 @@
+using DotsKit.Ignoring;
 using DotsKit.Merging;
 using DotsKit.Solutions;
 
@@ -30,10 +31,14 @@ namespace DotsKit.Planning;
 /// The template's files of the parts an upgrade a part at a time has not merged yet, relative to the root: the repair
 /// by the build's errors leaves them to their part.
 /// </param>
+/// <param name="Ignore">
+/// What <c>.dotskitignore</c> holds at the version the plan goes to, and the pins it spends: the report shows both, and
+/// the write returns the file for the review.
+/// </param>
 internal sealed record Plan(string Root, Manifest Next, IReadOnlyList<Change> Changes, MembershipChange Membership, IReadOnlyList<string>? Packages = null,
     TypeMap? Types = null, (TemplateCommit Base, TemplateCommit Next)? ByGit = null, bool PreferTemplate = false, bool MarkBase = false,
     Manifest? OnConflicts = null, IReadOnlyList<string>? Parts = null, IReadOnlySet<string>? Waiting = null, string? BaseTree = null,
-    string? NextTree = null)
+    string? NextTree = null, IgnoreDecision? Ignore = null)
 {
     /// <summary>The manifest the solution has once the plan is written, by whether the merge left conflicts.</summary>
     public Manifest Written(bool conflicts) => conflicts && OnConflicts is { } open ? open : Next;

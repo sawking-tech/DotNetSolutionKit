@@ -1,3 +1,4 @@
+using DotsKit.Ignoring;
 using DotsKit.Io;
 using DotsKit.Merging;
 
@@ -15,8 +16,31 @@ internal sealed class PlanReport(ITerminal terminal)
             terminal.Info($"  package   {line}");
         }
 
+        ShowRules(plan.Ignore);
         terminal.Info($"  manifest  {Layout.ManifestPath}");
         ShowCounts(plan.Changes);
+    }
+
+    /// <summary>
+    /// What <c>.dotskitignore</c> holds and which pins the upgrade spends: a person sees the file the upgrade brings to
+    /// the review, and the rules that stop holding at this version.
+    /// </summary>
+    private void ShowRules(IgnoreDecision? ignore)
+    {
+        if (ignore is null || (ignore.Held.Count == 0 && ignore.Spent.Count == 0))
+        {
+            return;
+        }
+
+        foreach (var path in ignore.Held.Order(StringComparer.Ordinal))
+        {
+            terminal.Info($"  ignored   {path}");
+        }
+
+        foreach (var rule in ignore.Spent)
+        {
+            terminal.Info($"  pin spent line {rule.Line}: {rule.Pattern} - the upgrade to {ignore.Version} passes its pin");
+        }
     }
 
     /// <summary>Every file the plan touches, by kind: what is written is what was shown.</summary>
