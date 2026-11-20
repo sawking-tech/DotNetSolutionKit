@@ -11,7 +11,9 @@ Site: [dotskit.sawking.tech](https://dotskit.sawking.tech/). Documentation, in E
 
 `dotskit upgrade` brings the template's later changes into a generated solution under the team's control:
 a three-way merge with the team's code, where what does not merge is a conflict for the team to resolve;
-the IDE shows the team's lines, the template's and the base, and taking both changes is one click.
+the IDE shows the team's lines, the template's and the base, and taking both changes is one click. A file the
+team wants kept out of an upgrade is named in `.dotskitignore` in the solution's root, with `@2.9`, `@2` or
+`@major` to pin it ([tool](docs/getting-started/tool.md#what-an-upgrade-leaves-alone-dotskitignore)).
 
 The solution needs nothing of the template at run time: no runtime of ours, no package it has to reference, no
 service to call home. The tool is useful, not required -

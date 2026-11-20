@@ -165,6 +165,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed; one with no side of the template's, under `--force`, is resolved with the template's removal; one with no base, added by both sides, gains the solution's side as its base |
 | | `git update-index --index-info` | the solution's side as the base of a file both sides added, so the IDE opens it with its merge view |
 | | `git diff --no-index -M` | the files the template moved, between two of its outputs outside the repository |
+| | `git init` in a folder of the tool's own, `git -c core.excludesFile=… check-ignore --no-index --stdin` | the paths `.dotskitignore` holds, matched by git's own rules; the repository is empty, so neither the solution's `.gitignore` nor its config reaches the match, and a solution outside git reads its rules the same way |
 | | `git merge-file -p [--zdiff3]`, again with `--theirs` under `--force` | a file merged by the merge driver, on copies of the three sides; `--zdiff3` only with `--conflict-style zdiff3`; under `--force` the first run counts the conflicts the second decides, for the report of the files the team's lines gave way in |
 | | `git ls-remote --tags` | the releases of the template, for `init` on a solution that does not say its version |
 | writes objects only, through an index of its own | `git add -A`, `git rm --cached`, `git ls-files`, `git write-tree`, `git commit-tree` | a commit of the template's output; the solution's index and files are not touched |
@@ -204,6 +205,42 @@ The template writes the manifest itself when it generates a solution: since 2.9 
 alone carries `.dotskit/manifest.json` from generation, and `dotskit new` and `dotskit upgrade` work from it
 without `dotskit init`. A service generated into the solution afterwards is not in it - the template writes
 the manifest only with `--Solution`; `dotskit init` takes the service in, read from its files.
+
+## What an upgrade leaves alone: `.dotskitignore`
+
+A team that changed a file of the template may want an upgrade to keep its hands off it. One file in the
+solution's root says so: `.dotskitignore`, beside the manifest. The template does not write it, so no merge
+brings it, and it is the team's to edit.
+
+```
+# The rules of a path are gitignore's: a file or a pattern, a deeper rule over a higher one,
+# a later line over an earlier one, and ! cancels a rule.
+src/common/ST.Demo.Common.Infrastructure/Persistence/MigrationLock.cs
+src/services/ST.Demo.Orders/ST.Demo.Orders.Infrastructure/**@2.9
+```
+
+A rule with no pin holds its path for good: the upgrade writes no file of it, and neither adds nor removes one.
+A file the template adds under a held pattern stays out too, so the rule covers a path the solution does not
+have yet.
+
+`@` and a version pin the rule. An upgrade below the pin's line leaves the path alone; the upgrade that passes
+it spends the pin, and the path goes into the usual merge. `@2.9` holds through 2.9.x and lets 2.10.0 through;
+`@2` holds through 2.x and lets 3.0.0 through; `@major` holds for good and is the one the tool moves: on a new
+major it comments the line out and adds the next one, commented out of its own, for the team to confirm.
+
+After an upgrade the tool reviews the pins it spent and writes the file beside the merge: one whose paths the
+upgrade brought to the template's own is commented out, with the reason on the line, and one whose paths still
+differ is renewed to the version the upgrade went to. The report names each and its line, and the change joins
+the merge like any other file, so it reaches the team's review and `git merge --abort` puts it back.
+
+Matching is git's own: the file's rules go to `git check-ignore` as an excludes file, in a repository of the
+tool's own. The same syntax as `.gitignore` holds, the exclusion of a folder not re-entered by a rule on a file
+inside it included, and a solution outside git reads its rules the same way.
+
+A held file is the team's from then on. The upgrade writes no line of it, so a file of an older template that a
+newer one no longer fits - a `Program.cs` of 2.9 in a solution of 3.0 - stops building until the team brings it
+up by hand, and the build says which file. Hold what the team owns; let the template have what it keeps working
+with the template.
 
 ## A solution made without dotskit
 
