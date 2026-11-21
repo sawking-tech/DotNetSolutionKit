@@ -106,7 +106,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Tests.csproj", "{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}"
 EndProject
 #endif
-#if (SecretStore)
+#if (ConfigurationStore)
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions.csproj", "{B27F6E04-9A53-4D71-8E2C-5A09D4F17B38}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.csproj", "{61CF3F26-821E-49AC-8819-229D7249BEA1}"
@@ -657,7 +657,7 @@ Global
 		{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}.Release|x86.ActiveCfg = Release|Any CPU
 		{4E8C1A72-6B3D-4F59-9A25-3C7E2D8B4F91}.Release|x86.Build.0 = Release|Any CPU
 #endif
-#if (SecretStore)
+#if (ConfigurationStore)
 		{B27F6E04-9A53-4D71-8E2C-5A09D4F17B38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B27F6E04-9A53-4D71-8E2C-5A09D4F17B38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B27F6E04-9A53-4D71-8E2C-5A09D4F17B38}.Debug|x64.ActiveCfg = Debug|Any CPU

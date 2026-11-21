@@ -9,7 +9,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Messaging\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions\NamespaceRoot.ProductName.Capabilities.Messaging.Notifications.Abstractions.csproj", "{05B476CD-8E67-4F3D-96E1-510FC86F27C6}"
 EndProject
 #endif
-#if (SecretStore)
+#if (ConfigurationStore)
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions.csproj", "{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}"
 EndProject
 #endif
@@ -85,7 +85,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.S3.Abstractions.csproj", "{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}"
 EndProject
 #endif
-#if (SecretStore)
+#if (ConfigurationStore)
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.csproj", "{61CF3F26-821E-49AC-8819-229D7249BEA1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests", "..\capabilities\NamespaceRoot.ProductName.Capabilities.Security\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests\NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.csproj", "{5D30102B-EE73-4ED4-B87D-F091FAC68989}"
@@ -175,7 +175,7 @@ Global
 		{D4E8A3F1-5C27-4B69-9A03-8E1F6B2C7D50}.Debug|Any CPU.Build.0 = Debug|Any CPU.Build.0
 		{D4E8A3F1-5C27-4B69-9A03-8E1F6B2C7D50}.Release|Any CPU.ActiveCfg = Release|Any CPU.ActiveCfg
 		{D4E8A3F1-5C27-4B69-9A03-8E1F6B2C7D50}.Release|Any CPU.Build.0 = Release|Any CPU.Build.0
-#if (SecretStore)
+#if (ConfigurationStore)
 		{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU.ActiveCfg
 		{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}.Debug|Any CPU.Build.0 = Debug|Any CPU.Build.0
 		{91E6E2A4-49EA-4DE1-8287-AA7A2ABE739D}.Release|Any CPU.ActiveCfg = Release|Any CPU.ActiveCfg
@@ -584,7 +584,7 @@ Global
 		{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}.Release|Any CPU.ActiveCfg = Release|Any CPU.ActiveCfg
 		{C6519F42-D592-4222-9E5A-1E9B74AFE9A1}.Release|Any CPU.Build.0 = Release|Any CPU.Build.0
 #endif
-#if (SecretStore)
+#if (ConfigurationStore)
 		{61CF3F26-821E-49AC-8819-229D7249BEA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{61CF3F26-821E-49AC-8819-229D7249BEA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61CF3F26-821E-49AC-8819-229D7249BEA1}.Debug|x64.ActiveCfg = Debug|Any CPU
