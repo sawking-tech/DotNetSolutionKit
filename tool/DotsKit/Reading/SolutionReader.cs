@@ -169,7 +169,7 @@ internal static partial class SolutionReader
     private static TemplateArgs Solution(ISolutionFiles files, string prefix, (string Root, string Product) names, string firstService, string version)
     {
         var args = TemplateArgs.Empty.With("NamespaceRoot", names.Root).With("ProductName", names.Product);
-        args = NotDefault(args, "Database", files.Exists(Markers.Of(Markers.SqlServerPath, prefix)) ? "mssql" : "postgres");
+        args = NotDefault(args, "Database", Markers.SqlServerPaths.Any(p => files.Exists(Markers.Of(p, prefix))) ? "mssql" : "postgres");
         args = NotDefault(args, "Deploy", files.Exists(Markers.ComposePath) ? "compose" : files.Exists(Markers.KubernetesPath) ? "k8s" : "none");
         args = NotDefault(args, "Agent", files.Exists(Markers.ClaudePath) ? "claude" : files.Exists(Markers.OpenCodePath) ? "opencode" : "none");
         args = NotDefault(args, "TestFramework", Contains(files, ServicePath(Markers.TestsProject, prefix, firstService), Markers.XunitLine) ? "xunit" : "nunit");

@@ -37,7 +37,11 @@ internal static class Markers
     public static readonly string[] NotifyEmailPaths =
         ["src/capabilities/{P}.Capabilities.Messaging/{P}.Capabilities.Messaging.Notifications", "src/capabilities/{P}.Capabilities.Notifications"];
 
-    public const string SqlServerPath = "src/common/{P}.Common.Infrastructure/Persistence/SqlServer";
+    /// <summary>
+    /// The SQL Server persistence, the first path of 3.0 and the second of 2.x: a solution of an old base still reads it.
+    /// </summary>
+    public static readonly string[] SqlServerPaths =
+        ["src/capabilities/{P}.Capabilities.Persistence/{P}.Capabilities.Persistence.Mssql", "src/common/{P}.Common.Infrastructure/Persistence/SqlServer"];
     public const string ComposePath = "deploy/compose";
     public const string KubernetesPath = "deploy/k8s";
     public const string ClaudePath = ".claude";
