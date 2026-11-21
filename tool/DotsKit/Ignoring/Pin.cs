@@ -53,12 +53,13 @@ internal sealed partial record Pin(int Major, int? Minor, bool EveryMajor)
 
     /// <summary>
     /// The pin at the same precision, renewed to <paramref name="version"/>: <c>@2.9</c> renewed to 3.1.4 is <c>@3.1</c>,
-    /// <c>@2</c> to <c>@3</c>. <c>@major</c> keeps its word.
+    /// <c>@2</c> to <c>@3</c>. <c>@major</c> is renewed to the major it moved to, <c>@3</c> on 3.1.4 - a pin of the whole
+    /// major on the new line, as the ADR asks the tool to re-pin it.
     /// </summary>
     public string RenewedTo(string version) =>
-        EveryMajor || !Version.TryParse(version.Split('-')[0], out var target)
+        !Version.TryParse(version.Split('-')[0], out var target)
             ? "major"
-            : Minor is not null ? $"{target.Major}.{target.Minor}" : target.Major.ToString();
+            : EveryMajor ? target.Major.ToString() : Minor is not null ? $"{target.Major}.{target.Minor}" : target.Major.ToString();
 
     /// <summary>Letters and digits of a version, never a path: a pin goes into a comparison alone.</summary>
     [GeneratedRegex(@"^\d{1,9}(\.\d{1,9})?\z")]

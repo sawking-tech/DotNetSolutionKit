@@ -1,7 +1,7 @@
 using DotsKit.Commands;
 using DotsKit.Generation;
-using DotsKit.Io;
 using DotsKit.Ignoring;
+using DotsKit.Io;
 using DotsKit.Merging;
 using DotsKit.Planning;
 using DotsKit.Solutions;

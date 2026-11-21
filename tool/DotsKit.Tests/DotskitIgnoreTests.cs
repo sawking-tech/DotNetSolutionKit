@@ -70,7 +70,7 @@ internal sealed class DotskitIgnoreTests
 
     [TestCase("2.9", "3.1.4", "3.1")]
     [TestCase("2", "3.1.4", "3")]
-    [TestCase("major", "3.1.4", "major")]
+    [TestCase("major", "3.1.4", "3")]
     public void ARenewedPin_KeepsItsPrecision_OnTheLineOfTheVersionItGoesTo(string pin, string version, string renewed)
     {
         Pin.Parse(pin)!.RenewedTo(version).ShouldBe(renewed);
@@ -110,9 +110,9 @@ internal sealed class DotskitIgnoreTests
 
         var (text, lines) = PinReview.Of(file, [(file.Rules[0], false)], "3.0.0");
 
-        // ADR-009: the old line is commented out and the next one is written commented out of its own, so a rule that
-        // held for good does not come back to life unread.
-        text.ShouldBe("# src/locked/@major # dotskit: spent by the upgrade to 3.0.0; uncomment the line below to hold again\n# src/locked/@major");
+        // ADR-009: the old line is commented out and the next one is written commented out of its own, on the line the
+        // solution has moved to, so the team uncomments a pin of the major it now holds.
+        text.ShouldBe("# src/locked/@3 # dotskit: spent by the upgrade to 3.0.0; uncomment the line below to hold again\n# src/locked/@3");
         lines.ShouldHaveSingleItem().ShouldContain("written below it");
     }
 

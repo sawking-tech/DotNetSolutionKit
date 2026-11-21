@@ -11,8 +11,6 @@ namespace DotsKit.Ignoring;
 /// <param name="Text">The file as it is written, so a rewrite leaves every line the tool did not touch as the team wrote it.</param>
 internal sealed record DotskitIgnore(IReadOnlyList<IgnoreRule> Rules, string Text)
 {
-    public static readonly DotskitIgnore None = new([], "");
-
     /// <summary>The rules of the file, read as text; a folder with no file and an empty file both have no rules.</summary>
     public static DotskitIgnore Parse(string? text)
     {

@@ -51,7 +51,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         // A pin the upgrade spends is written back beside the merge, with the lines the team wrote around it: the
         // team sees the change in the review, git commits it with the part, and git merge --abort puts it back too.
         IReadOnlyList<string> pins = [];
-        if (PinReview.Of(DotskitIgnore.Parse(Read(IgnoreRules.PathOf(plan.Root))), Spent(plan, conflicts), plan.Ignore?.Version ?? plan.Next.Template) is { Lines.Count: > 0 } review)
+        if (PinReview.Of(DotskitIgnore.Parse(Read(IgnoreRules.PathOf(plan.Root))), Spent(plan), plan.Ignore?.Version ?? plan.Next.Template) is { Lines.Count: > 0 } review)
         {
             transaction.Write(IgnoreRules.FileName, System.Text.Encoding.UTF8.GetBytes(review.Text));
             pins = review.Lines;
@@ -105,18 +105,18 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     private static string SolutionFile(string root) => Path.GetRelativePath(root, Layout.SolutionFileOf(root)).Replace('\\', '/');
 
     /// <summary>
-    /// The spent pins with whether the solution still differs from the template there, once the merge is written: the file
+    /// The spent pins with whether the solution still differs from the template there, once the merge is written: a file
     /// the team edited differs and keeps its rule for another round; one the merge brought to the template's own text
-    /// matches it, and its rule goes. A path the solution has no file for is no difference of the team's.
+    /// matches it, and its rule goes. The paths are the ones git itself read the rule to name.
     /// </summary>
-    private static IReadOnlyList<(IgnoreRule Rule, bool Difference)> Spent(Plan plan, IReadOnlyList<string> conflicts) =>
+    private static IReadOnlyList<(IgnoreRule Rule, bool Difference)> Spent(Plan plan) =>
         plan.Ignore is not { Spent.Count: > 0 } ignore || plan.NextTree is null
             ? []
-            : [.. ignore.Spent.Select(rule => (rule, StaysDifferent(rule, plan, conflicts)))];
+            : [.. ignore.Spent.Select(rule => (rule, StaysDifferent(rule, plan, ignore)))];
 
-    private static bool StaysDifferent(IgnoreRule rule, Plan plan, IReadOnlyList<string> conflicts)
+    private static bool StaysDifferent(IgnoreRule rule, Plan plan, IgnoreDecision ignore)
     {
-        foreach (var path in ConflictsAndFiles(rule, plan, conflicts))
+        foreach (var path in ignore.PathsOf.GetValueOrDefault(rule) ?? new HashSet<string>())
         {
             var template = Path.Combine(plan.NextTree!, path);
             var solution = Path.Combine(plan.Root, path);
@@ -134,20 +134,9 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         return false;
     }
 
-    /// <summary>The paths of the solution the rule names: the plan's changes and the files left in conflict.</summary>
-    private static IEnumerable<string> ConflictsAndFiles(IgnoreRule rule, Plan plan, IReadOnlyList<string> conflicts) =>
-        (plan.Changes ?? []).Select(c => c.Path).Concat(conflicts).Distinct(StringComparer.Ordinal).Where(p => Matches(rule.Pattern, p));
-
     /// <summary>Two texts equal, whether written on two OSes: the line ends of each are read as one.</summary>
     private static bool Same(string left, string right) =>
         left.ReplaceLineEndings("\n").Equals(right.ReplaceLineEndings("\n"), StringComparison.Ordinal);
-
-    /// <summary>Whether a path of the solution is one the rule names, as a prefix of it or as its own text; the matching of the plan's report need not be git's exact one.</summary>
-    private static bool Matches(string pattern, string path)
-    {
-        var prefix = pattern.TrimEnd('/', '*', '.', '!');
-        return prefix.Length > 0 && path.StartsWith(prefix, StringComparison.Ordinal);
-    }
 
     private static string? Read(string path) => File.Exists(path) ? File.ReadAllText(path) : null;
 
@@ -167,9 +156,11 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
             {
                 await ApplyMembershipAsync(plan, ct);
                 await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
+                // The file the team may have put into its own .gitignore: a merge commit takes it whole, as the team's
+                // own file, so it is staged whether the solution's rules hide it or not.
                 if (File.Exists(IgnoreRules.PathOf(plan.Root)))
                 {
-                    await git.StageAsync(plan.Root, [IgnoreRules.FileName], ct);
+                    await git.StageAsync(plan.Root, [IgnoreRules.FileName], ct, force: true);
                 }
                 repaired = await RepairAsync(plan, conflicts, ct);
                 var written = repaired.Select(RepairReport.FileOf).Concat(repaired.OfType<CentralizeVersion>().Select(c => c.Central))

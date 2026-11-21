@@ -1,4 +1,5 @@
 using DotsKit.Ignoring;
+using DotsKit.Io;
 
 namespace DotsKit.Tests;
 
@@ -12,7 +13,7 @@ internal sealed class HeldFilesTests
 {
     private static string Tree(params (string Path, string Text)[] files)
     {
-        var root = DotsKit.Io.Folders.NewTemp("held");
+        var root = Folders.NewTemp("held");
         foreach (var (path, text) in files)
         {
             var full = Path.Combine(root, path);
@@ -64,7 +65,7 @@ internal sealed class HeldFilesTests
         var next = Tree(("src/common/Keep.cs", "the template's"));
 
         HeldFiles.Apply(next, null, new HashSet<string> { "src/common/Keep.cs" });
-        HeldFiles.Apply(next, DotsKit.Io.Folders.NewTemp("empty"), new HashSet<string>());
+        HeldFiles.Apply(next, Folders.NewTemp("empty"), new HashSet<string>());
 
         File.ReadAllText(Path.Combine(next, "src/common/Keep.cs")).ShouldBe("the template's");
     }

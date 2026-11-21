@@ -29,9 +29,14 @@ internal interface IIgnoreRules
 /// <param name="Held">The paths the rules hold at <paramref name="Version"/>; no file of them is read, written or merged.</param>
 /// <param name="Spent">The rules whose pin expired at <paramref name="Version"/>: their paths merge, and the review names the line.</param>
 /// <param name="Version">The release the upgrade goes to, by which the pins are read.</param>
-internal sealed record IgnoreDecision(IReadOnlySet<string> Held, IReadOnlyList<IgnoreRule> Spent, string Version)
+/// <param name="PathsOf">
+/// The paths each rule of the file answers to, the spent ones among them - read by git, in the file's own syntax, so
+/// the review asks about exactly the paths a rule names instead of guessing from the pattern.
+/// </param>
+internal sealed record IgnoreDecision(IReadOnlySet<string> Held, IReadOnlyList<IgnoreRule> Spent, string Version,
+    IReadOnlyDictionary<IgnoreRule, IReadOnlySet<string>> PathsOf)
 {
-    public static readonly IgnoreDecision None = new(new HashSet<string>(), [], "");
+    public static readonly IgnoreDecision None = new(new HashSet<string>(), [], "", new Dictionary<IgnoreRule, IReadOnlySet<string>>());
 }
 
 /// <summary>
@@ -45,7 +50,7 @@ internal sealed class IgnoreRules(IIgnorePatterns patterns) : IIgnoreRules
     /// <summary>The file's name in the solution's root, beside the manifest.</summary>
     public const string FileName = ".dotskitignore";
 
-    public static string PathOf(string root) => System.IO.Path.Combine(root, FileName);
+    public static string PathOf(string root) => Path.Combine(root, FileName);
 
     public async Task<IgnoreDecision> DecideAsync(string root, string to, string from, IReadOnlyList<string> candidates, CancellationToken ct)
     {
@@ -58,11 +63,22 @@ internal sealed class IgnoreRules(IIgnorePatterns patterns) : IIgnoreRules
         // A pin holds until the upgrade reaches it: at the pin's precision or above, the file merges and the review
         // names the spent rule. A rule with no pin holds always, until a person removes it.
         var spent = skip.Rules.Where(r => r.Pin is { } pin && !pin.Holds(to, from)).ToList();
-        var holding = skip.Rules.Where(r => r.Pin is null || r.Pin.Holds(to, from)).ToList();
-        var held = holding.Count == 0
-            ? new HashSet<string>()
-            : await patterns.MatchAsync(root, [.. holding.Select(r => r.Pattern)], candidates, ct);
-        return new IgnoreDecision(held, spent, to);
+        // Every rule of the file goes to git at once, the spent ones too: a spent rule is still a rule, and its paths are
+        // what the review asks about. git names, for each candidate, the last rule that decided it, as the file's own
+        // semantics say - a deeper rule over a higher one, a later line over an earlier one, ! cancelling.
+        var matches = await patterns.MatchAsync(root, [.. skip.Patterns], candidates, ct);
+        var rules = skip.Rules.ToDictionary(r => r.Line);
+        Dictionary<IgnoreRule, IReadOnlySet<string>> byRule = skip.Rules.ToDictionary(
+            r => r,
+            r => (IReadOnlySet<string>)matches.Where(m => m.Line == r.Line).Select(m => m.Path).ToHashSet(StringComparer.Ordinal));
+        // A path is held when the rule that decided it still holds and the rule is no cancellation: git names a ! rule
+        // for the path it brings back, and a path brought back is the template's to write. The last rule wins, as in the
+        // file itself.
+        var held = matches
+            .Where(m => !m.Pattern.StartsWith('!')
+                && rules.TryGetValue(m.Line, out var rule) && (rule.Pin is not { } pin || pin.Holds(to, from)))
+            .Select(m => m.Path).ToHashSet(StringComparer.Ordinal);
+        return new IgnoreDecision(held, spent, to, byRule);
     }
 
     private static string? Read(string root) =>
@@ -76,6 +92,6 @@ internal sealed class IgnoreRules(IIgnorePatterns patterns) : IIgnoreRules
 /// </summary>
 internal interface IIgnorePatterns
 {
-    /// <summary>The candidates a pattern matches, relative to <paramref name="root"/> with forward slashes.</summary>
-    Task<IReadOnlySet<string>> MatchAsync(string root, IReadOnlyList<string> patterns, IReadOnlyList<string> candidates, CancellationToken ct);
+    /// <summary>The candidates a pattern matches, with the rule that decided each, relative to the root with forward slashes.</summary>
+    Task<IReadOnlyList<IgnoreMatch>> MatchAsync(string root, IReadOnlyList<string> patterns, IReadOnlyList<string> candidates, CancellationToken ct);
 }

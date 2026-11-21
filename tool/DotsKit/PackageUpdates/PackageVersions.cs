@@ -44,12 +44,16 @@ internal static partial class PackageVersions
     /// <param name="nextDir">What the template gives now; its version files are rewritten in place.</param>
     /// <param name="policy">The solution's policy: the pinned versions and how far an update goes.</param>
     /// <param name="majorUpgrade">The template moves to its next major version: a package's major version may come with it.</param>
-    public static IReadOnlyList<string> Hold(string? baseDir, string nextDir, PackagePolicy policy, bool majorUpgrade)
+    /// <param name="held">
+    /// The paths <c>.dotskitignore</c> holds: no version file of them is written, so a path the team keeps out of an
+    /// upgrade stays as the team has it.
+    /// </param>
+    public static IReadOnlyList<string> Hold(string? baseDir, string nextDir, PackagePolicy policy, bool majorUpgrade, IReadOnlySet<string>? held = null)
     {
         var had = baseDir is null ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) : All(baseDir);
         var lines = new SortedSet<string>(StringComparer.Ordinal);
         var brought = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var path in Folders.RelativeFiles(nextDir).Where(IsVersionsFile))
+        foreach (var path in Folders.RelativeFiles(nextDir).Where(IsVersionsFile).Where(p => held is null || !held.Contains(p)))
         {
             // Through FileText, so the byte order mark the template gives stays.
             var file = FileText.Read(nextDir, path)!;
