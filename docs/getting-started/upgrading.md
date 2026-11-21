@@ -307,6 +307,34 @@ reference back would be a cycle, so the tool refuses to add it and says so.
   names what it needs. Edit every `--messaging` line in `.dotskit/manifest.json`, the solution's and each
   service's, from `--messaging outbox` to `--messaging rabbitmq:outbox`, or from `direct` to
   `rabbitmq:direct`, then run `dotskit upgrade`.
+- The flags are written in lower case, as `dotnet` writes its own options, and a few words are split by a
+  hyphen. A command or a script of the team's that names a flag takes the new name; the old one stops
+  working, because `dotnet new` tells case apart.
+
+  | Before 3.0 | Since 3.0 |
+  |---|---|
+  | `--NamespaceRoot` | `--namespace-root` |
+  | `--ProductName` | `--product-name` |
+  | `--ServiceNameOrCustom` | `--service` |
+  | `--ApiGateway` | `--api-gateway` |
+  | `--ClickHouse` | `--clickhouse` |
+  | `--MongoDB` | `--mongodb` |
+  | `--TestFramework` | `--test-framework` |
+  | `--HttpPort` | `--http-port` |
+  | `--DiffApi` | `--diff-api` |
+  | `--GitHubCiCd` | `--github-cicd` |
+  | `--FeatureFlags` | `--feature-flags` |
+  | `--HierarchyRules` | `--hierarchy-rules` |
+  | `--Solution` | `--solution` |
+
+  The rest were one word already and lose only the capital: `--hangfire`, `--messaging`, `--storage`,
+  `--notify`, `--audit`, `--agent`, `--deploy`, `--infisical`, `--database`, `--vault`.
+  `-M false` is gone with `-M`: it was `--Solution` since 2.8, and the manifest keeps it as the template
+  wrote it. `dotskit` itself takes either case (`--Storage` and `--storage` are one parameter) and passes
+  the template of a version the names that version knows, so an upgrade needs no edit of the manifest.
+- The package of the template is `SawKing.DotsKit.Templates`: `dotnet tool` and `dotnet new install`
+  take the new name. `SawKing.DotNetSolutionKit` stays on nuget.org for 2.x, and its last version points
+  at the new one.
 
 ## The changes of v2
 

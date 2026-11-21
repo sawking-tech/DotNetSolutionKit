@@ -304,6 +304,33 @@ workflow, тестовые серверы, версии пакетов - сли�
   называет нужное. Поправьте каждую строку `--messaging` в `.dotskit/manifest.json`, решения и каждого
   сервиса, с `--messaging outbox` на `--messaging rabbitmq:outbox`, или с `direct` на `rabbitmq:direct`,
   и запустите `dotskit upgrade`.
+- Флаги пишутся в нижнем регистре, как `dotnet` пишет свои опции, а несколько слов разделяются дефисом.
+  Команда или скрипт команды, который называет флаг, берёт новое имя; старое перестаёт работать, потому
+  что `dotnet new` различает регистр.
+
+  | До 3.0 | С 3.0 |
+  |---|---|
+  | `--NamespaceRoot` | `--namespace-root` |
+  | `--ProductName` | `--product-name` |
+  | `--ServiceNameOrCustom` | `--service` |
+  | `--ApiGateway` | `--api-gateway` |
+  | `--ClickHouse` | `--clickhouse` |
+  | `--MongoDB` | `--mongodb` |
+  | `--TestFramework` | `--test-framework` |
+  | `--HttpPort` | `--http-port` |
+  | `--DiffApi` | `--diff-api` |
+  | `--GitHubCiCd` | `--github-cicd` |
+  | `--FeatureFlags` | `--feature-flags` |
+  | `--HierarchyRules` | `--hierarchy-rules` |
+  | `--Solution` | `--solution` |
+
+  Остальные были одним словом и теряют только заглавную букву: `--hangfire`, `--messaging`, `--storage`,
+  `--notify`, `--audit`, `--agent`, `--deploy`, `--infisical`, `--database`, `--vault`.
+  `-M false` уходит вместе с `-M`: с 2.8 это `--Solution`, и манифест держит его так, как написал шаблон.
+  Сам `dotskit` принимает любой регистр (`--Storage` и `--storage` - один параметр) и отдаёт шаблону
+  версии имена, которые эта версия знает, поэтому обновление не требует правок манифеста.
+- Пакет шаблона - `SawKing.DotsKit.Templates`: `dotnet tool` и `dotnet new install` берут новое имя.
+  `SawKing.DotNetSolutionKit` остаётся на nuget.org для 2.x, и его последняя версия указывает на новое.
 
 ## Изменения v2
 

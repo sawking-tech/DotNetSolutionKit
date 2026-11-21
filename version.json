@@ -10,7 +10,8 @@
         "Capabilities are named by the system they carry inside their group: Capabilities.Persistence.Mongo, Capabilities.Analytics.ClickHouse, Capabilities.Messaging.Notifications; the projects a consumer references carry .Abstractions.",
         "dotskit upgrade retargets a solution's references and usings through every move, a part at a time, and builds after each part.",
         "A file the team wants kept out of an upgrade is named in .dotskitignore, at the solution's root or in any folder below it, where a rule acts on its own folder's subtree; @2.9, @2 or @major pin it, and the upgrade holds what the file names and brings a spent pin back to its review.",
-        "The Messaging value names the transport: --Messaging rabbitmq:outbox or rabbitmq:direct. A 2.x solution says outbox or direct, and upgrade asks for the transport before it runs."
+        "The Messaging value names the transport: --messaging rabbitmq:outbox or rabbitmq:direct. A 2.x solution says outbox or direct, and upgrade asks for the transport before it runs.",
+        "The flags are written in lower case, as dotnet writes its own options: --api-gateway, --feature-flags, --storage; the template package is SawKing.DotsKit.Templates, in line with SawKing.DotsKit.Tool. dotskit takes either case and passes each version of the template the names it knows, so an upgrade needs no edit of the manifest."
       ],
       "ru": {
         "headline": "Внешние системы, которые включает флаг, переезжают из Common в capabilities и framework: драйвер системы живёт только в сервисе с её флагом.",
@@ -21,7 +22,8 @@
           "Capabilities называются по системе внутри своей группы: Capabilities.Persistence.Mongo, Capabilities.Analytics.ClickHouse, Capabilities.Messaging.Notifications; проекты, на которые ссылается потребитель, несут .Abstractions.",
           "dotskit upgrade перенацеливает ссылки и using'и решения через каждый перенос, по частям, и собирает решение после каждой части.",
           "Файл, который команда хочет уберечь от обновления, называется в .dotskitignore - в корне решения или в любом каталоге ниже, где правило действует на поддерево своего каталога; @2.9, @2 или @major закрепляют его, обновление держит названное и возвращает потраченный пин на разбор.",
-          "Значение Messaging называет транспорт: --Messaging rabbitmq:outbox или rabbitmq:direct. Решение 2.x говорит outbox или direct, и обновление просит назвать транспорт до запуска."
+          "Значение Messaging называет транспорт: --messaging rabbitmq:outbox или rabbitmq:direct. Решение 2.x говорит outbox или direct, и обновление просит назвать транспорт до запуска.",
+          "Флаги пишутся в нижнем регистре, как dotnet пишет свои опции: --api-gateway, --feature-flags, --storage; пакет шаблона - SawKing.DotsKit.Templates, в одну линию с SawKing.DotsKit.Tool. dotskit принимает любой регистр и отдаёт каждой версии шаблона имена, которые она знает, поэтому обновление не требует правок манифеста."
         ]
       }
     },
