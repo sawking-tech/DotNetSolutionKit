@@ -31,7 +31,7 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         ShowRepairs("before the build, for the namespaces the template gave up", written.Repaired);
         if (written.Pins.Count > 0)
         {
-            terminal.Info($"{IgnoreRules.FileName}: {written.Pins.Count} pin(s) the upgrade spent, the file brings them to the review:");
+            terminal.Info($"{DotskitIgnores.FileName}: {written.Pins.Count} pin(s) the upgrade spent, the file brings them to the review:");
             foreach (var line in written.Pins)
             {
                 terminal.Info($"  {line}");
@@ -100,7 +100,7 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         {
             var first = await builder.BuildAsync(plan.Root, ct);
             result = first.Code != 0 && plan.Types is not null
-                ? await repair.RunAsync(plan.Root, plan.Types, first, ct)
+                ? await repair.RunAsync(plan.Root, plan.Types, first, ct, plan.Ignore?.Held)
                 : new(first, [], null);
         }
         catch (OperationCanceledException)

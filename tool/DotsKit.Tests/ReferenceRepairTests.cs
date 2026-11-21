@@ -234,6 +234,31 @@ internal sealed class ReferenceRepairTests
         UsingLines.Declared("namespace C\n{\n    namespace D { }\n}\n").ShouldBe(["C"]);
     }
 
+    [Test]
+    public async Task BeforeTheBuild_AFileTheRulesHold_IsLeftAlone_AsTheUpgradeWritesNoLineOfIt()
+    {
+        // ADR-009, "Ignoring on upgrade": a rule of .dotskitignore holds the file for good, and a repair that replaced a
+        // using of a moved type there would write the file the team keeps out of the upgrade's reach.
+        var root = Io.Folders.NewTemp("repair-held");
+        const string given = "using ST.Demo.Common.Events;\n";
+        string Put(string path)
+        {
+            var full = Path.Combine(root, path);
+            Directory.CreateDirectory(Path.GetDirectoryName(full)!);
+            File.WriteAllText(full, given);
+            return Path.GetFullPath(full);
+        }
+        Put(Orders[3..]);
+        Put("src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Order.cs");
+        var free = Put("src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Free.cs");
+        var writer = new RecordingWriter();
+
+        await new ReferenceRepair(writer, new NoBuilder()).BeforeBuildAsync(root, TypeMap.Between(Before, After), [], CancellationToken.None,
+            held: new HashSet<string> { "src/services/ST.Demo.Orders/ST.Demo.Orders.Domain/Order.cs" });
+
+        writer.Repairs.OfType<ReplaceUsing>().Select(r => r.File).ShouldBe([free]);
+    }
+
     private sealed class RecordingWriter : IRepairWriter
     {
         public List<Repair> Repairs { get; } = [];

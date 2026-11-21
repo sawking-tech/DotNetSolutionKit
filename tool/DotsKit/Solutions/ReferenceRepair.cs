@@ -1,3 +1,4 @@
+using DotsKit.Ignoring;
 using DotsKit.Io;
 using DotsKit.Merging;
 
@@ -76,7 +77,11 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
     /// <param name="map">The types the template moved.</param>
     /// <param name="build">The build that failed.</param>
     /// <param name="ct">Cancels the repair.</param>
-    public async Task<RepairResult> RunAsync(string root, TypeMap map, ProcessResult build, CancellationToken ct)
+    /// <param name="held">
+    /// The paths <c>.dotskitignore</c> holds, relative to the root: a repair that would write one is left to the team,
+    /// since the upgrade writes no line of a held file.
+    /// </param>
+    public async Task<RepairResult> RunAsync(string root, TypeMap map, ProcessResult build, CancellationToken ct, IReadOnlySet<string>? held = null)
     {
         var made = new HashSet<Repair>();
         var applied = new List<Repair>();
@@ -87,7 +92,8 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
             // not merged yet is repaired too: an error of it means the type's new home is merged already, and the
             // merge of its own part brings both sides in line with the repair.
             var repairs = ReferenceRepairs.Decide(BuildErrors.Parse(build.Output), map, root, TextOf)
-                .Where(r => !made.Contains(r) && Folders.IsInside(root, RepairReport.FileOf(r))).ToList();
+                .Where(r => !made.Contains(r) && Folders.IsInside(root, RepairReport.FileOf(r)) && !HeldFiles.Holds(root, held, RepairReport.FileOf(r)))
+                .ToList();
             if (repairs.Count == 0)
             {
                 break;
@@ -125,10 +131,14 @@ internal sealed class ReferenceRepair(IRepairWriter writer, IBuilder builder)
     /// <param name="ct">Cancels the repair; what is written stays for git to show.</param>
     /// <param name="ofThisStepOnly">Whether a file is of a part this step merges or one merged before; files of the parts
     /// not merged yet are left to their own step, so the two sides of a later merge never carry two repairs of one file.</param>
-    public async Task<IReadOnlyList<Repair>> BeforeBuildAsync(string root, TypeMap map, IReadOnlyList<string> conflicts, CancellationToken ct, Func<string, bool>? ofThisStepOnly = null)
+    /// <param name="held">
+    /// The paths <c>.dotskitignore</c> holds, relative to the root: no file of them is repaired, since the upgrade
+    /// writes no line of one, a using of a type the template moved among them.
+    /// </param>
+    public async Task<IReadOnlyList<Repair>> BeforeBuildAsync(string root, TypeMap map, IReadOnlyList<string> conflicts, CancellationToken ct, Func<string, bool>? ofThisStepOnly = null, IReadOnlySet<string>? held = null)
     {
         var left = conflicts.Select(c => Path.GetFullPath(Path.Combine(root, c))).ToHashSet(PathComparer);
-        var files = SourceFiles(root).Where(f => !left.Contains(f.File) && !left.Contains(f.Project));
+        var files = SourceFiles(root).Where(f => !left.Contains(f.File) && !left.Contains(f.Project) && !HeldFiles.Holds(root, held, f.File));
         if (ofThisStepOnly is not null)
         {
             files = files.Where(f => ofThisStepOnly(Relative(root, f.File)));

@@ -100,4 +100,27 @@ internal sealed class IgnoreScenarios
         upgraded.Output.ShouldNotContain("ignored   ");
         solution.Exists(RulesFile).ShouldBeFalse("the tool writes no rules file of its own");
     }
+
+    /// <summary>
+    /// ADR-009: a file in any folder holds the subtree of that folder. The rule sits in a subfolder of the solution and
+    /// names paths from there, so the upgrade keeps the files of that folder and brings the rest in - and the rule
+    /// holds nothing outside it.
+    /// </summary>
+    [Test]
+    public async Task ARuleInADeeperFile_HoldsItsOwnSubtree_AndLeavesTheRestOfTheSolutionAlone()
+    {
+        const string folder = "src/common/ST.Demo.Common";
+        const string deeper = folder + "/" + RulesFile;
+        const string held = folder + "/ST.Demo.Common.csproj";
+        var solution = await SolutionOfTheReleaseAsync();
+        solution.Write(deeper, "*.csproj\n");
+        await solution.CommitAsync("the rules of the folder");
+        var before = solution.Read(held);
+
+        var upgraded = await solution.DotskitAsync("upgrade", "--yes", "--all-at-once");
+
+        upgraded.Output.ShouldContain($"ignored   {held}", customMessage: "the rule acts on the subtree of its own folder");
+        solution.Read(held).ShouldBe(before, customMessage: "the held file keeps the text of 2.9");
+        upgraded.Output.ShouldNotContain("ignored   src/services/", customMessage: "a rule of a deeper file never reaches outside its folder");
+    }
 }

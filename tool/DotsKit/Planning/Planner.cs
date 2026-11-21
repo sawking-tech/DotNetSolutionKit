@@ -61,9 +61,11 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
             (baseDir, nextDir) = (Folders.Overlay(baseDir, nextDir, step.InDone), Folders.Overlay(baseDir, nextDir, step.InDoneOrThis));
             // The repair of the trees covers the files of the parts merged so far and this one: a file of a part not
             // merged yet is repaired on the solution's side by the build's errors and by its own part later, and the
-            // two sides of a merge never carry two repairs of one file.
+            // two sides of a merge never carry two repairs of one file. A file the rules hold takes the base's text
+            // back after the repair, since the repair writes the text of a held file as it does any other.
             await repair.BeforeBuildAsync(baseDir, moves.Within(step.InDone), [], ct, step.InDone);
-            await repair.BeforeBuildAsync(nextDir, types, [], ct, step.InDoneOrThis);
+            await repair.BeforeBuildAsync(nextDir, types, [], ct, step.InDoneOrThis, ignore.Held);
+            HeldFiles.Apply(nextDir, baseDir, ignore.Held);
             PackageVersions.KeepReferenced(baseDir, before, root);
             PackageVersions.KeepReferenced(nextDir, before, root);
             // The repair by the build's errors cannot be carried by the trees: the template's files of the parts not merged

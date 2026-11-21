@@ -37,4 +37,14 @@ internal static class HeldFiles
             }
         }
     }
+
+    /// <summary>
+    /// Whether <paramref name="file"/>, a full path, is one the rules hold: no repair writes it, since the upgrade
+    /// writes no line of a held file, a using it carries included.
+    /// </summary>
+    /// <param name="root">The solution's root the held paths are relative to.</param>
+    /// <param name="held">The paths the rules hold, relative to the root.</param>
+    /// <param name="file">The full path of a file a repair would write.</param>
+    public static bool Holds(string root, IReadOnlySet<string>? held, string file) =>
+        held is { Count: > 0 } && held.Contains(Path.GetRelativePath(root, file).Replace('\\', '/'));
 }
