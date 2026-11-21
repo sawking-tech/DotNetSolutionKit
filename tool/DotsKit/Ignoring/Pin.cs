@@ -31,17 +31,24 @@ internal sealed partial record Pin(int Major, int? Minor, bool EveryMajor)
     /// <summary>
     /// Whether the pin still holds the file at <paramref name="version"/>: an upgrade that stays below the pin's line
     /// leaves the file alone, and the upgrade that moves past it spends the pin and the file goes into a normal merge.
-    /// <c>@2.9</c> holds every 2.9.x and stops at 2.10; <c>@2</c> holds every 2.x and stops at 3.0.
+    /// <c>@2.9</c> holds every 2.9.x and stops at 2.10; <c>@2</c> holds every 2.x and stops at 3.0. <c>@major</c> holds
+    /// the major the solution is on, and a new major spends it: the tool then moves the pin onto the new line.
     /// </summary>
-    public bool Holds(string version)
+    /// <param name="version">The release the upgrade goes to.</param>
+    /// <param name="from">The release the solution is on; <c>@major</c> is read against its major, and ignored for the others.</param>
+    public bool Holds(string version, string from = "")
     {
-        if (EveryMajor)
+        if (!Version.TryParse(version.Split('-')[0], out var target))
         {
-            return true;
+            return false;
         }
 
-        return Version.TryParse(version.Split('-')[0], out var target)
-            && (Minor is { } minor ? (target.Major, target.Minor).CompareTo((Major, minor)) : target.Major.CompareTo(Major)) <= 0;
+        if (EveryMajor)
+        {
+            return Version.TryParse(from.Split('-')[0], out var current) && target.Major == current.Major;
+        }
+
+        return (Minor is { } minor ? (target.Major, target.Minor).CompareTo((Major, minor)) : target.Major.CompareTo(Major)) <= 0;
     }
 
     /// <summary>
