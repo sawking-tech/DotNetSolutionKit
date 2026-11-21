@@ -19,7 +19,7 @@ ST-Demo/
 │   │   ├── ST.Demo.Common/                  примитивы домена: сущности, агрегаты, события, Money
 │   │   ├── ST.Demo.Common.Contracts/        то, что пересекает границу: запросы, ответы, сообщения шины
 │   │   ├── ST.Demo.Common.Application/      сценарии над доменом и порты, которые им нужны
-│   │   ├── ST.Demo.Common.Infrastructure/   EF Core, шина, хранилище секретов, внешний мир
+│   │   ├── ST.Demo.Common.Infrastructure/   EF Core, шина, хранилище конфигурации, внешний мир
 │   │   ├── ST.Demo.Common.Web/              хост: конвейер, ошибки, Swagger, аутентификация
 │   │   ├── ST.Demo.Common.Testing/          тестовая оснастка, без тестового фреймворка
 │   │   └── ST.Demo.Common.Tests/            тесты Common

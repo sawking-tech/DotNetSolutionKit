@@ -26,7 +26,7 @@ other failure a `StorageException`, which the client receives as 503.
 | `S3:Enabled` | `true`; `false` keeps nothing: writes are ignored, reads return empty, so a service runs before it has a bucket |
 | `S3:ServiceUrl` | the endpoint: AWS, or a self-hosted server |
 | `S3:BucketName` | the bucket, which has to exist |
-| `S3:AccessKey`, `S3:SecretKey` | credentials, from the environment or the secret store, never in a file |
+| `S3:AccessKey`, `S3:SecretKey` | credentials, from the environment or the configuration store, never in a file |
 | `S3:ForcePathStyle` | `true` for self-hosted servers |
 
 A request fails after 2 seconds and is retried once: a caller with a fallback uses it at once instead of

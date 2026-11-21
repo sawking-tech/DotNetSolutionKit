@@ -28,7 +28,7 @@ looks like touched a database. Two more facts had to be handled:
 
 - **Schema-only mode** (`--schema-only` or `SCHEMA_ONLY=1`) builds the service without its infrastructure:
   it turns off every infrastructure switch, registers no infrastructure services, no authentication and no
-  secret store, and drops startup validation of options.
+  configuration store, and drops startup validation of options.
 - **`SchemaHost.Build(args)`** in each service constructs the application exactly as `Program` does and
   stops there. `Program` builds through the same method, so the document always describes the application
   that runs.

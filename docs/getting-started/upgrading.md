@@ -270,6 +270,7 @@ What stays with the team - its own code and its own call:
 | `v2.8.0` | `Infisical__SnapshotPath` and `Vault__SnapshotPath` are gone: remove the key where it is set and delete the snapshot file, which holds secrets nothing updates any more. |
 | `v2.8.0` | A service of the team's that writes files in its container writes them to `/tmp`, or to object storage when they must outlive the container: the root filesystem is read-only. |
 | `v3.0.0` | The `Messaging` value names the transport: edit every `--Messaging` line in `.dotskit/manifest.json`, the solution's and each service's, from `outbox` to `rabbitmq:outbox` or from `direct` to `rabbitmq:direct`; the upgrade refuses until it is done. |
+| `v3.0.0` | The secret store is the configuration store: `ISecretStore` is `IConfigurationStore`, `SecretStoreOptions` is `ConfigurationStoreOptions`, `SecretsConfigurationProvider` is `ConfigurationStoreProvider`, and `AddPlatformSecrets` is `AddPlatformConfiguration`. Code of the team's that names them takes the new names; `dotskit upgrade` rewrites its `using` lines and references, and a name it does not recognise the tool leaves for a person. Kept as they were: the `Secrets:ReloadError` configuration key and the `appsettings.Secrets.json` file. |
 
 Everything else these releases changed - where a file lives, which project references which, how the
 infrastructure is split, how the test servers start - the upgrade brings on its own.

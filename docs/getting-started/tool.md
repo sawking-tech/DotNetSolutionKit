@@ -198,7 +198,7 @@ services has it. The solution's names, `--Database`, `--Deploy`, `--TestFramewor
 gives one of them another value is refused.
 
 `Infisical` and `Vault` are infrastructure of the whole solution: a service added by `dotskit new` gets the
-solution's secret store even when the command does not repeat its flag. Capabilities of one service, such as
+solution's configuration store even when the command does not repeat its flag. Capabilities of one service, such as
 `Storage`, `ClickHouse` or `MongoDB`, are not copied from another service.
 
 The template writes the manifest itself when it generates a solution: since 2.9 a solution made by `dotnet new`

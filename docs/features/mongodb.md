@@ -32,7 +32,7 @@ creates its indexes itself, at startup, through the collection's `Indexes`.
 | Setting | |
 |---|---|
 | `MongoDB:Enabled` | `true`; `false` makes the database answer 503, drops the readiness check and the requirement for a connection string and a database |
-| `MongoDB:ConnectionString` | `mongodb://user:password@host:27017/?authSource=admin`, from the environment or the secret store; checked at startup |
+| `MongoDB:ConnectionString` | `mongodb://user:password@host:27017/?authSource=admin`, from the environment or the configuration store; checked at startup |
 | `MongoDB:Database` | the service's own database; the generated value is the service's name |
 
 Under docker compose the infrastructure gets a MongoDB server; the credentials come from

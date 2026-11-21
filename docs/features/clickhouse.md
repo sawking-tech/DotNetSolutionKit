@@ -44,7 +44,7 @@ then never takes traffic, and the running one keeps serving.
 | Setting | |
 |---|---|
 | `ClickHouse:Enabled` | `true`; `false` makes a connection answer 503, drops the readiness check and the requirement for a connection string |
-| `ClickHouse:ConnectionString` | `Host=...;Port=8123;Username=...;Password=...;Database=...`, from the environment or the secret store |
+| `ClickHouse:ConnectionString` | `Host=...;Port=8123;Username=...;Password=...;Database=...`, from the environment or the configuration store |
 | `ClickHouse:CommandTimeoutSeconds` | 30 |
 | `ClickHouse:MaxInsertBlockRows` | 10 000: the largest insert sent as one block, and so the largest that server-side deduplication covers |
 

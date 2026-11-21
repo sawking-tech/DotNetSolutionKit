@@ -72,8 +72,8 @@ Checked at startup: the provider has to be named, its section has what it needs,
 | `Email:TimeoutSeconds` | 30: SMTP, for each network operation of a delivery; Graph does not read it |
 | `Email:Smtp:Host`, `Email:Smtp:Port`, `Email:Smtp:From` | the server and the sender; port 587 by default |
 | `Email:Smtp:Secure` | `true`: TLS on connect on any port; otherwise 465 is TLS on connect and 587 STARTTLS |
-| `Email:Smtp:Username`, `Email:Smtp:Password` | only for a server that wants a sign-in, from the secret store |
-| `Email:GraphApi:TenantId`, `ClientId`, `ClientSecret` | the application that sends, the secret from the secret store |
+| `Email:Smtp:Username`, `Email:Smtp:Password` | only for a server that wants a sign-in, from the configuration store |
+| `Email:GraphApi:TenantId`, `ClientId`, `ClientSecret` | the application that sends, the secret from the configuration store |
 | `Email:GraphApi:SenderEmail` | the mailbox of the organisation messages are sent from |
 | `Email:Sandbox:Enabled` | `true` by default; outside Production the sandbox applies whatever it says |
 | `Email:Sandbox:ReceiverAddress` | where diverted messages go |

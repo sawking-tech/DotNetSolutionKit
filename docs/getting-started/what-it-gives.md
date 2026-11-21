@@ -73,7 +73,7 @@ team's reviews and tests focus on the rules of its domain.
 
 - The product is the generated solution, and that is what gets verified.
 - At runtime, a service writes nothing to disk.
-- With a secret store (Infisical or Vault), secrets reside only in the store and in the service's memory.
+- With a configuration store (Infisical or Vault), secrets reside only in the store and in the service's memory.
 - The choice between libraries is made in one place.
 - Every capability can be switched off cleanly, leaving nothing behind.
 

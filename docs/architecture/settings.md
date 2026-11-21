@@ -5,12 +5,12 @@ A service reads its settings from these sources, each overriding the ones before
 1. `features.json` from the `Framework.FeatureFlags` module, with `--FeatureFlags`;
 2. `appsettings.json`, then `appsettings.<Environment>.json`, then `appsettings.Secrets.json` in `Local`;
 3. environment variables;
-4. the secret store, with `-I` or `--Vault`: the shared folder, then the service's
+4. the configuration store, with `-I` or `--Vault`: the shared folder, then the service's
    ([secrets](../features/secrets.md)).
 
 ## What changes while the service runs
 
-The JSON files are read again when they change on disk, and the secret store every
+The JSON files are read again when they change on disk, and the configuration store every
 `ReloadSeconds` (300 by default; 0 reads it at startup only). A new value reaches what reads it on
 each use, and nothing else:
 
@@ -45,7 +45,7 @@ last valid value, and a typo in a file or the store fails no request.
 `AddValidatedOptions` stays for what is built once from a value: the value is read at the first use and
 kept for the life of the process.
 
-## The secret store, read again
+## The configuration store, read again
 
 The reload reads the same folders as the start, in the same order. New values replace the old ones and
 raise the configuration's change token; the same values raise nothing. When the store does not answer,
