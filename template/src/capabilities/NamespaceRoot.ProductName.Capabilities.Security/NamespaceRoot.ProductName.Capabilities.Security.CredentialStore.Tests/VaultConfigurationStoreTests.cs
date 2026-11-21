@@ -12,7 +12,7 @@ namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests;
 /// </summary>
 [TestFixture]
 [Category(TestCategories.Integration)]
-internal class VaultSecretStoreTests
+internal class VaultConfigurationStoreTests
 {
     private VaultOptions _options = null!;
     private string _prefix = null!;
@@ -42,7 +42,7 @@ internal class VaultSecretStoreTests
     {
         await Write("auth", new() { ["ConnectionStrings__DefaultConnection"] = "Host=db", ["Port"] = 5432 });
 
-        var secrets = await new VaultSecretStore(_options).ReadAsync($"{_prefix}/auth");
+        var secrets = await new VaultConfigurationStore(_options).ReadAsync($"{_prefix}/auth");
 
         secrets["ConnectionStrings__DefaultConnection"].ShouldBe("Host=db");
         secrets["Port"].ShouldBe("5432");
@@ -51,7 +51,7 @@ internal class VaultSecretStoreTests
     [Test]
     public async Task A_path_without_a_secret_reads_as_empty()
     {
-        (await new VaultSecretStore(_options).ReadAsync($"{_prefix}/nothing-here")).ShouldBeEmpty();
+        (await new VaultConfigurationStore(_options).ReadAsync($"{_prefix}/nothing-here")).ShouldBeEmpty();
     }
 
     [Test]
@@ -59,6 +59,6 @@ internal class VaultSecretStoreTests
     {
         var wrong = new VaultOptions { Address = _options.Address, Token = "test-do-not-use-wrong" };
 
-        await Should.ThrowAsync<ConfigurationException>(() => new VaultSecretStore(wrong).ReadAsync($"{_prefix}/auth"));
+        await Should.ThrowAsync<ConfigurationException>(() => new VaultConfigurationStore(wrong).ReadAsync($"{_prefix}/auth"));
     }
 }

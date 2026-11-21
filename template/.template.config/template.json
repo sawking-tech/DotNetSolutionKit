@@ -275,7 +275,7 @@
       "defaultValue": "false",
       "description": "Read secrets from HashiCorp Vault (KV version 2): the shared secret and the service's secret overlay configuration"
     },
-    "SecretStore": {
+    "ConfigurationStore": {
       "type": "computed",
       "value": "(Infisical || Vault)"
     },
@@ -690,7 +690,7 @@
           ]
         },
         {
-          "condition": "(!SecretStore)",
+          "condition": "(!ConfigurationStore)",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/**",
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/**",
@@ -702,15 +702,15 @@
           "condition": "(!Infisical)",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/Infisical*.cs",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Secrets/SecretsConfigurationTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Configuration/ConfigurationStoreTests.cs"
           ]
         },
         {
           "condition": "(!Vault)",
           "exclude": [
             "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore/Vault*.cs",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Secrets/VaultConfigurationTests.cs",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/VaultSecretStoreTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Configuration/VaultConfigurationTests.cs",
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/VaultConfigurationStoreTests.cs"
           ]
         },
         {
@@ -737,7 +737,7 @@
           "exclude": [
             "src/framework/NamespaceRoot.ProductName.Framework.FeatureFlags/**",
             "src/framework/NamespaceRoot.ProductName.Framework.FeatureFlags.Tests/**",
-            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Secrets/FeatureFlagsStoreOutageTests.cs"
+            "src/capabilities/NamespaceRoot.ProductName.Capabilities.Security/NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests/Configuration/FeatureFlagsStoreOutageTests.cs"
           ]
         },
         {

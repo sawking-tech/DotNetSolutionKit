@@ -18,12 +18,12 @@ namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
 /// secrets of its own needs no secret created for it. A refusal or an unreachable Vault is a
 /// <see cref="ConfigurationException"/>, which the configuration provider answers with a refusal to start.
 /// </remarks>
-public sealed class VaultSecretStore : ISecretStore
+public sealed class VaultConfigurationStore : IConfigurationStore
 {
     private readonly VaultOptions _options;
     private readonly Lazy<IVaultClient> _client;
 
-    public VaultSecretStore(VaultOptions options)
+    public VaultConfigurationStore(VaultOptions options)
     {
         _options = options;
         _client = new Lazy<IVaultClient>(() => new VaultClient(new VaultClientSettings(options.Address, SignIn(options))));

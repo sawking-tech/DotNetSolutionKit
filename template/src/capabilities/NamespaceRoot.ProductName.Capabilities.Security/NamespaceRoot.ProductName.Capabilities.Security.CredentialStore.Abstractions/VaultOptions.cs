@@ -1,13 +1,13 @@
 namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions;
 
 /// <summary>
-/// HashiCorp Vault as the secret store: the <c>Vault</c> section.
+/// HashiCorp Vault as the configuration store: the <c>Vault</c> section.
 /// </summary>
 /// <remarks>
-/// The secrets are key-value secrets of a KV version 2 engine: the shared one and the service's own, each
+/// The values are key-value pairs of a KV version 2 engine: the shared one and the service's own, each
 /// a set of keys. A service signs in with a token or with an AppRole; both come from the environment.
 /// </remarks>
-public sealed class VaultOptions : SecretStoreOptions
+public sealed class VaultOptions : ConfigurationStoreOptions
 {
     public const string SectionName = "Vault";
 
@@ -17,7 +17,7 @@ public sealed class VaultOptions : SecretStoreOptions
     public string Address { get; set; } = string.Empty;
 
     /// <summary>
-    /// The mount of the KV version 2 engine holding the secrets.
+    /// The mount of the KV version 2 engine holding the values.
     /// </summary>
     public string Mount { get; set; } = "secret";
 
