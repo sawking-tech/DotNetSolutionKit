@@ -1,6 +1,6 @@
 # API diff
 
-Generated with `--DiffApi`, off by default. Pass it with `--Solution`, and to each service generated later.
+Generated with `--diff-api`, off by default. Pass it with `--solution`, and to each service generated later.
 
 On every pull request, CI generates the OpenAPI document of each service twice: from the pull request's
 branch and from the branch it targets (usually `main`). [oasdiff](https://github.com/oasdiff/oasdiff)

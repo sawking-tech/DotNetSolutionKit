@@ -1,6 +1,6 @@
 # Object storage
 
-`--Storage` adds a project `Capabilities.Persistence.S3` to `src/capabilities` with S3-compatible object
+`--storage` adds a project `Capabilities.Persistence.S3` to `src/capabilities` with S3-compatible object
 storage and registers it in the service: files a service keeps outside its database, such as
 documents, images, generated PDFs.
 
@@ -34,7 +34,7 @@ waiting for the SDK's defaults of minutes.
 
 ## Under docker compose
 
-With `--Deploy compose`, the infrastructure gets [SeaweedFS](https://github.com/seaweedfs/seaweedfs)
+With `--deploy compose`, the infrastructure gets [SeaweedFS](https://github.com/seaweedfs/seaweedfs)
 (Apache 2.0) as the S3 server, and a one-off container that creates the bucket before the services
 start. MinIO, the usual choice, no longer publishes images. The credentials and the bucket come from
 `deploy/compose/.env`: `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`.

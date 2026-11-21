@@ -43,15 +43,15 @@ commit.
 dotnet tool install -g SawKing.DotsKit.Tool
 
 dotskit new -N MyCompany -P MyProduct -S Orders   # in an empty folder: the solution and its first service
-dotskit new -S Billing --Storage true             # in the solution: one more service
-dotskit new -S Orders --MongoDB true              # in the solution: a flag for a service it has
+dotskit new -S Billing --storage true             # in the solution: one more service
+dotskit new -S Orders --mongodb true              # in the solution: a flag for a service it has
 dotskit init                                      # in a solution made without dotskit: describe it in its manifest
 dotskit upgrade                                   # in the solution: bring it to the tool's version of the template
 dotskit upgrade --to 2.3.0                        # in the solution: to an earlier release, a step at a time
 ```
 
 A service added by `dotskit new` uses the solution's Infisical or Vault configuration without repeating its
-flag. Capabilities of one service, such as `--Storage`, stay specific to that service. A newly added flag brings
+flag. Capabilities of one service, such as `--storage`, stay specific to that service. A newly added flag brings
 the dependency versions its code needs.
 
 A solution of an earlier 2.x version is brought to the current one by `dotskit upgrade`: git keeps the team's
@@ -65,7 +65,7 @@ to 2.0.0 by hand first ([upgrading](docs/getting-started/upgrading.md)).
 dotnet new install SawKing.DotNetSolutionKit
 
 # the shared Common projects, the solution file and the first service
-dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
+dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --solution
 
 # every further service; dotskit is the template's second short name
 dotnet new dotskit -N MyCompany -P MyProduct -S Billing
@@ -90,29 +90,29 @@ shows their files and how their CI ran.
 
 | Parameter | Default | What it does |
 |---|---|---|
-| `-N`, `--NamespaceRoot` | `MyCompany` | Organization name, the root namespace. May be dotted. |
-| `-P`, `--ProductName` | `Product` | Product name. May be dotted. |
-| `-S`, `--ServiceNameOrCustom` | `Service` | Service name. May be dotted. |
-| `--Solution` | `false` | Generates the solution: `Common`, `All.sln` and the root files, with the first service. Without it, only the service folder, into a solution already there. |
-| `--Database` | `postgres` | [Database](docs/architecture/persistence.md#sql-server): `postgres` or `mssql` (SQL Server). |
-| `-H`, `--Hangfire` | `true` | [Background jobs](docs/features/background-jobs.md) on Hangfire. |
-| `--Messaging` | `none` | [Message bus](docs/features/messaging.md): `rabbitmq:outbox` or `rabbitmq:direct`. |
-| `-I`, `--Infisical` | `false` | [Secrets and settings from Infisical](docs/features/secrets.md). |
-| `--Vault` | `false` | [Secrets and settings from HashiCorp Vault](docs/features/secrets.md#hashicorp-vault). |
-| `--DiffApi` | `false` | [API contract diff](docs/features/api-diff.md) on pull requests. |
-| `--GitHubCiCd` | `false` | [CI on GitHub Actions](docs/features/ci.md): build, tests on real servers, coverage on demand, secret scan. |
-| `-FF`, `--FeatureFlags` | `false` | [Feature flags](docs/features/feature-flags.md). |
-| `--HierarchyRules` | `false` | [Access rules over a tenant tree](docs/features/hierarchy-rules.md). |
-| `--Storage` | `false` | [Object storage](docs/features/object-storage.md), S3-compatible. |
-| `-CH`, `--ClickHouse` | `false` | [ClickHouse](docs/features/clickhouse.md): connections, schema check, readiness. |
-| `--MongoDB` | `false` | [MongoDB](docs/features/mongodb.md) beside the main database: the client, the service's database, readiness. |
-| `--Notify` | none | Channels of [notifications](docs/features/notifications.md): `email` - through SMTP or Graph API, with a sandbox outside Production; with `--Messaging` other services ask for it by a bus command. |
-| `--TestFramework` | `nunit` | Test framework of the service's tests: `nunit` or `xunit` (v3). |
-| `--Audit` | `false` | [Audit journal](docs/features/audit.md) of entity changes, through the outbox; with `--Messaging rabbitmq:outbox`. |
-| `--ApiGateway` | `false` | An [API gateway](docs/features/api-gateway.md) on YARP in place of a service, into a solution already there (without `--Solution`). |
-| `--Deploy` | `compose` | [Deployment files](docs/operations/deployment.md): `compose`, `k8s` or `none`. |
-| `--Agent` | `claude` | [Rules and skills for an AI agent](docs/getting-started/agents.md): `claude`, `opencode` or `none`. |
-| `--HttpPort` | free port | Port in `launchSettings.json` and on the host under compose. |
+| `-N`, `--namespace-root` | `MyCompany` | Organization name, the root namespace. May be dotted. |
+| `-P`, `--product-name` | `Product` | Product name. May be dotted. |
+| `-S`, `--service` | `Service` | Service name. May be dotted. |
+| `--solution` | `false` | Generates the solution: `Common`, `All.sln` and the root files, with the first service. Without it, only the service folder, into a solution already there. |
+| `--database` | `postgres` | [Database](docs/architecture/persistence.md#sql-server): `postgres` or `mssql` (SQL Server). |
+| `-H`, `--hangfire` | `true` | [Background jobs](docs/features/background-jobs.md) on Hangfire. |
+| `--messaging` | `none` | [Message bus](docs/features/messaging.md): `rabbitmq:outbox` or `rabbitmq:direct`. |
+| `-I`, `--infisical` | `false` | [Secrets and settings from Infisical](docs/features/secrets.md). |
+| `--vault` | `false` | [Secrets and settings from HashiCorp Vault](docs/features/secrets.md#hashicorp-vault). |
+| `--diff-api` | `false` | [API contract diff](docs/features/api-diff.md) on pull requests. |
+| `--github-cicd` | `false` | [CI on GitHub Actions](docs/features/ci.md): build, tests on real servers, coverage on demand, secret scan. |
+| `-FF`, `--feature-flags` | `false` | [Feature flags](docs/features/feature-flags.md). |
+| `--hierarchy-rules` | `false` | [Access rules over a tenant tree](docs/features/hierarchy-rules.md). |
+| `--storage` | `false` | [Object storage](docs/features/object-storage.md), S3-compatible. |
+| `-CH`, `--clickhouse` | `false` | [ClickHouse](docs/features/clickhouse.md): connections, schema check, readiness. |
+| `--mongodb` | `false` | [MongoDB](docs/features/mongodb.md) beside the main database: the client, the service's database, readiness. |
+| `--notify` | none | Channels of [notifications](docs/features/notifications.md): `email` - through SMTP or Graph API, with a sandbox outside Production; with `--messaging` other services ask for it by a bus command. |
+| `--test-framework` | `nunit` | Test framework of the service's tests: `nunit` or `xunit` (v3). |
+| `--audit` | `false` | [Audit journal](docs/features/audit.md) of entity changes, through the outbox; with `--messaging rabbitmq:outbox`. |
+| `--api-gateway` | `false` | An [API gateway](docs/features/api-gateway.md) on YARP in place of a service, into a solution already there (without `--solution`). |
+| `--deploy` | `compose` | [Deployment files](docs/operations/deployment.md): `compose`, `k8s` or `none`. |
+| `--agent` | `claude` | [Rules and skills for an AI agent](docs/getting-started/agents.md): `claude`, `opencode` or `none`. |
+| `--http-port` | free port | Port in `launchSettings.json` and on the host under compose. |
 
 Details, dotted names and running locally:
 [generating a solution](docs/getting-started/template.md).

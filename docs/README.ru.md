@@ -78,24 +78,24 @@ mindmap
 
 ## Возможности
 
-- [Фоновые задачи](features/background-jobs.md): Hangfire, `--Hangfire`
-- [Шина сообщений](features/messaging.md): MassTransit, `--Messaging`
-- [Секреты из Infisical или Vault](features/secrets.md): `-I`, `--Vault`
-- [Фича-флаги](features/feature-flags.md): `--FeatureFlags`
-- [Сравнение API](features/api-diff.md): `--DiffApi`
-- [CI на GitHub Actions](features/ci.md): `--GitHubCiCd`
-- [Правила доступа по дереву тенантов](features/hierarchy-rules.md): `--HierarchyRules`
-- [Объектное хранилище](features/object-storage.md): совместимое с S3, `--Storage`
-- [ClickHouse](features/clickhouse.md): `--ClickHouse`
-- [MongoDB](features/mongodb.md): `--MongoDB`
-- [Уведомления](features/notifications.md): почта, `--Notify`
-- [Журнал аудита](features/audit.md): `--Audit`, вместе с `--Messaging rabbitmq:outbox`
-- [API-шлюз](features/api-gateway.md): YARP, `--ApiGateway`
+- [Фоновые задачи](features/background-jobs.md): Hangfire, `--hangfire`
+- [Шина сообщений](features/messaging.md): MassTransit, `--messaging`
+- [Секреты из Infisical или Vault](features/secrets.md): `-I`, `--vault`
+- [Фича-флаги](features/feature-flags.md): `--feature-flags`
+- [Сравнение API](features/api-diff.md): `--diff-api`
+- [CI на GitHub Actions](features/ci.md): `--github-cicd`
+- [Правила доступа по дереву тенантов](features/hierarchy-rules.md): `--hierarchy-rules`
+- [Объектное хранилище](features/object-storage.md): совместимое с S3, `--storage`
+- [ClickHouse](features/clickhouse.md): `--clickhouse`
+- [MongoDB](features/mongodb.md): `--mongodb`
+- [Уведомления](features/notifications.md): почта, `--notify`
+- [Журнал аудита](features/audit.md): `--audit`, вместе с `--messaging rabbitmq:outbox`
+- [API-шлюз](features/api-gateway.md): YARP, `--api-gateway`
 
 ## Эксплуатация
 
 - [Docker](operations/docker.md): один Dockerfile, пересобираются только изменённые сервисы
-- [Развёртывание](operations/deployment.md): docker compose или Kubernetes, `--Deploy`
+- [Развёртывание](operations/deployment.md): docker compose или Kubernetes, `--deploy`
 - [Здоровье](operations/health.md): `/health` и `/ready`
 - [Проверки при старте](operations/startup-checks.md)
 - [Отключение зависимостей](operations/switching-dependencies-off.md): запуск без базы данных, фоновых

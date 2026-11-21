@@ -1,7 +1,7 @@
 # CI на GitHub Actions
 
-Генерируется с `--GitHubCiCd`, по умолчанию выключено: у каждой команды свой CI, а эти workflow работают
-только на GitHub. Флаг передаётся с `--Solution`; workflow покрывают все сервисы в `All.sln`, поэтому
+Генерируется с `--github-cicd`, по умолчанию выключено: у каждой команды свой CI, а эти workflow работают
+только на GitHub. Флаг передаётся с `--solution`; workflow покрывают все сервисы в `All.sln`, поэтому
 следующему сервису ничего больше не нужно.
 
 ## `.github/workflows/ci.yml`
@@ -13,8 +13,8 @@
 2. Собирает `All.sln` в Release.
 3. Запускает юнит-тесты: всё вне категории `TestCategory=Integration` (`[Integration]` в сервисе, `[Category(TestCategories.Integration)]` в `Common`).
 4. Запускает интеграционные тесты на реальных серверах, которые поднимает в джобе `tests/servers/up.sh` -
-   те же скрипты, что запускает разработчик: PostgreSQL или SQL Server всегда, ClickHouse с `--ClickHouse`,
-   MongoDB с `--MongoDB`, MailHog с `--Notify email`, SeaweedFS с `--Storage`, Vault с `--Vault`. Серверы
+   те же скрипты, что запускает разработчик: PostgreSQL или SQL Server всегда, ClickHouse с `--clickhouse`,
+   MongoDB с `--mongodb`, MailHog с `--notify email`, SeaweedFS с `--storage`, Vault с `--vault`. Серверы
    стартуют до сборки, а их готовности джоб ждёт перед интеграционными тестами. PostgreSQL держит данные на
    ramdisk с выключенной надёжностью записи; это безопасно только потому, что данные умирают вместе с
    джобом. См. [тестирование](../architecture/testing.md).

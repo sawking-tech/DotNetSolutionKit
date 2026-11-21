@@ -102,7 +102,7 @@ The in-memory provider is not a database. These are tested against PostgreSQL, a
 - concurrency tokens.
 
 The server comes from the `TEST_POSTGRES` environment variable (`TEST_SQLSERVER` with
-`--Database mssql`), which a build agent sets; without it the test is skipped with that reason, so a
+`--database mssql`), which a build agent sets; without it the test is skipped with that reason, so a
 plain `dotnet test` needs no database. Each test gets a database of its own on that server, cloned from
 one migrated once per run.
 

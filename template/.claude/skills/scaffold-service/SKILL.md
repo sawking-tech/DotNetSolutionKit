@@ -33,7 +33,7 @@ and builds the solution:
 
 ```bash
 dotskit new -S <ServiceName> [flags]           # a new service
-dotskit new -S <ExistingService> --MongoDB true  # a flag for a service the solution has
+dotskit new -S <ExistingService> --mongodb true  # a flag for a service the solution has
 ```
 
 It shows every file it will change and asks before writing. An agent's shell has no one to answer: run the
@@ -50,25 +50,25 @@ Some flags hold one value for the whole solution and must be passed again, uncha
 
 | Flag | Rule |
 |------|------|
-| `--Database` | `postgres` or `mssql`: the value the solution was generated with |
-| `--Deploy` | `compose`, `k8s` or `none`: the same value |
+| `--database` | `postgres` or `mssql`: the value the solution was generated with |
+| `--deploy` | `compose`, `k8s` or `none`: the same value |
 
-Others add files to `Common` or a project to `src/capabilities` (`--MongoDB`, `--ClickHouse`,
-`--Notify`), and were chosen when the shared code was generated. A service that should use
-them passes them again: `-I`, `--Vault`, `--DiffApi`, `--FeatureFlags`, `--Storage`, `--ClickHouse`,
-`--MongoDB`, `--Notify`, `--Audit`. A service generated without them leaves them out. Pass only the flags whose part the solution
-already has, in `src/common` or `src/capabilities`. With `--Messaging`, `--Notify email` also gives the service the consumer of `SendEmailCommandV1`;
+Others add files to `Common` or a project to `src/capabilities` (`--mongodb`, `--clickhouse`,
+`--notify`), and were chosen when the shared code was generated. A service that should use
+them passes them again: `-I`, `--vault`, `--diff-api`, `--feature-flags`, `--storage`, `--clickhouse`,
+`--mongodb`, `--notify`, `--audit`. A service generated without them leaves them out. Pass only the flags whose part the solution
+already has, in `src/common` or `src/capabilities`. With `--messaging`, `--notify email` also gives the service the consumer of `SendEmailCommandV1`;
 keep it in the one service that owns notifications.
 
-Per service, freely: `-H` (Hangfire), `--Messaging` (`none`, `rabbitmq:outbox`, `rabbitmq:direct`), `--TestFramework`
-(`nunit`, `xunit`), `--HttpPort`.
+Per service, freely: `-H` (Hangfire), `--messaging` (`none`, `rabbitmq:outbox`, `rabbitmq:direct`), `--test-framework`
+(`nunit`, `xunit`), `--http-port`.
 
 Read what the solution has before choosing:
 
 ```bash
-ls src/capabilities                                                   # Capabilities.Messaging.Notifications -> --Notify email; Capabilities.Persistence.Mongo -> --MongoDB; Capabilities.Analytics.ClickHouse -> --ClickHouse; Capabilities.Security.CredentialStore -> --Infisical or --Vault
+ls src/capabilities                                                   # Capabilities.Messaging.Notifications -> --notify email; Capabilities.Persistence.Mongo -> --mongodb; Capabilities.Analytics.ClickHouse -> --clickhouse; Capabilities.Security.CredentialStore -> --infisical or --vault
 ls src/common/NamespaceRoot.ProductName.Common.Infrastructure        # Persistence/SqlServer -> mssql; Storage
-ls src/common/NamespaceRoot.ProductName.Common.Web/FeatureManagement  # present -> --FeatureFlags
+ls src/common/NamespaceRoot.ProductName.Common.Web/FeatureManagement  # present -> --feature-flags
 ls deploy                                                             # compose or k8s
 ```
 
@@ -77,13 +77,13 @@ All parameters: [generating a solution](https://dotskit.sawking.tech/docs.html#g
 ## Step 2 - Generate
 
 ```bash
-# From the repository root; without --Solution the template generates the service folder only, uses the Common already there,
+# From the repository root; without --solution the template generates the service folder only, uses the Common already there,
 # and adds the service's projects to All.sln (--allow-scripts yes runs that without asking)
-dotnet new DotNetSolutionKit -N NamespaceRoot -P ProductName -S <ServiceName> --Database <db> --Deploy <deploy> [flags] --allow-scripts yes
+dotnet new DotNetSolutionKit -N NamespaceRoot -P ProductName -S <ServiceName> --database <db> --deploy <deploy> [flags] --allow-scripts yes
 ```
 
 `-N` and `-P` are this solution's namespace root and product name. An API gateway in place of a service
-is `--ApiGateway true`: [API gateway](https://dotskit.sawking.tech/docs.html#gateway).
+is `--api-gateway true`: [API gateway](https://dotskit.sawking.tech/docs.html#gateway).
 
 ## Step 3 - Package versions
 

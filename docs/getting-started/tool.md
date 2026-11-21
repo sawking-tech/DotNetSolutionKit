@@ -25,10 +25,10 @@ by `dotnet new install` is left as it is.
 dotskit new -N MyCompany -P MyProduct -S Orders
 
 # in the solution: one more service, with the solution's names, database and deployment
-dotskit new -S Billing --Storage true
+dotskit new -S Billing --storage true
 
 # in the solution: a flag for a service it has
-dotskit new -S Orders --MongoDB true
+dotskit new -S Orders --mongodb true
 
 # in a solution made without dotskit: describe it in its manifest
 dotskit init
@@ -38,9 +38,9 @@ dotskit upgrade
 ```
 
 `dotskit new` reads from the folder whether to make a solution or to add to one: it looks for
-`src/services/*.All.sln` in the folder and its parents. `--Solution` is not needed and changes nothing.
+`src/services/*.All.sln` in the folder and its parents. `--solution` is not needed and changes nothing.
 
-The template's parameters are passed as they are, in short or long form, in any case: `-S`, `--Storage`,
+The template's parameters are passed as they are, in short or long form, in any case: `-S`, `--storage`,
 `--storage`, `--api-gateway`. See the [parameters](template.md#parameters).
 
 ## The steps of a command
@@ -187,14 +187,14 @@ checks out a branch: the merge is the team's to look at, commit or undo.
 arguments of the solution and the arguments of each service. Commit it with the solution: every later
 command rebuilds the base from it.
 
-The manifest keeps a port for each service: when `--HttpPort` is not given, a port is picked once and
+The manifest keeps a port for each service: when `--http-port` is not given, a port is picked once and
 written into the manifest, and a service keeps its port when a later command adds a flag to it. The tool
 names the first port from 5000 that no service of the solution has; `dotnet new` alone leaves the pick to
 the template.
 
-A flag with a part in `Common` or the root, such as `--Storage`, becomes the solution's when any of its
-services has it. The solution's names, `--Database`, `--Deploy`, `--TestFramework`, `--Agent` and
-`--GitHubCiCd` are set by the first command. A later command takes them from the manifest; a command that
+A flag with a part in `Common` or the root, such as `--storage`, becomes the solution's when any of its
+services has it. The solution's names, `--database`, `--deploy`, `--test-framework`, `--agent` and
+`--github-cicd` are set by the first command. A later command takes them from the manifest; a command that
 gives one of them another value is refused.
 
 `Infisical` and `Vault` are infrastructure of the whole solution: a service added by `dotskit new` gets the
@@ -204,7 +204,7 @@ solution's configuration store even when the command does not repeat its flag. C
 The template writes the manifest itself when it generates a solution: since 2.9 a solution made by `dotnet new`
 alone carries `.dotskit/manifest.json` from generation, and `dotskit new` and `dotskit upgrade` work from it
 without `dotskit init`. A service generated into the solution afterwards is not in it - the template writes
-the manifest only with `--Solution`; `dotskit init` takes the service in, read from its files.
+the manifest only with `--solution`; `dotskit init` takes the service in, read from its files.
 
 ## What an upgrade leaves alone: `.dotskitignore`
 
@@ -282,7 +282,7 @@ projects. The check installs the template of that version from nuget.org.
 | of an earlier major version than the tool, other than the last release of the previous one | writes nothing, and names the tool of the solution's major |
 | a service of another version than the solution | writes nothing, names the service and its version, and asks for the version to describe the solution by with `--template-version`; with it, the check shows what differs |
 | with a manifest that lists every service | writes nothing: "the manifest is current: 2.8.0, services Orders, Billing" |
-| with a manifest, and a service under `src/services` it does not list | adds the service, read from its files, after the same check - the template writes the manifest only with `--Solution`, so a service generated into the solution arrives like this |
+| with a manifest, and a service under `src/services` it does not list | adds the service, read from its files, after the same check - the template writes the manifest only with `--solution`, so a service generated into the solution arrives like this |
 | services, but no `Common` | writes the manifest without the check and says so: the database and the flags read from `Common` are the template's defaults; `dotskit new` takes `Common` for removed by the team and does not add it back |
 | uncommitted changes in git | runs: it writes only `.dotskit/` |
 

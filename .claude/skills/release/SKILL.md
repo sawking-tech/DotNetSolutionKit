@@ -45,10 +45,10 @@ PR выпуска не принимать, пока не все пункты о�
 - [ ] **tool/README.md**: секция Stay current (роадмап, звезда обоих репо), кросс-ссылка на пакет шаблона. Проверка: `grep -c "Stay current\|star" tool/README.md`.
 - [ ] **README.md**: прямая ссылка на `docs/roadmap.md`, призыв поставить звезду. Проверка: `grep -c "roadmap.md" README.md`.
 - [ ] **index.html**: `<meta name="description">`, og и twitter, JSON-LD и «Что вы получаете» называют то, что выпуск приносит (проверить глазами diff); роадмап и звезда - ссылками. (2.7.0 вышла с описанием «on PostgreSQL» без SQL Server и Vault.)
-- [ ] **Страница пакета**: `Description` и `PackageTags` в `DotNetSolutionKit.Templates.csproj` и в csproj тулзы называют выпуск.
+- [ ] **Страница пакета**: `Description` и `PackageTags` в `DotsKit.Templates.csproj` и в csproj тулзы называют выпуск.
 - [ ] **roadmap.md и roadmap.ru.md**: строка версии переведена в `:done`. Проверка: `grep ":done" docs/roadmap.md docs/roadmap.ru.md` в части этой версии.
 - [ ] **Пакет собран и прочитан изнутри ДО тега**:
-      `rm -rf /c/t/pack-check && dotnet pack DotNetSolutionKit.Templates.csproj -c Release -o /c/t/pack-check`
+      `rm -rf /c/t/pack-check && dotnet pack DotsKit.Templates.csproj -c Release -o /c/t/pack-check`
       - в `.nuspec` `<releaseNotes>` - текст заметок, не ссылка;
       - README внутри nupkg - новый (`unzip -p /c/t/pack-check/SawKing.DotNetSolutionKit.X.Y.0.nupkg README.md | grep -c "Stay current|strongly recommended"`);
       - версия в примере установки внутри nupkg == выпуск (`... | grep "::X.Y.0"`).

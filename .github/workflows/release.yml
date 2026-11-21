@@ -165,7 +165,7 @@ jobs:
           PUBLISH: ${{ steps.what.outputs.publish }}
         run: |
           bash scripts/release-notes.sh "${TAG#v}" plain > "$RUNNER_TEMP/release-notes.txt"
-          dotnet pack DotNetSolutionKit.Templates.csproj --configuration Release -o package \
+          dotnet pack DotsKit.Templates.csproj --configuration Release -o package \
             -p:ReleaseNotesFile="$RUNNER_TEMP/release-notes.txt"
           dotnet pack tool/DotsKit --configuration Release -o package \
             -p:ReleaseNotesFile="$RUNNER_TEMP/release-notes.txt"
@@ -181,7 +181,7 @@ jobs:
         env:
           NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
         run: |
-          for package in package/SawKing.DotsKit.Tool.*.nupkg package/SawKing.DotNetSolutionKit.*.nupkg; do
+          for package in package/SawKing.DotsKit.Tool.*.nupkg package/SawKing.DotsKit.Templates.*.nupkg; do
             dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
           done
 

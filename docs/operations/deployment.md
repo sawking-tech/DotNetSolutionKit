@@ -1,6 +1,6 @@
 # Deployment
 
-`--Deploy` chooses the deployment files a solution is generated with:
+`--deploy` chooses the deployment files a solution is generated with:
 
 | Value | What is generated |
 |---|---|
@@ -22,7 +22,7 @@ What runs where, with a gateway; without one, the proxy talks to the services:
 ```mermaid
 flowchart LR
     U([client]) --> PX[TLS proxy]
-    PX --> GW["gateway<br/>with --ApiGateway"]
+    PX --> GW["gateway<br/>with --api-gateway"]
     GW --> S1[service]
     GW --> S2[service]
     S1 --> PG[(PostgreSQL<br/>a schema per service)]
@@ -143,5 +143,5 @@ current `kubectl` context; further arguments go to `kubectl apply` (`--namespace
 ## Checked
 
 Both were run end to end on a generated solution: compose with two services, one generated later without
-`--Solution`, each answering `/ready` with its own commit; Kubernetes on k3s with four replicas of a service
+`--solution`, each answering `/ready` with its own commit; Kubernetes on k3s with four replicas of a service
 with a dotted name on a fresh database, all ready without a restart.

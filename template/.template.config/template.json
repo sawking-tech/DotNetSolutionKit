@@ -6,7 +6,7 @@
     "language": "C#",
     "type": "solution"
   },
-  "identity": "SawKing.DotNetSolutionKit",
+  "identity": "SawKing.DotsKit.Templates",
   "name": "DotNet Solution Kit",
   "description": "Microservices on .NET 8 and PostgreSQL: shared Common libraries and services split into domain, application, infrastructure and API projects; the message bus, secrets, feature flags, object storage, ClickHouse, MongoDB, email, a gateway, deployment files and CI by flags. Documentation: https://dotskit.sawking.tech/",
   "shortName": ["DotNetSolutionKit", "dotskit"],
@@ -472,7 +472,7 @@
       "generator": "constant",
       "parameters": { "value": "source" },
       "replaces": "DOTNETSOLUTIONKIT_TEMPLATE_VERSION",
-      "description": "The template's version, written into the packed copy of this file by DotNetSolutionKit.Templates.csproj; source when the template is installed from its sources"
+      "description": "The template's version, written into the packed copy of this file by DotsKit.Templates.csproj; source when the template is installed from its sources"
     },
     "Solution": {
       "type": "parameter",

@@ -9,7 +9,7 @@
 dotnet tool install -g SawKing.DotsKit.Tool
 
 dotskit new -N MyCompany -P MyProduct -S Orders   # в пустой папке: решение и первый сервис
-dotskit new -S Billing --Storage true             # в решении: ещё один сервис
+dotskit new -S Billing --storage true             # в решении: ещё один сервис
 dotskit upgrade                                   # в решении: привести его к версии шаблона, которой соответствует инструмент
 ```
 

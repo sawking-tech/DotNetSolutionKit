@@ -1,7 +1,7 @@
 # Secrets from Infisical or Vault
 
-Generated with `-I` for [Infisical](https://infisical.com) or `--Vault` for [HashiCorp Vault](https://www.vaultproject.io),
-off by default. Pass the flag with `--Solution`, and to each service generated later that reads secrets.
+Generated with `-I` for [Infisical](https://infisical.com) or `--vault` for [HashiCorp Vault](https://www.vaultproject.io),
+off by default. Pass the flag with `--solution`, and to each service generated later that reads secrets.
 What follows holds for both; [Vault](#hashicorp-vault) has its own section for what differs.
 
 The store is the solution's configuration store: the service reads two folders of an Infisical project,
@@ -41,7 +41,7 @@ store solves.
 
 ## HashiCorp Vault
 
-With `--Vault` the two folders are two key-value secrets of a KV version 2 engine: the shared one,
+With `--vault` the two folders are two key-value secrets of a KV version 2 engine: the shared one,
 `shared` by default, and the service's, `orders` or `sales_orders` for `Sales.Orders`. Each key of a
 secret is one setting, named as above.
 
@@ -114,6 +114,6 @@ outside `Local` it does not start.
 ## Tests
 
 The capability's own tests cover the order of the folders and the optional and required store, with the store
-replaced by a stub. With `--Vault`, the same rules are checked through the `Vault`
+replaced by a stub. With `--vault`, the same rules are checked through the `Vault`
 section, and the Vault store itself against a real Vault in development mode (`TEST_VAULT`) in the
 integration tests of the template's CI and of a generated solution's.

@@ -87,7 +87,7 @@ The release is then one pull request from `dev` into `master`.
 Merged into `master`, it makes [release.yml](.github/workflows/release.yml) tag `v<version>`, wait for
 `template.yml` on that commit and publish: the GitHub release with the version's notes
 (`scripts/release-notes.sh <version>` prints the same text), the package
-`DotNetSolutionKit.Templates.csproj` packs, on nuget.org as `SawKing.DotNetSolutionKit`, and the tool
+`DotsKit.Templates.csproj` packs, on nuget.org as `SawKing.DotNetSolutionKit`, and the tool
 `dotskit` of the same version, packed from `tool/DotsKit` as `SawKing.DotsKit.Tool`; both are attached to the
 release and published on nuget.org, the tool first, and in GitHub Packages. nuget.org takes them by
 Trusted Publishing, with no stored key: the policy of the profile `sawking.tech` names this repository and

@@ -9,7 +9,7 @@ template.
 dotnet tool install -g SawKing.DotsKit.Tool
 
 dotskit new -N MyCompany -P MyProduct -S Orders   # in an empty folder: the solution and its first service
-dotskit new -S Billing --Storage true             # in the solution: one more service
+dotskit new -S Billing --storage true             # in the solution: one more service
 dotskit upgrade                                   # in the solution: bring it to the tool's version of the template
 ```
 

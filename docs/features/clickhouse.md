@@ -1,6 +1,6 @@
 # ClickHouse
 
-`--ClickHouse` adds a project `Capabilities.Analytics.ClickHouse` to `src/capabilities` with what every service that
+`--clickhouse` adds a project `Capabilities.Analytics.ClickHouse` to `src/capabilities` with what every service that
 reads or writes ClickHouse needs, and registers it in the service. The queries stay in the service: a reader or writer is a class of the service's
 infrastructure behind a port of its application layer.
 

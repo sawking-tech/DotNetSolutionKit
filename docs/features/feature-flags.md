@@ -1,6 +1,6 @@
 # Feature flags
 
-Generated with `--FeatureFlags`, off by default. Pass it with `--Solution`, and to each service generated
+Generated with `--feature-flags`, off by default. Pass it with `--solution`, and to each service generated
 later that reads the flags.
 
 A flag answers one question: *is this behaviour on right now?* The answer is kept as data. It ships in
@@ -147,7 +147,7 @@ constant at all.
 ## Changing a value
 
 A flag is switched by editing the configuration it comes from: `features.json` on disk, or the value in
-the configuration store (`-I` or `--Vault`). Services re-read it, so the change applies without a restart. In a
+the configuration store (`-I` or `--vault`). Services re-read it, so the change applies without a restart. In a
 container `features.json` is part of the image, so changing it there means a new image and a deployment. The
 platform has no write endpoint: a service that wrote flags would need write access to the store it
 reads.
@@ -200,7 +200,7 @@ so a parallel run has nothing shared to race over and nothing left behind for th
 Two guard tests check that every constant in `FeatureKeys` names a flag that exists,
 and every declared key keeps the agreed shape.
 
-With a configuration store (`-I` or `--Vault`), `FeatureFlagsStoreOutageTests` in `CredentialStore.Tests` runs the layers
+With a configuration store (`-I` or `--vault`), `FeatureFlagsStoreOutageTests` in `CredentialStore.Tests` runs the layers
 above end to end on the store's real configuration provider, with only the store faked: a flag set in the
 store decides, a change applies on the next read, a store that goes down leaves the flags as they were, a
 pinned flag keeps the file's value over the store, and a start with the store down does not happen.

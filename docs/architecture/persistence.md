@@ -1,6 +1,6 @@
 # Persistence
 
-EF Core on PostgreSQL, or on SQL Server with `--Database mssql`. Each service has its own `DbContext` and
+EF Core on PostgreSQL, or on SQL Server with `--database mssql`. Each service has its own `DbContext` and
 its own database schema, named after the service (`orders`, or `sales_orders` for `Sales.Orders`);
 Hangfire gets a second schema next to it (`orders_hangfire`).
 
@@ -135,7 +135,7 @@ services.AddIdempotency<OrdersDbContext>();
 
 ## SQL Server
 
-`--Database mssql` generates the solution on SQL Server. Each piece above has a SQL Server implementation
+`--database mssql` generates the solution on SQL Server. Each piece above has a SQL Server implementation
 behind the same seam, and only one of the two goes into a generated solution:
 
 | Piece | PostgreSQL | SQL Server |

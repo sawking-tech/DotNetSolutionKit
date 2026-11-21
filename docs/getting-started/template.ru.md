@@ -20,10 +20,10 @@ dotnet new install /path/to/DotNetSolutionKit/template --force
 ## Генерация
 
 Первый запуск генерирует общие проекты `Common`, корневой файл решения и первый сервис.
-Для него передайте `--Solution`:
+Для него передайте `--solution`:
 
 ```bash
-dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --Solution
+dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --solution
 ```
 
 Запуск также пишет `.dotskit/manifest.json` - из чего сгенерировано решение: [инструмент](tool.ru.md#манифест)
@@ -43,7 +43,7 @@ dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 [`dotskit new`](tool.md); шаблон без тулзы пишет только папку сервиса. База данных, способ развёртывания и
 имена передаются заново такими, какие они у решения.
 
-Сервис, сгенерированный без `--Solution`, не трогает корневой `src/Directory.Packages.props`. В решении, сгенерированном этой версией
+Сервис, сгенерированный без `--solution`, не трогает корневой `src/Directory.Packages.props`. В решении, сгенерированном этой версией
 шаблона, там уже есть все версии, нужные сервису; флаг, чьи версии лежат в
 [`src/package-versions/`](../../template/src/package-versions), приносит свой файл через `dotskit new`. В
 более старом решении сборка останавливается с `NU1010` и называет пакеты без версии; скопируйте их строки
@@ -55,33 +55,33 @@ dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 
 | Параметр | По умолчанию | Что делает |
 |---|---|---|
-| `-N`, `--NamespaceRoot` | `MyCompany` | Название организации, корневое пространство имён. Может содержать точки. |
-| `-P`, `--ProductName` | `Product` | Название продукта. Может содержать точки. |
-| `-S`, `--ServiceNameOrCustom` | `Service` | Название сервиса. Может содержать точки. |
-| `--Solution` | `false` | Генерирует решение: проекты `Common`, `All.sln` и корневые файлы вместе с первым сервисом. Без него - только папка сервиса, в уже существующее решение. `-M false` прежних версий по-прежнему означает то же. |
-| `--Database` | `postgres` | [СУБД](../architecture/persistence.ru.md#sql-server): `postgres` или `mssql` (SQL Server). Одно значение на решение: передайте его с `--Solution` и каждому сервису. |
-| `-H`, `--Hangfire` | `true` | [Фоновые задачи](../features/background-jobs.md) на Hangfire. Задаётся для каждого сервиса, в том числе без `--Solution`. |
-| `--Messaging` | `none` | [Шина сообщений](../features/messaging.md): `rabbitmq:outbox` или `rabbitmq:direct`. Задаётся для каждого сервиса. |
-| `-I`, `--Infisical` | `false` | [Секреты из Infisical](../features/secrets.md). |
-| `--Vault` | `false` | [Секреты из HashiCorp Vault](../features/secrets.ru.md#hashicorp-vault). |
-| `--DiffApi` | `false` | [Сравнение контракта API](../features/api-diff.md) в pull request. |
-| `--GitHubCiCd` | `false` | [CI на GitHub Actions](../features/ci.md): сборка, тесты на настоящих серверах, покрытие по запросу, поиск секретов. С `--Solution`: workflow покрывают все сервисы в `All.sln`. |
-| `-FF`, `--FeatureFlags` | `false` | [Фича-флаги](../features/feature-flags.md). |
-| `--HierarchyRules` | `false` | [Правила доступа по дереву тенантов](../features/hierarchy-rules.md). |
-| `--Storage` | `false` | [Объектное хранилище](../features/object-storage.md), совместимое с S3. |
-| `-CH`, `--ClickHouse` | `false` | [ClickHouse](../features/clickhouse.md): подключения, проверка схемы, готовность. |
-| `--MongoDB` | `false` | [MongoDB](../features/mongodb.md) рядом с основной базой: клиент, база сервиса, готовность. |
-| `--Notify` | нет | Каналы [уведомлений](../features/notifications.md): `email` - через SMTP или Graph API, с песочницей вне Production; с `--Messaging` другие сервисы просят письмо командой шины. |
-| `--TestFramework` | `nunit` | Тестовый фреймворк для тестов сервиса, `nunit` или `xunit` (v3); задаётся для каждого сервиса. Собственные тесты `Common` остаются на NUnit. См. [тестирование](../architecture/testing.md). |
-| `--Audit` | `false` | [Журнал аудита](../features/audit.md) изменений сущностей; действует только с `--Messaging rabbitmq:outbox`; без него генерация сообщает, что флаг не применён. |
-| `--ApiGateway` | `false` | [API-шлюз](../features/api-gateway.md) на YARP вместо сервиса. Только без `--Solution`; с ним генерация сообщает, что флаг не применён. |
-| `--Deploy` | `compose` | [Файлы развёртывания](../operations/deployment.md): `compose`, `k8s` или `none`. Одно значение на решение: передавайте то же самое каждому следующему сервису. |
-| `--Agent` | `claude` | [Правила и скиллы для ИИ-агента](agents.md): `claude`, `opencode` или `none`. С `--Solution`. |
-| `--HttpPort` | свободный порт | Порт в `launchSettings.json` и на хосте под compose. Без параметра берётся свободный порт из диапазона 5000-5999 на машине, где идёт генерация, поэтому сервисы, сгенерированные один за другим, не получают один и тот же порт. |
+| `-N`, `--namespace-root` | `MyCompany` | Название организации, корневое пространство имён. Может содержать точки. |
+| `-P`, `--product-name` | `Product` | Название продукта. Может содержать точки. |
+| `-S`, `--service` | `Service` | Название сервиса. Может содержать точки. |
+| `--solution` | `false` | Генерирует решение: проекты `Common`, `All.sln` и корневые файлы вместе с первым сервисом. Без него - только папка сервиса, в уже существующее решение. `-M false` прежних версий по-прежнему означает то же. |
+| `--database` | `postgres` | [СУБД](../architecture/persistence.ru.md#sql-server): `postgres` или `mssql` (SQL Server). Одно значение на решение: передайте его с `--solution` и каждому сервису. |
+| `-H`, `--hangfire` | `true` | [Фоновые задачи](../features/background-jobs.md) на Hangfire. Задаётся для каждого сервиса, в том числе без `--solution`. |
+| `--messaging` | `none` | [Шина сообщений](../features/messaging.md): `rabbitmq:outbox` или `rabbitmq:direct`. Задаётся для каждого сервиса. |
+| `-I`, `--infisical` | `false` | [Секреты из Infisical](../features/secrets.md). |
+| `--vault` | `false` | [Секреты из HashiCorp Vault](../features/secrets.ru.md#hashicorp-vault). |
+| `--diff-api` | `false` | [Сравнение контракта API](../features/api-diff.md) в pull request. |
+| `--github-cicd` | `false` | [CI на GitHub Actions](../features/ci.md): сборка, тесты на настоящих серверах, покрытие по запросу, поиск секретов. С `--solution`: workflow покрывают все сервисы в `All.sln`. |
+| `-FF`, `--feature-flags` | `false` | [Фича-флаги](../features/feature-flags.md). |
+| `--hierarchy-rules` | `false` | [Правила доступа по дереву тенантов](../features/hierarchy-rules.md). |
+| `--storage` | `false` | [Объектное хранилище](../features/object-storage.md), совместимое с S3. |
+| `-CH`, `--clickhouse` | `false` | [ClickHouse](../features/clickhouse.md): подключения, проверка схемы, готовность. |
+| `--mongodb` | `false` | [MongoDB](../features/mongodb.md) рядом с основной базой: клиент, база сервиса, готовность. |
+| `--notify` | нет | Каналы [уведомлений](../features/notifications.md): `email` - через SMTP или Graph API, с песочницей вне Production; с `--messaging` другие сервисы просят письмо командой шины. |
+| `--test-framework` | `nunit` | Тестовый фреймворк для тестов сервиса, `nunit` или `xunit` (v3); задаётся для каждого сервиса. Собственные тесты `Common` остаются на NUnit. См. [тестирование](../architecture/testing.md). |
+| `--audit` | `false` | [Журнал аудита](../features/audit.md) изменений сущностей; действует только с `--messaging rabbitmq:outbox`; без него генерация сообщает, что флаг не применён. |
+| `--api-gateway` | `false` | [API-шлюз](../features/api-gateway.md) на YARP вместо сервиса. Только без `--solution`; с ним генерация сообщает, что флаг не применён. |
+| `--deploy` | `compose` | [Файлы развёртывания](../operations/deployment.md): `compose`, `k8s` или `none`. Одно значение на решение: передавайте то же самое каждому следующему сервису. |
+| `--agent` | `claude` | [Правила и скиллы для ИИ-агента](agents.md): `claude`, `opencode` или `none`. С `--solution`. |
+| `--http-port` | свободный порт | Порт в `launchSettings.json` и на хосте под compose. Без параметра берётся свободный порт из диапазона 5000-5999 на машине, где идёт генерация, поэтому сервисы, сгенерированные один за другим, не получают один и тот же порт. |
 
-`-I`, `--Vault`, `--DiffApi`, `--HierarchyRules`, `--Audit` и `--Notify` добавляют файлы в `Common`, а
-`--FeatureFlags` - модуль `Framework.FeatureFlags` в `src/framework`; их выбирают один раз на решение
-с `--Solution`. `--MongoDB`, `--ClickHouse`, `--Storage`, `-H` и `--Messaging` добавляют проект в
+`-I`, `--vault`, `--diff-api`, `--hierarchy-rules`, `--audit` и `--notify` добавляют файлы в `Common`, а
+`--feature-flags` - модуль `Framework.FeatureFlags` в `src/framework`; их выбирают один раз на решение
+с `--solution`. `--mongodb`, `--clickhouse`, `--storage`, `-H` и `--messaging` добавляют проект в
 `src/capabilities`; сервис, которому такой флаг понадобился позже, добавляется через
 [`dotskit new`](tool.md), и тот приносит проект с его файлами. Каждому сервису, которому флаги нужны,
 передайте их ещё раз: они меняют и код сервиса, и сервис подключает то, что уже есть в `Common` и
@@ -92,7 +92,7 @@ dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 Любой из `-N`, `-P` и `-S` может содержать точки:
 
 ```bash
-dotnet new DotNetSolutionKit -N ST.Corp -P Demo.Online -S Sales.Orders --Solution
+dotnet new DotNetSolutionKit -N ST.Corp -P Demo.Online -S Sales.Orders --solution
 ```
 
 Эта команда генерирует `ST.Corp.Demo.Online.Sales.Orders.API` и остальные проекты под тем же именем.
@@ -126,7 +126,7 @@ dotnet ef migrations add Initial \
   -o EntityFramework/Migrations
 ```
 
-Если сервис сгенерирован с `--Messaging rabbitmq:outbox`, миграция создаёт и таблицы outbox. Сервис, запущенный
+Если сервис сгенерирован с `--messaging rabbitmq:outbox`, миграция создаёт и таблицы outbox. Сервис, запущенный
 без миграций, пишет в лог строку уровня fatal с этой командой, а каждый запрос к отсутствующей таблице
 падает.
 
