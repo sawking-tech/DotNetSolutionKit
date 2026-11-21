@@ -98,10 +98,14 @@ internal static partial class PackageVersions
     /// team never touched out of the central file; a package of the team's own, which no output of the template
     /// declares, keeps its line the same way.
     /// </param>
-    public static void KeepReferenced(string tree, string before, string solution)
+    /// <param name="held">
+    /// The paths <c>.dotskitignore</c> holds: the central file of them takes no line, since the upgrade writes no line
+    /// of a held file.
+    /// </param>
+    public static void KeepReferenced(string tree, string before, string solution, IReadOnlySet<string>? held = null)
     {
         var central = FileText.Read(tree, Central);
-        if (central is null)
+        if (central is null || held?.Contains(Central) == true)
         {
             return;
         }

@@ -207,6 +207,26 @@ internal sealed class UpgradePartsTests
         File.ReadAllText(Path.Combine(next, Central)).ShouldBe(asWritten, customMessage: "the file the rules hold keeps the text the template gave it, as the upgrade writes no line of a held file");
     }
 
+    /// <summary>
+    /// A path the rules hold takes no line from the keep either: the upgrade writes no line of a held file, whatever
+    /// the step that would write it.
+    /// </summary>
+    [Test]
+    public void AHeldCentralFile_TakesNoKeptVersion_FromTheKeep()
+    {
+        var before = Folders.NewTemp("keep-held-before");
+        var tree = Folders.NewTemp("keep-held-tree");
+        Put(before, Central, Props(("Polly", "8.0.0")));
+        Put(tree, Central, Props());
+        Put(tree, "src/services/ST.Demo.Orders/ST.Demo.Orders.Application/ST.Demo.Orders.Application.csproj",
+            "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"Polly\" />\n  </ItemGroup>\n</Project>\n");
+        var asWritten = File.ReadAllText(Path.Combine(tree, Central));
+
+        PackageVersions.KeepReferenced(tree, before, tree, held: new HashSet<string> { Central });
+
+        File.ReadAllText(Path.Combine(tree, Central)).ShouldBe(asWritten);
+    }
+
     [Test]
     public void AVersion_IsGivenOnlyTheParametersItHas()
     {
