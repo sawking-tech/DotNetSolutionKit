@@ -188,6 +188,25 @@ internal sealed class UpgradePartsTests
         lines.ShouldContain("Npgslq: pinned on 1.0.0, not among the template's packages");
     }
 
+    /// <summary>
+    /// ADR-009, "Ignoring on upgrade": a path the rules hold is no file the upgrade writes, a version file among them -
+    /// the policy of the solution never runs over a props the team keeps out of the upgrade's reach.
+    /// </summary>
+    [Test]
+    public void AHeldVersionFile_IsNotWritten_AndThePolicyLeavesItAsTheTeamHasIt()
+    {
+        var before = Folders.NewTemp("held-props-before");
+        var next = Folders.NewTemp("held-props-next");
+        Put(before, Central, Props(("Npgsql", "8.0.4")));
+        Put(next, Central, Props(("Npgsql", "8.0.11")));
+        var asWritten = File.ReadAllText(Path.Combine(next, Central));
+
+        PackageVersions.Hold(before, next, new PackagePolicy { Pinned = new() { ["Npgsql"] = "8.0.4" } }, majorUpgrade: false,
+            held: new HashSet<string> { Central });
+
+        File.ReadAllText(Path.Combine(next, Central)).ShouldBe(asWritten, customMessage: "the file the rules hold keeps the text the template gave it, as the upgrade writes no line of a held file");
+    }
+
     [Test]
     public void AVersion_IsGivenOnlyTheParametersItHas()
     {
