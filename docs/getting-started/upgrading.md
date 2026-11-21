@@ -274,8 +274,9 @@ What stays with the team - its own code and its own call:
 Everything else these releases changed - where a file lives, which project references which, how the
 infrastructure is split, how the test servers start - the upgrade brings on its own.
 
-A file of the template the team wants kept out of an upgrade is named in `.dotskitignore` in the solution's
-root, a path a line, with `@2.9`, `@2` or `@major` to pin it and let a later upgrade through. The file needs no
+A file of the template the team wants kept out of an upgrade is named in `.dotskitignore` - in the solution's
+root or in any folder below it, a path a line, with `@2.9`, `@2` or `@major` to pin it and let a later upgrade
+through. A file in a folder acts on the subtree of that folder, in the words of that folder. The file needs no
 command: the upgrade reads it, holds what it names, and brings a pin it spent back to the review. The section
 "what an upgrade leaves alone" of [dotskit](tool.md#what-an-upgrade-leaves-alone-dotskitignore) has the syntax
 and the review.
