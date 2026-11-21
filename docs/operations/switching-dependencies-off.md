@@ -1,6 +1,6 @@
 # Switching dependencies off
 
-A generation flag such as `-H false` or `--Messaging none` leaves a part out of the code for good. A
+A generation flag such as `-H false` or `--messaging none` leaves a part out of the code for good. A
 switch in configuration leaves the code in place and stops using it on this run. A team can generate a
 service with a database and a bus, run it without them while there is nothing to store or send, and
 turn them on later with one setting, without regenerating anything.
@@ -27,14 +27,14 @@ service logs one line at startup naming what is off:
 ```mermaid
 flowchart LR
     DBOFF["Database:Enabled=false"] --> J["HangfireSettings:Enabled=false<br/>jobs are stored in the database"]
-    DBOFF --> O["RabbitMq:Enabled=false<br/>with --Messaging rabbitmq:outbox"]
+    DBOFF --> O["RabbitMq:Enabled=false<br/>with --messaging rabbitmq:outbox"]
     DBOFF --> Q["a query or a write<br/>answers 503"]
     DBOFF --> R["/ready checks no database"]
 ```
 
 The job server stores its jobs in the database, so it goes off with it. So does a bus that delivers
-through the outbox (`--Messaging rabbitmq:outbox`), because the outbox is a table. A bus that sends straight to the
-broker (`--Messaging rabbitmq:direct`) stays on.
+through the outbox (`--messaging rabbitmq:outbox`), because the outbox is a table. A bus that sends straight to the
+broker (`--messaging rabbitmq:direct`) stays on.
 
 The service's `DbContext` stays registered while the database is off, so repositories and handlers that
 depend on it are still built and the start does not fail. Opening a connection fails before it reaches

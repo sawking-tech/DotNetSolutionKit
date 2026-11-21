@@ -23,20 +23,20 @@ ST-Demo/
 │   │   ├── ST.Demo.Common.Web/              хост: конвейер, ошибки, Swagger, аутентификация
 │   │   ├── ST.Demo.Common.Testing/          тестовая оснастка, без тестового фреймворка
 │   │   └── ST.Demo.Common.Tests/            тесты Common
-│   ├── framework/                  собственные модули шаблона: Auth, OpenApi, Validation, Observability, DomainEvents, Testing и FeatureFlags с --FeatureFlags
+│   ├── framework/                  собственные модули шаблона: Auth, OpenApi, Validation, Observability, DomainEvents, Testing и FeatureFlags с --feature-flags
 │   ├── capabilities/              проект на флаг, сгруппированы по системе: Persistence (база данных, Mongo, S3), Analytics (ClickHouse), Messaging (Notifications), Security (CredentialStore), рядом .Abstractions и .Tests
 │   └── services/
 │       ├── ST.Demo.All.sln      все проекты решения
 │       └── ST.Demo.Orders/      один сервис, четыре проекта (ниже)
-├── gateway/                       шлюз API, при --ApiGateway
+├── gateway/                       шлюз API, при --api-gateway
 ├── deploy/
 │   ├── compose/                   docker compose: сервисы и infra/ по файлу на часть
-│   ├── k8s/                       манифесты, при --Deploy k8s
+│   ├── k8s/                       манифесты, при --deploy k8s
 │   └── build-images.sh            собирает образ каждого сервиса
 ├── tests/servers/                 тестовые серверы: start, ready, logs, down; up.sh поднимает все
 ├── scripts/                       проверки и схемы решения
 ├── tools/                         инструменты разработки решения
-├── .github/workflows/             CI, при --GitHubCiCd
+├── .github/workflows/             CI, при --github-cicd
 └── CLAUDE.md                      правила, по которым работает ИИ-агент этого решения
 ```
 
@@ -74,7 +74,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    T["Шаблон<br/>dotnet new DotNetSolutionKit"] -->|"--Solution"| Root["Корень и Common<br/>src/common, deploy, scripts, CI"]
+    T["Шаблон<br/>dotnet new DotNetSolutionKit"] -->|"--solution"| Root["Корень и Common<br/>src/common, deploy, scripts, CI"]
     T -->|"-S Orders"| S1["Сервис<br/>src/services/ST.Demo.Orders"]
     T -->|"-S Billing"| S2["Ещё один сервис"]
     Root --> M[".dotskit/manifest.json"]

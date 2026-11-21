@@ -10,7 +10,7 @@ This file is committed: no tokens, keys, credentials or personal data in it.
 
 ```
 .dotskit/manifest.json              # what the solution was generated from, kept by dotskit and committed
-deploy/                             # the infrastructure and the services for docker compose or Kubernetes (with --Deploy compose or k8s)
+deploy/                             # the infrastructure and the services for docker compose or Kubernetes (with --deploy compose or k8s)
 tests/servers/                      # a script per test server (start, ready, logs, down); up.sh starts them all
 src/
 ├── Directory.Packages.props        # every package version, declared once here or in package-versions/ (central package management)

@@ -83,24 +83,24 @@ functional modules under `src/capabilities` and `src/framework`. It is one thing
 sides: the template ships a feature, the solution carries a module, and the consumer works with
 modules and names them that way.
 
-- [Background jobs](features/background-jobs.md): Hangfire, `--Hangfire`
-- [Message bus](features/messaging.md): MassTransit, `--Messaging`
-- [Secrets from Infisical or Vault](features/secrets.md): `-I`, `--Vault`
-- [Feature flags](features/feature-flags.md): `--FeatureFlags`
-- [API diff](features/api-diff.md): `--DiffApi`
-- [CI on GitHub Actions](features/ci.md): `--GitHubCiCd`
-- [Access rules over a tenant tree](features/hierarchy-rules.md): `--HierarchyRules`
-- [Object storage](features/object-storage.md): S3-compatible, `--Storage`
-- [ClickHouse](features/clickhouse.md): `--ClickHouse`
-- [MongoDB](features/mongodb.md): `--MongoDB`
-- [Notifications](features/notifications.md): email, `--Notify`
-- [Audit journal](features/audit.md): `--Audit`, with `--Messaging rabbitmq:outbox`
-- [API gateway](features/api-gateway.md): YARP, `--ApiGateway`
+- [Background jobs](features/background-jobs.md): Hangfire, `--hangfire`
+- [Message bus](features/messaging.md): MassTransit, `--messaging`
+- [Secrets from Infisical or Vault](features/secrets.md): `-I`, `--vault`
+- [Feature flags](features/feature-flags.md): `--feature-flags`
+- [API diff](features/api-diff.md): `--diff-api`
+- [CI on GitHub Actions](features/ci.md): `--github-cicd`
+- [Access rules over a tenant tree](features/hierarchy-rules.md): `--hierarchy-rules`
+- [Object storage](features/object-storage.md): S3-compatible, `--storage`
+- [ClickHouse](features/clickhouse.md): `--clickhouse`
+- [MongoDB](features/mongodb.md): `--mongodb`
+- [Notifications](features/notifications.md): email, `--notify`
+- [Audit journal](features/audit.md): `--audit`, with `--messaging rabbitmq:outbox`
+- [API gateway](features/api-gateway.md): YARP, `--api-gateway`
 
 ## Operations
 
 - [Docker](operations/docker.md): one Dockerfile, only changed services rebuilt
-- [Deployment](operations/deployment.md): docker compose or Kubernetes, `--Deploy`
+- [Deployment](operations/deployment.md): docker compose or Kubernetes, `--deploy`
 - [Health](operations/health.md): `/health` and `/ready`
 - [Startup checks](operations/startup-checks.md)
 - [Switching dependencies off](operations/switching-dependencies-off.md): run without the database, the

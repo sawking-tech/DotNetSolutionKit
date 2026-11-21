@@ -1,16 +1,16 @@
 # API-шлюз
 
-`--ApiGateway` генерирует шлюз вместо сервиса: один API-проект на
+`--api-gateway` генерирует шлюз вместо сервиса: один API-проект на
 [YARP](https://microsoft.github.io/reverse-proxy/), единственную публичную точку входа в решение. Шлюз
 проверяет токен вызывающего, направляет запрос в сервис и сообщает сервису, кто вызывает.
 
 ```bash
 # from the solution root, into an existing solution
-dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Gateway --ApiGateway
+dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Gateway --api-gateway
 ```
 
-Шлюз генерируется без `--Solution`, как любой следующий сервис: ему нужны проекты `Common` уже существующего
-решения. С `--Solution` флаг ни на что не влияет, первый сервис генерируется как обычно, и
+Шлюз генерируется без `--solution`, как любой следующий сервис: ему нужны проекты `Common` уже существующего
+решения. С `--solution` флаг ни на что не влияет, первый сервис генерируется как обычно, и
 генерация об этом сообщает.
 
 ## Две схемы

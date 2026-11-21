@@ -1,6 +1,6 @@
 # Message bus
 
-Off by default. `--Messaging` chooses per service:
+Off by default. `--messaging` chooses per service:
 
 | Value | What the service gets |
 |---|---|

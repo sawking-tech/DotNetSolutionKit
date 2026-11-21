@@ -1,7 +1,7 @@
 # CI on GitHub Actions
 
-Generated with `--GitHubCiCd`, off by default: each team has its own CI, and these workflows only run on
-GitHub. Pass it with `--Solution`; the workflows cover every service in `All.sln`, so a later service needs
+Generated with `--github-cicd`, off by default: each team has its own CI, and these workflows only run on
+GitHub. Pass it with `--solution`; the workflows cover every service in `All.sln`, so a later service needs
 nothing more.
 
 ## `.github/workflows/ci.yml`
@@ -13,8 +13,8 @@ Runs on every pull request, on a push to `main` or `master`, and by hand, with c
 2. Builds `All.sln` in Release.
 3. Runs the unit tests: everything outside the category `TestCategory=Integration` (`[Integration]` in a service, `[Category(TestCategories.Integration)]` in `Common`).
 4. Runs the integration tests against real servers started in the job by `tests/servers/up.sh` - the same
-   scripts a developer runs: PostgreSQL or SQL Server always, ClickHouse with `--ClickHouse`, MongoDB with
-   `--MongoDB`, MailHog with `--Notify email`, SeaweedFS with `--Storage`, Vault with `--Vault`. They start
+   scripts a developer runs: PostgreSQL or SQL Server always, ClickHouse with `--clickhouse`, MongoDB with
+   `--mongodb`, MailHog with `--notify email`, SeaweedFS with `--storage`, Vault with `--vault`. They start
    before the build and are waited for before the integration tests. PostgreSQL keeps its data on a ramdisk
    with durability off, which is safe only because the data dies with the job. See
    [testing](../architecture/testing.md).

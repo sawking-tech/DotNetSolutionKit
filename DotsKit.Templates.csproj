@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <!--
-        The template as a NuGet package: dotnet new install SawKing.DotNetSolutionKit.
+        The template as a NuGet package: dotnet new install SawKing.DotsKit.Templates.
         Packed by .github/workflows/release.yml on a tag, with the version from version.json.
         Pack from a clean checkout: everything under template/ that is not ignored here goes in.
     -->
@@ -11,7 +11,7 @@
         <Version>$([System.Text.RegularExpressions.Regex]::Match($(_VersionJson), '&quot;version&quot;\s*:\s*&quot;([^&quot;]+)&quot;').Groups[1].Value)</Version>
 
         <PackageType>Template</PackageType>
-        <PackageId>SawKing.DotNetSolutionKit</PackageId>
+        <PackageId>SawKing.DotsKit.Templates</PackageId>
         <Title>DotNet Solution Kit</Title>
         <Authors>Vladimir Savkin</Authors>
         <Description>A dotnet new template for a fast start on .NET 8: scaffold a solution of any shape, from a monolith with domain events and DDD primitives to microservices on PostgreSQL or SQL Server with CI, deployment and tests - everything by flag. Secrets from Infisical or HashiCorp Vault, RabbitMQ with a transactional outbox, Hangfire jobs, ClickHouse, MongoDB, email, object storage and a YARP gateway come by flag too. Its tool dotskit (SawKing.DotsKit.Tool) adds services and flags to a solution and upgrades it to a new version, keeping the team's code.</Description>

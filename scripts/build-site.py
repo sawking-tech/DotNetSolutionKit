@@ -59,7 +59,7 @@ def application(version, note):
         "operatingSystem": "Windows, macOS, Linux",
         "softwareVersion": version,
         "releaseNotes": text,
-        "downloadUrl": f"https://www.nuget.org/packages/SawKing.DotNetSolutionKit/{version}",
+        "downloadUrl": f"https://www.nuget.org/packages/SawKing.DotsKit.Templates/{version}",
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
     }
 

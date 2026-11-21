@@ -41,7 +41,7 @@ a small, fixed set of variation points. Otherwise compose.
 | **Adapter / Anti-corruption layer** | An external system whose model must not leak in | a port in the application layer, the adapter in infrastructure |
 | **Process Manager (light) / Saga (heavy)** | A long flow across services with a correlation id that converges or fails | a state marker on the aggregate, events over the bus, a watchdog job |
 | **Event-Carried State Transfer** | A service needs a copy of another's state and must not query back | a consumer that keeps a projection table in its own schema |
-| **Transactional Outbox** | A message must go out exactly when the change commits | `--Messaging rabbitmq:outbox`, a pre-save handler: `/add-domain-event` |
+| **Transactional Outbox** | A message must go out exactly when the change commits | `--messaging rabbitmq:outbox`, a pre-save handler: `/add-domain-event` |
 | **Idempotent Receiver** | Redelivery from the bus, a job retry or a webhook must not repeat the effect | `IIdempotentExecutor`, a correlation log, a state marker |
 | **Rate Limiter** | Protect a downstream with a documented capacity | `System.Threading.RateLimiting`; a `DelegatingHandler` on the HTTP client |
 | **Circuit Breaker** | Fail fast while a downstream is degraded | a resilience handler on the HTTP client (`Microsoft.Extensions.Http.Resilience`); the template wires none |
@@ -49,11 +49,11 @@ a small, fixed set of variation points. Otherwise compose.
 | **Watchdog / Reaper** | Recover entities stuck in an in-flight state | a recurring Hangfire job (`-H`) |
 | **Batched producer** | Many small actions become one bulk call | a job that collects intents and sends them per interval |
 | **Diff / Delta transfer** | The downstream already knows the previous state | a hash of what was sent, compared before the call |
-| **CQRS** | The read model differs from the write model in shape, scale or audience | a projection, ClickHouse with `--ClickHouse` |
+| **CQRS** | The read model differs from the write model in shape, scale or audience | a projection, ClickHouse with `--clickhouse` |
 | **Optimistic concurrency** | Two writers may race and "the first commit wins" is acceptable | a concurrency token: `xmin` on PostgreSQL, `rowversion` on SQL Server |
 | **Compare-and-set** | Set a marker only if it is not set yet, without a row lock | a conditional `ExecuteUpdateAsync` on the marker |
-| **Two-tier toggle** | An operator switch that applies at once, plus a kill switch | a feature flag (`--FeatureFlags`) over a configuration switch |
-| **Audit log** | Who changed what and when, without snapshots | the audit journal (`--Audit`) |
+| **Two-tier toggle** | An operator switch that applies at once, plus a kill switch | a feature flag (`--feature-flags`) over a configuration switch |
+| **Audit log** | Who changed what and when, without snapshots | the audit journal (`--audit`) |
 
 ## Decision flow
 

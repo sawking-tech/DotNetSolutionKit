@@ -104,5 +104,5 @@ field by that name is there decides nothing, so a comment whose field is gone is
 | Risk | What we do |
 |---|---|
 | metadata reaches the application | unknown keys are ignored on reading and never reach an options object; code does not read raw `IConfiguration` |
-| a secret gets into a comment | a comment says *what* goes into a field, never a value; the template's CI scans every generated solution for secrets, and a solution with `--GitHubCiCd` scans its own pushes |
+| a secret gets into a comment | a comment says *what* goes into a field, never a value; the template's CI scans every generated solution for secrets, and a solution with `--github-cicd` scans its own pushes |
 | code that saves a JSON file sorts its keys | `_comment_X` would move away from `X`; a writer keeps the order of the keys it read; the manifest of `dotskit` gets a fixed order (#102) |

@@ -230,7 +230,7 @@ template changed - is the team's to decide, and its tests show it.
 
 The value is written when the template is packed, so a solution generated from the package on nuget.org or
 from a release's `.nupkg` names that release; one generated from the template's sources says `source`. The
-file comes with the solution (`--Solution`): a service added later with a newer template does not change it.
+file comes with the solution (`--solution`): a service added later with a newer template does not change it.
 A solution generated before the property was added has none; the dates on the releases page tell its
 version.
 
@@ -269,7 +269,7 @@ What stays with the team - its own code and its own call:
 | `v2.8.0` | A service of the team's own added to `deploy/compose/infrastructure.yml` moves into `deploy/compose/infra/`, a file per part. |
 | `v2.8.0` | `Infisical__SnapshotPath` and `Vault__SnapshotPath` are gone: remove the key where it is set and delete the snapshot file, which holds secrets nothing updates any more. |
 | `v2.8.0` | A service of the team's that writes files in its container writes them to `/tmp`, or to object storage when they must outlive the container: the root filesystem is read-only. |
-| `v3.0.0` | The `Messaging` value names the transport: edit every `--Messaging` line in `.dotskit/manifest.json`, the solution's and each service's, from `outbox` to `rabbitmq:outbox` or from `direct` to `rabbitmq:direct`; the upgrade refuses until it is done. |
+| `v3.0.0` | The `Messaging` value names the transport: edit every `--messaging` line in `.dotskit/manifest.json`, the solution's and each service's, from `outbox` to `rabbitmq:outbox` or from `direct` to `rabbitmq:direct`; the upgrade refuses until it is done. |
 | `v3.0.0` | The secret store is the configuration store: `ISecretStore` is `IConfigurationStore`, `SecretStoreOptions` is `ConfigurationStoreOptions`, `SecretsConfigurationProvider` is `ConfigurationStoreProvider`, and `AddPlatformSecrets` is `AddPlatformConfiguration`. Code of the team's that names them takes the new names; `dotskit upgrade` rewrites its `using` lines and references, and a name it does not recognise the tool leaves for a person. Kept as they were: the `Secrets:ReloadError` configuration key and the `appsettings.Secrets.json` file. |
 
 Everything else these releases changed - where a file lives, which project references which, how the
@@ -304,8 +304,8 @@ reference back would be a cycle, so the tool refuses to add it and says so.
 
 - The `Messaging` value names the transport: `none`, `rabbitmq:outbox`, `rabbitmq:direct`. A solution of
   2.x says `outbox` or `direct`, where the value named the delivery alone; the upgrade refuses it and
-  names what it needs. Edit every `--Messaging` line in `.dotskit/manifest.json`, the solution's and each
-  service's, from `--Messaging outbox` to `--Messaging rabbitmq:outbox`, or from `direct` to
+  names what it needs. Edit every `--messaging` line in `.dotskit/manifest.json`, the solution's and each
+  service's, from `--messaging outbox` to `--messaging rabbitmq:outbox`, or from `direct` to
   `rabbitmq:direct`, then run `dotskit upgrade`.
 
 ## The changes of v2

@@ -1,16 +1,16 @@
 # API gateway
 
-`--ApiGateway` generates a gateway in place of a service: one API project on
+`--api-gateway` generates a gateway in place of a service: one API project on
 [YARP](https://microsoft.github.io/reverse-proxy/), the single public entry point of the solution. It
 validates the caller's token, routes the request to a service and tells the service who the caller is.
 
 ```bash
 # from the solution root, into an existing solution
-dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Gateway --ApiGateway
+dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Gateway --api-gateway
 ```
 
-The gateway is generated without `--Solution`, like any further service: it needs the `Common` projects of a
-solution already there. With `--Solution` the flag has no effect, the first service is generated as usual,
+The gateway is generated without `--solution`, like any further service: it needs the `Common` projects of a
+solution already there. With `--solution` the flag has no effect, the first service is generated as usual,
 and the generation says so.
 
 ## Two shapes

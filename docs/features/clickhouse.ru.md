@@ -1,6 +1,6 @@
 # ClickHouse
 
-`--ClickHouse` добавляет проект `Capabilities.Analytics.ClickHouse` в `src/capabilities` с тем, что нужно каждому
+`--clickhouse` добавляет проект `Capabilities.Analytics.ClickHouse` в `src/capabilities` с тем, что нужно каждому
 сервису, который читает или пишет ClickHouse, и регистрирует это в сервисе. Запросы остаются в сервисе: читатель или писатель - класс инфраструктуры
 сервиса за портом его слоя приложения.
 

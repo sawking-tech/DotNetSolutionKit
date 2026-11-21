@@ -86,7 +86,7 @@ public interface IOrderPolicy
 - A policy throws `AccessDeniedException`; the shared handler answers 403.
 - A platform user and a tenant's user have different rules: check both paths.
 - A service method without its policy call is a bug.
-- Where tenants form a tree, the policy compares paths with `HierarchyRules` (`--HierarchyRules`), so the
+- Where tenants form a tree, the policy compares paths with `HierarchyRules` (`--hierarchy-rules`), so the
   tree means the same in every service: [hierarchy rules](https://dotskit.sawking.tech/docs.html#hierarchy-rules).
 
 ## Three-tier defence

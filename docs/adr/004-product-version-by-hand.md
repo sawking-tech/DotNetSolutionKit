@@ -68,7 +68,7 @@ handling it can rely on is the team's process; checks in CI are an addition for 
 | Risk | What happens | Handled by | Possible CI check |
 |---|---|---|---|
 | The version is not raised | A new release goes out under the old number; the version drifts from the code it names | Raising the version is part of preparing a release; the review of a release checks `version.json` | A pull request check: code under `src` changed and `version.json` did not |
-| The wrong level is raised: a breaking change ships as a minor release | Consumers believe they are still compatible, for example on 1.x when the code is 2.0, and break on update | Review; the [API diff](../features/api-diff.md) with `--DiffApi` shows every change of the API contract | The API diff fails a pull request on a breaking change of the contract until it is declared, and a declaration expires with the next version. Behaviour, configuration and the database schema have no such check |
+| The wrong level is raised: a breaking change ships as a minor release | Consumers believe they are still compatible, for example on 1.x when the code is 2.0, and break on update | Review; the [API diff](../features/api-diff.md) with `--diff-api` shows every change of the API contract | The API diff fails a pull request on a breaking change of the contract until it is declared, and a declaration expires with the next version. Behaviour, configuration and the database schema have no such check |
 | Release notes do not match the release | Readers of `/health` and of the notes get the wrong story | The notes live in the same file and the same commit as the version, so a review sees both | none |
 
 The checks in the last column are known options, not part of this decision. The template may later

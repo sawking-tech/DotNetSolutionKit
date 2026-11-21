@@ -2,10 +2,10 @@
 
 Сервис читает настройки из этих источников, каждый перекрывает предыдущие:
 
-1. `features.json` из модуля `Framework.FeatureFlags`, с `--FeatureFlags`;
+1. `features.json` из модуля `Framework.FeatureFlags`, с `--feature-flags`;
 2. `appsettings.json`, затем `appsettings.<Environment>.json`, затем `appsettings.Secrets.json` в `Local`;
 3. переменные окружения;
-4. хранилище конфигурации, с `-I` или `--Vault`: общая папка, затем папка сервиса
+4. хранилище конфигурации, с `-I` или `--vault`: общая папка, затем папка сервиса
    ([секреты](../features/secrets.ru.md)).
 
 ## Что меняется, пока сервис работает

@@ -23,20 +23,20 @@ ST-Demo/
 │   │   ├── ST.Demo.Common.Web/              the host: pipeline, errors, Swagger, authentication
 │   │   ├── ST.Demo.Common.Testing/          the test harness, with no test framework
 │   │   └── ST.Demo.Common.Tests/            the tests of Common
-│   ├── framework/                  the template's own modules: Auth, OpenApi, Validation, Observability, DomainEvents, Testing, and FeatureFlags with --FeatureFlags
+│   ├── framework/                  the template's own modules: Auth, OpenApi, Validation, Observability, DomainEvents, Testing, and FeatureFlags with --feature-flags
 │   ├── capabilities/              a project per flag, grouped by system: Persistence (the database, Mongo, S3), Analytics (ClickHouse), Messaging (Notifications), Security (CredentialStore), each with .Abstractions and .Tests beside it
 │   └── services/
 │       ├── ST.Demo.All.sln      every project of the solution
 │       └── ST.Demo.Orders/      one service, four projects (below)
-├── gateway/                       the API gateway, with --ApiGateway
+├── gateway/                       the API gateway, with --api-gateway
 ├── deploy/
 │   ├── compose/                   docker compose: the services, and infra/ a file per part
-│   ├── k8s/                       the manifests, with --Deploy k8s
+│   ├── k8s/                       the manifests, with --deploy k8s
 │   └── build-images.sh            builds the image of every service
 ├── tests/servers/                 the test servers: start, ready, logs, down; up.sh starts them all
 ├── scripts/                       the checks and the schemas of the solution
 ├── tools/                         the development tools of the solution
-├── .github/workflows/             CI, with --GitHubCiCd
+├── .github/workflows/             CI, with --github-cicd
 └── CLAUDE.md                      the rules an AI agent of this solution works by
 ```
 
@@ -74,7 +74,7 @@ was generated and merges a newer version of the template into the solution later
 
 ```mermaid
 flowchart LR
-    T["The template<br/>dotnet new DotNetSolutionKit"] -->|"--Solution"| Root["The root and Common<br/>src/common, deploy, scripts, CI"]
+    T["The template<br/>dotnet new DotNetSolutionKit"] -->|"--solution"| Root["The root and Common<br/>src/common, deploy, scripts, CI"]
     T -->|"-S Orders"| S1["A service<br/>src/services/ST.Demo.Orders"]
     T -->|"-S Billing"| S2["One more service"]
     Root --> M[".dotskit/manifest.json"]

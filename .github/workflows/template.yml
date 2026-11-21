@@ -260,7 +260,7 @@ jobs:
       - name: Pack, install, generate, build
         if: needs.scope.outputs.code == 'true'
         run: |
-          dotnet pack DotNetSolutionKit.Templates.csproj --configuration Release -o "$RUNNER_TEMP/package"
+          dotnet pack DotsKit.Templates.csproj --configuration Release -o "$RUNNER_TEMP/package"
           dotnet new install "$RUNNER_TEMP"/package/*.nupkg
           mkdir "$RUNNER_TEMP/solution" && cd "$RUNNER_TEMP/solution"
           dotnet new DotNetSolutionKit -N Acme -P Shop -S Orders --Solution --GitHubCiCd true

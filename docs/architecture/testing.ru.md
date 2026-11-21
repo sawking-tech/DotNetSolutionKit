@@ -8,7 +8,7 @@
 Тестового фреймворка в них нет; его выбирает тестовый проект сервиса и задаёт в `TestSkip.Handler`, как
 этот фреймворк пропускает тест. `Common.Tests` - тестовый проект самого `Common`.
 
-`--TestFramework xunit` генерирует тесты сервиса на xUnit v3 вместо NUnit; инфраструктура та же, и
+`--test-framework xunit` генерирует тесты сервиса на xUnit v3 вместо NUnit; инфраструктура та же, и
 тесты те же. Фреймворк знает один файл тестового проекта, `TestFramework.cs`: в нём атрибуты, которые
 носят тесты, - `[Test]`, `[TestOf]`, `[Integration]`, `[RunsInParallel]`, `[RunsAlone]` - поверх атрибутов
 самого фреймворка, поэтому в тесте нет `#if`, а смена фреймворка трогает только этот файл.
@@ -73,7 +73,7 @@ public class OrderServicePlaceTests : OrderServiceTestBase
 
 ## NUnit, xUnit и Shouldly
 
-Тесты сервиса по умолчанию на NUnit, с `--TestFramework xunit` - на xUnit v3; `Common.Tests` остаётся на
+Тесты сервиса по умолчанию на NUnit, с `--test-framework xunit` - на xUnit v3; `Common.Tests` остаётся на
 NUnit. `Common.Testing`, на который ссылаются оба, от тестового фреймворка не зависит: каждый in-memory
 контекст называет свою базу новым Guid, а каждый тестовый проект через `TestSkip.Handler` говорит ему,
 как его фреймворк пропускает тест. Параллельность у каждого фреймворка своя: NUnit запускает fixture с
@@ -104,7 +104,7 @@ dotnet test --filter "TestCategory!=Integration"   # everything else
 командами `start`, `ready`, `logs` и `down`. `up.sh` запускает все скрипты, которые там находит, и CI
 запускает те же скрипты, поэтому флаг, добавленный позже, приносит свой скрипт и ничего общего не меняет.
 
-Решение, сгенерированное с `--Database mssql`, читает вместо неё `TEST_SQLSERVER`, а тесты сервиса берут
+Решение, сгенерированное с `--database mssql`, читает вместо неё `TEST_SQLSERVER`, а тесты сервиса берут
 `SqlServerDbTestExecutionContext` вместо `PostgresDbTestExecutionContext`. Схема сервиса один раз за прогон
 мигрируется в шаблонную базу, с неё снимается backup, и каждый тест восстанавливает его под своим именем:
 на SQL Server это быстрее, чем мигрировать базу каждого теста. SQL Server для них поднимает `up.sh`.
@@ -125,6 +125,6 @@ dotnet test --filter "TestCategory!=Integration"   # everything else
 dotnet test --collect:"XPlat Code Coverage"
 ```
 
-Каждый тестовый проект пишет отчёт Cobertura в `TestResults/`. С `--GitHubCiCd` покрытие снимается по
+Каждый тестовый проект пишет отчёт Cobertura в `TestResults/`. С `--github-cicd` покрытие снимается по
 запросу, а не на каждом пулл-реквесте: `coverage.yml` даёт отчёт по каждому сервису и по `Common` для
 unit- и интеграционных прогонов и может падать по порогу покрытия ветвей; см. [CI](../features/ci.md).

@@ -1,6 +1,6 @@
 # Хранение
 
-EF Core на PostgreSQL или, с `--Database mssql`, на SQL Server. У каждого сервиса свой `DbContext` и своя
+EF Core на PostgreSQL или, с `--database mssql`, на SQL Server. У каждого сервиса свой `DbContext` и своя
 схема базы, названная по сервису (`orders` или `sales_orders` для `Sales.Orders`); рядом Hangfire получает
 вторую схему (`orders_hangfire`).
 
@@ -137,7 +137,7 @@ services.AddIdempotency<OrdersDbContext>();
 
 ## SQL Server
 
-`--Database mssql` генерирует решение на SQL Server. У каждой части выше есть реализация для SQL Server за
+`--database mssql` генерирует решение на SQL Server. У каждой части выше есть реализация для SQL Server за
 тем же швом, и в сгенерированное решение попадает только одна из двух:
 
 | Часть | PostgreSQL | SQL Server |

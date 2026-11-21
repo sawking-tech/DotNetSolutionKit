@@ -47,7 +47,7 @@ docs/                      # every page has a Russian twin <name>.ru.md
 site/                      # the static site, built by scripts/build-site.py
 scripts/                   # repository checks and the site build
 .github/workflows/         # template.yml checks PRs; promote, release and site publish
-DotNetSolutionKit.Templates.csproj   # packs template/ into the template NuGet package
+DotsKit.Templates.csproj   # packs template/ into the template NuGet package
 version.json               # product version and release notes
 CLAUDE.md, AGENTS.md       # identical agent rules
 ```
@@ -91,7 +91,7 @@ scripts/check-service-layers.sh <solution> <service>   # add a use case to a cop
 python -m pytest scripts/test_check_style.py
 ```
 
-`dotnet pack DotNetSolutionKit.Templates.csproj` packs the template. The `WriteTemplateVersion` target
+`dotnet pack DotsKit.Templates.csproj` packs the template. The `WriteTemplateVersion` target
 stamps the version from `version.json` into a copy of `template.json`.
 
 ## Code rules

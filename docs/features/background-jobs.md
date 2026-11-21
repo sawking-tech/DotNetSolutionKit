@@ -1,6 +1,6 @@
 # Background jobs
 
-On by default; `--Hangfire false` generates a service without them. Jobs run on Hangfire, stored in
+On by default; `--hangfire false` generates a service without them. Jobs run on Hangfire, stored in
 the solution's database, PostgreSQL or SQL Server, in a schema of the service's own (`orders_hangfire`),
 next to the service's schema and guarded the same way.
 
@@ -61,7 +61,7 @@ Of the job libraries for .NET it is the most convenient for a service's tasks:
 Quartz.NET is much harder to maintain: the same job takes more code, and a dashboard is not part of it.
 
 The template has no other way to run jobs. Where Hangfire does not fit, generate the service with
-`--Hangfire false` and run background jobs however suits you (an external cron or a Kubernetes
+`--hangfire false` and run background jobs however suits you (an external cron or a Kubernetes
 CronJob, a hosted service, delayed messages on the bus).
 
 ## Tests

@@ -20,12 +20,12 @@ flowchart BT
         CW --> CI
     end
     subgraph capabilities [src/capabilities]
-        CN["Capabilities.Messaging.Notifications, with --Notify email"]
-        CM["Capabilities.Persistence.Mongo, with --MongoDB"] --> C
+        CN["Capabilities.Messaging.Notifications, with --notify email"]
+        CM["Capabilities.Persistence.Mongo, with --mongodb"] --> C
         CM --> CC
-        CCH["Capabilities.Analytics.ClickHouse, with --ClickHouse"] --> C
+        CCH["Capabilities.Analytics.ClickHouse, with --clickhouse"] --> C
         CCH --> CC
-        CS["Capabilities.Persistence.S3, with --Storage"] --> C
+        CS["Capabilities.Persistence.S3, with --storage"] --> C
     end
     subgraph service ["src/services/#lt;Service#gt;"]
         D["#lt;Service#gt;"] --> C
@@ -45,7 +45,7 @@ flowchart BT
         API --> I
         API --> CW
     end
-    subgraph gateway ["src/services/#lt;Gateway#gt;, with --ApiGateway"]
+    subgraph gateway ["src/services/#lt;Gateway#gt;, with --api-gateway"]
         G["#lt;Gateway#gt;.API"] --> CW
     end
 ```
@@ -70,20 +70,20 @@ flowchart BT
 | `Framework.Validation.Tests` | The tests of the validation wiring | `Framework.Validation` |
 | `Framework.Observability` | The correlation identifier: the ambient value, the header name, the middleware that reads or creates it per request, the handler that puts it on an outgoing call | nothing of `Common` |
 | `Framework.Observability.Tests` | The tests of the correlation identifier | `Framework.Observability` |
-| `Framework.FeatureFlags`, with `--FeatureFlags` | The platform feature flags: the shared `features.json` catalogue, the Microsoft.FeatureManagement wiring, `GET /api/v1/features`, the Swagger filters for `[FeatureGate]`. A service with the flag references it | nothing of `Common` |
+| `Framework.FeatureFlags`, with `--feature-flags` | The platform feature flags: the shared `features.json` catalogue, the Microsoft.FeatureManagement wiring, `GET /api/v1/features`, the Swagger filters for `[FeatureGate]`. A service with the flag references it | nothing of `Common` |
 | `Framework.FeatureFlags.Tests` | The tests of feature flags | `Framework.FeatureFlags` |
-| `Capabilities.Messaging.Notifications` | Email of `--Notify email`: the port, the SMTP and Graph transports, the sandbox. A service with the flag references it, so only that service carries MailKit and the Graph SDK | nothing of `Common` |
+| `Capabilities.Messaging.Notifications` | Email of `--notify email`: the port, the SMTP and Graph transports, the sandbox. A service with the flag references it, so only that service carries MailKit and the Graph SDK | nothing of `Common` |
 | `Capabilities.Messaging.Notifications.Tests` | The tests of email | `Capabilities.Messaging.Notifications`, `Common.Testing` |
-| `Capabilities.Persistence.Mongo` | MongoDB of `--MongoDB`: the store, its options, its health check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
+| `Capabilities.Persistence.Mongo` | MongoDB of `--mongodb`: the store, its options, its health check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
 | `Capabilities.Persistence.Mongo.Tests` | The tests of MongoDB | `Capabilities.Persistence.Mongo`, `Common`, `Common.Testing` |
-| `Capabilities.Analytics.ClickHouse` | ClickHouse of `--ClickHouse`: connections, the schema guard, the readiness check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
+| `Capabilities.Analytics.ClickHouse` | ClickHouse of `--clickhouse`: connections, the schema guard, the readiness check. A service with the flag references it, so only that service carries the driver | `Common`, `Common.Contracts` |
 | `Capabilities.Analytics.ClickHouse.Tests` | The tests of ClickHouse | `Capabilities.Analytics.ClickHouse`, `Common`, `Common.Testing` |
 | `Capabilities.Persistence.Abstractions` | The persistence contracts the kernel and the providers share: `IMigrationLock`, `IShortIdGenerator`, `IOutboxStatsDialect`, `MigrationLockKey` | nothing |
-| `Capabilities.Persistence.S3` | Object storage of `--Storage`: `IS3ObjectStorage`, its settings, the null double. A service with the flag references it, so only that service carries the AWS SDK | `Common` |
+| `Capabilities.Persistence.S3` | Object storage of `--storage`: `IS3ObjectStorage`, its settings, the null double. A service with the flag references it, so only that service carries the AWS SDK | `Common` |
 | `Capabilities.Persistence.S3.Tests` | The tests of object storage | `Capabilities.Persistence.S3`, `Common`, `Common.Testing` |
-| `Capabilities.Messaging.RabbitMQ` | The message bus of `--Messaging rabbitmq:outbox` or `rabbitmq:direct`: the MassTransit transport on RabbitMQ, the transactional outbox and its diagnostics endpoint, the consumers. A service with the flag references it, so only that service carries the broker packages | `Common`, `Common.Application`, `Common.Contracts`, `Common.Infrastructure`, `Capabilities.Persistence.Abstractions`, `Framework.Observability` |
+| `Capabilities.Messaging.RabbitMQ` | The message bus of `--messaging rabbitmq:outbox` or `rabbitmq:direct`: the MassTransit transport on RabbitMQ, the transactional outbox and its diagnostics endpoint, the consumers. A service with the flag references it, so only that service carries the broker packages | `Common`, `Common.Application`, `Common.Contracts`, `Common.Infrastructure`, `Capabilities.Persistence.Abstractions`, `Framework.Observability` |
 | `Capabilities.Messaging.RabbitMQ.Tests` | The tests of the bus: actor and trace propagation, endpoint names, outbox diagnostics | `Capabilities.Messaging.RabbitMQ`, `Common`, `Common.Infrastructure`, `Framework.Testing` |
-| `Capabilities.Background.Hangfire` | Background jobs of `--Hangfire`: the storage in the service's schema, the dashboard, the filters that carry the actor and the domain-event scope into a job | `Common`, `Common.Infrastructure`, `Framework.DomainEvents`, `Framework.Observability` |
+| `Capabilities.Background.Hangfire` | Background jobs of `--hangfire`: the storage in the service's schema, the dashboard, the filters that carry the actor and the domain-event scope into a job | `Common`, `Common.Infrastructure`, `Framework.DomainEvents`, `Framework.Observability` |
 | `Capabilities.Background.Hangfire.Tests` | The tests of background jobs: the job's domain-event scope and the actor it carries | `Capabilities.Background.Hangfire`, `Common`, `Framework.Testing` |
 
 ## The shape of a module
@@ -128,6 +128,6 @@ Package versions are declared once, in `src/Directory.Packages.props` or in a fi
 names a package without a version. Every package stays on the .NET 8 line: none pulls in a .NET 9 library, directly or
 transitively, so some packages are held below their newest version.
 
-The versions a flag brings - the database, `--Notify`, `--MongoDB` and the rest - live in a file of their
+The versions a flag brings - the database, `--notify`, `--mongodb` and the rest - live in a file of their
 own, `src/package-versions/<flag>.props`, which `Directory.Packages.props` imports by mask: a flag adds a
 file and leaves the shared one as it is.

@@ -1,6 +1,6 @@
 # Объектное хранилище
 
-`--Storage` добавляет проект `Capabilities.Persistence.S3` в `src/capabilities` с S3-совместимым объектным
+`--storage` добавляет проект `Capabilities.Persistence.S3` в `src/capabilities` с S3-совместимым объектным
 хранилищем и регистрирует его в сервисе: для
 файлов, которые сервис держит вне своей базы, например документов, изображений, сгенерированных PDF.
 
@@ -34,7 +34,7 @@ public class InvoiceFiles(IS3ObjectStorage storage)
 
 ## Под docker compose
 
-С `--Deploy compose` инфраструктура получает [SeaweedFS](https://github.com/seaweedfs/seaweedfs)
+С `--deploy compose` инфраструктура получает [SeaweedFS](https://github.com/seaweedfs/seaweedfs)
 (Apache 2.0) как S3-сервер и одноразовый контейнер, который создаёт бакет до старта сервисов. MinIO,
 обычный выбор, больше не публикует образы. Учётные данные и бакет берутся из `deploy/compose/.env`:
 `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`.

@@ -8,7 +8,7 @@ test servers of the solution's database, the audit verifiers, stubs for time and
 They carry no test framework; the service's test project picks one, and sets `TestSkip.Handler` to how that
 framework skips a test. `Common.Tests` is the test project of `Common` itself.
 
-`--TestFramework xunit` generates the service's tests on xUnit v3 instead of NUnit; the infrastructure
+`--test-framework xunit` generates the service's tests on xUnit v3 instead of NUnit; the infrastructure
 is the same, and so are the tests. One file in the test project, `TestFramework.cs`, knows the framework:
 it defines the attributes the tests carry - `[Test]`, `[TestOf]`, `[Integration]`, `[RunsInParallel]`,
 `[RunsAlone]` - on top of the framework's own, so a test has no `#if` and a change of framework touches
@@ -73,7 +73,7 @@ scopes, so the assertion reads what was saved.
 
 ## NUnit, xUnit and Shouldly
 
-A service's tests are on NUnit by default and on xUnit v3 with `--TestFramework xunit`; `Common.Tests` stays
+A service's tests are on NUnit by default and on xUnit v3 with `--test-framework xunit`; `Common.Tests` stays
 on NUnit. `Common.Testing`, which both reference, has no test framework: each in-memory test context names
 its database with a new Guid, and each test project tells it how its framework skips a test through
 `TestSkip.Handler`. Parallelism is the framework's own: NUnit runs a fixture marked
@@ -104,7 +104,7 @@ Each server is a script in `tests/servers/` - `postgres.sh`, and one per flag th
 `start`, `ready`, `logs` and `down`; `up.sh` runs every script it finds there, and CI runs the same scripts,
 so a flag added later brings its script and changes nothing shared.
 
-A solution generated with `--Database mssql` reads `TEST_SQLSERVER` instead, and its service tests use
+A solution generated with `--database mssql` reads `TEST_SQLSERVER` instead, and its service tests use
 `SqlServerDbTestExecutionContext` in place of `PostgresDbTestExecutionContext`. The service's schema is
 migrated into one template database once per run, backed up, and each test restores the backup under a
 name of its own, which is faster on SQL Server than migrating each test's database. `up.sh` starts SQL
@@ -125,6 +125,6 @@ The test projects reference `coverlet.collector`, so coverage needs no setup:
 dotnet test --collect:"XPlat Code Coverage"
 ```
 
-Each test project writes a Cobertura report under `TestResults/`. With `--GitHubCiCd`, coverage is measured
+Each test project writes a Cobertura report under `TestResults/`. With `--github-cicd`, coverage is measured
 on demand, not on every pull request: `coverage.yml` reports it per service and for `Common` over the unit
 and integration runs, and can fail on a branch coverage threshold; see [CI](../features/ci.md).

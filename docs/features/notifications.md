@@ -1,6 +1,6 @@
 # Notifications
 
-`--Notify` gives a service notifications and chooses their channels; `--Notify email` is email, and SignalR
+`--notify` gives a service notifications and chooses their channels; `--notify email` is email, and SignalR
 is [planned](https://github.com/sawking-tech/DotNetSolutionKit/issues/71) as a second channel. The flag goes
 to the service that owns notifications. A message goes to its recipient as it is: a subject and plain text.
 Messages rendered from templates come with `--Templates`, which is
@@ -8,7 +8,7 @@ Messages rendered from templates come with `--Templates`, which is
 
 | Part | |
 |---|---|
-| `INotificationEmailSender` | the port in `Capabilities.Messaging.Notifications`, a project of its own that a service with `--Notify email` references; it needs nothing else of `Common`: `SendEmailAsync` and `SendEmailWithAttachmentAsync` |
+| `INotificationEmailSender` | the port in `Capabilities.Messaging.Notifications`, a project of its own that a service with `--notify email` references; it needs nothing else of `Common`: `SendEmailAsync` and `SendEmailWithAttachmentAsync` |
 | transports | SMTP on MailKit and Microsoft Graph, internal; the one `Email:Provider` names is chosen once, at registration |
 | sandbox | outside Production every message goes to one address, with a note on top naming who it was for, the environment and the time; no transport can skip it |
 
@@ -28,14 +28,14 @@ does not open; for a larger attachment use SMTP.
 
 ## Asking from another service
 
-With `--Messaging`, another service asks for an email with the bus command `SendEmailCommandV1` from
+With `--messaging`, another service asks for an email with the bus command `SendEmailCommandV1` from
 `Common.Contracts`; nothing calls the owner synchronously. Its consumer, `SendEmailCommandV1Consumer` in the
 owner's Infrastructure, sends the message through the port, so the sandbox applies to it too. With
-`--Storage` the command carries an attachment as a key in object storage and a file name: the sender puts the
+`--storage` the command carries an attachment as a key in object storage and a file name: the sender puts the
 file there first, and when it cannot be read, or sending with it fails, the email goes out without it. The
 sender and the owner read the same bucket, `S3:BucketName`.
 
-Every service generated with both `--Notify email` and `--Messaging` gets the consumer, and the command's queue
+Every service generated with both `--notify email` and `--messaging` gets the consumer, and the command's queue
 has no service prefix: two such services share the commands between them, each sending with its own `Email`
 settings. Keep the consumer in one service; a service that only sends through its own port does not need it.
 

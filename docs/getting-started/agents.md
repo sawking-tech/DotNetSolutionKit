@@ -20,9 +20,9 @@ agents as well.
 
 ## The rules and skills of a solution
 
-A generated solution gets rules for the agent and skills. `--Agent` chooses their format:
+A generated solution gets rules for the agent and skills. `--agent` chooses their format:
 
-| `--Agent` | Rules | Skills | Plan of long work |
+| `--agent` | Rules | Skills | Plan of long work |
 |---|---|---|---|
 | `claude`, the default | `CLAUDE.md` | `.claude/skills/` | `.claude/session-context/` |
 | `opencode` | `AGENTS.md` | `.opencode/skills/` | `.opencode/session-context/` |

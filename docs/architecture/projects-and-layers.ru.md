@@ -21,12 +21,12 @@ flowchart BT
         CW --> CI
     end
     subgraph capabilities [src/capabilities]
-        CN["Capabilities.Messaging.Notifications, with --Notify email"]
-        CM["Capabilities.Persistence.Mongo, with --MongoDB"] --> C
+        CN["Capabilities.Messaging.Notifications, with --notify email"]
+        CM["Capabilities.Persistence.Mongo, with --mongodb"] --> C
         CM --> CC
-        CCH["Capabilities.Analytics.ClickHouse, with --ClickHouse"] --> C
+        CCH["Capabilities.Analytics.ClickHouse, with --clickhouse"] --> C
         CCH --> CC
-        CS["Capabilities.Persistence.S3, with --Storage"] --> C
+        CS["Capabilities.Persistence.S3, with --storage"] --> C
     end
     subgraph service ["src/services/#lt;Service#gt;"]
         D["#lt;Service#gt;"] --> C
@@ -46,7 +46,7 @@ flowchart BT
         API --> I
         API --> CW
     end
-    subgraph gateway ["src/services/#lt;Gateway#gt;, with --ApiGateway"]
+    subgraph gateway ["src/services/#lt;Gateway#gt;, with --api-gateway"]
         G["#lt;Gateway#gt;.API"] --> CW
     end
 ```
@@ -71,20 +71,20 @@ flowchart BT
 | `Framework.Validation.Tests` | Тесты обвязки валидации | `Framework.Validation` |
 | `Framework.Observability` | Идентификатор корреляции: ambient-значение, имя заголовка, middleware, который читает или создаёт его на запрос, и обработчик, кладущий его в исходящий вызов | ничего из `Common` |
 | `Framework.Observability.Tests` | Тесты идентификатора корреляции | `Framework.Observability` |
-| `Framework.FeatureFlags`, с `--FeatureFlags` | Платформенные фича-флаги: общий каталог `features.json`, обвязка Microsoft.FeatureManagement, `GET /api/v1/features`, Swagger-фильтры для `[FeatureGate]`. На него ссылается сервис с флагом | ничего из `Common` |
+| `Framework.FeatureFlags`, с `--feature-flags` | Платформенные фича-флаги: общий каталог `features.json`, обвязка Microsoft.FeatureManagement, `GET /api/v1/features`, Swagger-фильтры для `[FeatureGate]`. На него ссылается сервис с флагом | ничего из `Common` |
 | `Framework.FeatureFlags.Tests` | Тесты фича-флагов | `Framework.FeatureFlags` |
-| `Capabilities.Messaging.Notifications` | Почта `--Notify email`: порт, транспорты SMTP и Graph, песочница. На него ссылается сервис с флагом, поэтому MailKit и Graph SDK есть только у этого сервиса | ничего из `Common` |
+| `Capabilities.Messaging.Notifications` | Почта `--notify email`: порт, транспорты SMTP и Graph, песочница. На него ссылается сервис с флагом, поэтому MailKit и Graph SDK есть только у этого сервиса | ничего из `Common` |
 | `Capabilities.Messaging.Notifications.Tests` | Тесты почты | `Capabilities.Messaging.Notifications`, `Common.Testing` |
-| `Capabilities.Persistence.Mongo` | MongoDB `--MongoDB`: хранилище, его настройки, проверка здоровья. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
+| `Capabilities.Persistence.Mongo` | MongoDB `--mongodb`: хранилище, его настройки, проверка здоровья. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
 | `Capabilities.Persistence.Mongo.Tests` | Тесты MongoDB | `Capabilities.Persistence.Mongo`, `Common`, `Common.Testing` |
-| `Capabilities.Analytics.ClickHouse` | ClickHouse флага `--ClickHouse`: подключения, страж схемы, проверка готовности. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
+| `Capabilities.Analytics.ClickHouse` | ClickHouse флага `--clickhouse`: подключения, страж схемы, проверка готовности. На него ссылается сервис с флагом, поэтому драйвер есть только у этого сервиса | `Common`, `Common.Contracts` |
 | `Capabilities.Analytics.ClickHouse.Tests` | Тесты ClickHouse | `Capabilities.Analytics.ClickHouse`, `Common`, `Common.Testing` |
 | `Capabilities.Persistence.Abstractions` | Контракты персистенции, общие для ядра и провайдеров: `IMigrationLock`, `IShortIdGenerator`, `IOutboxStatsDialect`, `MigrationLockKey` | ни на что |
-| `Capabilities.Persistence.S3` | Объектное хранилище флага `--Storage`: `IS3ObjectStorage`, его настройки, null-заглушка. На него ссылается сервис с флагом, поэтому AWS SDK есть только у этого сервиса | `Common` |
+| `Capabilities.Persistence.S3` | Объектное хранилище флага `--storage`: `IS3ObjectStorage`, его настройки, null-заглушка. На него ссылается сервис с флагом, поэтому AWS SDK есть только у этого сервиса | `Common` |
 | `Capabilities.Persistence.S3.Tests` | Тесты объектного хранилища | `Capabilities.Persistence.S3`, `Common`, `Common.Testing` |
-| `Capabilities.Messaging.RabbitMQ` | Шина сообщений `--Messaging rabbitmq:outbox` или `rabbitmq:direct`: транспорт MassTransit на RabbitMQ, транзакционный outbox и его diagnostics-эндпоинт, консюмеры. На неё ссылается сервис с флагом, поэтому пакеты брокера есть только у этого сервиса | `Common`, `Common.Application`, `Common.Contracts`, `Common.Infrastructure`, `Capabilities.Persistence.Abstractions`, `Framework.Observability` |
+| `Capabilities.Messaging.RabbitMQ` | Шина сообщений `--messaging rabbitmq:outbox` или `rabbitmq:direct`: транспорт MassTransit на RabbitMQ, транзакционный outbox и его diagnostics-эндпоинт, консюмеры. На неё ссылается сервис с флагом, поэтому пакеты брокера есть только у этого сервиса | `Common`, `Common.Application`, `Common.Contracts`, `Common.Infrastructure`, `Capabilities.Persistence.Abstractions`, `Framework.Observability` |
 | `Capabilities.Messaging.RabbitMQ.Tests` | Тесты шины: перенос актора и трейса, имена эндпоинтов, диагностика outbox | `Capabilities.Messaging.RabbitMQ`, `Common`, `Common.Infrastructure`, `Framework.Testing` |
-| `Capabilities.Background.Hangfire` | Фоновые задачи `--Hangfire`: хранилище в схеме сервиса, дашборд, фильтры, переносящие актора и область доменных событий в задачу | `Common`, `Common.Infrastructure`, `Framework.DomainEvents`, `Framework.Observability` |
+| `Capabilities.Background.Hangfire` | Фоновые задачи `--hangfire`: хранилище в схеме сервиса, дашборд, фильтры, переносящие актора и область доменных событий в задачу | `Common`, `Common.Infrastructure`, `Framework.DomainEvents`, `Framework.Observability` |
 | `Capabilities.Background.Hangfire.Tests` | Тесты фоновых задач: область доменных событий задачи и переносимый актор | `Capabilities.Background.Hangfire`, `Common`, `Framework.Testing` |
 
 ## Форма модуля
@@ -129,6 +129,6 @@ flowchart BT
 `.csproj` называет пакет без версии. Все пакеты остаются на линейке .NET 8: ни один не тянет библиотеку .NET 9, ни напрямую, ни
 транзитивно, поэтому часть пакетов держится ниже последней версии.
 
-Версии, которые приносит флаг - база данных, `--Notify`, `--MongoDB` и остальные, - лежат в отдельном файле
+Версии, которые приносит флаг - база данных, `--notify`, `--mongodb` и остальные, - лежат в отдельном файле
 `src/package-versions/<флаг>.props`, а `Directory.Packages.props` подключает такие файлы по маске: флаг
 добавляет файл и общий не трогает.
