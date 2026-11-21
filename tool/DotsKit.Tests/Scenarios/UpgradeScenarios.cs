@@ -94,7 +94,7 @@ internal sealed class UpgradeScenarios
         var refused = await solution.DotskitAsync("upgrade", "--yes", "--all-at-once");
 
         refused.Code.ShouldNotBe(0);
-        refused.Error.ShouldContain("--Messaging rabbitmq:outbox");
+        refused.Error.ShouldContain("--messaging rabbitmq:outbox");
         refused.Error.ShouldContain(Layout.ManifestPath);
     }
 }

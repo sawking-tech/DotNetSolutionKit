@@ -106,7 +106,7 @@ internal sealed class TeamScenarios
         var program = $"src/services/{Orders}/{Orders}.API/Program.cs";
         var before = solution.Read(program);
 
-        var again = await solution.DotnetNewAsync("-N", "ST", "-P", "Demo", "-S", "Orders", "--MongoDB", "true", "--allow-scripts", "yes");
+        var again = await solution.DotnetNewAsync("-N", "ST", "-P", "Demo", "-S", "Orders", "--mongodb", "true", "--allow-scripts", "yes");
 
         again.Code.ShouldBe(WouldOverwrite);
         solution.Read(program).ShouldBe(before);
@@ -120,7 +120,7 @@ internal sealed class TeamScenarios
         solution.Write(repository, solution.Read(repository) + "\n// the team's line\n");
         await solution.CommitAsync("the team's change");
 
-        var added = await solution.DotskitAsync("new", "-S", "orders", "--MongoDB", "true", "--yes");
+        var added = await solution.DotskitAsync("new", "-S", "orders", "--mongodb", "true", "--yes");
 
         added.Code.ShouldBe((int)ExitCode.Done, added.Output + added.Error);
         solution.Read(repository).ShouldContain("// the team's line");
@@ -136,7 +136,7 @@ internal sealed class TeamScenarios
         var mine = solution.Read(secrets).Replace("\"DefaultConnection\": \"\"", "\"DefaultConnection\": \"Host=mine\"", StringComparison.Ordinal);
         solution.Write(secrets, mine);
 
-        var changed = await solution.DotskitAsync("new", "-S", "Orders", "--Hangfire", "false", "--yes", "--no-build");
+        var changed = await solution.DotskitAsync("new", "-S", "Orders", "--hangfire", "false", "--yes", "--no-build");
 
         changed.Code.ShouldBe((int)ExitCode.Done, changed.Output + changed.Error);
         solution.Read(secrets).ShouldBe(mine);
@@ -167,7 +167,7 @@ internal sealed class TeamScenarios
         solution.Write(mongo, "# the team's own mongo\n");
         await solution.CommitAsync("the team's mongo");
 
-        var added = await solution.DotskitAsync("new", "-S", "Orders", "--MongoDB", "true", "--yes", "--no-build");
+        var added = await solution.DotskitAsync("new", "-S", "Orders", "--mongodb", "true", "--yes", "--no-build");
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         solution.Read(mongo).ShouldContain("# the team's own mongo");
@@ -185,7 +185,7 @@ internal sealed class TeamScenarios
         await solution.CommitAsync("the team's note on the bus line");
 
         // The outbox turns this very line into busNeedsDatabase: true.
-        var added = await solution.DotskitAsync("new", "-S", "Orders", "--Messaging", "rabbitmq:outbox", "--yes", "--no-build");
+        var added = await solution.DotskitAsync("new", "-S", "Orders", "--messaging", "rabbitmq:outbox", "--yes", "--no-build");
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         added.Output.ShouldContain(configuration);
@@ -205,7 +205,7 @@ internal sealed class TeamScenarios
 
         // The template's email block starts on the line right after the team's, with Hangfire on and
         // ClickHouse off as the sandbox has them: git merge-file takes changes that touch for one place.
-        var added = await solution.DotskitAsync("new", "-S", "Notifications", "--Notify", "email", "--yes", "--no-build");
+        var added = await solution.DotskitAsync("new", "-S", "Notifications", "--notify", "email", "--yes", "--no-build");
 
         added.Code.ShouldBe((int)ExitCode.Conflicts, added.Output + added.Error);
         added.Output.ShouldContain(env);
@@ -220,7 +220,7 @@ internal sealed class TeamScenarios
         var folder = Path.Combine(Folders.NewTemp("scenario-gateway"), "solution");
         Directory.CreateDirectory(folder);
 
-        var made = await Sandbox.DotskitIn(folder, ["new", "-N", "ST", "-P", "Demo", "-S", "Gate", "--ApiGateway", "true", "--yes"]);
+        var made = await Sandbox.DotskitIn(folder, ["new", "-N", "ST", "-P", "Demo", "-S", "Gate", "--api-gateway", "true", "--yes"]);
 
         made.Code.ShouldBe((int)ExitCode.Done, made.Output + made.Error);
     }

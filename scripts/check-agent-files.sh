@@ -2,7 +2,7 @@
 #
 # Checks the rules and skills for an AI agent in a generated solution:
 #
-#   scripts/check-agent-files.sh <solution> <agent>   # <agent>: claude, opencode or none, as passed to --Agent
+#   scripts/check-agent-files.sh <solution> <agent>   # <agent>: claude, opencode or none, as passed to --agent
 #
 # The format's own files are there and the other format's are not, inside the texts too; every skill has
 # the frontmatter both agents read (only name and description, the name matching its folder); no template
@@ -20,17 +20,17 @@ case "$agent" in
     opencode) rules=AGENTS.md folder=.opencode other_rules=CLAUDE.md other_folder=.claude ;;
     none)
         for path in CLAUDE.md AGENTS.md .claude .opencode; do
-            [ ! -e "$path" ] || fail "--Agent none generated $path"
+            [ ! -e "$path" ] || fail "--agent none generated $path"
         done
-        [ "$failed" -eq 0 ] && echo "No agent files, as --Agent none asks."
+        [ "$failed" -eq 0 ] && echo "No agent files, as --agent none asks."
         exit "$failed"
         ;;
     *) echo "unknown agent: $agent" >&2; exit 2 ;;
 esac
 
 [ -f "$rules" ] || fail "$rules is missing"
-[ ! -e "$other_rules" ] || fail "$other_rules is there with --Agent $agent"
-[ ! -e "$other_folder" ] || fail "$other_folder is there with --Agent $agent"
+[ ! -e "$other_rules" ] || fail "$other_rules is there with --agent $agent"
+[ ! -e "$other_folder" ] || fail "$other_folder is there with --agent $agent"
 
 skills=0
 for skill in "$folder"/skills/*/SKILL.md; do
