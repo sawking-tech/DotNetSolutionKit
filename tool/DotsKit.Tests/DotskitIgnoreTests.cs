@@ -161,6 +161,22 @@ internal sealed class DotskitIgnoreTests
         lines.ShouldHaveSingleItem().ShouldContain("src/common/X/.dotskitignore:2 Locked.cs");
     }
 
+    /// <summary>
+    /// A file may change between the read of the rules and the write: a rule whose line the file no longer has is
+    /// reported, not dropped, so a spent pin does not leave the review unspoken.
+    /// </summary>
+    [Test]
+    public void ASpentRule_WhoseLineTheFileNoLongerHas_IsReportedRatherThanDropped()
+    {
+        var file = DotskitIgnore.Parse("", "Locked.cs@2.9\n");
+        var rule = file.Rules[0] with { Line = 9 };
+
+        var (text, lines) = PinReview.Of(file, [(rule, false)], "3.0.0");
+
+        text.ShouldBe("Locked.cs@2.9\n", customMessage: "the tool writes no line it has no rule for");
+        lines.ShouldHaveSingleItem().ShouldContain("no longer in the file");
+    }
+
     [Test]
     public void NoFile_MeansNoRules()
     {

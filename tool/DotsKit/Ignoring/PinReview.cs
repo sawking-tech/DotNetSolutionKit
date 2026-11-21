@@ -59,6 +59,10 @@ internal static class PinReview
             }
         }
 
+        // A rule whose line the file no longer has - the file changed between the read and the write - is reported
+        // rather than dropped, so a pin does not leave the review unspoken.
+        report.AddRange(mine.Where(s => s.Rule.Line < 1 || s.Rule.Line > lines.Length)
+            .Select(s => $"{Where(s.Rule)}: spent by the upgrade to {to}, and the line is no longer in the file - the tool leaves it as the team has it"));
         return (string.Join('\n', written), report);
     }
 
