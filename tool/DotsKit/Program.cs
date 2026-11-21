@@ -27,7 +27,7 @@ var staging = new CachedStaging(new Staging(new TemplateSource(runner, new TagAr
 var builder = new DotnetBuilder(runner);
 var repair = new ReferenceRepair(new RepairWriter(), builder);
 var ignoredFiles = new GitIgnoredFiles(runner);
-var planner = new Planner(staging, projects, new GitRenames(runner), ignoredFiles, repair, new IgnoreRules(new GitIgnorePatterns(runner), () => ToolVersion.Current));
+var planner = new Planner(staging, projects, new GitRenames(runner), ignoredFiles, repair, new IgnoreRules(new GitIgnorePatterns(runner)));
 var report = new PlanReport(terminal);
 var git = new Git(runner);
 var self = SelfCommand.Of(Environment.ProcessPath, typeof(StyleMergeDriver).Assembly.Location);

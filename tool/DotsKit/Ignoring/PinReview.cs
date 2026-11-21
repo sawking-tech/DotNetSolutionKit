@@ -4,7 +4,9 @@ namespace DotsKit.Ignoring;
 /// What the tool writes into <c>.dotskitignore</c> after an upgrade, for the pins that upgrade spent. A spent pin whose
 /// files the upgrade brought to the template's own has done its work: its rule is commented out, never erased, so the
 /// team sees what the tool took out. A spent pin whose files still differ is re-pinned to the version the upgrade went
-/// to, so the team's change stands another round. Every line the tool did not touch stays as the team wrote it.
+/// to, so the team's change stands another round. A pin of the whole major is the exception: at a new major the tool
+/// comments the old line out and writes the next one commented out of its own, for the team to confirm. Every line the
+/// tool did not touch stays as the team wrote it.
 /// </summary>
 internal static class PinReview
 {
@@ -19,29 +21,41 @@ internal static class PinReview
             return (file.Text, []);
         }
 
-        var text = file.Text.Split('\n');
+        var lines = file.Text.Split('\n');
+        var byLine = spent.ToDictionary(s => s.Rule.Line);
+        List<string> written = [];
         List<string> report = [];
-        foreach (var (rule, difference) in spent.OrderBy(s => s.Rule.Line))
+        for (var i = 0; i < lines.Length; i++)
         {
-            var index = rule.Line - 1;
-            if (index < 0 || index >= text.Length)
+            if (!byLine.TryGetValue(i + 1, out var at))
             {
+                written.Add(lines[i]);
                 continue;
             }
 
-            if (difference)
+            var (rule, difference) = at;
+            var pin = rule.Pin!.RenewedTo(to);
+            if (difference && !rule.Pin!.EveryMajor)
             {
-                var pin = rule.Pin!.RenewedTo(to);
-                text[index] = $"{rule.Pattern}@{pin}";
+                // The team's change stands: the rule is re-pinned to the version the upgrade went to, and keeps the path.
+                written.Add($"{rule.Pattern}@{pin}");
                 report.Add($"{rule.Pattern}: spent by the upgrade to {to}, the files still differ - pinned on @{pin} again");
+            }
+            else if (rule.Pin!.EveryMajor)
+            {
+                // ADR-009: at a new major the tool moves the pin itself - the old line commented out with the reason, the
+                // next one written commented out of its own, so a rule that held for good does not come back unread.
+                written.Add($"# {rule.Pattern}@{pin} # dotskit: spent by the upgrade to {to}; uncomment the line below to hold again");
+                written.Add($"# {rule.Pattern}@{pin}");
+                report.Add($"{rule.Pattern}: spent by the upgrade to {to}, the rule is commented out and @{pin} is written below it for the team");
             }
             else
             {
-                text[index] = $"# {rule.Pattern}@{rule.Pin!.RenewedTo(to)} # dotskit: the pin is spent by the upgrade to {to} and the files are the template's own; remove the line when the team agrees";
+                written.Add($"# {rule.Pattern}@{pin} # dotskit: the pin is spent by the upgrade to {to} and the files are the template's own; remove the line when the team agrees");
                 report.Add($"{rule.Pattern}: spent by the upgrade to {to}, the files are the template's own - the rule is commented out");
             }
         }
 
-        return (string.Join('\n', text), report);
+        return (string.Join('\n', written), report);
     }
 }

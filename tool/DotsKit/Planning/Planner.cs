@@ -134,6 +134,9 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
 
     private async Task<string?> BaseAsync(Manifest current, CancellationToken ct) => await staging.BuildAsync(current, withSolutionFile: false, ct);
 
+    /// <summary>The line a pin is read and renewed by: the release an upgrade goes to, or the tool's own for the sources.</summary>
+    private static string LineOf(string version) => version == TemplateSource.SourcesVersion ? ToolVersion.Current : version;
+
     /// <summary>
     /// The rules of <c>.dotskitignore</c> read at the version the solution goes to, and their effect on the template's
     /// next output: the held paths take the base's text, and a held path the template adds leaves the output. The
@@ -152,7 +155,9 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
             .Concat(Folders.RelativeFiles(nextDir))
             .Concat(baseDir is null ? [] : Folders.RelativeFiles(baseDir))
             .Distinct(StringComparer.Ordinal)];
-        var decision = await rules.DecideAsync(root, next.Template, candidates, ct);
+        // The sources carry no version of their own: a pin is read and renewed by the tool's, which is the line they
+        // become. The solution's release stands as the one it came from, so a pin of the major is read against it.
+        var decision = await rules.DecideAsync(root, LineOf(next.Template), LineOf(current.Template), candidates, ct);
         HeldFiles.Apply(nextDir, baseDir, decision.Held);
         return decision;
     }

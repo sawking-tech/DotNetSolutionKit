@@ -225,12 +225,14 @@ have yet.
 
 `@` and a version pin the rule. An upgrade below the pin's line leaves the path alone; the upgrade that passes
 it spends the pin, and the path goes into the usual merge. `@2.9` holds through 2.9.x and lets 2.10.0 through;
-`@2` holds through 2.x and lets 3.0.0 through; `@major` holds for good and is the one the tool moves: on a new
-major it comments the line out and adds the next one, commented out of its own, for the team to confirm.
+`@2` holds through 2.x and lets 3.0.0 through. `@major` holds through the major the solution is on, and the next
+major spends it: the tool then comments the line out and writes the next one, for the team to confirm.
 
 After an upgrade the tool reviews the pins it spent and writes the file beside the merge: one whose paths the
 upgrade brought to the template's own is commented out, with the reason on the line, and one whose paths still
-differ is renewed to the version the upgrade went to. The report names each and its line, and the change joins
+differ is renewed to the version the upgrade went to. A pin of the whole major has its own way: the line goes
+commented out with the reason, and the next pin is written under it, commented out of its own, for the team to
+confirm. The report names each and its line, and the change joins
 the merge like any other file, so it reaches the team's review and `git merge --abort` puts it back.
 
 Matching is git's own: the file's rules go to `git check-ignore` as an excludes file, in a repository of the
@@ -239,8 +241,7 @@ inside it included, and a solution outside git reads its rules the same way.
 
 A held file is the team's from then on. The upgrade writes no line of it, so a file of an older template that a
 newer one no longer fits - a `Program.cs` of 2.9 in a solution of 3.0 - stops building until the team brings it
-up by hand, and the build says which file. Hold what the team owns; let the template have what it keeps working
-with the template.
+up by hand, and the build says which file.
 
 ## A solution made without dotskit
 

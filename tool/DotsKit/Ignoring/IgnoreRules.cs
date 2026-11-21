@@ -12,13 +12,14 @@ internal interface IIgnoreRules
     /// rules whose pins it spends.
     /// </summary>
     /// <param name="root">The solution's root, where <c>.dotskitignore</c> sits.</param>
-    /// <param name="to">The release the upgrade goes to, by which the pins are read.</param>
+    /// <param name="to">The release the upgrade goes to, by which the pins are read; a release, not the sources.</param>
+    /// <param name="from">The release the solution is on, which a pin of the whole major is read against.</param>
     /// <param name="candidates">
     /// The paths the upgrade could write, relative to the root with forward slashes - the solution's files and the
     /// template's next output together, so a rule holds a file the template adds as well as one it changes.
     /// </param>
     /// <param name="ct">Cancels the read.</param>
-    Task<IgnoreDecision> DecideAsync(string root, string to, IReadOnlyList<string> candidates, CancellationToken ct);
+    Task<IgnoreDecision> DecideAsync(string root, string to, string from, IReadOnlyList<string> candidates, CancellationToken ct);
 }
 
 /// <summary>
@@ -39,18 +40,14 @@ internal sealed record IgnoreDecision(IReadOnlySet<string> Held, IReadOnlyList<I
 /// is written in, so the tool and the team read the file the same way.
 /// </summary>
 /// <param name="patterns">The matcher the rules go to.</param>
-/// <param name="toolVersion">
-/// The version the tool is released as, which reads a pin an upgrade to the template's sources is judged by: the sources
-/// carry no version of their own, and a pin is renewed onto the tool's line there.
-/// </param>
-internal sealed class IgnoreRules(IIgnorePatterns patterns, Func<string> toolVersion) : IIgnoreRules
+internal sealed class IgnoreRules(IIgnorePatterns patterns) : IIgnoreRules
 {
     /// <summary>The file's name in the solution's root, beside the manifest.</summary>
     public const string FileName = ".dotskitignore";
 
     public static string PathOf(string root) => System.IO.Path.Combine(root, FileName);
 
-    public async Task<IgnoreDecision> DecideAsync(string root, string to, IReadOnlyList<string> candidates, CancellationToken ct)
+    public async Task<IgnoreDecision> DecideAsync(string root, string to, string from, IReadOnlyList<string> candidates, CancellationToken ct)
     {
         var skip = DotskitIgnore.Parse(Read(root));
         if (skip.IsEmpty)
@@ -60,17 +57,13 @@ internal sealed class IgnoreRules(IIgnorePatterns patterns, Func<string> toolVer
 
         // A pin holds until the upgrade reaches it: at the pin's precision or above, the file merges and the review
         // names the spent rule. A rule with no pin holds always, until a person removes it.
-        var line = LineOf(to);
-        var spent = skip.Rules.Where(r => r.Pin is { } pin && !pin.Holds(line)).ToList();
-        var holding = skip.Rules.Where(r => r.Pin is null || r.Pin.Holds(line)).ToList();
+        var spent = skip.Rules.Where(r => r.Pin is { } pin && !pin.Holds(to, from)).ToList();
+        var holding = skip.Rules.Where(r => r.Pin is null || r.Pin.Holds(to, from)).ToList();
         var held = holding.Count == 0
             ? new HashSet<string>()
             : await patterns.MatchAsync(root, [.. holding.Select(r => r.Pattern)], candidates, ct);
-        return new IgnoreDecision(held, spent, line);
+        return new IgnoreDecision(held, spent, to);
     }
-
-    /// <summary>The version a pin is read and renewed by: the release an upgrade goes to, or the tool's own for the sources.</summary>
-    public string LineOf(string version) => version == Generation.TemplateSource.SourcesVersion ? toolVersion() : version;
 
     private static string? Read(string root) =>
         File.Exists(PathOf(root)) ? File.ReadAllText(PathOf(root)) : null;

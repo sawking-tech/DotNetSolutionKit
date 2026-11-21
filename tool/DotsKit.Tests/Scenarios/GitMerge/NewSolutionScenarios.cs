@@ -26,7 +26,7 @@ internal sealed class NewSolutionScenarios
 
     private static Planner Planner() =>
         new(new FixedOutput(), new SolutionProjects(Runner), new GitRenames(Runner), new GitIgnoredFiles(Runner),
-            new ReferenceRepair(new RepairWriter(), new DotnetBuilder(Runner)), new IgnoreRules(new GitIgnorePatterns(Runner), () => ToolVersion.Current));
+            new ReferenceRepair(new RepairWriter(), new DotnetBuilder(Runner)), new IgnoreRules(new GitIgnorePatterns(Runner)));
 
     [Test]
     public async Task AnEmptyFolder_TakesThePlainWrite_WithoutGit()

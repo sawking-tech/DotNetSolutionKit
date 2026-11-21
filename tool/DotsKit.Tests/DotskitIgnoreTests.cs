@@ -55,11 +55,17 @@ internal sealed class DotskitIgnoreTests
     [TestCase("2.9", "3.0.0", false)]
     [TestCase("2", "2.9.9", true)]
     [TestCase("2", "3.0.0", false)]
-    [TestCase("major", "2.9.0", true)]
-    [TestCase("major", "9.0.0", true)]
     public void APin_HoldsWithinItsLine_AndIsSpentPastIt(string pin, string version, bool holds)
     {
         Pin.Parse(pin)!.Holds(version).ShouldBe(holds);
+    }
+
+    [TestCase("2.9.0", "3.0.0", false, "a pin of the major is spent by the next major")]
+    [TestCase("2.9.4", "2.10.0", true, "it holds through the whole of its major")]
+    [TestCase("2.9.0", "source", false, "the sources are the tool's line, which is the next major")]
+    public void APinOfTheMajor_HoldsTheMajorTheSolutionIsOn_AndIsSpentByTheNext(string from, string to, bool holds, string why)
+    {
+        Pin.Parse("major")!.Holds(to, from).ShouldBe(holds, why);
     }
 
     [TestCase("2.9", "3.1.4", "3.1")]
@@ -95,6 +101,19 @@ internal sealed class DotskitIgnoreTests
 
         text.ShouldBe("src/locked/@3.1");
         lines.ShouldHaveSingleItem().ShouldContain("pinned on @3.1 again");
+    }
+
+    [Test]
+    public void ASpentPinOfTheMajor_IsMovedOntoTheNextLine_CommentedOutForTheTeam()
+    {
+        var file = DotskitIgnore.Parse("src/locked/@major");
+
+        var (text, lines) = PinReview.Of(file, [(file.Rules[0], false)], "3.0.0");
+
+        // ADR-009: the old line is commented out and the next one is written commented out of its own, so a rule that
+        // held for good does not come back to life unread.
+        text.ShouldBe("# src/locked/@major # dotskit: spent by the upgrade to 3.0.0; uncomment the line below to hold again\n# src/locked/@major");
+        lines.ShouldHaveSingleItem().ShouldContain("written below it");
     }
 
     [Test]

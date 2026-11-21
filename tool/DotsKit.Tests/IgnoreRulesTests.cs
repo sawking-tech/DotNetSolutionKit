@@ -30,7 +30,7 @@ internal sealed class IgnoreRulesTests
         var root = Tree(tree);
         File.WriteAllText(IgnoreRules.PathOf(root), rules);
         var patterns = new GitIgnorePatterns(new ProcessRunner());
-        return (await new IgnoreRules(patterns, () => "3.0.0").DecideAsync(root, to, tree, CancellationToken.None)).Held;
+        return (await new IgnoreRules(patterns).DecideAsync(root, to, "2.9.0", tree, CancellationToken.None)).Held;
     }
 
     [Test]
@@ -63,8 +63,8 @@ internal sealed class IgnoreRulesTests
         var root = Tree(["src/common/X/Taken.cs"]);
         File.WriteAllText(IgnoreRules.PathOf(root), "# ours\nsrc/common/X/@2.9\n");
 
-        var decision = await new IgnoreRules(new GitIgnorePatterns(new ProcessRunner()), () => "3.0.0")
-            .DecideAsync(root, "3.0.0", ["src/common/X/Taken.cs"], CancellationToken.None);
+        var decision = await new IgnoreRules(new GitIgnorePatterns(new ProcessRunner()))
+            .DecideAsync(root, "3.0.0", "2.9.0", ["src/common/X/Taken.cs"], CancellationToken.None);
 
         decision.Held.ShouldBeEmpty();
         decision.Spent.ShouldHaveSingleItem().Line.ShouldBe(2);
@@ -77,8 +77,8 @@ internal sealed class IgnoreRulesTests
         var root = Tree(["src/common/X/Taken.cs"]);
         File.WriteAllText(IgnoreRules.PathOf(root), "src/common/X/@2.9\n");
 
-        var decision = await new IgnoreRules(new GitIgnorePatterns(new ProcessRunner()), () => "3.0.0")
-            .DecideAsync(root, "2.9.4", ["src/common/X/Taken.cs"], CancellationToken.None);
+        var decision = await new IgnoreRules(new GitIgnorePatterns(new ProcessRunner()))
+            .DecideAsync(root, "2.9.4", "2.9.0", ["src/common/X/Taken.cs"], CancellationToken.None);
 
         decision.Held.ShouldBe(["src/common/X/Taken.cs"]);
         decision.Spent.ShouldBeEmpty();
@@ -90,24 +90,10 @@ internal sealed class IgnoreRulesTests
         var root = Tree([]);
         File.WriteAllText(IgnoreRules.PathOf(root), "src/common/New/\n");
 
-        var decision = await new IgnoreRules(new GitIgnorePatterns(new ProcessRunner()), () => "3.0.0")
-            .DecideAsync(root, "3.0.0", ["src/common/New/Locked.cs"], CancellationToken.None);
+        var decision = await new IgnoreRules(new GitIgnorePatterns(new ProcessRunner()))
+            .DecideAsync(root, "3.0.0", "2.9.0", ["src/common/New/Locked.cs"], CancellationToken.None);
 
         decision.Held.ShouldBe(["src/common/New/Locked.cs"]);
-    }
-
-    [Test]
-    public async Task AnUpgradeToTheSources_ReadsAPinByTheToolVersion_AndRenewsItOnThatLine()
-    {
-        var root = Tree(["src/common/X/Taken.cs"]);
-        File.WriteAllText(IgnoreRules.PathOf(root), "src/common/X/@2.9\n");
-
-        var decision = await new IgnoreRules(new GitIgnorePatterns(new ProcessRunner()), () => "3.0.0")
-            .DecideAsync(root, "source", ["src/common/X/Taken.cs"], CancellationToken.None);
-
-        // The sources name no version, so the tool's own decides: 2.9 is spent, and the review renews it to 3.0.
-        decision.Version.ShouldBe("3.0.0");
-        decision.Spent.ShouldHaveSingleItem().Pin!.RenewedTo(decision.Version).ShouldBe("3.0");
     }
 
     [Test]
