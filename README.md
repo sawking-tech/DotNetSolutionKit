@@ -1,6 +1,6 @@
 # DotNetSolutionKit (dotskit)
 
-[![NuGet](https://img.shields.io/nuget/v/SawKing.DotNetSolutionKit?label=nuget&color=1f9d4c)](https://www.nuget.org/packages/SawKing.DotNetSolutionKit)
+[![NuGet](https://img.shields.io/nuget/v/SawKing.DotsKit.Templates?label=nuget&color=1f9d4c)](https://www.nuget.org/packages/SawKing.DotsKit.Templates)
 
 Made by Vladimir Savkin at [sawking.tech](https://sawking.tech/).
 
@@ -62,7 +62,7 @@ to 2.0.0 by hand first ([upgrading](docs/getting-started/upgrading.md)).
 <summary>The template alone, by <code>dotnet new</code></summary>
 
 ```bash
-dotnet new install SawKing.DotNetSolutionKit
+dotnet new install SawKing.DotsKit.Templates
 
 # the shared Common projects, the solution file and the first service
 dotnet new DotNetSolutionKit -N MyCompany -P MyProduct -S Orders --solution
@@ -79,7 +79,7 @@ To try the template from a clone: `dotnet new install /path/to/DotNetSolutionKit
 </details>
 
 The packages are [SawKing.DotsKit.Tool](https://www.nuget.org/packages/SawKing.DotsKit.Tool) and
-[SawKing.DotNetSolutionKit](https://www.nuget.org/packages/SawKing.DotNetSolutionKit) on nuget.org; every
+[SawKing.DotsKit.Templates](https://www.nuget.org/packages/SawKing.DotsKit.Templates) on nuget.org; every
 [release](https://github.com/sawking-tech/DotNetSolutionKit/releases) also carries them as `.nupkg` files.
 
 What the generated solutions look like:

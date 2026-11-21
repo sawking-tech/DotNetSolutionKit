@@ -15,7 +15,7 @@ dotnet tool install -g SawKing.DotsKit.Tool
 ```
 
 The tool is published from version 2.8. dotskit X.Y.Z generates with the template X.Y.Z: it installs the
-package `SawKing.DotNetSolutionKit` of its own version into a hive of its own, and the template installed
+package `SawKing.DotsKit.Templates` of its own version into a hive of its own, and the template installed
 by `dotnet new install` is left as it is.
 
 ## Commands
@@ -306,7 +306,7 @@ command spends its time on.
 
 `DOTSKIT_TEMPLATE_PACKAGES=<folder>` installs the template's package from a folder of nupkg files instead of
 nuget.org: for an offline machine or a build not published yet. The folder must hold
-`SawKing.DotNetSolutionKit.<version>.nupkg` of the version a command needs; releases before nuget.org still
+`SawKing.DotsKit.Templates.<version>.nupkg` of the version a command needs; releases before nuget.org still
 come from their tags on GitHub, and `DOTSKIT_TEMPLATE_SOURCE` still stands the sources folder in for a version.
 
 ## Exit codes

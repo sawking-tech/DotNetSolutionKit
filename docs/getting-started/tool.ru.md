@@ -15,7 +15,7 @@ dotnet tool install -g SawKing.DotsKit.Tool
 ```
 
 Инструмент публикуется с версии 2.8. dotskit X.Y.Z генерирует шаблоном X.Y.Z: он ставит пакет
-`SawKing.DotNetSolutionKit` своей версии в отдельное хранилище шаблонов и не трогает шаблон, установленный
+`SawKing.DotsKit.Templates` своей версии в отдельное хранилище шаблонов и не трогает шаблон, установленный
 через `dotnet new install`.
 
 ## Команды
@@ -303,7 +303,7 @@ src/services/ST.Demo.Orders/ST.Demo.Orders.Infrastructure/**@2.9
 
 `DOTSKIT_TEMPLATE_PACKAGES=<папка>` ставит пакет шаблона из папки с nupkg-файлами вместо nuget.org: для
 машины без сети или сборки, которую ещё не опубликовали. В папке должен лежать
-`SawKing.DotNetSolutionKit.<версия>.nupkg` той версии, которая нужна команде; выпуски до появления nuget.org
+`SawKing.DotsKit.Templates.<версия>.nupkg` той версии, которая нужна команде; выпуски до появления nuget.org
 прежде идут со своих тегов на GitHub, а `DOTSKIT_TEMPLATE_SOURCE` по-прежнему заменяет версию папкой исходников.
 
 ## Коды выхода
