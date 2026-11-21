@@ -66,8 +66,8 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
             await repair.BeforeBuildAsync(baseDir, moves.Within(step.InDone), [], ct, step.InDone);
             await repair.BeforeBuildAsync(nextDir, types, [], ct, step.InDoneOrThis, ignore.Held);
             HeldFiles.Apply(nextDir, baseDir, ignore.Held);
-            PackageVersions.KeepReferenced(baseDir, before, root);
-            PackageVersions.KeepReferenced(nextDir, before, root);
+            PackageVersions.KeepReferenced(baseDir, before, root, ignore.Held);
+            PackageVersions.KeepReferenced(nextDir, before, root, ignore.Held);
             // The repair by the build's errors cannot be carried by the trees: the template's files of the parts not merged
             // yet wait for their part, which brings them repaired.
             waiting = Folders.RelativeFiles(nextDir).Where(p => !step.InDoneOrThis(p)).ToHashSet(StringComparer.Ordinal);
@@ -75,7 +75,7 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
         else if (baseDir is not null)
         {
             // All at once: a package the template drops keeps its version while a project of the team's references it.
-            PackageVersions.KeepReferenced(nextDir, baseDir, root);
+            PackageVersions.KeepReferenced(nextDir, baseDir, root, ignore.Held);
         }
 
         var packages = PackageVersions.Hold(baseDir, nextDir, next.Packages, TemplateVersions.IsMajorStep(current?.Template, next.Template), ignore.Held);
