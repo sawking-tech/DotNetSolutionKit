@@ -21,7 +21,7 @@ internal sealed class NewSolutionScenarios
     {
         Template = "2.8.0",
         Solution = ["--NamespaceRoot", "ST", "--ProductName", "Demo"],
-        Services = [["--ServiceNameOrCustom", "Orders", "--HttpPort", "5000"]],
+        Services = [["--ServiceNameOrCustom", "Orders", "--http-port", "5000"]],
     };
 
     private static Planner Planner() =>

@@ -78,7 +78,7 @@ internal static partial class TemplateVersions
     /// <summary>Why a Messaging value of a release before 3.0 cannot be carried into <paramref name="version"/>; null when it can.</summary>
     public static string? WhyNotATransport(string? value, string version) =>
         NamesTransport(version) && value is "outbox" or "direct"
-            ? $"The Messaging value \"{value}\" is of 2.x, where it named the delivery alone: since 3.0 the value names the transport too. Use --Messaging rabbitmq:{value}."
+            ? $"The Messaging value \"{value}\" is of 2.x, where it named the delivery alone: since 3.0 the value names the transport too. Use --messaging rabbitmq:{value}."
             : null;
 
     /// <summary>

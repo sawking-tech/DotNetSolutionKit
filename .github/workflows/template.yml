@@ -64,50 +64,50 @@ jobs:
       matrix:
         include:
           - name: defaults
-            first: -N Acme -P Shop -S Orders --Solution
+            first: -N Acme -P Shop -S Orders --solution
           - name: every flag, three services
             first: >-
-              -N Acme -P Shop -S Orders --Solution --Messaging rabbitmq:outbox -I true --DiffApi true --FeatureFlags true
-              --HierarchyRules true --Storage true --ClickHouse true --MongoDB true --Notify email --GitHubCiCd true --Audit true
+              -N Acme -P Shop -S Orders --solution --messaging rabbitmq:outbox -I true --diff-api true --feature-flags true
+              --hierarchy-rules true --storage true --clickhouse true --mongodb true --notify email --github-cicd true --audit true
             # Flags that change a service's code are passed again to a later service, as the docs say.
             # The second service by the short names, so they keep working.
-            more: -N Acme -P Shop -S Billing --Messaging rabbitmq:outbox -I true --DiffApi true -FF true --Storage true -CH true --MongoDB true --Notify email --Audit true
-            gateway: -N Acme -P Shop -S Gateway --ApiGateway true
+            more: -N Acme -P Shop -S Billing --messaging rabbitmq:outbox -I true --diff-api true -FF true --storage true -CH true --mongodb true --notify email --audit true
+            gateway: -N Acme -P Shop -S Gateway --api-gateway true
             integration: true
             # ci.yml with coverage, as coverage.yml runs it; the others run it as a pull request
             coverage: true
             schemas: true
             layers: Orders
           - name: no background jobs
-            first: -N Acme -P Shop -S Orders -M false -H false  # -M false: the hidden name of --Solution in earlier versions
+            first: -N Acme -P Shop -S Orders -M false -H false  # -M false: the hidden name of --solution in earlier versions
             more: -N Acme -P Shop -S Billing -H false
           - name: direct bus
-            first: -N Acme -P Shop -S Orders --Solution --Messaging rabbitmq:direct
+            first: -N Acme -P Shop -S Orders --solution --messaging rabbitmq:direct
           - name: vault
-            first: -N Acme -P Shop -S Orders --Solution --Vault true --GitHubCiCd true --FeatureFlags true
-            more: -N Acme -P Shop -S Billing --Vault true --FeatureFlags true
+            first: -N Acme -P Shop -S Orders --solution --vault true --github-cicd true --feature-flags true
+            more: -N Acme -P Shop -S Billing --vault true --feature-flags true
             integration: true
           - name: sql server
             first: >-
-              -N Acme -P Shop -S Orders --Solution --Database mssql --Messaging rabbitmq:outbox -I true --DiffApi true
-              --FeatureFlags true --HierarchyRules true --Audit true --GitHubCiCd true
-            more: -N Acme -P Shop -S Billing --Database mssql --Messaging rabbitmq:outbox -I true --DiffApi true --FeatureFlags true --Audit true
+              -N Acme -P Shop -S Orders --solution --database mssql --messaging rabbitmq:outbox -I true --diff-api true
+              --feature-flags true --hierarchy-rules true --audit true --github-cicd true
+            more: -N Acme -P Shop -S Billing --database mssql --messaging rabbitmq:outbox -I true --diff-api true --feature-flags true --audit true
             integration: true
             schemas: true
           - name: xunit tests
-            first: -N Acme -P Shop -S Orders --Solution --TestFramework xunit --Messaging rabbitmq:outbox --Audit true
-            more: -N Acme -P Shop -S Billing --TestFramework xunit
-            gateway: -N Acme -P Shop -S Gateway --ApiGateway true --TestFramework xunit
+            first: -N Acme -P Shop -S Orders --solution --test-framework xunit --messaging rabbitmq:outbox --audit true
+            more: -N Acme -P Shop -S Billing --test-framework xunit
+            gateway: -N Acme -P Shop -S Gateway --api-gateway true --test-framework xunit
             layers: Orders
           - name: dotted names
-            first: -N Acme.Corp -P Retail.Shop -S Sales.Orders --Solution --Messaging rabbitmq:outbox --DiffApi true
-            more: -N Acme.Corp -P Retail.Shop -S Sales.Billing --Messaging rabbitmq:outbox --DiffApi true
+            first: -N Acme.Corp -P Retail.Shop -S Sales.Orders --solution --messaging rabbitmq:outbox --diff-api true
+            more: -N Acme.Corp -P Retail.Shop -S Sales.Billing --messaging rabbitmq:outbox --diff-api true
           - name: kubernetes files
-            first: -N Acme -P Shop -S Orders --Solution --Deploy k8s --Agent opencode
+            first: -N Acme -P Shop -S Orders --solution --deploy k8s --agent opencode
             agent: opencode
-            more: -N Acme -P Shop -S Billing --Deploy k8s
+            more: -N Acme -P Shop -S Billing --deploy k8s
           - name: no deployment files
-            first: -N Acme -P Shop -S Orders --Solution --Deploy none --Agent none
+            first: -N Acme -P Shop -S Orders --solution --deploy none --agent none
             agent: none
 
     steps:
@@ -170,7 +170,7 @@ jobs:
         working-directory: ${{ runner.temp }}/solution
         run: bash "$GITHUB_WORKSPACE/scripts/check-service-layers.sh" . "${{ matrix.layers }}"
 
-      # The rules and skills for an AI agent are in the format --Agent chose, and only in it.
+      # The rules and skills for an AI agent are in the format --agent chose, and only in it.
       - name: Agent rules and skills
         if: needs.scope.outputs.code == 'true'
         working-directory: ${{ runner.temp }}/solution
@@ -263,7 +263,7 @@ jobs:
           dotnet pack DotsKit.Templates.csproj --configuration Release -o "$RUNNER_TEMP/package"
           dotnet new install "$RUNNER_TEMP"/package/*.nupkg
           mkdir "$RUNNER_TEMP/solution" && cd "$RUNNER_TEMP/solution"
-          dotnet new DotNetSolutionKit -N Acme -P Shop -S Orders --Solution --GitHubCiCd true
+          dotnet new DotNetSolutionKit -N Acme -P Shop -S Orders --solution --github-cicd true
           # The manifest the template wrote at generation names the packed version.
           version=$(jq -r .version "$GITHUB_WORKSPACE/version.json")
           test -f .dotskit/manifest.json && [ "$(jq -r .template .dotskit/manifest.json)" = "$version" ]
@@ -327,9 +327,9 @@ jobs:
           dotnet new install ./template
           New-Item -ItemType Directory "$env:RUNNER_TEMP/solution" | Out-Null
           Set-Location "$env:RUNNER_TEMP/solution"
-          dotnet new DotNetSolutionKit -N Acme -P Shop -S Orders --Solution
+          dotnet new DotNetSolutionKit -N Acme -P Shop -S Orders --solution
           dotnet new DotNetSolutionKit -N Acme -P Shop -S Sales.Billing --allow-scripts yes
-          dotnet new DotNetSolutionKit -N Acme -P Shop -S Gateway --ApiGateway true --allow-scripts yes
+          dotnet new DotNetSolutionKit -N Acme -P Shop -S Gateway --api-gateway true --allow-scripts yes
           $listed = dotnet sln src/services/Acme.Shop.All.sln list
           $billing = @($listed | Select-String -SimpleMatch 'Acme.Shop.Sales.Billing').Count
           $gateway = @($listed | Select-String -SimpleMatch 'Acme.Shop.Gateway').Count

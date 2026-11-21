@@ -20,7 +20,7 @@ internal sealed class CapabilityScenarios
     {
         var solution = await ASolutionWithoutCapabilitiesAsync();
 
-        var billing = await solution.DotskitAsync("new", "-S", "Billing", "--MongoDB", "true", "--Messaging", "rabbitmq:outbox", "-H", "false", "--yes");
+        var billing = await solution.DotskitAsync("new", "-S", "Billing", "--mongodb", "true", "--messaging", "rabbitmq:outbox", "-H", "false", "--yes");
 
         billing.Code.ShouldBe((int)ExitCode.Done, billing.Output + billing.Error);
         billing.Output.ShouldContain("the solution builds");
@@ -51,7 +51,7 @@ internal sealed class CapabilityScenarios
     private static async Task<Sandbox> ASolutionWithoutCapabilitiesAsync()
     {
         var solution = await Sandbox.EmptyAsync();
-        var made = await solution.DotnetNewAsync("-N", "ST", "-P", "Demo", "-S", "Orders", "--Solution", "-H", "false");
+        var made = await solution.DotnetNewAsync("-N", "ST", "-P", "Demo", "-S", "Orders", "--solution", "-H", "false");
 
         made.Code.ShouldBe(0, made.Output + made.Error);
         await solution.CommitAsync("generated");
