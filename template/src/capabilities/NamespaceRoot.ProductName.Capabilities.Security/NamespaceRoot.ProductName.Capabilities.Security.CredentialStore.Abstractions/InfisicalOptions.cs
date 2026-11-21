@@ -1,9 +1,9 @@
 namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Abstractions;
 
 /// <summary>
-/// Infisical as the secret store: the <c>Infisical</c> section.
+/// Infisical as the configuration store: the <c>Infisical</c> section.
 /// </summary>
-public sealed class InfisicalOptions : SecretStoreOptions
+public sealed class InfisicalOptions : ConfigurationStoreOptions
 {
     public const string SectionName = "Infisical";
 
@@ -13,7 +13,7 @@ public sealed class InfisicalOptions : SecretStoreOptions
     public string HostUri { get; set; } = "https://app.infisical.com";
 
     /// <summary>
-    /// The project holding the platform's secrets.
+    /// The project holding the platform's configuration.
     /// </summary>
     public string ProjectId { get; set; } = string.Empty;
 

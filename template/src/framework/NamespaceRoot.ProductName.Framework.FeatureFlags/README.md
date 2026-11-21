@@ -7,9 +7,9 @@ same file, and a service gains a new flag without a line of code - it adds a con
 `FeatureKeys` only for the flags its own code reads.
 
 This project is a detachable seam of the system, a candidate for a package of its own. What is
-deliberately not here: the secret-store integration of the flags - the
+deliberately not here: the configuration-store integration of the flags - the
 `NamespaceRoot.ProductName.Capabilities.Security.CredentialStore` capability feeds the catalogue
-from Infisical or Vault when `--SecretStore` is on; the module itself depends on nothing but
+from Infisical or Vault when `--Infisical` or `--Vault` is on; the module itself depends on nothing but
 configuration.
 
 ### What is inside

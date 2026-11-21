@@ -4,7 +4,7 @@ using NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
 using NUnit.Framework;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.Configuration;
 
 /// <summary>
 /// Vault reaches configuration by the same rules as any secret store: its own section, the shared path
@@ -29,7 +29,7 @@ public class VaultConfigurationTests
             (Service, new Dictionary<string, string> { ["Mail__Host"] = "auth-mail" }));
         var builder = new ConfigurationBuilder().AddInMemoryCollection(Configured());
 
-        var configuration = builder.AddPlatformVaultSecrets(Service, storeFactory: _ => store).Build();
+        var configuration = builder.AddPlatformVaultConfiguration(Service, storeFactory: _ => store).Build();
 
         store.ReadPaths.ShouldBe(["shared", Service]);
         configuration["Mail:Host"].ShouldBe("auth-mail");
@@ -41,7 +41,7 @@ public class VaultConfigurationTests
     {
         var builder = new ConfigurationBuilder();
 
-        var start = () => builder.AddPlatformVaultSecrets(Service, storeFactory: _ => new FakeStore()).Build();
+        var start = () => builder.AddPlatformVaultConfiguration(Service, storeFactory: _ => new FakeStore()).Build();
 
         Should.Throw<ConfigurationException>(start);
     }
@@ -50,7 +50,7 @@ public class VaultConfigurationTests
     public void An_unreachable_vault_stops_the_service()
     {
         var start = () => new ConfigurationBuilder().AddInMemoryCollection(Configured())
-            .AddPlatformVaultSecrets(Service, storeFactory: _ => new UnreachableStore())
+            .AddPlatformVaultConfiguration(Service, storeFactory: _ => new UnreachableStore())
             .Build();
 
         Should.Throw<ConfigurationException>(start);
@@ -64,13 +64,13 @@ public class VaultConfigurationTests
         settings["Vault:Enabled"] = "false";
 
         new ConfigurationBuilder().AddInMemoryCollection(settings)
-            .AddPlatformVaultSecrets(Service, storeFactory: _ => store)
+            .AddPlatformVaultConfiguration(Service, storeFactory: _ => store)
             .Build();
 
         store.ReadPaths.ShouldBeEmpty();
     }
 
-    private sealed class FakeStore(params (string Path, Dictionary<string, string> Secrets)[] secrets) : ISecretStore
+    private sealed class FakeStore(params (string Path, Dictionary<string, string> Secrets)[] secrets) : IConfigurationStore
     {
         public List<string> ReadPaths { get; } = [];
 
@@ -82,7 +82,7 @@ public class VaultConfigurationTests
         }
     }
 
-    private sealed class UnreachableStore : ISecretStore
+    private sealed class UnreachableStore : IConfigurationStore
     {
         public Task<IReadOnlyDictionary<string, string>> ReadAsync(string path, CancellationToken cancellationToken = default) =>
             throw new ConfigurationException("Vault is down");

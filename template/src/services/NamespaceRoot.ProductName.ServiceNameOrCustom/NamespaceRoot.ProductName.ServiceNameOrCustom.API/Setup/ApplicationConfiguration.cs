@@ -2,7 +2,7 @@ using NamespaceRoot.ProductName.Common.Application.Configuration;
 //#if (FeatureFlags)
 using NamespaceRoot.ProductName.Framework.FeatureFlags;
 //#endif
-//#if (SecretStore)
+//#if (ConfigurationStore)
 using NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
 //#endif
 //#if (DiffApi)
@@ -42,7 +42,7 @@ internal static class ApplicationConfiguration
         builder.AddEnvironmentVariables();
 
 //#if (Infisical)
-        // The secret store goes last, so a value it holds wins over anything shipped in the image. Its
+        // The configuration store goes last, so a value it holds wins over anything shipped in the image. Its
         // connection (project, environment, folders, whether it is required) is read from the Infisical
         // section of configuration; the machine identity comes from environment variables, added above.
         // The arguments are fallbacks for when configuration says nothing: the service's own folder, and
@@ -51,23 +51,23 @@ internal static class ApplicationConfiguration
         // Skipped for --schema-only: a build agent producing the API document holds no store identity.
         if (!SchemaOnlyMode.IsEnabled(args))
         {
-            builder.AddPlatformSecrets("/servicenameorcustom", optional: env.IsEnvironment("Local"));
+            builder.AddPlatformConfiguration("/servicenameorcustom", optional: env.IsEnvironment("Local"));
         }
 //#else
-        builder.AddPlatformSecrets("/servicenameorcustom", optional: env.IsEnvironment("Local"));
+        builder.AddPlatformConfiguration("/servicenameorcustom", optional: env.IsEnvironment("Local"));
 //#endif
 
 //#endif
 //#if (Vault)
-        // The same for Vault: the shared secret, then this service's, from the Vault section of
+        // The same for Vault: the shared folder, then this service's, from the Vault section of
         // configuration; the token or the AppRole comes from environment variables, added above.
 //#if (DiffApi)
         if (!SchemaOnlyMode.IsEnabled(args))
         {
-            builder.AddPlatformVaultSecrets("servicenameorcustom", optional: env.IsEnvironment("Local"));
+            builder.AddPlatformVaultConfiguration("servicenameorcustom", optional: env.IsEnvironment("Local"));
         }
 //#else
-        builder.AddPlatformVaultSecrets("servicenameorcustom", optional: env.IsEnvironment("Local"));
+        builder.AddPlatformVaultConfiguration("servicenameorcustom", optional: env.IsEnvironment("Local"));
 //#endif
 
 //#endif

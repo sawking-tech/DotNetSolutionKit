@@ -4,16 +4,16 @@ using NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
 using NUnit.Framework;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.Configuration;
 
 /// <summary>
 /// A running service reads the store again: a changed value reaches configuration and raises its change
 /// token, and a store that stops answering leaves the values as they were.
 /// </summary>
 [TestFixture]
-public class SecretsReloadTests
+public class ConfigurationStoreReloadTests
 {
-    private sealed class ChangingStore : ISecretStore
+    private sealed class ChangingStore : IConfigurationStore
     {
         public Dictionary<string, string> Values { get; set; } = new() { ["Limits__PageSize"] = "50" };
         public bool Down { get; set; }
@@ -25,7 +25,7 @@ public class SecretsReloadTests
     }
 
     // ReloadSeconds is 0, so no timer runs and the test calls the reload itself.
-    private static (IConfigurationRoot Configuration, SecretsConfigurationProvider Provider) Build(ChangingStore store)
+    private static (IConfigurationRoot Configuration, ConfigurationStoreProvider Provider) Build(ChangingStore store)
     {
         var builder = new ConfigurationBuilder();
 //#if (Infisical)
@@ -34,16 +34,16 @@ public class SecretsReloadTests
             ["Infisical:ProjectId"] = "project", ["Infisical:EnvironmentSlug"] = "prod",
             ["Infisical:ClientId"] = "id", ["Infisical:ClientSecret"] = "secret", ["Infisical:ReloadSeconds"] = "0",
         });
-        builder.AddPlatformSecrets("/orders", storeFactory: _ => store);
+        builder.AddPlatformConfiguration("/orders", storeFactory: _ => store);
 //#else
         builder.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Vault:Address"] = "http://vault:8200", ["Vault:Token"] = "test-do-not-use", ["Vault:ReloadSeconds"] = "0",
         });
-        builder.AddPlatformVaultSecrets("orders", storeFactory: _ => store);
+        builder.AddPlatformVaultConfiguration("orders", storeFactory: _ => store);
 //#endif
         var configuration = builder.Build();
-        return (configuration, configuration.Providers.OfType<SecretsConfigurationProvider>().Last());
+        return (configuration, configuration.Providers.OfType<ConfigurationStoreProvider>().Last());
     }
 
     [Test]
@@ -84,6 +84,6 @@ public class SecretsReloadTests
         await provider.ReloadAsync();
 
         configuration["Limits:PageSize"].ShouldBe("50");
-        configuration[SecretsConfigurationProvider.ReloadErrorKey].ShouldNotBeNull().ShouldContain("the store is down");
+        configuration[ConfigurationStoreProvider.ReloadErrorKey].ShouldNotBeNull().ShouldContain("the store is down");
     }
 }

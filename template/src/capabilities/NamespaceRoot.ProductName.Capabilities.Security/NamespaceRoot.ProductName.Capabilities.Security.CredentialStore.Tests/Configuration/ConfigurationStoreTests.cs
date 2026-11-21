@@ -4,7 +4,7 @@ using NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
 using NUnit.Framework;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.Secrets;
+namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.Configuration;
 
 /// <summary>
 /// How secrets become configuration: which folder wins, how a secret name becomes a configuration path,
@@ -12,7 +12,7 @@ namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore.Tests.
 /// client and is not what breaks; these rules are.
 /// </summary>
 [TestFixture]
-public class SecretsConfigurationTests
+public class ConfigurationStoreTests
 {
     private const string Shared = "/";
     private const string Service = "/auth";
@@ -72,7 +72,7 @@ public class SecretsConfigurationTests
 
         var store = new FakeStore(
             (Shared, new Dictionary<string, string> { ["ConnectionStrings__DefaultConnection"] = "Host=prod-db" }));
-        builder.AddPlatformSecrets(Service, optional: false, storeFactory: _ => store);
+        builder.AddPlatformConfiguration(Service, optional: false, storeFactory: _ => store);
 
         builder.Build()["ConnectionStrings:DefaultConnection"].ShouldBe("Host=prod-db",
             "a file baked into the image must not shadow what the environment was given");
@@ -119,7 +119,7 @@ public class SecretsConfigurationTests
             ["Infisical:Optional"] = "false",
         });
 
-        var start = () => builder.AddPlatformSecrets(Service, optional: true, storeFactory: _ => new FakeStore()).Build();
+        var start = () => builder.AddPlatformConfiguration(Service, optional: true, storeFactory: _ => new FakeStore()).Build();
 
         Should.Throw<ConfigurationException>(start,
             "k8s sets Infisical__Optional=false so a Development host still refuses to start without the store");
@@ -139,7 +139,7 @@ public class SecretsConfigurationTests
         new((Shared, new Dictionary<string, string> { ["ConnectionStrings__DefaultConnection"] = connection }));
 
     private static IConfiguration Build(
-        ISecretStore store,
+        IConfigurationStore store,
         bool configured = true,
         bool optional = false,
         string servicePath = Service)
@@ -157,12 +157,12 @@ public class SecretsConfigurationTests
             });
         }
 
-        builder.AddPlatformSecrets(servicePath, optional, _ => store);
+        builder.AddPlatformConfiguration(servicePath, optional, _ => store);
 
         return builder.Build();
     }
 
-    private sealed class FakeStore : ISecretStore
+    private sealed class FakeStore : IConfigurationStore
     {
         private readonly Dictionary<string, IReadOnlyDictionary<string, string>> _folders;
 
@@ -185,7 +185,7 @@ public class SecretsConfigurationTests
         }
     }
 
-    private sealed class UnreachableStore : ISecretStore
+    private sealed class UnreachableStore : IConfigurationStore
     {
         public Task<IReadOnlyDictionary<string, string>> ReadAsync(
             string path,

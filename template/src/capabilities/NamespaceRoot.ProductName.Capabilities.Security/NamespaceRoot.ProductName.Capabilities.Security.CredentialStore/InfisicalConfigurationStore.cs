@@ -13,14 +13,14 @@ namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
 /// The client logs in once and is reused: authentication is a round trip, and a service reads several
 /// folders while starting up.
 /// </remarks>
-public sealed class InfisicalSecretStore : ISecretStore, IDisposable
+public sealed class InfisicalConfigurationStore : IConfigurationStore, IDisposable
 {
     private readonly InfisicalOptions _options;
     private readonly SemaphoreSlim _loginGate = new(1, 1);
 
     private InfisicalClient? _client;
 
-    public InfisicalSecretStore(InfisicalOptions options)
+    public InfisicalConfigurationStore(InfisicalOptions options)
     {
         _options = options;
     }
