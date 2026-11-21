@@ -12,11 +12,12 @@ internal sealed class GitClient(IProcessRunner runner)
     private const string PathspecFromFile = "--pathspec-from-file";
     private const string PathspecFileNul = "--pathspec-file-nul";
 
-    public async Task StageAsync(string root, IReadOnlyCollection<string> paths, CancellationToken ct)
+    /// <summary>Stages the paths; <paramref name="force"/> takes a path the solution's own .gitignore hides, as -f does.</summary>
+    public async Task StageAsync(string root, IReadOnlyCollection<string> paths, CancellationToken ct, bool force = false)
     {
         if (paths.Count > 0)
         {
-            await runner.RunCheckedAsync("git", await WithPathsAsync(["add"], paths, ct), root, ct);
+            await runner.RunCheckedAsync("git", await WithPathsAsync(force ? ["add", "-f"] : ["add"], paths, ct), root, ct);
         }
     }
 

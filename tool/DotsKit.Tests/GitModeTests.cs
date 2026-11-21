@@ -180,7 +180,7 @@ internal sealed class GitModeTests
         public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct) =>
             Task.FromResult<IReadOnlyList<string>>([]);
 
-        public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) => Task.CompletedTask;
+        public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct, bool force = false) => Task.CompletedTask;
 
         public Task AbortAsync(string root, CancellationToken ct) => Task.CompletedTask;
     }

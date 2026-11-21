@@ -126,7 +126,7 @@ internal sealed class RollbackScenarios
         public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct) =>
             git.MergeAsync(root, @base, next, preferTemplate, markBase, ct);
 
-        public async Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct)
+        public async Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct, bool force = false)
         {
             await git.StageAsync(root, paths, ct);
             throw new IOException("the disk is full");

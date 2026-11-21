@@ -79,12 +79,13 @@ internal sealed class IgnoreScenarios
     [Test]
     public async Task APinTheUpgradeSpends_ComesToTheReview_AndOneStillHolding_Stays()
     {
+        // 2.9.1 -> the sources is a step to the tool's line, 3.0.0: the pin of 2.9 and the pin of the major are both
+        // spent, and the review writes each back - the pin of the major on the line the solution has moved to.
         var (solution, upgraded) = await UpgradedWithAsync($"CLAUDE.md@2.9\nREADME.md@major\n");
 
-        // 2.9 holds only within 2.9.x: the upgrade to the sources passes it, and the review brings the line back.
         var rules = solution.Read(RulesFile);
         rules.ShouldContain("# CLAUDE.md@3.", customMessage: "the pin of 2.9 is spent and commented out at the line of the target");
-        rules.ShouldContain("README.md@major", customMessage: "@major holds for good and is left as the team wrote it");
+        rules.ShouldContain("# README.md@3 ", customMessage: "the pin of the major moves onto the line the upgrade went to");
         upgraded.Output.ShouldContain("pin(s) the upgrade spent");
     }
 

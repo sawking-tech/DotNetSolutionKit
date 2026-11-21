@@ -39,7 +39,7 @@ internal sealed class PlanWriterTests
         public Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct) =>
             throw new InvalidOperationException("the tool's own write reached git");
 
-        public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) => Task.CompletedTask;
+        public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct, bool force = false) => Task.CompletedTask;
 
         public Task AbortAsync(string root, CancellationToken ct) => Task.CompletedTask;
     }

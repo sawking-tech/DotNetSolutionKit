@@ -39,7 +39,7 @@ internal sealed class PlanReport(ITerminal terminal)
 
         foreach (var rule in ignore.Spent)
         {
-            terminal.Info($"  pin spent line {rule.Line}: {rule.Pattern} - the upgrade to {ignore.Version} passes its pin");
+            terminal.Info($"  pin spent line {rule.Line}: {rule.Pattern} - the upgrade to {ignore.Version} passes its pin; the review after the merge says what becomes of it");
         }
     }
 

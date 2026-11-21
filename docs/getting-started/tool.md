@@ -220,20 +220,20 @@ src/services/ST.Demo.Orders/ST.Demo.Orders.Infrastructure/**@2.9
 ```
 
 A rule with no pin holds its path for good: the upgrade writes no file of it, and neither adds nor removes one.
-A file the template adds under a held pattern stays out too, so the rule covers a path the solution does not
-have yet.
+A file the template adds under a held pattern stays out too, so a rule on a path the solution does not have yet
+keeps it absent.
 
 `@` and a version pin the rule. An upgrade below the pin's line leaves the path alone; the upgrade that passes
 it spends the pin, and the path goes into the usual merge. `@2.9` holds through 2.9.x and lets 2.10.0 through;
 `@2` holds through 2.x and lets 3.0.0 through. `@major` holds through the major the solution is on, and the next
 major spends it: the tool then comments the line out and writes the next one, for the team to confirm.
 
-After an upgrade the tool reviews the pins it spent and writes the file beside the merge: one whose paths the
-upgrade brought to the template's own is commented out, with the reason on the line, and one whose paths still
-differ is renewed to the version the upgrade went to. A pin of the whole major has its own way: the line goes
-commented out with the reason, and the next pin is written under it, commented out of its own, for the team to
-confirm. The report names each and its line, and the change joins
-the merge like any other file, so it reaches the team's review and `git merge --abort` puts it back.
+After an upgrade the tool reviews the pins it spent and writes each back in one of three ways. A pin whose paths
+became the template's own is commented out, with the reason on the line. A pin whose paths still differ is
+renewed and stays live, so the rule holds the path another round. A pin of the whole major is moved by the tool
+itself: the old line is commented out with the reason, and the next pin, of the line the solution has moved to,
+is written under it commented out, for the team to uncomment. The report names each and its line, and the change
+joins the merge like any other file, so it reaches the team's review and `git merge --abort` puts it back.
 
 Matching is git's own: the file's rules go to `git check-ignore` as an excludes file, in a repository of the
 tool's own. The same syntax as `.gitignore` holds, the exclusion of a folder not re-entered by a rule on a file

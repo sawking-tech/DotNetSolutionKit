@@ -72,6 +72,33 @@ internal sealed class IgnoreRulesTests
     }
 
     [Test]
+    public async Task ACancellationRule_BringsItsFileBack_AndAPathBroughtBackIsNoHold()
+    {
+        // git names a ! rule for the path it brings back; a path brought back by the team's own rule is the template's
+        // to write, so it is never held, whatever the pin of the rule that named it.
+        var root = Tree(["src/x/A.cs", "src/x/Keep.cs"]);
+        File.WriteAllText(IgnoreRules.PathOf(root), "src/x/*.cs\n!src/x/Keep.cs\n");
+
+        var decision = await new IgnoreRules(new GitIgnorePatterns(new ProcessRunner()))
+            .DecideAsync(root, "3.0.0", "2.9.0", ["src/x/A.cs", "src/x/Keep.cs"], CancellationToken.None);
+
+        decision.Held.ShouldBe(["src/x/A.cs"]);
+    }
+
+    [Test]
+    public async Task ASpentRule_StillNamesThePathsItsReviewAsksAbout()
+    {
+        var root = Tree(["src/x/A.cs"]);
+        File.WriteAllText(IgnoreRules.PathOf(root), "src/x/@2.9\n");
+
+        var decision = await new IgnoreRules(new GitIgnorePatterns(new ProcessRunner()))
+            .DecideAsync(root, "3.0.0", "2.9.0", ["src/x/A.cs"], CancellationToken.None);
+
+        decision.Held.ShouldBeEmpty();
+        decision.PathsOf[decision.Spent[0]].ShouldBe(new HashSet<string> { "src/x/A.cs" }, customMessage: "the review reads these paths against the template's own");
+    }
+
+    [Test]
     public async Task AnUnexpiredPin_HoldsItsPaths()
     {
         var root = Tree(["src/common/X/Taken.cs"]);

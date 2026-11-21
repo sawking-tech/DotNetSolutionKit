@@ -76,7 +76,7 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
             PackageVersions.KeepReferenced(nextDir, baseDir, root);
         }
 
-        var packages = PackageVersions.Hold(baseDir, nextDir, next.Packages, TemplateVersions.IsMajorStep(current?.Template, next.Template));
+        var packages = PackageVersions.Hold(baseDir, nextDir, next.Packages, TemplateVersions.IsMajorStep(current?.Template, next.Template), ignore.Held);
         // A new solution in an empty folder is unpacked, not merged. Beside files it merges by git, like an upgrade:
         // an empty tree then stands for what the template gave before.
         var byGit = current is not null || !SolutionRoot.IsEmpty(root);

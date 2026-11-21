@@ -13,7 +13,7 @@ internal interface IGitMerge
     Task<IReadOnlyList<string>> MergeAsync(string root, TemplateCommit @base, TemplateCommit next, bool preferTemplate, bool markBase, CancellationToken ct);
 
     /// <summary>Adds the files the tool wrote beside the merge to it, so <c>git merge --abort</c> puts them back too.</summary>
-    Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct);
+    Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct, bool force = false);
 
     /// <summary>Undoes a merge this run started: a later step of the command failed.</summary>
     Task AbortAsync(string root, CancellationToken ct);
@@ -284,7 +284,7 @@ internal sealed partial class GitTemplateMerge(IProcessRunner runner, string sel
         return TemplateStyle.Of(path, before).SameTextAs(TemplateStyle.Of(path, after));
     }
 
-    public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct) => _git.StageAsync(root, paths, ct);
+    public Task StageAsync(string root, IReadOnlyList<string> paths, CancellationToken ct, bool force = false) => _git.StageAsync(root, paths, ct, force);
 
     /// <summary>
     /// The working branch and <see cref="Branch"/> back where they were before the run, in one step each. The tree was
