@@ -32,7 +32,7 @@ public sealed class ReceiptStore(IMongoStore mongo) : IReceiptStore
 | Настройка | |
 |---|---|
 | `MongoDB:Enabled` | `true`; `false` - база отвечает 503, проверка готовности снимается, строка подключения и база не требуются |
-| `MongoDB:ConnectionString` | `mongodb://user:password@host:27017/?authSource=admin`, из окружения или хранилища секретов; проверяется на старте |
+| `MongoDB:ConnectionString` | `mongodb://user:password@host:27017/?authSource=admin`, из окружения или хранилища конфигурации; проверяется на старте |
 | `MongoDB:Database` | собственная база сервиса; при генерации - имя сервиса |
 
 Под docker compose инфраструктура получает сервер MongoDB; учётные данные берутся из

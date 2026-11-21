@@ -73,8 +73,8 @@ await bus.SendAsync(new SendEmailCommandV1
 | `Email:TimeoutSeconds` | 30: SMTP, на каждую сетевую операцию доставки; Graph его не читает |
 | `Email:Smtp:Host`, `Email:Smtp:Port`, `Email:Smtp:From` | сервер и отправитель; по умолчанию порт 587 |
 | `Email:Smtp:Secure` | `true`: TLS при подключении на любом порту; иначе 465 - TLS при подключении, 587 - STARTTLS |
-| `Email:Smtp:Username`, `Email:Smtp:Password` | только для сервера, который требует входа, из хранилища секретов |
-| `Email:GraphApi:TenantId`, `ClientId`, `ClientSecret` | приложение, которое отправляет, секрет из хранилища секретов |
+| `Email:Smtp:Username`, `Email:Smtp:Password` | только для сервера, который требует входа, из хранилища конфигурации |
+| `Email:GraphApi:TenantId`, `ClientId`, `ClientSecret` | приложение, которое отправляет, секрет из хранилища конфигурации |
 | `Email:GraphApi:SenderEmail` | ящик организации, от имени которого уходят письма |
 | `Email:Sandbox:Enabled` | по умолчанию `true`; вне Production песочница действует при любом значении |
 | `Email:Sandbox:ReceiverAddress` | куда уходят перехваченные письма |

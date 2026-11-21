@@ -121,7 +121,7 @@ live in `src/capabilities`.
 | `Analytics` | analytical data | ClickHouse |
 | `Messaging` | messaging | brokers, notifications, etc. |
 | `Background` | background jobs | Hangfire, etc. |
-| `Security` | security | secret stores: Infisical, Vault, etc. |
+| `Security` | security | configuration stores: Infisical, Vault, etc. |
 
 The groups are open: a new system joins a fitting group or starts a new one. A capability can
 carry traits of different groups - it is placed by the predominant use case: a secrets store is

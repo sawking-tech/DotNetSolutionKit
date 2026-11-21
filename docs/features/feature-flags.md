@@ -127,7 +127,7 @@ After it:
 | Evaluate in code | `IFeatureManager` from `Microsoft.FeatureManagement`, backed by the shared file |
 | Guard an endpoint | `[FeatureGate(FeatureKeys.SomeFeature)]` - while the flag is off the route answers 404 and is left out of the Swagger document |
 | Read the platform view | `IFeatureCatalog` - value plus owner, expiry, tags and the deciding layer |
-| Change a value | edit `features.json` on disk or the value in the secret store |
+| Change a value | edit `features.json` on disk or the value in the configuration store |
 
 Evaluation stays with `Microsoft.FeatureManagement`: its evaluation, its snapshots and its
 `[FeatureGate]` are already written and tested. The template adds the schema, the shared file and the
@@ -147,12 +147,12 @@ constant at all.
 ## Changing a value
 
 A flag is switched by editing the configuration it comes from: `features.json` on disk, or the value in
-the secret store (`-I` or `--Vault`). Services re-read it, so the change applies without a restart. In a
+the configuration store (`-I` or `--Vault`). Services re-read it, so the change applies without a restart. In a
 container `features.json` is part of the image, so changing it there means a new image and a deployment. The
 platform has no write endpoint: a service that wrote flags would need write access to the store it
 reads.
 
-A management UI built on top follows the same shape, as the secret store's own UI does: it writes to the
+A management UI built on top follows the same shape, as the configuration store's own UI does: it writes to the
 source, `features.json` or the store, and services keep reading it. To apply a change before the next
 periodic read, the UI signals the services to re-read; it does not send them the value.
 
@@ -200,7 +200,7 @@ so a parallel run has nothing shared to race over and nothing left behind for th
 Two guard tests check that every constant in `FeatureKeys` names a flag that exists,
 and every declared key keeps the agreed shape.
 
-With a secret store (`-I` or `--Vault`), `FeatureFlagsStoreOutageTests` in `CredentialStore.Tests` runs the layers
+With a configuration store (`-I` or `--Vault`), `FeatureFlagsStoreOutageTests` in `CredentialStore.Tests` runs the layers
 above end to end on the store's real configuration provider, with only the store faked: a flag set in the
 store decides, a change applies on the next read, a store that goes down leaves the flags as they were, a
 pinned flag keeps the file's value over the store, and a start with the store down does not happen.

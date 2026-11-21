@@ -19,7 +19,7 @@ ST-Demo/
 │   │   ├── ST.Demo.Common/                  the domain's primitives: entities, aggregates, events, Money
 │   │   ├── ST.Demo.Common.Contracts/        what crosses the boundary: requests, responses, bus messages
 │   │   ├── ST.Demo.Common.Application/      use cases over the domain, the ports they need
-│   │   ├── ST.Demo.Common.Infrastructure/   EF Core, the bus, the secret store, the outside world
+│   │   ├── ST.Demo.Common.Infrastructure/   EF Core, the bus, the configuration store, the outside world
 │   │   ├── ST.Demo.Common.Web/              the host: pipeline, errors, Swagger, authentication
 │   │   ├── ST.Demo.Common.Testing/          the test harness, with no test framework
 │   │   └── ST.Demo.Common.Tests/            the tests of Common

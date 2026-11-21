@@ -4,8 +4,8 @@ Generated with `-I` for [Infisical](https://infisical.com) or `--Vault` for [Has
 off by default. Pass the flag with `--Solution`, and to each service generated later that reads secrets.
 What follows holds for both; [Vault](#hashicorp-vault) has its own section for what differs.
 
-The service reads two folders of an Infisical project, the shared one and its own,
-and lays them over the rest of configuration. Code reads a secret like any other setting: a secret named
+The store is the solution's configuration store: the service reads two folders of an Infisical project,
+the shared one and its own, and lays them over the rest of configuration. Code reads a secret like any other setting: a secret named
 `ConnectionStrings__DefaultConnection` is `configuration.GetConnectionString("DefaultConnection")`.
 
 Keep both secrets and ordinary settings in the store. A value there changes without a new build or a

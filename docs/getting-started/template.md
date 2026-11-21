@@ -149,5 +149,5 @@ dotnet run --project src/services/MyCompany.MyProduct.Orders/MyCompany.MyProduct
 A misconfigured service stops at startup rather than at the first request; see
 [startup checks](../operations/startup-checks.md).
 
-To run the service before its database, broker or secret store exist, switch them off in configuration,
+To run the service before its database, broker or configuration store exist, switch them off in configuration,
 for example `Database__Enabled=false`; see [switching dependencies off](../operations/switching-dependencies-off.md).

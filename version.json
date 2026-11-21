@@ -6,7 +6,7 @@
       "highlights": [
         "ClickHouse of --ClickHouse and object storage of --Storage move to their own projects in src/capabilities; the drivers live only in a service that uses them.",
         "The domain events and the testing system move out of Common to src/framework, which the template owns the way it owns Common.",
-        "The secret stores of --Infisical and --Vault move to Capabilities.Security.CredentialStore; a service with the flag carries the store's SDK, and the configuration overlay moves with it.",
+        "The secret stores of --Infisical and --Vault move to Capabilities.Security.CredentialStore and become the configuration store: ISecretStore is IConfigurationStore, and a service with the flag carries the store's SDK.",
         "Capabilities are named by the system they carry inside their group: Capabilities.Persistence.Mongo, Capabilities.Analytics.ClickHouse, Capabilities.Messaging.Notifications; the projects a consumer references carry .Abstractions.",
         "dotskit upgrade retargets a solution's references and usings through every move, a part at a time, and builds after each part.",
         "A file the team wants kept out of an upgrade is named in .dotskitignore, at the solution's root or in any folder below it, where a rule acts on its own folder's subtree; @2.9, @2 or @major pin it, and the upgrade holds what the file names and brings a spent pin back to its review.",
@@ -17,7 +17,7 @@
         "highlights": [
           "ClickHouse флага --ClickHouse и объектное хранилище флага --Storage переезжают в собственные проекты в src/capabilities; драйверы остаются только в сервисе, который их использует.",
           "Доменные события и тестовая система переезжают из Common в src/framework — то, чем владеет шаблон, как Common.",
-          "Хранилища секретов флагов --Infisical и --Vault переезжают в Capabilities.Security.CredentialStore; сервис с флагом несёт SDK хранилища, а провайдер конфигурации переезжает вместе с ним.",
+          "Хранилища секретов флагов --Infisical и --Vault переезжают в Capabilities.Security.CredentialStore и становятся хранилищем конфигурации: ISecretStore теперь IConfigurationStore, а сервис с флагом несёт SDK хранилища.",
           "Capabilities называются по системе внутри своей группы: Capabilities.Persistence.Mongo, Capabilities.Analytics.ClickHouse, Capabilities.Messaging.Notifications; проекты, на которые ссылается потребитель, несут .Abstractions.",
           "dotskit upgrade перенацеливает ссылки и using'и решения через каждый перенос, по частям, и собирает решение после каждой части.",
           "Файл, который команда хочет уберечь от обновления, называется в .dotskitignore - в корне решения или в любом каталоге ниже, где правило действует на поддерево своего каталога; @2.9, @2 или @major закрепляют его, обновление держит названное и возвращает потраченный пин на разбор.",

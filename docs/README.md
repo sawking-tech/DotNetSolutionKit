@@ -104,7 +104,7 @@ modules and names them that way.
 - [Health](operations/health.md): `/health` and `/ready`
 - [Startup checks](operations/startup-checks.md)
 - [Switching dependencies off](operations/switching-dependencies-off.md): run without the database, the
-  jobs, the bus or the secret store, and turn them on later
+  jobs, the bus or the configuration store, and turn them on later
 
 ## Decisions
 

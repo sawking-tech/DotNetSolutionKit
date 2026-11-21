@@ -135,7 +135,7 @@ current `kubectl` context; further arguments go to `kubectl apply` (`--namespace
 - Settings come from a Secret named after the service (`sales-orders` for `Sales.Orders`) as environment
   variables, the same keys as in `appsettings.json` with `__` for `:`. The Secret is optional, so a pod
   without it starts and reports what is missing.
-- The database, the broker and the secret store are not in the manifests: a cluster usually has them
+- The database, the broker and the configuration store are not in the manifests: a cluster usually has them
   managed, and their addresses go into the Secret.
 - Replicas start together safely: migrations run under a lock, and so does the
   [schema guard](startup-checks.md).

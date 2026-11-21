@@ -44,7 +44,7 @@ await guard.EnsureColumnsAsync("reports.usage", UsageWriter.Columns, "Apply depl
 | Настройка | |
 |---|---|
 | `ClickHouse:Enabled` | `true`; `false` заставляет подключение отвечать 503, убирает проверку готовности и требование строки подключения |
-| `ClickHouse:ConnectionString` | `Host=...;Port=8123;Username=...;Password=...;Database=...`, из окружения или хранилища секретов |
+| `ClickHouse:ConnectionString` | `Host=...;Port=8123;Username=...;Password=...;Database=...`, из окружения или хранилища конфигурации |
 | `ClickHouse:CommandTimeoutSeconds` | 30 |
 | `ClickHouse:MaxInsertBlockRows` | 10 000: самый большой insert, который уходит одним блоком, и поэтому самый большой, который покрывает серверная дедупликация |
 
