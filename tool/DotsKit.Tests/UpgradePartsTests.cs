@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DotsKit.Commands;
 using DotsKit.Generation;
 using DotsKit.Io;
@@ -235,6 +236,61 @@ internal sealed class UpgradePartsTests
         args.ForVersion("2.0.0").ToArgs().ShouldBe(["--NamespaceRoot", "ST"]);
         args.ForVersion("2.7.0").ToArgs().ShouldBe(["--NamespaceRoot", "ST", "--Agent", "none", "--Storage", "true"]);
         args.ForVersion(TemplateSource.SourcesVersion).ToArgs().Count.ShouldBe(8);
+    }
+
+    /// <summary>
+    /// The long names are the template's own: a release before 3.0 names them in PascalCase, 3.0 and its sources in
+    /// lower case. The same arguments go to both, and each template is given the name it knows.
+    /// </summary>
+    [Test]
+    public void TheLongNames_AreLowerCaseSinceThree_AndPascalCaseBeforeIt()
+    {
+        var args = TemplateArgs.Parse(["-N", "ST", "--ApiGateway", "true", "--FeatureFlags", "true"]).ForVersion(TemplateSource.SourcesVersion);
+
+        args.ToArgs("2.9.0").ShouldBe(["--NamespaceRoot", "ST", "--ApiGateway", "true", "--FeatureFlags", "true"]);
+        args.ToArgs("3.0.0").ShouldBe(["--namespace-root", "ST", "--api-gateway", "true", "--feature-flags", "true"]);
+        args.ToArgs(TemplateSource.SourcesVersion).ShouldBe(args.ToArgs("3.0.0"));
+        args.ToArgs().ShouldBe(args.ToArgs("2.9.0"), "with no version the names stand as the manifest keeps them");
+    }
+
+    /// <summary>
+    /// Two lists give the long names: the tool's, for what it passes to a template, and <c>dotnetcli.host.json</c>,
+    /// for what <c>dotnet new</c> accepts. A name in one and not the other leaves a parameter the tool cannot pass
+    /// or a person cannot write, so both are read and compared here.
+    /// </summary>
+    [Test]
+    public void EveryParameterOfTheTemplate_IsNamedInLowerCase_ByTheToolAndByTheHost()
+    {
+        var config = Path.Combine(RepositoryRoot(), "template", ".template.config");
+        var template = JsonNode.Parse(File.ReadAllText(Path.Combine(config, "template.json")))!;
+        var host = JsonNode.Parse(File.ReadAllText(Path.Combine(config, "dotnetcli.host.json")))!;
+
+        var parameters = template["symbols"]!.AsObject()
+            .Where(s => s.Value?["type"]?.GetValue<string>() == "parameter")
+            .Select(s => s.Key).ToList();
+        var hostNames = host["symbolInfo"]!.AsObject().ToDictionary(s => s.Key, s => s.Value?["longName"]?.GetValue<string>());
+
+        parameters.ShouldNotBeEmpty();
+        foreach (var parameter in parameters)
+        {
+            var named = hostNames.GetValueOrDefault(parameter);
+            named.ShouldNotBeNullOrWhiteSpace($"{parameter} has no longName in dotnetcli.host.json");
+            named.ShouldNotContain("-0", customMessage: "a name splits at a word, not inside a word");
+            TemplateVersions.LowerCaseNameOf(parameter).ShouldBe(named, $"{parameter} is named one way by the tool and another by the host");
+        }
+    }
+
+    private static string RepositoryRoot()
+    {
+        for (var folder = new DirectoryInfo(AppContext.BaseDirectory); folder is not null; folder = folder.Parent)
+        {
+            if (Directory.Exists(Path.Combine(folder.FullName, "template", ".template.config")))
+            {
+                return folder.FullName;
+            }
+        }
+
+        throw new InvalidOperationException("The template's sources are not above the tests' folder.");
     }
 
     [TestCase("1.0.0")]
