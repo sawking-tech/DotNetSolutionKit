@@ -288,7 +288,18 @@ internal sealed partial class TemplateArgs
         new([.. _values.OrderBy(v => Array.FindIndex(Parameters, p => Is(p, v.Key)))]);
 
     /// <summary>The arguments as stored and as passed to dotnet new: every parameter by its long name.</summary>
-    public List<string> ToArgs() => [.. _values.SelectMany(v => new[] { "--" + v.Key, v.Value })];
+    /// <param name="version">
+    /// The version of the template that reads them: from 3.0 the long names are in lower case, before it in
+    /// PascalCase; a name the template does not know is refused, so the tool says each in the words of its version.
+    /// </param>
+    public List<string> ToArgs(string? version = null) =>
+        [.. _values.SelectMany(v => new[] { "--" + LongNameOf(v.Key, version), v.Value })];
+
+    /// <summary>The long name of a parameter in the words of a version of the template; the name as written before 3.0 when no version is given.</summary>
+    private static string LongNameOf(string name, string? version) =>
+        version is not null && Generation.TemplateVersions.NamesFlagsInLowerCase(version)
+            ? Generation.TemplateVersions.LowerCaseNameOf(name)
+            : name;
 
     private static bool Is(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
 }

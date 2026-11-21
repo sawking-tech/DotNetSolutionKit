@@ -7,7 +7,13 @@ namespace DotsKit.Generation;
 internal interface ITemplate
 {
     /// <summary>Runs the template in <paramref name="root"/>, its post-actions with it.</summary>
-    Task GenerateAsync(TemplateArgs args, string root, CancellationToken ct);
+    /// <param name="args">The parameters.</param>
+    /// <param name="version">
+    /// The version this template is, which names its long parameters: lower case since 3.0, PascalCase before it.
+    /// </param>
+    /// <param name="root">The folder the solution comes into.</param>
+    /// <param name="ct">Cancels the run.</param>
+    Task GenerateAsync(TemplateArgs args, string version, string root, CancellationToken ct);
 }
 
 /// <summary>Makes the template of a version; the version a manifest names may be older than the tool.</summary>
@@ -46,7 +52,7 @@ internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> pa
     private readonly object _installing = new();
     private Task? _install;
 
-    public async Task GenerateAsync(TemplateArgs args, string root, CancellationToken ct)
+    public async Task GenerateAsync(TemplateArgs args, string version, string root, CancellationToken ct)
     {
         await InstallOnceAsync(ct);
         // One dotnet new at a time in a hive: two write its cache at once, and Windows refuses the second. Trees of
@@ -54,7 +60,7 @@ internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> pa
         await _generating.WaitAsync(ct);
         try
         {
-            await RunAsync(args, root, ct);
+            await RunAsync(args, version, root, ct);
         }
         finally
         {
@@ -62,10 +68,10 @@ internal sealed class DotnetNewTemplate(Func<CancellationToken, Task<string>> pa
         }
     }
 
-    private async Task RunAsync(TemplateArgs args, string root, CancellationToken ct)
+    private async Task RunAsync(TemplateArgs args, string version, string root, CancellationToken ct)
     {
         Directory.CreateDirectory(root);
-        List<string> command = ["new", ShortName, .. args.ToArgs(), "--output", root, .. ScriptsAllowed(), "--debug:custom-hive", _hive];
+        List<string> command = ["new", ShortName, .. args.ToArgs(version), "--output", root, .. ScriptsAllowed(), "--debug:custom-hive", _hive];
         var result = await runner.RunAsync("dotnet", command, root, ct);
         if (result.Code != 0 && !(result.Code == ManualPostAction && !runsScripts))
         {

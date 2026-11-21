@@ -1,22 +1,102 @@
 {
   "$schema": "http://json.schemastore.org/dotnetcli.host",
   "symbolInfo": {
-    "NamespaceRoot": { "shortName": "N" },
-    "ProductName": { "shortName": "P" },
-    "ServiceNameOrCustom": { "shortName": "S" },
-    "Solution": { "shortName": "" },
-    "Minimal": { "shortName": "M", "isHidden": true },
-    "Hangfire": { "shortName": "H" },
-    "Infisical": { "shortName": "I" },
-    "Messaging": { "shortName": "" },
-    "HierarchyRules": { "shortName": "" },
-    "FeatureFlags": { "shortName": "FF" },
-    "ClickHouse": { "shortName": "CH" },
-    "MongoDB": { "shortName": "" },
-    "Notify": { "shortName": "" },
-    "HttpPort": { "shortName": "" },
-    "DiffApi": { "shortName": "" },
-    "GitHubCiCd": { "shortName": "" },
-    "Audit": { "shortName": "" }
+    "NamespaceRoot": {
+      "longName": "namespace-root",
+      "shortName": "N"
+    },
+    "ProductName": {
+      "longName": "product-name",
+      "shortName": "P"
+    },
+    "ServiceNameOrCustom": {
+      "longName": "service",
+      "shortName": "S"
+    },
+    "Hangfire": {
+      "longName": "hangfire",
+      "shortName": "H"
+    },
+    "Messaging": {
+      "longName": "messaging",
+      "shortName": ""
+    },
+    "ApiGateway": {
+      "longName": "api-gateway",
+      "shortName": "A"
+    },
+    "Storage": {
+      "longName": "storage",
+      "shortName": ""
+    },
+    "ClickHouse": {
+      "longName": "clickhouse",
+      "shortName": "CH"
+    },
+    "MongoDB": {
+      "longName": "mongodb",
+      "shortName": ""
+    },
+    "Notify": {
+      "longName": "notify",
+      "shortName": ""
+    },
+    "Audit": {
+      "longName": "audit",
+      "shortName": ""
+    },
+    "TestFramework": {
+      "longName": "test-framework",
+      "shortName": ""
+    },
+    "Agent": {
+      "longName": "agent",
+      "shortName": "Ag"
+    },
+    "Deploy": {
+      "longName": "deploy",
+      "shortName": ""
+    },
+    "Infisical": {
+      "longName": "infisical",
+      "shortName": "I"
+    },
+    "Database": {
+      "longName": "database",
+      "shortName": ""
+    },
+    "Vault": {
+      "longName": "vault",
+      "shortName": ""
+    },
+    "HttpPort": {
+      "longName": "http-port",
+      "shortName": ""
+    },
+    "DiffApi": {
+      "longName": "diff-api",
+      "shortName": ""
+    },
+    "GitHubCiCd": {
+      "longName": "github-cicd",
+      "shortName": ""
+    },
+    "FeatureFlags": {
+      "longName": "feature-flags",
+      "shortName": "FF"
+    },
+    "HierarchyRules": {
+      "longName": "hierarchy-rules",
+      "shortName": ""
+    },
+    "Solution": {
+      "longName": "solution",
+      "shortName": ""
+    },
+    "Minimal": {
+      "longName": "minimal",
+      "shortName": "",
+      "isHidden": true
+    }
   }
 }

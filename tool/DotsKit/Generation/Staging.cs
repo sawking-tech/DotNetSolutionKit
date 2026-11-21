@@ -29,7 +29,7 @@ internal sealed class Staging(ITemplateSource templates, ISolutionProjects proje
         var template = templates.Of(manifest.Template);
         var root = Path.Combine(Folders.NewTemp("staging"), "solution");
         var services = manifest.ServiceArgs;
-        await template.GenerateAsync(TemplateArgs.ForSolution(manifest.SolutionArgs, services[0], manifest.Template).ForVersion(manifest.Template), root, ct);
+        await template.GenerateAsync(TemplateArgs.ForSolution(manifest.SolutionArgs, services[0], manifest.Template).ForVersion(manifest.Template), manifest.Template, root, ct);
         RemoveServiceFolders(root);
         // The solution's command listed its first service as a regular one; a gateway in its place has fewer projects.
         if (withSolutionFile)
@@ -39,7 +39,7 @@ internal sealed class Staging(ITemplateSource templates, ISolutionProjects proje
 
         foreach (var service in services)
         {
-            await template.GenerateAsync(TemplateArgs.ForService(manifest.SolutionArgs, service).ForVersion(manifest.Template), root, ct);
+            await template.GenerateAsync(TemplateArgs.ForService(manifest.SolutionArgs, service).ForVersion(manifest.Template), manifest.Template, root, ct);
             // Before 2.8 the template left this to manual-add-projects.sh. Goes in 3.0
             // (TemplateVersions.AddsServiceToSolution).
             if (withSolutionFile && !TemplateVersions.AddsServiceToSolution(manifest.Template))

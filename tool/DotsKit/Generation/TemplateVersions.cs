@@ -23,6 +23,49 @@ internal static partial class TemplateVersions
 
     public static bool HasSolutionFlag(string version) => IsAtLeast(version, SolutionFlag);
 
+    /// <summary>
+    /// The long names of the parameters are in lower case since 3.0 (<c>--api-gateway</c>, <c>--feature-flags</c>),
+    /// as <c>dotnet</c> writes its own; a release before it names them in PascalCase (<c>--ApiGateway</c>).
+    /// </summary>
+    public static bool NamesFlagsInLowerCase(string version) =>
+        version == TemplateSource.SourcesVersion || Version.Parse(version.Split('-')[0]).Major >= 3;
+
+    /// <summary>
+    /// The long name of every parameter of the template since 3.0, as <c>dotnetcli.host.json</c> gives it: the
+    /// parameter stays the same symbol inside the template, and only the name a person and the tool write changes.
+    /// The host file and this table are one list; a test checks them against each other.
+    /// </summary>
+    private static readonly Dictionary<string, string> LowerCaseNames = new(StringComparer.Ordinal)
+    {
+        ["NamespaceRoot"] = "namespace-root",
+        ["ProductName"] = "product-name",
+        [TemplateArgs.ServiceName] = "service",
+        ["Hangfire"] = "hangfire",
+        ["Messaging"] = "messaging",
+        ["ApiGateway"] = "api-gateway",
+        ["Storage"] = "storage",
+        ["ClickHouse"] = "clickhouse",
+        ["MongoDB"] = "mongodb",
+        ["Notify"] = "notify",
+        ["Audit"] = "audit",
+        ["TestFramework"] = "test-framework",
+        ["Agent"] = "agent",
+        ["Deploy"] = "deploy",
+        ["Infisical"] = "infisical",
+        ["Database"] = "database",
+        ["Vault"] = "vault",
+        ["HttpPort"] = "http-port",
+        ["DiffApi"] = "diff-api",
+        ["GitHubCiCd"] = "github-cicd",
+        ["FeatureFlags"] = "feature-flags",
+        ["HierarchyRules"] = "hierarchy-rules",
+        ["Solution"] = "solution",
+        ["Minimal"] = "minimal",
+    };
+
+    /// <summary>The long name of a parameter since 3.0; the name itself when the table has none, which a test refuses.</summary>
+    public static string LowerCaseNameOf(string name) => LowerCaseNames.GetValueOrDefault(name, name);
+
     public static bool AddsServiceToSolution(string version) => IsAtLeast(version, SelfAddingService);
 
     /// <summary>
