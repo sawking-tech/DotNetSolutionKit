@@ -50,11 +50,19 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
         transaction.Write(Layout.ManifestPath, System.Text.Encoding.UTF8.GetBytes(plan.Written(conflicts.Count > 0).Serialize()));
         // A pin the upgrade spends is written back beside the merge, with the lines the team wrote around it: the
         // team sees the change in the review, git commits it with the part, and git merge --abort puts it back too.
+        // Every file of the rules takes its own share of the spent pins, wherever in the tree it sits.
         IReadOnlyList<string> pins = [];
-        if (PinReview.Of(DotskitIgnore.Parse(Read(IgnoreRules.PathOf(plan.Root))), Spent(plan), plan.Ignore?.Version ?? plan.Next.Template) is { Lines.Count: > 0 } review)
+        List<string> reviewed = [];
+        foreach (var file in DotskitIgnores.Load(plan.Root))
         {
-            transaction.Write(IgnoreRules.FileName, System.Text.Encoding.UTF8.GetBytes(review.Text));
-            pins = review.Lines;
+            if (PinReview.Of(file, Spent(plan), plan.Ignore?.Version ?? plan.Next.Template) is not { Lines.Count: > 0 } review)
+            {
+                continue;
+            }
+
+            transaction.Write(file.PathIn(plan.Root), System.Text.Encoding.UTF8.GetBytes(review.Text));
+            reviewed.Add(file.PathIn(plan.Root));
+            pins = [.. pins, .. review.Lines];
         }
 
         if (!plan.Membership.IsEmpty)
@@ -67,7 +75,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
             await transaction.CommitAsync(() => ApplyMembershipAsync(plan, ct));
             return new(conflicts, await RepairWrittenAsync(plan, conflicts, ct), [], pins);
         }
-        return new(conflicts, await WriteBesideTheMergeAsync(plan, transaction, conflicts, SolutionFile(plan.Root), ct), git.Taken, pins);
+        return new(conflicts, await WriteBesideTheMergeAsync(plan, transaction, reviewed, conflicts, SolutionFile(plan.Root), ct), git.Taken, pins);
     }
     /// <summary>
     /// The usings of namespaces the template gave up, repaired from the text before any build, in every project of
@@ -75,12 +83,15 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     /// </summary>
     private async Task<IReadOnlyList<Repair>> RepairAsync(Plan plan, IReadOnlyList<string> conflicts, CancellationToken ct)
     {
-        // The template's frame first: the references between its projects as its next version has them.
-        var left = conflicts.ToHashSet(StringComparer.Ordinal);
+        // A file the rules hold is no file to repair, whatever the shape of the repair: the upgrade writes no line of
+        // it, a using of a moved type and a project's reference alike. The template's frame first: the references
+        // between its projects as its next version has them.
+        var held = plan.Ignore?.Held ?? new HashSet<string>();
+        var left = conflicts.Concat(held).ToHashSet(StringComparer.Ordinal);
         IReadOnlyList<Repair> frame = plan.NextTree is null || plan.BaseTree is null
             ? []
             : await repair.ApplyAsync([.. TemplateReferences.Decide(plan.Root, plan.BaseTree, plan.NextTree, left), .. PackageUpdates.CentralVersions.Decide(plan.Root, left, plan.Waiting)], ct);
-        return plan.Types is null ? frame : [.. frame, .. await repair.BeforeBuildAsync(plan.Root, plan.Types, conflicts, ct)];
+        return plan.Types is null ? frame : [.. frame, .. await repair.BeforeBuildAsync(plan.Root, plan.Types, conflicts, ct, held: held)];
     }
 
     /// <summary>
@@ -138,8 +149,6 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     private static bool Same(string left, string right) =>
         left.ReplaceLineEndings("\n").Equals(right.ReplaceLineEndings("\n"), StringComparison.Ordinal);
 
-    private static string? Read(string path) => File.Exists(path) ? File.ReadAllText(path) : null;
-
     /// <summary>
     /// The manifest, All.sln and the files the repair changed join git's merge, so committing it takes them and
     /// <c>git merge --abort</c> puts them back; a failure here undoes the merge as well as the files. Staging and the
@@ -147,7 +156,7 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
     /// the files the branch left out, which git does not know - and the abort takes back the merge. The repair
     /// leaves a file in conflict alone, so staging never marks one resolved.
     /// </summary>
-    private async Task<IReadOnlyList<Repair>> WriteBesideTheMergeAsync(Plan plan, FileTransaction transaction, IReadOnlyList<string> conflicts, string solutionFile, CancellationToken ct)
+    private async Task<IReadOnlyList<Repair>> WriteBesideTheMergeAsync(Plan plan, FileTransaction transaction, List<string> reviewed, IReadOnlyList<string> conflicts, string solutionFile, CancellationToken ct)
     {
         try
         {
@@ -156,11 +165,11 @@ internal sealed class PlanWriter(ISolutionProjects projects, IGitMerge git, Refe
             {
                 await ApplyMembershipAsync(plan, ct);
                 await git.StageAsync(plan.Root, [Layout.ManifestPath, solutionFile], ct);
-                // The file the team may have put into its own .gitignore: a merge commit takes it whole, as the team's
-                // own file, so it is staged whether the solution's rules hide it or not.
-                if (File.Exists(IgnoreRules.PathOf(plan.Root)))
+                // A file the team may have put into its own .gitignore: a merge commit takes it whole, as the team's own
+                // file, so it is staged whether the solution's rules hide it or not.
+                if (reviewed.Count > 0)
                 {
-                    await git.StageAsync(plan.Root, [IgnoreRules.FileName], ct, force: true);
+                    await git.StageAsync(plan.Root, reviewed, ct, force: true);
                 }
                 repaired = await RepairAsync(plan, conflicts, ct);
                 var written = repaired.Select(RepairReport.FileOf).Concat(repaired.OfType<CentralizeVersion>().Select(c => c.Central))

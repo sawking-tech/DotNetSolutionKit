@@ -165,7 +165,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed; one with no side of the template's, under `--force`, is resolved with the template's removal; one with no base, added by both sides, gains the solution's side as its base |
 | | `git update-index --index-info` | the solution's side as the base of a file both sides added, so the IDE opens it with its merge view |
 | | `git diff --no-index -M` | the files the template moved, between two of its outputs outside the repository |
-| | `git init` in a folder of the tool's own, `git -c core.excludesFile=… check-ignore --no-index --stdin` | the paths `.dotskitignore` holds, matched by git's own rules; the repository is empty, so neither the solution's `.gitignore` nor its config reaches the match, and a solution outside git reads its rules the same way |
+| | `git init` in a folder of the tool's own, `git check-ignore --no-index --stdin` | the paths `.dotskitignore` holds, matched by git's own rules: each file goes into that folder in the shape of a `.gitignore`, at the depth it sits in, so git itself applies the subtree of a folder, a deeper file over a higher one and the numbering of the lines; the repository is empty, so neither the solution's `.gitignore` nor its config reaches the match, and a solution outside git reads its rules the same way |
 | | `git merge-file -p [--zdiff3]`, again with `--theirs` under `--force` | a file merged by the merge driver, on copies of the three sides; `--zdiff3` only with `--conflict-style zdiff3`; under `--force` the first run counts the conflicts the second decides, for the report of the files the team's lines gave way in |
 | | `git ls-remote --tags` | the releases of the template, for `init` on a solution that does not say its version |
 | writes objects only, through an index of its own | `git add -A`, `git rm --cached`, `git ls-files`, `git write-tree`, `git commit-tree` | a commit of the template's output; the solution's index and files are not touched |
@@ -208,9 +208,9 @@ the manifest only with `--Solution`; `dotskit init` takes the service in, read f
 
 ## What an upgrade leaves alone: `.dotskitignore`
 
-A team that changed a file of the template may want an upgrade to keep its hands off it. One file in the
-solution's root says so: `.dotskitignore`, beside the manifest. The template does not write it, so no merge
-brings it, and it is the team's to edit.
+A team that changed a file of the template may want an upgrade to keep its hands off it. A file named
+`.dotskitignore` says so, beside the manifest at the solution's root and in any folder below it. The template does
+not write it, so no merge brings it, and it is the team's to edit.
 
 ```
 # The rules of a path are gitignore's: a file or a pattern, a deeper rule over a higher one,
@@ -219,9 +219,12 @@ src/common/ST.Demo.Common.Infrastructure/Persistence/MigrationLock.cs
 src/services/ST.Demo.Orders/ST.Demo.Orders.Infrastructure/**@2.9
 ```
 
-A rule with no pin holds its path for good: the upgrade writes no file of it, and neither adds nor removes one.
-A file the template adds under a held pattern stays out too, so a rule on a path the solution does not have yet
-keeps it absent.
+A file in a folder acts on the subtree of that folder, and the rules are written from the folder the file sits
+in, as a `.gitignore` is: `src/common/X/.dotskitignore` with the line `*.cs` holds every C# file under
+`src/common/X`, and holds nothing outside it. A deeper file overrides a higher one, so the rule in `src/common/X`
+can bring back a file the root's file holds. A rule with no pin holds its path for good: the upgrade writes no
+file of it, and neither adds nor removes one. A file the template adds under a held pattern stays out too, so a
+rule on a path the solution does not have yet keeps it absent.
 
 `@` and a version pin the rule. An upgrade below the pin's line leaves the path alone; the upgrade that passes
 it spends the pin, and the path goes into the usual merge. `@2.9` holds through 2.9.x and lets 2.10.0 through;
@@ -232,16 +235,19 @@ After an upgrade the tool reviews the pins it spent and writes each back in one 
 became the template's own is commented out, with the reason on the line. A pin whose paths still differ is
 renewed and stays live, so the rule holds the path another round. A pin of the whole major is moved by the tool
 itself: the old line is commented out with the reason, and the next pin, of the line the solution has moved to,
-is written under it commented out, for the team to uncomment. The report names each and its line, and the change
-joins the merge like any other file, so it reaches the team's review and `git merge --abort` puts it back.
+is written under it commented out, for the team to uncomment. The report names each rule by its file and its
+line, and the change joins the merge like any other file, so it reaches the team's review and `git merge --abort`
+puts it back.
 
-Matching is git's own: the file's rules go to `git check-ignore` as an excludes file, in a repository of the
-tool's own. The same syntax as `.gitignore` holds, the exclusion of a folder not re-entered by a rule on a file
-inside it included, and a solution outside git reads its rules the same way.
+Matching is git's own: every file of the rules goes to `git check-ignore` in a repository of the tool's own, in
+the shape of a `.gitignore` at the depth it sits in. The same syntax as `.gitignore` holds - the exclusion of a
+folder not re-entered by a rule on a file inside it included - and a solution outside git reads its rules the
+same way.
 
 A held file is the team's from then on. The upgrade writes no line of it, so a file of an older template that a
 newer one no longer fits - a `Program.cs` of 2.9 in a solution of 3.0 - stops building until the team brings it
-up by hand, and the build says which file.
+up by hand, and the build says which file. The repair of the usings the template's moves ask for leaves a held
+file alone too: no using of it is rewritten on the team's behalf.
 
 ## A solution made without dotskit
 

@@ -10,7 +10,7 @@ namespace DotsKit.Tests;
 [Parallelizable(ParallelScope.All)]
 internal sealed class DotskitIgnoreTests
 {
-    private static IReadOnlyList<IgnoreRule> Rules(string text) => DotskitIgnore.Parse(text).Rules;
+    private static IReadOnlyList<IgnoreRule> Rules(string text) => DotskitIgnore.Parse("", text).Rules;
 
     [Test]
     public void ALine_IsAPatternWithAnOptionalPin_AndABlankOrACommentIsNoRule()
@@ -36,7 +36,7 @@ internal sealed class DotskitIgnoreTests
         Rules("a/b@2.9").Single().Pattern.ShouldBe("a/b");
         Rules("a/b@2.9").Single().Pin!.Major.ShouldBe(2);
         // A path that carries an @ of its own and no pin keeps it.
-        Rules("src/team@example.com/rules.json").Single().ShouldBe(new IgnoreRule("src/team@example.com/rules.json", null, 1));
+        Rules("src/team@example.com/rules.json").Single().ShouldBe(new IgnoreRule("src/team@example.com/rules.json", null, "", 1));
         Rules("src/team@example.com/rules.json@2").Single().Pattern.ShouldBe("src/team@example.com/rules.json");
     }
 
@@ -47,6 +47,16 @@ internal sealed class DotskitIgnoreTests
 
         rule.Pattern.ShouldBe("!src/common/keep.cs");
         rule.Pin!.PinText().ShouldBe("2.9");
+    }
+
+    [Test]
+    public void ARuleOfADeeperFile_CarriesTheFolderItsFileSitsIn_AndNamesItsFileForTheReview()
+    {
+        var rule = DotskitIgnore.Parse("src/common/X", "Locked.cs\n").Rules.Single();
+
+        rule.Source.ShouldBe("src/common/X");
+        rule.FilePath.ShouldBe("src/common/X/.dotskitignore");
+        DotskitIgnore.Parse("", "Locked.cs\n").Rules.Single().FilePath.ShouldBe(".dotskitignore");
     }
 
     [TestCase("2.9", "2.9.0", true)]
@@ -79,7 +89,7 @@ internal sealed class DotskitIgnoreTests
     [Test]
     public void ASpentPin_WhoseFilesAreTheTemplatesOwn_IsCommentedOut_NotErased()
     {
-        var file = DotskitIgnore.Parse("""
+        var file = DotskitIgnore.Parse("", """
             # The team's own rules
             src/locked/@2.9
             """);
@@ -95,7 +105,7 @@ internal sealed class DotskitIgnoreTests
     [Test]
     public void ASpentPin_WhoseFilesStillDiffer_IsRenewedToTheVersionTheUpgradeWentTo()
     {
-        var file = DotskitIgnore.Parse("src/locked/@2.9");
+        var file = DotskitIgnore.Parse("", "src/locked/@2.9");
 
         var (text, lines) = PinReview.Of(file, [(file.Rules[0], true)], "3.1.4");
 
@@ -106,7 +116,7 @@ internal sealed class DotskitIgnoreTests
     [Test]
     public void ASpentPinOfTheMajor_IsMovedOntoTheNextLine_CommentedOutForTheTeam()
     {
-        var file = DotskitIgnore.Parse("src/locked/@major");
+        var file = DotskitIgnore.Parse("", "src/locked/@major");
 
         var (text, lines) = PinReview.Of(file, [(file.Rules[0], false)], "3.0.0");
 
@@ -121,15 +131,42 @@ internal sealed class DotskitIgnoreTests
     {
         const string written = "# keep\nsrc/locked/@2.9\n";
 
-        PinReview.Of(DotskitIgnore.Parse(written), [], "3.0.0").Text.ShouldBe(written.ReplaceLineEndings("\n"));
+        PinReview.Of(DotskitIgnore.Parse("", written), [], "3.0.0").Text.ShouldBe(written.ReplaceLineEndings("\n"));
+    }
+
+    /// <summary>
+    /// A file takes only its own share of the spent pins: the pins of a rule of another folder are written by the file
+    /// that rule sits in, and a file the tool rewrote with a stranger's rule would take the team's line for its own.
+    /// </summary>
+    [Test]
+    public void AFileWritesItsOwnSpentPins_AndLeavesThoseOfAnotherFile()
+    {
+        var root = DotskitIgnore.Parse("", "src/locked/@2.9\n");
+        var deeper = DotskitIgnore.Parse("src/common/X", "Other/@major\n");
+
+        var (text, lines) = PinReview.Of(root, [(deeper.Rules[0], false)], "3.0.0");
+
+        text.ShouldBe("src/locked/@2.9\n");
+        lines.ShouldBeEmpty();
+    }
+
+    /// <summary>The report names the file and the line a person opens, not a number that means nothing without one.</summary>
+    [Test]
+    public void TheReview_NamesTheFileOfTheRuleAndItsLine()
+    {
+        var file = DotskitIgnore.Parse("src/common/X", "# ours\n@2.9\n".Replace("@2.9", "Locked.cs@2.9"));
+
+        var (_, lines) = PinReview.Of(file, [(file.Rules[0], false)], "3.0.0");
+
+        lines.ShouldHaveSingleItem().ShouldContain("src/common/X/.dotskitignore:2 Locked.cs");
     }
 
     [Test]
     public void NoFile_MeansNoRules()
     {
-        DotskitIgnore.Parse(null).IsEmpty.ShouldBeTrue();
-        DotskitIgnore.Parse("").IsEmpty.ShouldBeTrue();
-        DotskitIgnore.Parse(" # a comment only\n\n").IsEmpty.ShouldBeTrue();
+        DotskitIgnore.Parse("", null).IsEmpty.ShouldBeTrue();
+        DotskitIgnore.Parse("", "").IsEmpty.ShouldBeTrue();
+        DotskitIgnore.Parse("", " # a comment only\n\n").IsEmpty.ShouldBeTrue();
     }
 }
 

@@ -53,10 +53,11 @@ capability live in the `.Tests` project of that capability.
 
 ### Ignoring on upgrade
 
-A single file `.dotskitignore`: inside it, the rules for what an upgrade does not touch - paths
+A file named `.dotskitignore`: inside it, the rules for what an upgrade does not touch - paths
 and patterns. Opting out of a file, a module, or a subtree is one line in it; no markup in code
-is needed. The file lives in the manifest zone, the merge ignores it; the team edits it as its
-own.
+is needed. The file sits beside the manifest at the solution's root and in any folder below it, and its
+rules are written from the folder the file sits in, as a `.gitignore` writes them. The file lives in the manifest
+zone, the merge ignores it; the team edits it as its own.
 
 The rules apply to the subtree of the directory where the file sits; the semantics are borrowed
 from `.gitignore` wholesale: a file in any directory, deeper overrides higher, a later line beats
