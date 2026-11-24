@@ -98,7 +98,7 @@
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "true",
-      "description": "Background jobs on Hangfire, stored in PostgreSQL in the service's own schema, with the dashboard"
+      "description": "Background jobs on Hangfire, stored in the service's database schema (PostgreSQL or SQL Server), with the dashboard"
     },
     "Messaging": {
       "type": "parameter",
@@ -149,7 +149,7 @@
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false",
-      "description": "S3-compatible object storage (AWS S3, MinIO) in Common, registered in the service"
+      "description": "S3-compatible object storage (AWS S3, MinIO): Capabilities.Persistence.S3, referenced by the service"
     },
     "ClickHouse": {
       "type": "parameter",
@@ -716,8 +716,8 @@
         {
           "condition": "(!DiffApi)",
           "exclude": [
-            "src/common/NamespaceRoot.ProductName.Common.Web/Setup/SchemaOnlyMode.cs",
-            "src/common/NamespaceRoot.ProductName.Common.Web/Setup/SchemaDump.cs",
+            "src/framework/NamespaceRoot.ProductName.Framework.OpenApi/SchemaOnlyMode.cs",
+            "src/framework/NamespaceRoot.ProductName.Framework.OpenApi/SchemaDump.cs",
             "scripts/generate-api-schemas.sh",
             "scripts/normalise_api_schema.py",
             ".github/workflows/api-diff.yml"

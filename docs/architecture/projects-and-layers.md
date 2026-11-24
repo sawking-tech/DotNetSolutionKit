@@ -56,15 +56,15 @@ flowchart BT
 |---|---|---|
 | `Common` | The domain kernel: `Entity`, `AggregateRoot`, domain events, `IUnitOfWork`, specifications, the user and execution context, exceptions | nothing |
 | `Common.Contracts` | What crosses a service boundary: routes, request and response models, health constants | `Common` |
-| `Common.Application` | Application abstractions: the domain event dispatcher, `IPermissionService`, messaging interfaces | `Common` |
-| `Common.Infrastructure` | EF Core base classes, interceptors, repositories, migrations, the schema guard, messaging on MassTransit, security | `Common`, `Common.Application`, `Common.Contracts` |
-| `Common.Web` | The web layer of a service: pipeline, errors, validation, Swagger, authentication, permissions, health | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure` |
+| `Common.Application` | Application abstractions: idempotency, messaging and persistence interfaces (`IMessageBus`, `IInternalApiConfiguration`), serialization | `Common` |
+| `Common.Infrastructure` | EF Core base classes, interceptors, repositories, migrations, the schema guard, the actor model (`IUserContext` implementations, `JobActorContext`), the internal service protocol | `Common`, `Common.Application`, `Common.Contracts`, `Capabilities.Persistence.Abstractions` and the provider module (the `#228` switch), `Framework.DomainEvents`, `Framework.Observability` |
+| `Common.Web` | The web layer of a service: the host setup, errors, pagination, health, gateway forwarding | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure`, `Framework.Auth`, `Framework.OpenApi`, `Framework.Validation`, `Framework.Observability`, `Framework.FeatureFlags` (flag) |
 | `Common.Testing` | Test helpers tied to the audit pipeline: the audit verifiers and `TestCategories`; no test framework | all of the above, `Framework.Testing` |
 | `Framework.Testing` | The portable testing harness: the test contexts, the real-database test servers of the solution's database (`PostgresDbTestExecutionContext`, `SqlServerDbTestExecutionContext`), `TestDatabase`, the stubs, the rule checks; no test framework | `Common`, `Common.Application`, `Common.Infrastructure`, `Framework.DomainEvents`, the provider module |
 | `Common.Tests` | The tests of `Common` | all of the above, `Common.Testing` |
 | `Framework.Auth` | The platform's authentication and authorization over JwtBearer: the composite API key or JWT scheme, the token cookie with its CSRF contract, the permission check | `Common`, `Common.Application`, `Common.Infrastructure` |
 | `Framework.Auth.Tests` | The tests of authentication and permissions | `Framework.Auth` |
-| `Framework.OpenApi` | The Swagger stack: the document setup, the filters, the schema dump of `--ApiDiff` | `Common`, `Common.Contracts` |
+| `Framework.OpenApi` | The Swagger stack: the document setup, the filters, the schema dump of `--diff-api` | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure`, `Framework.Auth`, `Framework.FeatureFlags` (flag) |
 | `Framework.OpenApi.Tests` | The tests of the Swagger stack | `Framework.OpenApi` |
 | `Framework.Validation` | The FluentValidation wiring over SharpGrip: the validators of the service's assembly and the 422 answer | nothing of `Common` |
 | `Framework.Validation.Tests` | The tests of the validation wiring | `Framework.Validation` |

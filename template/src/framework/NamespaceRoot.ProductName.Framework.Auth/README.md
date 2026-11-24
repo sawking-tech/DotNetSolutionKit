@@ -21,6 +21,13 @@ reads the claims of the token or asks the service that owns them.
 - `ClaimsPermissionService` / `RemotePermissionService` - permissions from the token, or from the
   service that owns them, chosen by `PermissionsOptions` / `RemotePermissionsOptions`.
 - `PermissionsServiceCollectionExtensions` - `AddPlatformPermissions` wires the choice.
+- `IPermissionService` and its implementations - the seam the filter asks; a service whose
+  permissions live elsewhere registers its own implementation.
+- `Configuration/` - the JWT, refresh-token and auth-validation options, bound and validated at
+  startup by `AuthConfigurationExtensions` (`AddJwtPublicConfiguration`, `AddRefreshTokenConfiguration`,
+  `AddAuthValidationConfiguration`).
+- `Security/` - the RSA key providers (`RsaKeyProvider`, `RsaPublicKeyProvider`) that read the
+  public and private keys the token validation and signing need.
 
 ### Usage
 

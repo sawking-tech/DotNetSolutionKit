@@ -28,8 +28,10 @@
     </ItemGroup>
 
     <!-- The web pipeline is assembled here (PlatformWebHost), and its auth and validation wiring
-         live in the mandatory Framework modules (ADR-009): the kernel references the modules the
-         way DbContextBase references Framework.DomainEvents. -->
+         live in the Framework modules the pipeline is incomplete without: the kernel references
+         them the way DbContextBase references Framework.DomainEvents (ADR-009's one mandatory
+         reference, written there). These four are the same arrangement, not yet written into the
+         ADR: TODO - either ADR-009 names them mandatory or the wiring moves out of the kernel. -->
     <ItemGroup>
         <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Auth\NamespaceRoot.ProductName.Framework.Auth.csproj" />
         <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.OpenApi\NamespaceRoot.ProductName.Framework.OpenApi.csproj" />

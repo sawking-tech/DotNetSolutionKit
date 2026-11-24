@@ -29,6 +29,9 @@
         <ProjectReference Include="..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.csproj" />
         <!--#endif -->
         <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.DomainEvents\NamespaceRoot.ProductName.Framework.DomainEvents.csproj" />
+        <!-- The correlation handlers of the internal service protocol live in Framework.Observability;
+             TODO - same shape as Common.Web's four references: either the ADR names it mandatory or
+             the protocol moves out of the kernel. -->
         <ProjectReference Include="..\..\framework\NamespaceRoot.ProductName.Framework.Observability\NamespaceRoot.ProductName.Framework.Observability.csproj" />
     </ItemGroup>
 

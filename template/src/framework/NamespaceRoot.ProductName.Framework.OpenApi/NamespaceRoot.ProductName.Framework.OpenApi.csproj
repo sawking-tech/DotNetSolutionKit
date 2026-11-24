@@ -26,11 +26,17 @@
         <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
         <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
         <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+        <!-- TODO: another module's implementation, a violation ADR-009 allows only with its reason
+             written: the permission filter reads RequiredPermissionsAttribute and the Swagger setup reads
+             JwtPublicConfiguration, both live in Framework.Auth; the stack without them cannot name
+             what it documents. No issue yet: the split of the Swagger stack from auth is future work. -->
         <ProjectReference Include="..\NamespaceRoot.ProductName.Framework.Auth\NamespaceRoot.ProductName.Framework.Auth.csproj" />
     </ItemGroup>
 
     <!--#if (FeatureFlags) -->
     <ItemGroup>
+        <!-- TODO: another module's implementation under the flag: the FeatureGate filters of the
+             Swagger document live in Framework.FeatureFlags. Same reason shape as the Auth reference above. -->
         <ProjectReference Include="..\NamespaceRoot.ProductName.Framework.FeatureFlags\NamespaceRoot.ProductName.Framework.FeatureFlags.csproj" />
     </ItemGroup>
     <!--#endif -->

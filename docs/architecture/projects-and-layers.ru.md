@@ -57,15 +57,15 @@ flowchart BT
 |---|---|---|
 | `Common` | Доменное ядро: `Entity`, `AggregateRoot`, доменные события, `IUnitOfWork`, спецификации, пользователь и контекст выполнения, исключения | ни на что |
 | `Common.Contracts` | То, что пересекает границу сервиса: маршруты, модели запросов и ответов, константы проверок здоровья | `Common` |
-| `Common.Application` | Абстракции приложения: диспетчер доменных событий, `IPermissionService`, интерфейсы сообщений | `Common` |
-| `Common.Infrastructure` | Базовые классы EF Core, interceptor'ы, репозитории, миграции, schema guard, сообщения на MassTransit, безопасность | `Common`, `Common.Application`, `Common.Contracts` |
-| `Common.Web` | Веб-слой сервиса: pipeline, ошибки, валидация, Swagger, аутентификация, права, здоровье | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure` |
+| `Common.Application` | Абстракции приложения: идемпотентность, интерфейсы сообщений и персистенса (`IMessageBus`, `IInternalApiConfiguration`), сериализация | `Common` |
+| `Common.Infrastructure` | Базовые классы EF Core, interceptor'ы, репозитории, миграции, гарант схемы, модель актора (`IUserContext`, `JobActorContext`), внутренний межсервисный протокол | `Common`, `Common.Application`, `Common.Contracts`, `Capabilities.Persistence.Abstractions` и модуль провайдера (свитч `#228`), `Framework.DomainEvents`, `Framework.Observability` |
+| `Common.Web` | Веб-слой сервиса: настройка хоста, ошибки, пагинация, здоровье, проброс гейтвея | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure`, `Framework.Auth`, `Framework.OpenApi`, `Framework.Validation`, `Framework.Observability`, `Framework.FeatureFlags` (флаг) |
 | `Common.Testing` | Тестовые помощники, привязанные к аудит-pipeline: аудит-верификаторы и `TestCategories`; без тестового фреймворка | все перечисленные выше, `Framework.Testing` |
 | `Framework.Testing` | Переносимая тестовая система: тестовые контексты, тестовые серверы реальных СУБД решения (`PostgresDbTestExecutionContext`, `SqlServerDbTestExecutionContext`), `TestDatabase`, заглушки, проверки правил; без тестового фреймворка | `Common`, `Common.Application`, `Common.Infrastructure`, `Framework.DomainEvents`, модуль провайдера |
 | `Common.Tests` | Тесты `Common` | все перечисленные выше, `Common.Testing` |
 | `Framework.Auth` | Аутентификация и авторизация платформы над JwtBearer: составная схема API-ключа или JWT, cookie токена с CSRF-контрактом, проверка прав | `Common`, `Common.Application`, `Common.Infrastructure` |
 | `Framework.Auth.Tests` | Тесты аутентификации и прав | `Framework.Auth` |
-| `Framework.OpenApi` | Стек Swagger: настройка документа, фильтры, дамп схемы `--ApiDiff` | `Common`, `Common.Contracts` |
+| `Framework.OpenApi` | Стек Swagger: настройка документа, фильтры, дамп схемы `--diff-api` | `Common`, `Common.Contracts`, `Common.Application`, `Common.Infrastructure`, `Framework.Auth`, `Framework.FeatureFlags` (флаг) |
 | `Framework.OpenApi.Tests` | Тесты стека Swagger | `Framework.OpenApi` |
 | `Framework.Validation` | Обвязка FluentValidation над SharpGrip: валидаторы сборки сервиса и ответ 422 | ничего из `Common` |
 | `Framework.Validation.Tests` | Тесты обвязки валидации | `Framework.Validation` |

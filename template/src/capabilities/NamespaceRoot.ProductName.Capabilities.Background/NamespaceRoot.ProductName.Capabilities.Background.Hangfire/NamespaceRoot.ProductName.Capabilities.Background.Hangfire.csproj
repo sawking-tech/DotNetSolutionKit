@@ -27,6 +27,9 @@
         <ProjectReference Include="..\..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
         <ProjectReference Include="..\..\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions\NamespaceRoot.ProductName.Capabilities.Persistence.Abstractions.csproj" />
         <!--#if (Database == "mssql") -->
+        <!-- TODO: another module's implementation: the Hangfire objects are created by the provider's
+             installer (SqlServerObjectsInstaller), the same code path Postgres has inside the kernel
+             switch #228. Goes away with the #228 inversion, like the kernel's own provider reference. -->
         <ProjectReference Include="..\..\NamespaceRoot.ProductName.Capabilities.Persistence\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql\NamespaceRoot.ProductName.Capabilities.Persistence.Mssql.csproj" />
         <!--#endif -->
         <ProjectReference Include="..\..\..\framework\NamespaceRoot.ProductName.Framework.Observability\NamespaceRoot.ProductName.Framework.Observability.csproj" />
