@@ -1,6 +1,18 @@
 {
-  "version": "2.9.1",
+  "version": "2.9.2",
   "releaseNotes": {
+    "2.9.2": {
+      "headline": "Solutions keep all their projects on the SDKs that pull references into dotnet sln add.",
+      "highlights": [
+        "A newer .NET SDK adds a project's references along with it in dotnet sln add, which lost projects from All.sln and broke builds on some runners; the template and dotskit ask for the project alone and fall back for older SDKs."
+      ],
+      "ru": {
+        "headline": "Решения не теряют проекты на SDK, которые тянут референсы в dotnet sln add.",
+        "highlights": [
+          "Новый .NET SDK добавляет в dotnet sln add вместе с проектом его референсы, из-за чего All.sln теряла проекты и сборки падали на части раннеров; шаблон и dotskit просят один проект и откатываются для старых SDK."
+        ]
+      }
+    },
     "2.9.1": {
       "headline": "dotskit upgrade takes the parts one run after another and stops at conflicts; --continue resumes.",
       "highlights": [
