@@ -199,6 +199,23 @@ file-byte violations and C# style violations in the tool.
 - CI uses minimal permissions. nuget.org publishing uses Trusted Publishing without stored keys. A NuGet
   version can be unlisted, not deleted.
 
+## Session start (the first look)
+
+Before the first answer of a session, look at the samples board: every branch of `DotNetSolutionKit.Samples`
+and the result of its last run. A red branch is a statement about `dev` or about the automation, and it
+waits days unnoticed while work goes on beside it; `single`, `gateway`, `full`, `full-alt`, `full-dev` and
+`lifecycle` are the board.
+
+```bash
+gh run list --limit 6 -R sawking-tech/DotNetSolutionKit.Samples \
+  --json workflowName,headBranch,conclusion,createdAt \
+  -q '.[] | [.headBranch, .workflowName, .conclusion, .createdAt] | @tsv'
+```
+
+A red branch is a stop: explain it before taking other work, and if its cause is in this repository, it
+goes first. The same look comes before a release and before a merge that changes generation, service
+staging or the manifest - the Samples rehearsal is what tells a broken `dev` apart from a broken recipe.
+
 ## Plan-first (the law of sessions)
 Work strictly from plan.kdl: 1) an item in the plan (`plan.mjs add`), 2) its why/how/done_when, 3) priority by position, 4) `plan.mjs take` - only then action. A hotfix without a plan item is forbidden, with no "it's small" exceptions. Progress is marked with plan.mjs done + check.
 
