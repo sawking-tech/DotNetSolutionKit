@@ -1,0 +1,51 @@
+name: Samples dispatch
+
+# The samples repository regenerates its branches from every release: the dispatch wakes its Regenerate
+# and lifecycle workflows the minute the publication is done, instead of the half hour its nuget.org
+# polling takes to notice (released.yml there).
+#
+# It is a workflow of its own rather than a step of release.yml: a release is published, and this wakes
+# the samples on that event, whatever published it. A run of Release on a commit without a v* tag is a
+# rehearsal (workflow_call with publish: false) and wakes nobody.
+
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    steps:
+      - id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          tag=$(gh api "repos/$GITHUB_REPOSITORY/git/refs/tags" --paginate \
+            --jq ".[] | select(.object.sha == \"$SHA\") | .ref" | sed 's|^refs/tags/||' | head -1)
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "release run $SHA: ${tag:-(no tag, a rehearsal)}"
+
+      # The app is installed on the organization with Actions read and write on Samples alone.
+      - if: steps.tag.outputs.tag != ''
+        id: samples-app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.SAMPLES_APP_ID }}
+          private-key: ${{ secrets.SAMPLES_APP_KEY }}
+          owner: sawking-tech
+          repositories: DotNetSolutionKit.Samples
+
+      - if: steps.tag.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ steps.samples-app.outputs.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          gh api -X POST "/repos/sawking-tech/DotNetSolutionKit.Samples/dispatches" \
+            -f event_type=released -f "client_payload[tag]=$TAG"
+          echo "dispatched 'released' for $TAG to DotNetSolutionKit.Samples"
