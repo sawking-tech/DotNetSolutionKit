@@ -351,7 +351,7 @@ function dayCells(branch) {
   const start = new Date(today); start.setDate(start.getDate() - WEEK * GRID.pastWeeks - mondayIndex(today));
   const end = new Date(today); end.setDate(end.getDate() + WEEK * GRID.futureWeeks + (WEEK - 1 - mondayIndex(today)));
   const cells = [];
-  let last = null, i = 0, n = 0;
+  let last = null, lastCi = null, i = 0, n = 0;
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1), n++) {
     const key = localDay(d);
     const cell = { key, week: Math.floor(n / WEEK), weekday: n % WEEK };
@@ -359,12 +359,15 @@ function dayCells(branch) {
     const ran = [];
     while (i < runs.length && day(runs[i].started) <= key) {
       last = runs[i];
+      // the last CI up to the day: the numbers the card shows when the day's own last record is a
+      // rebuild or a scan without tests
+      if (last.workflow === "CI") lastCi = last;
       if (day(runs[i].started) === key) ran.push(runs[i]);
       i++;
     }
     if (!last) { cells.push({ ...cell, empty: true }); continue; }
     cells.push({
-      ...cell, run: last, ran, today: key === todayKey,
+      ...cell, run: last, ci: lastCi, ran, today: key === todayKey,
       ok: last.conclusion === "success",
       age: daysBetween(day(last.started), key),
       unchanged: daysBetween(since.get(last.version), key),
@@ -451,6 +454,10 @@ function dayCard(c) {
   const head = c.ran.length
     ? `<b class="result ${c.ok ? "ok" : "bad"}">${c.ok ? STR.passed : STR.failedRun}</b>`
     : `<b class="quiet">${STR.noRunThatDay}</b>`;
+  // the day the file's last record is a failed Regenerate behind a passed CI, the card speaks for the
+  // CI: the grid's colour keeps the failure, the numbers keep the CI's
+  const shown = r.tests ? r : c.ci;
+  const tests = shown?.tests ? `${shown.tests.passed} ${STR.of} ${shown.tests.total}` : "-";
   return `<div class="dc-date">${fmtDate(c.key)}</div>
     <div class="dc-head">${head}</div>
     <dl>
@@ -639,8 +646,16 @@ function releaseWindow(body, hashes = null) {
   </div>`;
 }
 
+// the last run of the checking workflow the row is about: a release row speaks for the CI that built
+// it, not for the last record of the file - a failed Regenerate behind a green CI is the branch's
+// trouble, not the release's (the v2.9.1 row of full read "failed, - tests" over a passed CI)
+const lastCiRun = (report) => {
+  const ci = [...report.runs].reverse().find((run) => run.workflow === "CI");
+  return ci ?? lastRun(report);
+};
+
 function releaseItem(report) {
-  const r = lastRun(report);
+  const r = lastCiRun(report);
   const key = report.version.replace(/^v/, "");
   // the commit a release's tag was cut from, resolved by the samples' report; the field's form is 7 hex
   const from = SHA_KEY.test(report.templateCommit ?? "") ? report.templateCommit.slice(0, 7) : "";
