@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Application.Authorization;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authorization;
 
 /// <summary>
 /// Answers whether the current user holds the permissions an action requires.

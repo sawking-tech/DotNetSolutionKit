@@ -1,13 +1,14 @@
 //#if (FeatureFlags)
 using NamespaceRoot.ProductName.Framework.FeatureFlags;
 //#endif
-using NamespaceRoot.ProductName.Common.Application.Configuration;
 //#if (DiffApi)
 using NamespaceRoot.ProductName.Common.Web.Setup;
 using NamespaceRoot.ProductName.Framework.OpenApi;
 //#endif
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Application;
 using NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure;
+using NamespaceRoot.ProductName.Common.Application.Configuration;
+using NamespaceRoot.ProductName.Framework.Auth.Configuration;
 
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.API.Setup;
 

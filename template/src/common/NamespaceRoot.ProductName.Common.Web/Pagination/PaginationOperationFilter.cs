@@ -7,6 +7,10 @@ namespace NamespaceRoot.ProductName.Common.Web.Pagination;
 /// <summary>
 /// Publishes in the OpenAPI document the bounds that <see cref="PaginationValidationFilter"/> enforces.
 /// </summary>
+// TODO: Web/Pagination stays in Common.Web although the 3.0 migration map moved this filter to
+// Framework.OpenApi - the filter reads PaginationContract, Common.Web references Framework.OpenApi, and
+// the move closes the cycle. ADR-009 allows a violation with its reason written; this is the reason.
+// The bounds are the team's product format, not a Swagger concern.
 public sealed class PaginationOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)

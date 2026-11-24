@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Moq;
-using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Exceptions;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 using NamespaceRoot.ProductName.Framework.Auth.Authentication;
 using NamespaceRoot.ProductName.Common.Web.Setup;
+using NamespaceRoot.ProductName.Framework.Auth.Configuration;
 
 namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;
 

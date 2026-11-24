@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using NamespaceRoot.ProductName.Common.Application.Configuration;
+using NamespaceRoot.ProductName.Framework.Auth.Configuration;
 
 namespace NamespaceRoot.ProductName.Framework.Auth.Authentication;
 

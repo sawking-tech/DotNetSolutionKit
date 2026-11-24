@@ -3,9 +3,9 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
+using NamespaceRoot.ProductName.Common.Application.Configuration;
 
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.Security.Handlers;
 

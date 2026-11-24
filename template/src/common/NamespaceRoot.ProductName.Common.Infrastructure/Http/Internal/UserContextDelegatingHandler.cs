@@ -10,6 +10,11 @@ namespace NamespaceRoot.ProductName.Common.Infrastructure.Http.Internal;
 /// Passes the caller on to the service being called: the person a request acts for, with the tenant,
 /// roles and permissions it came with, or the system when there is no person.
 /// </summary>
+// TODO: stays in the kernel although the 3.0 migration map moved it to Framework.Auth. The handler is
+// the outgoing half of the internal service protocol: it writes AuthHeaders and is registered beside
+// InternalApiKeyDelegatingHandler by InternalServiceHttpExtensions, both in the kernel. Framework.Auth
+// holds the incoming half - the schemes, the filters, the token cookie - and the kernel does not
+// reference it. ADR-009 allows a violation with its reason written; this is the reason.
 /// <remarks>
 /// <para>
 /// The person is read from <see cref="HttpContext.User"/> through the accessor rather than from an

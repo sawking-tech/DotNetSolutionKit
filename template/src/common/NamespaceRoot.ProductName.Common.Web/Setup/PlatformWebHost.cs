@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using NamespaceRoot.ProductName.Common.Application.Authorization;
 using NamespaceRoot.ProductName.Common.Application.Serialization;
 using NamespaceRoot.ProductName.Common.Infrastructure.Configuration;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;

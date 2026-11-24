@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
+using NamespaceRoot.ProductName.Framework.Auth.Configuration;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 using NamespaceRoot.ProductName.Framework.OpenApi;
 //#if (FeatureFlags)

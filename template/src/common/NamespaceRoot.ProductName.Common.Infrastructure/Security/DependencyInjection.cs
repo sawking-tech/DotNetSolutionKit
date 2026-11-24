@@ -5,6 +5,14 @@ using NamespaceRoot.ProductName.Common.Domain.Context;
 
 namespace NamespaceRoot.ProductName.Common.Infrastructure.Security;
 
+// TODO: Security/ keeps the actor model of the kernel - the users a request can act as, the actor a job
+// or a consumer carries, and the headers that pass them between services. The 3.0 migration map sent the
+// whole folder to Framework.Auth; what moved is the token half (Rsa* and its configuration). What stays
+// is the kernel's own: IUserContext and IAuthContext are the kernel's contracts, AuthHeaders is the
+// internal service protocol used by ten kernel files, JobActorContext is written by two capabilities
+// (RabbitMQ, Hangfire) through the kernel reference, and BasicCredentials guards the Hangfire dashboard.
+// Moving these would make the kernel reference Framework.Auth. ADR-009 allows a violation with its reason
+// written; this is the reason.
 public static class DependencyInjection
 {
     private static void AddUserContext(this IServiceCollection services)

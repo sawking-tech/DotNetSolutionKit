@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using NamespaceRoot.ProductName.Common.Application.Configuration;
+using NamespaceRoot.ProductName.Framework.Auth.Configuration;
 using NamespaceRoot.ProductName.Common.Exceptions;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Security;
+namespace NamespaceRoot.ProductName.Framework.Auth.Security;
 
 /// <summary>
 /// Provides RSA keys for JWT token signing and validation.

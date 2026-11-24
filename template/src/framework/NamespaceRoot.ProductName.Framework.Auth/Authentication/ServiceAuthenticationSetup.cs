@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using NamespaceRoot.ProductName.Common.Application.Configuration;
-using NamespaceRoot.ProductName.Common.Infrastructure.Security;
+using NamespaceRoot.ProductName.Framework.Auth.Security;
+using NamespaceRoot.ProductName.Framework.Auth.Configuration;
 
 namespace NamespaceRoot.ProductName.Framework.Auth.Authentication;
 

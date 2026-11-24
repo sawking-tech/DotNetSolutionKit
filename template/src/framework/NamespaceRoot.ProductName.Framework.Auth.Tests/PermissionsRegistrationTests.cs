@@ -1,12 +1,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NamespaceRoot.ProductName.Common.Application.Authorization;
+using NamespaceRoot.ProductName.Framework.Auth.Authorization;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Framework.Testing.Stubs;
-using NamespaceRoot.ProductName.Framework.Auth.Authorization;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Web;
+namespace NamespaceRoot.ProductName.Framework.Auth.Tests;
 
 /// <summary>
 /// Permissions:Source picks the implementation, and a remote source without an address does not start.

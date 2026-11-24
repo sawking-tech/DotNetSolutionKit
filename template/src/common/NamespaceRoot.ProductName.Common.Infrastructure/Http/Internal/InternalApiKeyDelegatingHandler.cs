@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using NamespaceRoot.ProductName.Common.Application.Configuration;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
+using NamespaceRoot.ProductName.Common.Application.Configuration;
 
 namespace NamespaceRoot.ProductName.Common.Infrastructure.Http.Internal;
 

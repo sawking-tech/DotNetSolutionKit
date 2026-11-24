@@ -1,6 +1,6 @@
 using Microsoft.IdentityModel.Tokens;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Security;
+namespace NamespaceRoot.ProductName.Framework.Auth.Security;
 
 /// <summary>
 /// Provides the RSA public key for JWT token validation.
