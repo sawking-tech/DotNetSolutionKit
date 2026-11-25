@@ -109,6 +109,13 @@ jobs:
           - name: no deployment files
             first: -N Acme -P Shop -S Orders --solution --deploy none --agent none
             agent: none
+          # A flag whose files another flag cuts or extends: email carries an attachment only with
+          # --storage, and every other row that turns email on turns storage on with it. Without this
+          # row the pair was never generated, and a broken conditional in the email contract reached
+          # dev - a TODO with the literal directive in it cut the record out and the service failed.
+          - name: email without storage
+            first: -N Acme -P Shop -S Orders --solution --notify email --messaging rabbitmq:outbox
+            more: -N Acme -P Shop -S Billing --notify email
 
     steps:
       - name: Nothing to build
