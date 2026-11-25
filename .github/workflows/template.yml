@@ -190,7 +190,8 @@ jobs:
       # The layout of the template's C# is held nowhere else: .editorconfig turns the analyzers off for
       # template/**.cs (no project of this repository compiles them), and dotnet format runs over the tool
       # alone. The generated tree has the placeholders resolved and compiles, so the layout is checked here,
-      # with the repository's own .editorconfig copied in - a generated solution carries none.
+      # with the repository's own .editorconfig for the length of this step only - a generated solution
+      # carries none, and leaving it would turn every CA rule on for the build below.
       # `whitespace` alone: the SDK 8 formatter throws when it applies a style change, and the full command
       # renames members under IDE1006. --include is what keeps MSBuildWorkspace from refusing the whole
       # solution. One combination is enough: the layout does not depend on which capability is on.
@@ -199,6 +200,7 @@ jobs:
         working-directory: ${{ runner.temp }}/solution
         run: |
           cp "$GITHUB_WORKSPACE/.editorconfig" .
+          trap 'rm -f .editorconfig' EXIT
           dotnet format whitespace "src/services/$(ls src/services | grep 'All.sln$')" \
             --verify-no-changes --include "src/**/*.cs"
 
