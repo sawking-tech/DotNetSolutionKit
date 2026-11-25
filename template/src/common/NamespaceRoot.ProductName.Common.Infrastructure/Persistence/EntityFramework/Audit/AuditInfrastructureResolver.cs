@@ -27,7 +27,8 @@ internal static class AuditInfrastructureResolver
         bus = null!;
 
         var internalSp = (context as IInfrastructure<IServiceProvider>)?.Instance;
-        if (internalSp is null) return false;
+        if (internalSp is null)
+            return false;
 
         var appSp = internalSp.GetService<IDbContextOptions>()
             ?.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault()
@@ -43,7 +44,8 @@ internal static class AuditInfrastructureResolver
 
         foreach (var candidate in candidates)
         {
-            if (candidate is null) continue;
+            if (candidate is null)
+                continue;
             execution = candidate.GetService<IDomainExecutionContext>()!;
             bus = candidate.GetService<IMessageBus>()!;
             if (execution is not null && bus is not null)

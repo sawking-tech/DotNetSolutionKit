@@ -19,35 +19,35 @@ namespace NamespaceRoot.ProductName.ServiceNameOrCustom.Tests.Tests;
 public sealed class SendEmailCommandV1ConsumerTests
 {
     private readonly Mock<INotificationEmailSender> _email = new();
-//#if (Storage)
+    //#if (Storage)
     private readonly Mock<IS3ObjectStorage> _storage = new();
-//#endif
+    //#endif
 
     private SendEmailCommandV1Consumer Consumer() => new(
         _email.Object,
-//#if (Storage)
+        //#if (Storage)
         _storage.Object,
-//#endif
+        //#endif
         NullLogger<SendEmailCommandV1Consumer>.Instance);
 
     private static ConsumeContext<SendEmailCommandV1> Context(SendEmailCommandV1 command) =>
         Mock.Of<ConsumeContext<SendEmailCommandV1>>(c => c.Message == command && c.CancellationToken == CancellationToken.None);
 
-//#if (Storage)
+    //#if (Storage)
     private static SendEmailCommandV1 Command(string? attachmentKey = null, string? attachmentName = null) => new()
 //#else
     private static SendEmailCommandV1 Command() => new()
-//#endif
+    //#endif
     {
         Id = Guid.NewGuid(),
         OccurredOnUtc = DateTimeOffset.UtcNow,
         ToEmail = "customer@example.test",
         Subject = "Your code",
         Body = "123456",
-//#if (Storage)
+        //#if (Storage)
         AttachmentKey = attachmentKey,
         AttachmentName = attachmentName,
-//#endif
+        //#endif
     };
 
     [Test(Description = "A command sent on the bus reaches its consumer, which sends the email")]
@@ -55,9 +55,9 @@ public sealed class SendEmailCommandV1ConsumerTests
     {
         await using var provider = new ServiceCollection()
             .AddSingleton(_email.Object)
-//#if (Storage)
+            //#if (Storage)
             .AddSingleton(_storage.Object)
-//#endif
+            //#endif
             .AddSingleton(typeof(ILogger<>), typeof(NullLogger<>))
             .AddMassTransitTestHarness(bus =>
             {
@@ -85,7 +85,7 @@ public sealed class SendEmailCommandV1ConsumerTests
         _email.Verify(e => e.SendEmailAsync("customer@example.test", "Your code", "123456", CancellationToken.None), Times.Once);
         _email.VerifyNoOtherCalls();
     }
-//#if (Storage)
+    //#if (Storage)
 
     [Test(Description = "An attachment is read from object storage by its key and sent under its name")]
     public async Task Should_AttachTheFile_FromStorage()
@@ -124,5 +124,5 @@ public sealed class SendEmailCommandV1ConsumerTests
 
         _email.Verify(e => e.SendEmailAsync("customer@example.test", "Your code", "123456", CancellationToken.None), Times.Once);
     }
-//#endif
+    //#endif
 }

@@ -196,7 +196,8 @@ public class ActorPropagationTests
         bool outsideAnyActivity = false)
     {
         var previous = Activity.Current;
-        if (outsideAnyActivity) Activity.Current = null;
+        if (outsideAnyActivity)
+            Activity.Current = null;
 
         try
         {

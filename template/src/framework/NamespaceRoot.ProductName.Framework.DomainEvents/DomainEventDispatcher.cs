@@ -92,7 +92,8 @@ public sealed class DomainEventDispatcher(
                     // committed (or rolling back) and an exception here cannot undo it. Silent
                     // swallowing without a log entry hides bus-publish failures and similar
                     // side-effect bugs; ERROR-level log ensures they surface in monitoring.
-                    if (openHandlerType == typeof(IDomainPreSaveHandler<>)) throw;
+                    if (openHandlerType == typeof(IDomainPreSaveHandler<>))
+                        throw;
 
                     logger.LogError(ex,
                         "Domain event handler {HandlerType} failed during {Phase} for event {EventType}",

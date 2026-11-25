@@ -19,14 +19,14 @@ internal static class ApplicationSetup
         var configuration = builder.Configuration;
         var services = builder.Services;
 
-//#if (FeatureFlags)
+        //#if (FeatureFlags)
         // Platform feature flags: the catalogue, the store, and the library that evaluates them.
         // Flags come from the shared features.json, so nothing is declared here: a service gains a
         // new flag without a line of code, and adds a constant to FeatureKeys only for the ones its
         // own code reads.
         services.AddPlatformFeatureManagement();
 
-//#endif
+        //#endif
         // services.AddJwtConfiguration(configuration);
         services.AddInternalApiConfiguration(configuration);
         services.AddAuthValidationConfiguration(configuration);
@@ -36,16 +36,16 @@ internal static class ApplicationSetup
         services.AddApplicationServices();
 
         // Register Infrastructure Layer services
-//#if (DiffApi)
+        //#if (DiffApi)
         // A schema-only run must not touch infrastructure: it registers no database, no broker and no
         // jobs, and only has to get far enough to describe the API.
         if (!SchemaOnlyMode.IsEnabled())
         {
             services.AddInfrastructureServices(builder.Configuration);
         }
-//#else
+        //#else
         services.AddInfrastructureServices(builder.Configuration);
-//#endif
+        //#endif
 
         return builder;
     }

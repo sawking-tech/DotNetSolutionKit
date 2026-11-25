@@ -54,7 +54,8 @@ public static class SetBasedWriteVerifier
         while (directory is not null)
         {
             var candidate = Path.Combine(directory.FullName, "src");
-            if (Directory.Exists(candidate)) return candidate;
+            if (Directory.Exists(candidate))
+                return candidate;
 
             directory = directory.Parent;
         }
@@ -124,10 +125,12 @@ public static class SetBasedWriteVerifier
         {
             var line = lines[i].TrimStart();
 
-            if (line.StartsWith("[SetBasedWrite", StringComparison.Ordinal)) return true;
+            if (line.StartsWith("[SetBasedWrite", StringComparison.Ordinal))
+                return true;
 
             // Stop at the previous member: attributes never span past a closing brace.
-            if (i < index && (line.StartsWith('}') || line.EndsWith(';'))) return false;
+            if (i < index && (line.StartsWith('}') || line.EndsWith(';')))
+                return false;
         }
 
         return false;

@@ -7,7 +7,7 @@ namespace NamespaceRoot.ProductName.Capabilities.Security.CredentialStore;
 /// </summary>
 public static class ConfigurationStoreExtensions
 {
-//#if (Infisical)
+    //#if (Infisical)
     /// <summary>
     /// Reads the shared folder and this service's folder from Infisical, on top of whatever was
     /// configured before.
@@ -34,8 +34,8 @@ public static class ConfigurationStoreExtensions
         Func<InfisicalOptions, IConfigurationStore>? storeFactory = null) =>
         builder.AddConfigurationStore(InfisicalOptions.SectionName, servicePath, optional,
             new InfisicalOptions(), storeFactory ?? (options => new InfisicalConfigurationStore(options)));
-//#endif
-//#if (Vault)
+    //#endif
+    //#if (Vault)
 
     /// <summary>
     /// Reads the shared path and this service's path from HashiCorp Vault, on top of whatever was
@@ -53,7 +53,7 @@ public static class ConfigurationStoreExtensions
         Func<VaultOptions, IConfigurationStore>? storeFactory = null) =>
         builder.AddConfigurationStore(VaultOptions.SectionName, servicePath, optional,
             new VaultOptions(), storeFactory ?? (options => new VaultConfigurationStore(options)));
-//#endif
+    //#endif
 
     private static IConfigurationBuilder AddConfigurationStore<TOptions>(
         this IConfigurationBuilder builder,

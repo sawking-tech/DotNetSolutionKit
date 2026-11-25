@@ -86,63 +86,63 @@ public static partial class DependencyInjection
             if (!switches.Database)
                 options.UseSwitchedOffDatabase();
             options.ApplyDomainEventInterceptors(sp);
-//#if (AuditEnabled)
+            //#if (AuditEnabled)
             options.ApplyAuditInterceptor(sp);
-//#endif
+            //#endif
         });
 
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ServiceIdentifierDbContext>());
 
-//#if (MessagingDelivery == "outbox")
+        //#if (MessagingDelivery == "outbox")
         // The bus, with the outbox in this service's schema: a message and the change that caused it
         // commit together. Consumers are found in this assembly.
         services.AddMessaging<ServiceIdentifierDbContext>(
             configuration, "servicenameorcustom", typeof(InfrastructureMarker).Assembly);
-//#if (AuditEnabled)
+        //#if (AuditEnabled)
 
         // The audit journal: a change to an entity marked [Auditable] publishes AuditRecordedV1 into the
         // outbox in the same save, so a rolled back change leaves no entry. IAuditRecorder and
         // ISetBasedAuditCapture record what bypasses the change tracker; see docs/features/audit.md.
         services.AddAuditPersistence();
         services.AddAuditRecorder<ServiceIdentifierDbContext>("servicenameorcustom");
-//#endif
+        //#endif
 
-//#elif (MessagingDelivery == "direct")
+        //#elif (MessagingDelivery == "direct")
         // The bus without an outbox: a message goes straight to RabbitMQ and is lost if the broker is
         // down. Consumers are found in this assembly.
         services.AddMessaging(configuration, "servicenameorcustom", typeof(InfrastructureMarker).Assembly);
 
-//#endif
+        //#endif
         // Repositories
 
         // Specifications: case-insensitive search; readable numbers from a sequence, taken before the
         // entity is created
         services.AddDatabaseQueries<ServiceIdentifierDbContext>();
 
-//#if (ClickHouse)
+        //#if (ClickHouse)
         // ClickHouse, the ClickHouse section: connections, the schema check, readiness
         services.AddClickHouse(configuration);
 
-//#endif
-//#if (MongoDB)
+        //#endif
+        //#if (MongoDB)
         // MongoDB, the MongoDB section: the client, the service's database, readiness
         services.AddMongoDB(configuration);
 
-//#endif
-//#if (NotifyEmail)
+        //#endif
+        //#if (NotifyEmail)
         // Email, the Email section: the transport of the provider it names, the sandbox outside Production
         services.AddNotifications(configuration);
 
-//#endif
-//#if (Storage)
+        //#endif
+        //#if (Storage)
         // Object storage, the S3 section; S3:Enabled=false keeps nothing
         services.AddS3ObjectStorage(configuration);
 
-//#endif
+        //#endif
         // Configurations
         services.AddInfrastructureConfiguration();
 
-//#if (Hangfire)
+        //#if (Hangfire)
         // Background jobs, with their settings validated only when the job server runs. Off together
         // with the database: the database is their storage.
         if (switches.Jobs)
@@ -154,7 +154,7 @@ public static partial class DependencyInjection
                 $"{ServiceIdentifierDbContext.DefaultSchemaName}_hangfire");
         }
 
-//#endif
+        //#endif
         // Data Seeding
         services.AddScoped<DataSeeder>();
 

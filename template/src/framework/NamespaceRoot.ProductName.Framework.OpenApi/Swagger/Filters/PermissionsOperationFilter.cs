@@ -18,7 +18,8 @@ public class PermissionsOperationFilter : IOperationFilter
             .Distinct()
             .ToList();
 
-        if (permissions.Count == 0) return;
+        if (permissions.Count == 0)
+            return;
 
         var permissionsText = $"\n\n---\n**Required permissions:** `{string.Join("`, `", permissions)}`\n";
 

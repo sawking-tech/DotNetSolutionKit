@@ -483,7 +483,8 @@ public class AuditSaveChangesInterceptorTests
         public Task PublishAsync<T>(T busEvent, CancellationToken ct = default)
             where T : class, IBusEvent
         {
-            if (busEvent is AuditRecordedV1 audit) sink.Add(audit);
+            if (busEvent is AuditRecordedV1 audit)
+                sink.Add(audit);
             return Task.CompletedTask;
         }
 

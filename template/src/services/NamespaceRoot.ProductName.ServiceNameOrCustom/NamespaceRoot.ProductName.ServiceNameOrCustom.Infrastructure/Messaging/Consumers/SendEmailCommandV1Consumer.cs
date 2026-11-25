@@ -26,7 +26,7 @@ public sealed class SendEmailCommandV1Consumer(
     protected override async Task HandleAsync(IMessageContext<SendEmailCommandV1> context)
     {
         var command = context.Message;
-//#if (Storage)
+        //#if (Storage)
         var attachment = await TryReadAttachmentAsync(command, context.CancellationToken);
 
         if (attachment is { Length: > 0 })
@@ -44,11 +44,11 @@ public sealed class SendEmailCommandV1Consumer(
                     command.Id, command.AttachmentName, attachment.Length);
             }
         }
-//#endif
+        //#endif
 
         await emailSender.SendEmailAsync(command.ToEmail, command.Subject, command.Body, context.CancellationToken);
     }
-//#if (Storage)
+    //#if (Storage)
 
     // The email still goes out when its file is missing: the recipient learns of it from the text, while a
     // command retried for a file that is not there would only fail again.
@@ -79,5 +79,5 @@ public sealed class SendEmailCommandV1Consumer(
             return null;
         }
     }
-//#endif
+    //#endif
 }

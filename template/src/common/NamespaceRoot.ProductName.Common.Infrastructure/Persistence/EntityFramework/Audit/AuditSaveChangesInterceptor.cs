@@ -222,7 +222,8 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
         bool ownerIsNew,
         string name)
     {
-        if (ownerIsNew) return null;
+        if (ownerIsNew)
+            return null;
 
         if (stored is not null)
             return stored.Properties.Any(p => p.Name == name) ? stored[name] : null;
@@ -266,7 +267,8 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
     private static string BuildEntityId(EntityEntry entry)
     {
         var key = entry.Metadata.FindPrimaryKey();
-        if (key is null) return string.Empty;
+        if (key is null)
+            return string.Empty;
 
         var parts = key.Properties
             .Select(p => Stringify(entry.Property(p.Name).CurrentValue) ?? string.Empty);
@@ -276,7 +278,8 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
 
     private static string? ReadDisplayValue(EntityEntry entry, AuditableAttribute marker)
     {
-        if (marker.DisplayProperty is null) return null;
+        if (marker.DisplayProperty is null)
+            return null;
 
         var property = entry.Entity.GetType().GetProperty(marker.DisplayProperty);
 
@@ -293,7 +296,8 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
     /// </remarks>
     private static Guid? ReadSubjectTenantId(EntityEntry entry, AuditableAttribute marker)
     {
-        if (marker.SubjectTenantProperty is null) return null;
+        if (marker.SubjectTenantProperty is null)
+            return null;
 
         var property = entry.Entity.GetType().GetProperty(marker.SubjectTenantProperty);
 

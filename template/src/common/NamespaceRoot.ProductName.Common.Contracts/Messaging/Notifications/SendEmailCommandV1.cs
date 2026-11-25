@@ -29,12 +29,12 @@ public sealed record SendEmailCommandV1 : IBusCommand
 
     /// <summary>Plain text.</summary>
     public required string Body { get; init; }
-//#if (Storage)
+    //#if (Storage)
 
     /// <summary>The key of the attachment in object storage; null for an email without one.</summary>
     public string? AttachmentKey { get; init; }
 
     /// <summary>The file name the recipient sees; required with <see cref="AttachmentKey"/>.</summary>
     public string? AttachmentName { get; init; }
-//#endif
+    //#endif
 }

@@ -134,9 +134,12 @@ internal class CookieAuthenticationTests
     private static HttpRequestMessage Post(string? cookie = null, bool csrf = false, string? authorization = null, string method = "POST")
     {
         var request = new HttpRequestMessage(new HttpMethod(method), "/orders");
-        if (cookie is not null) request.Headers.Add("Cookie", $"{cookie}=value");
-        if (csrf) request.Headers.Add(CsrfProtectionMiddleware.HeaderName, "1");
-        if (authorization is not null) request.Headers.Add("Authorization", authorization);
+        if (cookie is not null)
+            request.Headers.Add("Cookie", $"{cookie}=value");
+        if (csrf)
+            request.Headers.Add(CsrfProtectionMiddleware.HeaderName, "1");
+        if (authorization is not null)
+            request.Headers.Add("Authorization", authorization);
         return request;
     }
 

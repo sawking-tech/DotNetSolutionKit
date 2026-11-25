@@ -7,12 +7,12 @@ internal static class OutboxDatabaseLocks
 {
     public static IEntityFrameworkOutboxConfigurator UseDatabaseLocks(this IEntityFrameworkOutboxConfigurator outbox)
     {
-//#if (Database != "mssql")
+        //#if (Database != "mssql")
         outbox.UsePostgres();
-//#endif
-//#if (Database == "mssql")
+        //#endif
+        //#if (Database == "mssql")
         outbox.UseSqlServer();
-//#endif
+        //#endif
         return outbox;
     }
 }

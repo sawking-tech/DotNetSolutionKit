@@ -26,13 +26,13 @@ internal sealed class S3ObjectStorage : IS3ObjectStorage
             new BasicAWSCredentials(settings.AccessKey, settings.SecretKey),
             new AmazonS3Config
             {
-                ServiceURL     = settings.ServiceUrl,
+                ServiceURL = settings.ServiceUrl,
                 ForcePathStyle = settings.ForcePathStyle,
                 // A broken endpoint must fail fast, so a caller with a fallback uses it at once; the
                 // SDK defaults (100 s timeout × 4 retries) pin the request thread for minutes and turn
                 // a missing storage server into a request that seems to hang.
-                Timeout        = TimeSpan.FromSeconds(2),
-                MaxErrorRetry  = 1,
+                Timeout = TimeSpan.FromSeconds(2),
+                MaxErrorRetry = 1,
             });
     }
 
@@ -44,8 +44,8 @@ internal sealed class S3ObjectStorage : IS3ObjectStorage
             using var stream = new MemoryStream(data);
             await _s3.PutObjectAsync(new PutObjectRequest
             {
-                BucketName  = _bucket,
-                Key         = key,
+                BucketName = _bucket,
+                Key = key,
                 InputStream = stream,
                 ContentType = contentType,
             }, ct);
@@ -85,7 +85,7 @@ internal sealed class S3ObjectStorage : IS3ObjectStorage
         try
         {
             using var response = await _s3.GetObjectAsync(_bucket, key, ct);
-            using var reader   = new StreamReader(response.ResponseStream);
+            using var reader = new StreamReader(response.ResponseStream);
             return await reader.ReadToEndAsync(ct);
         }
         catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -104,7 +104,7 @@ internal sealed class S3ObjectStorage : IS3ObjectStorage
     {
         try
         {
-            var keys    = new List<string>();
+            var keys = new List<string>();
             var request = new ListObjectsV2Request { BucketName = _bucket, Prefix = prefix };
 
             ListObjectsV2Response response;
@@ -132,9 +132,9 @@ internal sealed class S3ObjectStorage : IS3ObjectStorage
         var url = _s3.GetPreSignedURL(new GetPreSignedUrlRequest
         {
             BucketName = _bucket,
-            Key        = key,
-            Expires    = DateTime.UtcNow.Add(ttl),
-            Verb       = HttpVerb.GET,
+            Key = key,
+            Expires = DateTime.UtcNow.Add(ttl),
+            Verb = HttpVerb.GET,
         });
         return Task.FromResult(new Uri(url));
     }
@@ -146,10 +146,10 @@ internal sealed class S3ObjectStorage : IS3ObjectStorage
         {
             await _s3.CopyObjectAsync(new CopyObjectRequest
             {
-                SourceBucket      = _bucket,
-                SourceKey         = sourceKey,
+                SourceBucket = _bucket,
+                SourceKey = sourceKey,
                 DestinationBucket = _bucket,
-                DestinationKey    = targetKey,
+                DestinationKey = targetKey,
             }, ct);
             _logger.LogDebug("S3: COPY {Bucket}/{Source} -> {Bucket}/{Target}", _bucket, sourceKey, _bucket, targetKey);
         }

@@ -82,7 +82,8 @@ public sealed class UserContextDelegatingHandler(
     private static void Set(HttpRequestMessage request, string name, string? value)
     {
         var clean = value?.Replace("\r", string.Empty).Replace("\n", string.Empty).Trim();
-        if (string.IsNullOrEmpty(clean)) return;
+        if (string.IsNullOrEmpty(clean))
+            return;
 
         request.Headers.Remove(name);
         request.Headers.TryAddWithoutValidation(name, clean);

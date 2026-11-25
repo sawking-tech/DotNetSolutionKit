@@ -11,7 +11,8 @@ public class VersionedDocumentFilter : IDocumentFilter
 {
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
-        if (swaggerDoc.Info.Version == "all") return;
+        if (swaggerDoc.Info.Version == "all")
+            return;
 
         var version = swaggerDoc.Info.Version;
         var pathsToRemove = swaggerDoc.Paths

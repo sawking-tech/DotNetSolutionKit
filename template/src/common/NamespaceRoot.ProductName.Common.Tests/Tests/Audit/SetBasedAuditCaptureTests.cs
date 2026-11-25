@@ -174,7 +174,8 @@ internal sealed class SetBasedAuditCaptureTests
         public Task PublishAsync<T>(T busEvent, CancellationToken ct = default)
             where T : class, IBusEvent
         {
-            if (busEvent is AuditBulkRecordedV1 bulk) sink.Add(bulk);
+            if (busEvent is AuditBulkRecordedV1 bulk)
+                sink.Add(bulk);
             return Task.CompletedTask;
         }
 

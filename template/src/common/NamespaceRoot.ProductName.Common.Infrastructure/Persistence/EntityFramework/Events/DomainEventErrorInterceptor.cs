@@ -27,10 +27,12 @@ public sealed class DomainEventErrorInterceptor : DbCommandInterceptor
     private static void CaptureException(CommandErrorEventData eventData)
     {
         // Guard Clause: Ensure context exists.
-        if (eventData.Context is null) return;
+        if (eventData.Context is null)
+            return;
 
         // Filter: Capture exceptions only within an active transaction (save/update operations).
-        if (eventData.Context.Database.CurrentTransaction == null) return;
+        if (eventData.Context.Database.CurrentTransaction == null)
+            return;
 
         // Resolve storage through the helper and attach the exception for the Rollback phase.
         if (DomainEventInfrastructureResolver.TryResolve(eventData.Context, out var storage, out _))

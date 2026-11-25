@@ -59,7 +59,7 @@ public class CorsSettings : ICorsSettings
     public int PreflightMaxAge { get; set; } = 3600;
 
     /// <inheritdoc />
-    public string[] AllowedHeaders { get; set; }  = [];
+    public string[] AllowedHeaders { get; set; } = [];
 
     /// <inheritdoc />
     public string[] ExposedHeaders { get; set; } = [];

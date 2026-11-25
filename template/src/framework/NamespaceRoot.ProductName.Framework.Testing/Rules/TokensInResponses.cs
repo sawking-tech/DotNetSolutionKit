@@ -28,11 +28,11 @@ public static class TokensInResponses
     {
         var findings = new List<string>();
         foreach (var controller in controllers)
-        foreach (var action in controller.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
-        {
-            var visited = new HashSet<Type>();
-            Walk(Unwrap(action.ReturnType), $"{controller.Name}.{action.Name}", visited, findings, depth: 0);
-        }
+            foreach (var action in controller.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
+            {
+                var visited = new HashSet<Type>();
+                Walk(Unwrap(action.ReturnType), $"{controller.Name}.{action.Name}", visited, findings, depth: 0);
+            }
 
         return findings;
     }

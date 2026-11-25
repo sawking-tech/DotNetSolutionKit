@@ -37,7 +37,8 @@ public static class AuditMarkerVerifier
                     $"{type.Name} nominates '{display}' as its display property, which does not exist.");
             }
 
-            if (marker.SubjectTenantProperty is not { } subject) continue;
+            if (marker.SubjectTenantProperty is not { } subject)
+                continue;
 
             var property = type.GetProperty(subject);
 
@@ -94,7 +95,8 @@ public static class AuditMarkerVerifier
     {
         for (var current = type.BaseType; current is not null; current = current.BaseType)
         {
-            if (!current.IsGenericType) continue;
+            if (!current.IsGenericType)
+                continue;
 
             var definition = current.GetGenericTypeDefinition();
             if (definition == typeof(AggregateRoot<>) || definition == typeof(Entity<>))

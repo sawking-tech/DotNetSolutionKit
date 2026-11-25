@@ -117,11 +117,11 @@ public static class SwaggerSetup
             options.SchemaFilter<SchemaValuesFromFilter>();
             options.DocumentFilter<VersionedDocumentFilter>();
             options.DocumentFilter<ScrubDescriptionsFilter>();
-//#if (FeatureFlags)
+            //#if (FeatureFlags)
             // An action behind a closed [FeatureGate] answers 404, so the document leaves it out too.
             options.OperationFilter<FeatureGateFilters>();
             options.DocumentFilter<FeatureGateFilters>();
-//#endif
+            //#endif
 
             var xmlFile = $"{serviceAssembly.GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -148,7 +148,8 @@ public static class SwaggerSetup
     /// </summary>
     public static WebApplication UseSwaggerPage(this WebApplication app, Assembly serviceAssembly)
     {
-        if (app.Environment.IsProduction()) return app;
+        if (app.Environment.IsProduction())
+            return app;
 
         app.UseSwagger();
         app.UseSwaggerUI(c =>

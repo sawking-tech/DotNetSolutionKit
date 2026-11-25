@@ -51,7 +51,8 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<AuthenticationS
                 : ProcessUserContextViaInternalApiKey();
 
             // Ensure HttpContext.User is set for all authentication results
-            if (authenticateResult.Succeeded) Context.User = authenticateResult.Principal;
+            if (authenticateResult.Succeeded)
+                Context.User = authenticateResult.Principal;
 
             return Task.FromResult(authenticateResult);
         }
@@ -194,7 +195,8 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<AuthenticationS
             return false;
 
         var result = 0;
-        for (var i = 0; i < a.Length; i++) result |= a[i] ^ b[i];
+        for (var i = 0; i < a.Length; i++)
+            result |= a[i] ^ b[i];
 
         return result == 0;
     }

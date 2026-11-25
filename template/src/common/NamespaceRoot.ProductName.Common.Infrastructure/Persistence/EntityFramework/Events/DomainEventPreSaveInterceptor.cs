@@ -58,7 +58,8 @@ public sealed class DomainEventPreSaveInterceptor : SaveChangesInterceptor
                         $"Domain event cascade did not converge after {RunawayDetectionLimit} iterations - " +
                         "a PreSave handler is producing new events on every pass.");
 
-                if (entries.Count == 0) break;
+                if (entries.Count == 0)
+                    break;
 
                 // Extract events before clearing them from entities.
                 var events = entries.SelectMany(e => e.Entity.DomainEvents).ToList();

@@ -29,12 +29,12 @@ public static class DatabaseProvider
     {
         get
         {
-//#if (Database != "mssql")
+            //#if (Database != "mssql")
             return "postgres";
-//#endif
-//#if (Database == "mssql")
+            //#endif
+            //#if (Database == "mssql")
             return "sqlserver";
-//#endif
+            //#endif
         }
     }
 
@@ -43,12 +43,12 @@ public static class DatabaseProvider
     {
         get
         {
-//#if (Database != "mssql")
+            //#if (Database != "mssql")
             return false;
-//#endif
-//#if (Database == "mssql")
+            //#endif
+            //#if (Database == "mssql")
             return true;
-//#endif
+            //#endif
         }
     }
 
@@ -60,12 +60,12 @@ public static class DatabaseProvider
     {
         get
         {
-//#if (Database != "mssql")
+            //#if (Database != "mssql")
             return "Host=localhost;Database=design-time-placeholder";
-//#endif
-//#if (Database == "mssql")
+            //#endif
+            //#if (Database == "mssql")
             return "Server=localhost;Database=design-time-placeholder;TrustServerCertificate=true";
-//#endif
+            //#endif
         }
     }
 
@@ -76,33 +76,33 @@ public static class DatabaseProvider
     public static DbContextOptionsBuilder UseDatabase(
         this DbContextOptionsBuilder options, string connectionString, string? schema = null)
     {
-//#if (Database != "mssql")
+        //#if (Database != "mssql")
         return options.UseNpgsql(connectionString, x =>
         {
             if (schema is not null)
                 x.MigrationsHistoryTable("__EFMigrationsHistory", schema);
         });
-//#endif
-//#if (Database == "mssql")
+        //#endif
+        //#if (Database == "mssql")
         return options.UseSqlServer(connectionString, x =>
         {
             if (schema is not null)
                 x.MigrationsHistoryTable("__EFMigrationsHistory", schema);
         });
-//#endif
+        //#endif
     }
 
     /// <summary>The server, database and user a connection string names, without its credentials.</summary>
     public static string DescribeTarget(string connectionString)
     {
-//#if (Database != "mssql")
+        //#if (Database != "mssql")
         var target = new NpgsqlConnectionStringBuilder(connectionString);
         return $"{target.Host}:{target.Port}/{target.Database} as {target.Username ?? "(no user)"}";
-//#endif
-//#if (Database == "mssql")
+        //#endif
+        //#if (Database == "mssql")
         var target = new SqlConnectionStringBuilder(connectionString);
         return $"{target.DataSource}/{target.InitialCatalog} as {(string.IsNullOrEmpty(target.UserID) ? "(integrated)" : target.UserID)}";
-//#endif
+        //#endif
     }
 
     /// <summary>
@@ -111,12 +111,12 @@ public static class DatabaseProvider
     /// </summary>
     public static void EnsureExclusiveSchema(string connectionString, string schema, string serviceName)
     {
-//#if (Database != "mssql")
+        //#if (Database != "mssql")
         PostgresSchemaGuard.EnsureExclusiveSchema(connectionString, schema, serviceName);
-//#endif
-//#if (Database == "mssql")
+        //#endif
+        //#if (Database == "mssql")
         SqlServerSchemaGuard.EnsureExclusiveSchema(connectionString, schema, serviceName);
-//#endif
+        //#endif
     }
 
     /// <summary>
@@ -126,48 +126,48 @@ public static class DatabaseProvider
     public static IServiceCollection AddDatabaseQueries<TContext>(this IServiceCollection services)
         where TContext : DbContext
     {
-//#if (Database != "mssql")
+        //#if (Database != "mssql")
         services.AddScoped<ICaseInsensitiveSearch, PostgresCaseInsensitiveSearch>();
         services.AddScoped<IShortIdGenerator, PostgresShortIdGenerator<TContext>>();
-//#endif
-//#if (Database == "mssql")
+        //#endif
+        //#if (Database == "mssql")
         services.AddScoped<ICaseInsensitiveSearch, SqlServerCaseInsensitiveSearch>();
         services.AddScoped<IShortIdGenerator, SqlServerShortIdGenerator<TContext>>();
-//#endif
+        //#endif
         return services;
     }
 
     /// <summary>True when a failed save broke a unique index.</summary>
     public static bool IsUniqueViolation(DbUpdateException exception)
     {
-//#if (Database != "mssql")
+        //#if (Database != "mssql")
         return PostgresErrors.IsUniqueViolation(exception);
-//#endif
-//#if (Database == "mssql")
+        //#endif
+        //#if (Database == "mssql")
         return SqlServerErrors.IsUniqueViolation(exception);
-//#endif
+        //#endif
     }
 
 
     /// <summary>How the outbox statistics are read from the solution's database.</summary>
     internal static IOutboxStatsDialect CreateOutboxStatsDialect()
     {
-//#if (Database != "mssql")
+        //#if (Database != "mssql")
         return new PostgresOutboxStatsDialect();
-//#endif
-//#if (Database == "mssql")
+        //#endif
+        //#if (Database == "mssql")
         return new SqlServerOutboxStatsDialect();
-//#endif
+        //#endif
     }
 
     /// <summary>The lock migrations take turns under, one at a time across every instance.</summary>
     public static IMigrationLock CreateMigrationLock()
     {
-//#if (Database != "mssql")
+        //#if (Database != "mssql")
         return new PostgresMigrationLock();
-//#endif
-//#if (Database == "mssql")
+        //#endif
+        //#if (Database == "mssql")
         return new SqlServerMigrationLock();
-//#endif
+        //#endif
     }
 }

@@ -60,7 +60,8 @@ public static class SchemaOnlyMode
     /// </summary>
     public static IConfigurationBuilder AddSchemaOnlyOverrides(this IConfigurationBuilder builder, string[]? args = null)
     {
-        if (!IsEnabled(args)) return builder;
+        if (!IsEnabled(args))
+            return builder;
 
         builder.AddInMemoryCollection(
             InfrastructureSwitches.ToDictionary(key => key, _ => (string?)"false"));
@@ -80,7 +81,8 @@ public static class SchemaOnlyMode
     /// </remarks>
     public static IServiceCollection RemoveStartupValidation(this IServiceCollection services, string[]? args = null)
     {
-        if (!IsEnabled(args)) return services;
+        if (!IsEnabled(args))
+            return services;
 
         foreach (var descriptor in services.Where(d => d.ServiceType == typeof(IStartupValidator)).ToList())
             services.Remove(descriptor);

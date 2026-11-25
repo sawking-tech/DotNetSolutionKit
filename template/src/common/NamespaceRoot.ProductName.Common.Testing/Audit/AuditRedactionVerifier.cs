@@ -42,16 +42,19 @@ public static class AuditRedactionVerifier
         foreach (var type in assembly.GetTypes().Where(IsAuditedEntity))
         {
             var ignoredOnType = type.GetCustomAttribute<AuditIgnoreAttribute>(inherit: false) is not null;
-            if (ignoredOnType) continue;
+            if (ignoredOnType)
+                continue;
 
             foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (!LooksLikeSecret(property.Name) || !IsRecordedValue(property)) continue;
+                if (!LooksLikeSecret(property.Name) || !IsRecordedValue(property))
+                    continue;
 
                 var redacted = property.GetCustomAttribute<AuditRedactAttribute>(inherit: false) is not null;
                 var ignored = property.GetCustomAttribute<AuditIgnoreAttribute>(inherit: false) is not null;
 
-                if (redacted || ignored) continue;
+                if (redacted || ignored)
+                    continue;
 
                 offenders.Add($"{type.Name}.{property.Name}");
             }
@@ -75,10 +78,12 @@ public static class AuditRedactionVerifier
     {
         for (var current = type.BaseType; current is not null; current = current.BaseType)
         {
-            if (!current.IsGenericType) continue;
+            if (!current.IsGenericType)
+                continue;
 
             var definition = current.GetGenericTypeDefinition();
-            if (definition == typeof(Entity<>) || definition == typeof(AggregateRoot<>)) return true;
+            if (definition == typeof(Entity<>) || definition == typeof(AggregateRoot<>))
+                return true;
         }
 
         return false;

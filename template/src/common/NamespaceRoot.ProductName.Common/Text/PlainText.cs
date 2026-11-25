@@ -26,13 +26,15 @@ public static class PlainText
     /// </remarks>
     public static string? Normalize(string? value)
     {
-        if (string.IsNullOrWhiteSpace(value)) return null;
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
 
         var normalized = value.Normalize(NormalizationForm.FormC);
         var builder = new StringBuilder(normalized.Length);
         foreach (var ch in normalized)
         {
-            if (CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.Format) continue;
+            if (CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.Format)
+                continue;
             builder.Append(ch);
         }
 

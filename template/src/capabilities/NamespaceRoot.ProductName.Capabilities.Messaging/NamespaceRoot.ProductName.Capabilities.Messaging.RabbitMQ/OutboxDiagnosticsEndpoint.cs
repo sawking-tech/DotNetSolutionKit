@@ -22,7 +22,8 @@ public static class OutboxDiagnosticsEndpoint
     public static WebApplication MapOutboxDiagnostics<TDbContext>(this WebApplication app)
         where TDbContext : DbContext
     {
-        if (app.Environment.IsProduction()) return app;
+        if (app.Environment.IsProduction())
+            return app;
 
         app.MapGet(Route, async (
                 HttpContext ctx,

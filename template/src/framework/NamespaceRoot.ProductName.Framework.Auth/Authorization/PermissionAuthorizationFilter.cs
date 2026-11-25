@@ -26,7 +26,8 @@ public sealed class PermissionAuthorizationFilter : IAsyncAuthorizationFilter
             .Distinct()
             .ToList();
 
-        if (requiredPermissions.Count == 0) return;
+        if (requiredPermissions.Count == 0)
+            return;
 
         if (context.HttpContext.User.Identity?.IsAuthenticated != true)
         {

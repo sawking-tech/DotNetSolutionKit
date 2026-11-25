@@ -18,11 +18,11 @@ internal static class HealthChecks
         var switches = DependencySwitches.Read(builder.Configuration);
         var checks = builder.Services.AddHealthChecks();
 
-//#if (Hangfire)
+        //#if (Hangfire)
         if (switches.Jobs)
             checks.AddHangfire(options => options.MinimumAvailableServers = 1, name: "hangfire", tags: [HealthConstants.ReadyTag]);
 
-//#endif
+        //#endif
         if (switches.Database)
             checks.AddDbContextCheck<ServiceIdentifierDbContext>(name: DatabaseProvider.Name, tags: [HealthConstants.ReadyTag]);
 

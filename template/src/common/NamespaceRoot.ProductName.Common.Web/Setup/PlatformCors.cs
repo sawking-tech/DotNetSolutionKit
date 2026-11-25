@@ -55,18 +55,21 @@ public static class PlatformCors
     /// </summary>
     internal static bool IsOriginAllowed(string origin, string[]? allowedPatterns)
     {
-        if (string.IsNullOrEmpty(origin) || allowedPatterns is null) return false;
+        if (string.IsNullOrEmpty(origin) || allowedPatterns is null)
+            return false;
 
         foreach (var pattern in allowedPatterns)
         {
-            if (pattern == "*") return true;
+            if (pattern == "*")
+                return true;
 
             // "https://localhost:*" allows every port of that host: the prefix is "https://localhost:".
             if (pattern.EndsWith(":*", StringComparison.Ordinal)
                 && origin.StartsWith(pattern[..^1], StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            if (string.Equals(origin, pattern, StringComparison.OrdinalIgnoreCase)) return true;
+            if (string.Equals(origin, pattern, StringComparison.OrdinalIgnoreCase))
+                return true;
         }
 
         return false;

@@ -23,7 +23,8 @@ public static partial class ApiVersionHelper
         foreach (var controllerType in controllerTypes)
         {
             var route = controllerType.GetCustomAttribute<RouteAttribute>();
-            if (route?.Template == null) continue;
+            if (route?.Template == null)
+                continue;
             var version = ExtractVersionFromRoute(route.Template);
             if (version != null)
                 versions.Add(version);
@@ -42,7 +43,8 @@ public static partial class ApiVersionHelper
     /// </remarks>
     public static string? ExtractVersionFromRoute(string route)
     {
-        if (string.IsNullOrEmpty(route)) return null;
+        if (string.IsNullOrEmpty(route))
+            return null;
         var match = VersionRegex().Match(route);
         return match.Success ? $"v{match.Groups[1].Value}" : null;
     }

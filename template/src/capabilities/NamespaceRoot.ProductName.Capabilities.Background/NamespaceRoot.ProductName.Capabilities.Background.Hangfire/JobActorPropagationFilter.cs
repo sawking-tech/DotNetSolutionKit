@@ -67,7 +67,8 @@ public sealed class JobActorPropagationFilter(IServiceProvider services)
         using var scope = services.CreateScope();
         var actor = scope.ServiceProvider.GetService<IUserContext>();
 
-        if (actor is null || IsAnonymous(actor)) return;
+        if (actor is null || IsAnonymous(actor))
+            return;
 
         context.SetJobParameter(UserIdParameter, actor.UserId);
         context.SetJobParameter(LoginParameter, actor.Login);

@@ -76,7 +76,8 @@ internal static class ActorHeaderWriter
         using var scope = services.CreateScope();
         var actor = scope.ServiceProvider.GetService<IUserContext>();
 
-        if (actor is null || IsAnonymous(actor)) return;
+        if (actor is null || IsAnonymous(actor))
+            return;
 
         context.Headers.Set(ActorHeaders.UserId, actor.UserId.ToString());
         context.Headers.Set(ActorHeaders.Login, actor.Login);
@@ -150,7 +151,8 @@ public sealed class ActorRestoreConsumeFilter<T>(ILoggerFactory loggerFactory) :
     {
         var raw = context.Headers.Get<string>(ActorHeaders.UserId);
 
-        if (!Guid.TryParse(raw, out var userId) || userId == Guid.Empty) return null;
+        if (!Guid.TryParse(raw, out var userId) || userId == Guid.Empty)
+            return null;
 
         var tenant = context.Headers.Get<string>(ActorHeaders.TenantId);
 
@@ -193,7 +195,8 @@ internal static class MessageTracing
     public static Activity? Start(ConsumeContext context)
     {
         // Already inside one: a consumer that publishes, and whatever it publishes is consumed in turn.
-        if (Activity.Current is not null) return null;
+        if (Activity.Current is not null)
+            return null;
 
         var parent = context.Headers.Get<string>("traceparent");
 

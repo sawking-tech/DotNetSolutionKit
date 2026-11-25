@@ -64,7 +64,8 @@ public static class AuditRedaction
     /// </remarks>
     public static string? Fingerprint(string? value)
     {
-        if (value is null) return null;
+        if (value is null)
+            return null;
 
         var digest = HMACSHA256.HashData(FingerprintKey, System.Text.Encoding.UTF8.GetBytes(value));
 

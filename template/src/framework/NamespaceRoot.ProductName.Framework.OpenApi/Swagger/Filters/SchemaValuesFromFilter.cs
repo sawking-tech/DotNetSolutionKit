@@ -23,18 +23,22 @@ public sealed class SchemaValuesFromFilter : ISchemaFilter
     /// <inheritdoc />
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
-        if (schema.Properties is null || schema.Properties.Count == 0) return;
+        if (schema.Properties is null || schema.Properties.Count == 0)
+            return;
 
         foreach (var property in context.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             var attribute = property.GetCustomAttribute<SchemaValuesFromAttribute>();
-            if (attribute is null) continue;
+            if (attribute is null)
+                continue;
 
             var values = ReadValues(attribute);
-            if (values.Count == 0) continue;
+            if (values.Count == 0)
+                continue;
 
             var name = JsonNamingPolicy.CamelCase.ConvertName(property.Name);
-            if (!schema.Properties.TryGetValue(name, out var propertySchema)) continue;
+            if (!schema.Properties.TryGetValue(name, out var propertySchema))
+                continue;
 
             propertySchema.Enum = values.Select(v => (IOpenApiAny)new OpenApiString(v)).ToList();
         }

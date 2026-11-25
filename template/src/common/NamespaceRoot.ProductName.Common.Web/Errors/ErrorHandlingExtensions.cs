@@ -131,7 +131,7 @@ public static class ErrorHandlingExtensions
         errors.Clear();
         foreach (var (field, messages) in renamed)
         {
-            errors[field] = errors.TryGetValue(field, out var existing) ? [..existing, ..messages] : messages;
+            errors[field] = errors.TryGetValue(field, out var existing) ? [.. existing, .. messages] : messages;
         }
     }
 

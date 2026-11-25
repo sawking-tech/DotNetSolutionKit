@@ -234,7 +234,8 @@ public abstract class SqlServerIntegrationTestBase<TService, TDbContext>
         {
             if (_slotAcquired)
             {
-                try { SqlServerDbThrottle.DbSlot.Release(); }
+                try
+                { SqlServerDbThrottle.DbSlot.Release(); }
                 catch (SemaphoreFullException) { /* already released */ }
             }
 

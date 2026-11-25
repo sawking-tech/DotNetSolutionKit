@@ -22,8 +22,8 @@ public sealed class PaginationValidationFilter : IActionFilter
             return;
 
         foreach (var request in context.ActionArguments.Values.OfType<IPaginationRequest>())
-        foreach (var error in PaginationContract.Validate(request))
-            context.ModelState.AddModelError(error.PropertyName, error.Message);
+            foreach (var error in PaginationContract.Validate(request))
+                context.ModelState.AddModelError(error.PropertyName, error.Message);
 
         if (context.ModelState.IsValid)
             return;

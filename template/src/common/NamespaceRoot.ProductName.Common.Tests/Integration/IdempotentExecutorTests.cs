@@ -132,7 +132,8 @@ internal abstract class IdempotentExecutorTests
             {
                 var widget = new Widget(context, name);
                 db.Add(widget);
-                if (Interlocked.Increment(ref arrived) == 2) bothWorking.SetResult();
+                if (Interlocked.Increment(ref arrived) == 2)
+                    bothWorking.SetResult();
                 await bothWorking.Task.WaitAsync(TimeSpan.FromSeconds(10));
                 return new WidgetCreated(widget.Id, widget.Name);
             });

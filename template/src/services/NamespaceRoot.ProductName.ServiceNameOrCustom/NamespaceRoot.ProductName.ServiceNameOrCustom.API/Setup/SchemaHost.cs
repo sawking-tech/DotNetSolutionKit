@@ -30,25 +30,25 @@ public static class SchemaHost
 
         // --- Logging configuration ---
         builder.AddPlatformLogging();
-//#if (DiffApi)
+        //#if (DiffApi)
 
         var schemaOnly = SchemaOnlyMode.IsEnabled(args);
-//#endif
+        //#endif
 
         // --- DI validation configuration ---
         // In every environment: a missing registration or a scoped service resolved from the root then
         // fails the start, instead of the first request or background job that happens to need it.
         builder.Host.UseDefaultServiceProvider((_, options) =>
         {
-//#if (DiffApi)
+            //#if (DiffApi)
             // A schema-only run registers no infrastructure, so validating the graph would fail on the
             // dependencies deliberately left out.
             options.ValidateScopes = !schemaOnly;
             options.ValidateOnBuild = !schemaOnly;
-//#else
+            //#else
             options.ValidateScopes = true;
             options.ValidateOnBuild = true;
-//#endif
+            //#endif
         });
 
         // --- Application configuration ---
@@ -57,18 +57,18 @@ public static class SchemaHost
         // --- Web layer shared by every service (Common.Web), with this service's own MVC additions ---
         builder.AddPlatformWebApi(typeof(SchemaHost).Assembly, mvc =>
         {
-//#if (FeatureFlags)
+            //#if (FeatureFlags)
             // The feature list endpoint ships with the platform, so every service answers about flags
             // the same way instead of each writing its own endpoint.
             mvc.AddApplicationPart(typeof(Framework.FeatureFlags.FeaturesController).Assembly);
-//#endif
+            //#endif
         });
 
         // --- This service's own registrations ---
         builder.SetupAppServices()
             .SetupHealthChecks();
 
-//#if (DiffApi)
+        //#if (DiffApi)
         // Left out of a schema-only run: the handlers resolve services this mode does not register,
         // and WebApplication adds the authentication middleware itself once it sees the schemes.
         if (!schemaOnly)
@@ -77,9 +77,9 @@ public static class SchemaHost
         }
 
         builder.Services.RemoveStartupValidation(args);
-//#else
+        //#else
         builder.SetupAppAuthentication();
-//#endif
+        //#endif
 
         return builder.Build();
     }

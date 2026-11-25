@@ -34,7 +34,8 @@ public static class SchemaDump
     public static bool TryWrite(WebApplication app, string[] args)
     {
         var destination = ValueOf(args, Switch);
-        if (destination is null) return false;
+        if (destination is null)
+            return false;
 
         var documentName = ValueOf(args, DocumentSwitch)
             ?? throw new ArgumentException($"{Switch} needs {DocumentSwitch} to say which document to write.");

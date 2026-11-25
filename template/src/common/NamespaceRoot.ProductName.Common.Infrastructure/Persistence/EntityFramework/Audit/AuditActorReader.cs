@@ -24,7 +24,8 @@ internal static class AuditActorReader
     {
         var actor = execution.Actor;
 
-        if (SafeIsSystem(actor)) return (Guid.Empty, null, SafeTenantId(actor));
+        if (SafeIsSystem(actor))
+            return (Guid.Empty, null, SafeTenantId(actor));
 
         try
         {

@@ -28,7 +28,8 @@ internal static class DomainEventInfrastructureResolver
 
         // 1. Get the internal EF service provider safely.
         var internalSp = (context as IInfrastructure<IServiceProvider>)?.Instance;
-        if (internalSp is null) return false;
+        if (internalSp is null)
+            return false;
 
         // 2. Get the EF Diagnostics Logger to provide visibility for DI issues (addressing review comments).
         var diagLogger = internalSp.GetService<IDiagnosticsLogger<DbLoggerCategory.Infrastructure>>();
@@ -54,7 +55,8 @@ internal static class DomainEventInfrastructureResolver
 
         foreach (var candidate in candidates)
         {
-            if (candidate is null) continue;
+            if (candidate is null)
+                continue;
             storage = candidate.GetService<IDomainEventStorage>()!;
             dispatcher = candidate.GetService<IDomainEventDispatcher>()!;
             if (storage is not null && dispatcher is not null)

@@ -21,7 +21,8 @@ public static class HierarchyRules
     /// </summary>
     public static bool IsInPlatformScope(this IHierarchicalEntity? target)
     {
-        if (target == null) return true;
+        if (target == null)
+            return true;
 
         return target.Level == PlatformManagedLevel;
     }
@@ -33,7 +34,8 @@ public static class HierarchyRules
     public static bool IsInTenantScope(this IHierarchicalEntity actor, IHierarchicalEntity target)
     {
         // A target higher in the tree than the actor cannot be below it.
-        if (target.Path.Length < actor.Path.Length) return false;
+        if (target.Path.Length < actor.Path.Length)
+            return false;
 
         return target.Path.AsSpan(0, actor.Path.Length)
             .SequenceEqual(actor.Path.AsSpan());

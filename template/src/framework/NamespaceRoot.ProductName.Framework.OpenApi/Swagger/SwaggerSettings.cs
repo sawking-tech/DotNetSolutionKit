@@ -61,7 +61,8 @@ public sealed class SwaggerSettings : ISwaggerSettings, IValidatableObject
         foreach (var pattern in ScrubPatterns)
         {
             string? error = null;
-            try { _ = new Regex(pattern); }
+            try
+            { _ = new Regex(pattern); }
             catch (ArgumentException ex) { error = ex.Message; }
             if (error is not null)
                 yield return new ValidationResult(

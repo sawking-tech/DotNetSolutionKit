@@ -16,11 +16,11 @@ namespace NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 // places that know which database the solution uses.
 public static class DependencyInjection
 {
-//#if (Database == "mssql")
+    //#if (Database == "mssql")
     // "Hangfire" in ASCII: one key for every service of the database.
     private const long HangfireInstallLockKey = 0x48616E6766697265;
 
-//#endif
+    //#endif
     /// <summary>Register Hangfire, its storage in the service's schema, and the job filters.</summary>
     /// <param name="serviceName">The service that owns the schema, named in the guard's message.</param>
     /// <param name="schemaName">The schema of the job storage, the service's own name and a suffix.</param>
@@ -32,7 +32,7 @@ public static class DependencyInjection
     {
         // Guard for Hangfire Schema
         DatabaseProvider.EnsureExclusiveSchema(connectionString, schemaName, serviceName);
-//#if (Database == "mssql")
+        //#if (Database == "mssql")
 
         // Hangfire.SqlServer installs its tables in a transaction that deadlocks with another service
         // installing into the same database at the same moment, and gives up after three attempts, leaving
@@ -44,7 +44,7 @@ public static class DependencyInjection
             SqlServerObjectsInstaller.Install(connection, schemaName);
             installLock.Release(connection, HangfireInstallLockKey);
         }
-//#endif
+        //#endif
 
         services.AddHangfire(config =>
         {
@@ -52,22 +52,22 @@ public static class DependencyInjection
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings();
-//#if (Database != "mssql")
+            //#if (Database != "mssql")
             config.UsePostgreSqlStorage(c =>
                 c.UseNpgsqlConnection(connectionString), new PostgreSqlStorageOptions
-            {
-                SchemaName = schemaName,
-                PrepareSchemaIfNecessary = true
-            });
-//#endif
-//#if (Database == "mssql")
+                {
+                    SchemaName = schemaName,
+                    PrepareSchemaIfNecessary = true
+                });
+            //#endif
+            //#if (Database == "mssql")
             config.UseSqlServerStorage(connectionString, new SqlServerStorageOptions
             {
                 SchemaName = schemaName,
                 // Installed above, under the lock.
                 PrepareSchemaIfNecessary = false
             });
-//#endif
+            //#endif
         });
 
         services.AddHangfireServer((sp, options) =>

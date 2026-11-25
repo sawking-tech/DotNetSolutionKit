@@ -21,11 +21,11 @@ public class ServiceIdentifierDbContext(DbContextOptions<ServiceIdentifierDbCont
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.HasDefaultSchema(DefaultSchemaName);
-//#if (MessagingDelivery == "outbox")
+        //#if (MessagingDelivery == "outbox")
 
         // Outbox tables in this service's schema: a message is stored with the change that caused it
         modelBuilder.AddTransactionalOutbox(DefaultSchemaName);
-//#endif
+        //#endif
 
         // Automatic registration of configurations from assembly
         modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);

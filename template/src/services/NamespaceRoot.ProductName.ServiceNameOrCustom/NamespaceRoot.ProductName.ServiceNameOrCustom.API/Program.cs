@@ -16,20 +16,20 @@ using Serilog;
 
 try
 {
-//#if (DiffApi)
+    //#if (DiffApi)
     var schemaOnly = SchemaOnlyMode.IsEnabled(args);
 
-//#endif
+    //#endif
     // Services and configuration live in SchemaHost, which the schema generator builds without
     // starting: one description of the application, whether it is about to serve traffic or only to
     // say what its API looks like.
     var app = SchemaHost.Build(args);
-//#if (DiffApi)
+    //#if (DiffApi)
 
     // Asked only for the contract: write it and stop, before anything touches the infrastructure.
     if (SchemaDump.TryWrite(app, args))
         return;
-//#endif
+    //#endif
 
     // Each dependency can be switched off in configuration; what is off is not registered, not
     // validated and not checked for readiness, and the log says so once, here.
@@ -62,32 +62,32 @@ try
     }
 
     // --- Middleware and endpoints, in the order the platform relies on (Common.Web) ---
-//#if (DiffApi)
+    //#if (DiffApi)
     // Nothing to authenticate against on a schema-only run: the schemes were never registered.
-//#if (Hangfire)
+    //#if (Hangfire)
     app.UsePlatformPipeline(typeof(Program).Assembly, authenticate: !schemaOnly, beforeEndpoints: pipeline =>
     {
         if (switches.Jobs)
             pipeline.UseAppHangfire();
     });
-//#else
+    //#else
     app.UsePlatformPipeline(typeof(Program).Assembly, authenticate: !schemaOnly);
-//#endif
-//#elif (Hangfire)
+    //#endif
+    //#elif (Hangfire)
     app.UsePlatformPipeline(typeof(Program).Assembly, beforeEndpoints: pipeline =>
     {
         if (switches.Jobs)
             pipeline.UseAppHangfire();
     });
-//#else
+    //#else
     app.UsePlatformPipeline(typeof(Program).Assembly);
-//#endif
+    //#endif
 
-//#if (MessagingDelivery == "outbox")
+    //#if (MessagingDelivery == "outbox")
     // Outside Production: what waits in the outbox and what was sent, at /api/v1/diagnostics/outbox-stats.
     app.MapOutboxDiagnostics<ServiceIdentifierDbContext>();
 
-//#endif
+    //#endif
     // --- Application startup ---
     app.Run();
 }

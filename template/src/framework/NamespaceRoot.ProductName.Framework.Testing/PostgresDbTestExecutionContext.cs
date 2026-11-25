@@ -55,8 +55,8 @@ internal static class PostgresAdmin
         // connection string, and every DROP failed before it started.
         new NpgsqlConnectionStringBuilder(adminConnStr)
         {
-            CommandTimeout         = 15,
-            Timeout                = 15
+            CommandTimeout = 15,
+            Timeout = 15
         }.ToString();
 
     /// <summary>
@@ -65,9 +65,9 @@ internal static class PostgresAdmin
     public static string BuildDbConnStr(string adminConnStr, string dbName, int maxPoolSize) =>
         new NpgsqlConnectionStringBuilder(adminConnStr)
         {
-            Database    = dbName,
+            Database = dbName,
             MaxPoolSize = maxPoolSize,
-            Timeout     = 60
+            Timeout = 60
         }.ToString();
 }
 
@@ -187,8 +187,8 @@ public abstract class PostgresIntegrationTestBase<TService, TDbContext>
         Action<IServiceCollection>? configure)
     {
         _adminConnStr = adminConnStr;
-        _testDbName   = testDbName;
-        _testConnStr  = testConnStr;
+        _testDbName = testDbName;
+        _testConnStr = testConnStr;
 
         // Domain events run as in the service once the test registers them, as on the in-memory context.
         Services.AddDbContext<TDbContext>((sp, opts) =>
@@ -294,7 +294,8 @@ public abstract class PostgresIntegrationTestBase<TService, TDbContext>
 
     public override async ValueTask DisposeAsync()
     {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            return;
 
         try
         {
@@ -311,8 +312,10 @@ public abstract class PostgresIntegrationTestBase<TService, TDbContext>
 
     private void ReleaseSlot()
     {
-        if (!_slotAcquired) return;
-        try { PostgresDbThrottle.DbSlot.Release(); }
+        if (!_slotAcquired)
+            return;
+        try
+        { PostgresDbThrottle.DbSlot.Release(); }
         catch (SemaphoreFullException) { /* defensive: already released */ }
     }
 

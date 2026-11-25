@@ -60,7 +60,7 @@ public class FeatureFlagsStoreOutageTests
 
         var builder = new ConfigurationBuilder()
             .AddJsonFile(new PhysicalFileProvider(_folder), FeatureConfigurationExtensions.FileName, optional: false, reloadOnChange: false);
-//#if (Infisical)
+        //#if (Infisical)
         builder.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Infisical:ProjectId"] = "project", ["Infisical:EnvironmentSlug"] = "prod",
@@ -68,14 +68,14 @@ public class FeatureFlagsStoreOutageTests
             ["Infisical:ReloadSeconds"] = "0",
         });
         builder.AddPlatformConfiguration("/orders", storeFactory: _ => store);
-//#else
+        //#else
         builder.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Vault:Address"] = "http://vault:8200", ["Vault:Token"] = "test-do-not-use",
             ["Vault:ReloadSeconds"] = "0",
         });
         builder.AddPlatformVaultConfiguration("orders", storeFactory: _ => store);
-//#endif
+        //#endif
         var configuration = builder.Build();
 
         return new Service(

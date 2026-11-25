@@ -17,7 +17,8 @@ public class AuthorizationOperationFilter : IOperationFilter
             .Union(context.MethodInfo.GetCustomAttributes(true))
             .Any(a => a is AuthorizeAttribute) ?? false;
 
-        if (!hasAuthorize) return;
+        if (!hasAuthorize)
+            return;
 
         operation.Description = $"{operation.Description}\n\n" +
                                 "**Authentication Methods:**\n" +
