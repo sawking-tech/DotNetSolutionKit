@@ -54,7 +54,7 @@ applying by itself.
 
 | Part | Where |
 |---|---|
-| Schema-only mode, `SchemaDump` | `Common.Web/Setup` |
+| Schema-only mode, `SchemaDump` | `Framework.OpenApi` |
 | `SchemaHost.Build` | each service's API project |
 | Generation and normalisation | `scripts/generate-api-schemas.sh`, `scripts/normalise_api_schema.py` |
 | The check | `.github/workflows/api-diff.yml`, on pull requests |

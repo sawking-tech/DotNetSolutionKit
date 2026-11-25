@@ -53,7 +53,7 @@ bash scripts/generate-api-schemas.sh
 
 | Часть | Где |
 |---|---|
-| Режим только схемы, `SchemaDump` | `Common.Web/Setup` |
+| Режим только схемы, `SchemaDump` | `Framework.OpenApi` |
 | `SchemaHost.Build` | API-проект каждого сервиса |
 | Генерация и нормализация | `scripts/generate-api-schemas.sh`, `scripts/normalise_api_schema.py` |
 | Проверка | `.github/workflows/api-diff.yml`, на пулл-реквестах |

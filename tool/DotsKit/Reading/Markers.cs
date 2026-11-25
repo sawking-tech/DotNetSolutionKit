@@ -24,8 +24,8 @@ internal static class Markers
         ("MongoDB", ["src/capabilities/{P}.Capabilities.Persistence/{P}.Capabilities.Persistence.Mongo", "src/capabilities/{P}.Capabilities.Mongo"]),
         ("Infisical", ["src/capabilities/{P}.Capabilities.Security/{P}.Capabilities.Security.CredentialStore/Infisical*", "src/capabilities/{P}.Capabilities.Secrets/Infisical*"]),
         ("Vault", ["src/capabilities/{P}.Capabilities.Security/{P}.Capabilities.Security.CredentialStore/Vault*", "src/capabilities/{P}.Capabilities.Secrets/Vault*"]),
-        ("DiffApi", ["src/common/{P}.Common.Web/Setup/SchemaDump.cs"]),
-        ("FeatureFlags", ["src/common/{P}.Common/FeatureManagement"]),
+        ("DiffApi", ["src/framework/{P}.Framework.OpenApi/SchemaDump.cs", "src/common/{P}.Common.Web/Setup/SchemaDump.cs"]),
+        ("FeatureFlags", ["src/framework/{P}.Framework.FeatureFlags", "src/common/{P}.Common/FeatureManagement"]),
         ("HierarchyRules", ["src/common/{P}.Common/Domain/IHierarchicalEntity.cs"]),
         ("GitHubCiCd", [".github/workflows/ci.yml"]),
     ];
