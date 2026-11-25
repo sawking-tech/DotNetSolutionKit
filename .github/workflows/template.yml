@@ -187,6 +187,21 @@ jobs:
             | tar -xz -C /usr/local/bin gitleaks
           gitleaks dir . --config "$GITHUB_WORKSPACE/template/tools/gitleaks/.gitleaks.toml" --redact --verbose
 
+      # The layout of the template's C# is held nowhere else: .editorconfig turns the analyzers off for
+      # template/**.cs (no project of this repository compiles them), and dotnet format runs over the tool
+      # alone. The generated tree has the placeholders resolved and compiles, so the layout is checked here,
+      # with the repository's own .editorconfig copied in - a generated solution carries none.
+      # `whitespace` alone: the SDK 8 formatter throws when it applies a style change, and the full command
+      # renames members under IDE1006. --include is what keeps MSBuildWorkspace from refusing the whole
+      # solution. One combination is enough: the layout does not depend on which capability is on.
+      - name: The template's C# layout
+        if: needs.scope.outputs.code == 'true' && matrix.name == 'defaults'
+        working-directory: ${{ runner.temp }}/solution
+        run: |
+          cp "$GITHUB_WORKSPACE/.editorconfig" .
+          dotnet format whitespace "src/services/$(ls src/services | grep 'All.sln$')" \
+            --verify-no-changes --include "src/**/*.cs"
+
       # A warning fails the build here: a team's first build of a generated solution shows none.
       - name: Build
         if: needs.scope.outputs.code == 'true'

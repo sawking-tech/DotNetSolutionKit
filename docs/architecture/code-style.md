@@ -116,8 +116,14 @@ The metadata keys of a JSON file, `_comment_<Key>` and `_note`: [ADR-006](../adr
 ### The template's sources
 
 `[template/**.cs]` turns the analyzers off for an IDE that opens the template's sources: they hold `//#if` at the
-first column and placeholder names, and no project of the repository compiles them. `dotnet format` is not run on
-them; their bytes are held by `check-style.py`, and their C# is to be checked on the solutions CI generates.
+first column and placeholder names, and no project of the repository compiles them. `dotnet format` cannot run on
+them either; their bytes are held by `check-style.py`, and their layout is checked on a solution CI generates: the
+job `defaults` copies the root `.editorconfig` into it and runs `dotnet format whitespace --verify-no-changes`.
+
+The format step is `whitespace` alone. `dotnet format` with no subcommand also runs the analyzers, and IDE1006
+among them renames a test method; `dotnet format style` on an SDK 8 throws `NotSupportedException` when it
+applies a change. The layout rules `.editorconfig` applies are the ones `whitespace` holds - the blank lines,
+the spacing, the braces around a body - and IDE0011's braces come with it.
 
 ## Planned
 
