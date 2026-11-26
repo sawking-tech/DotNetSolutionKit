@@ -127,6 +127,26 @@ among them renames a test method; `dotnet format style` on an SDK 8 throws `NotS
 applies a change. The layout rules `.editorconfig` applies are the ones `whitespace` holds - the blank lines,
 the spacing, the braces around a body - and IDE0011's braces come with it.
 
+## The style in a solution, and in an upgrade
+
+The file a solution may hold and the file the template's upgrade reads are one set of rules in two shapes, and
+`scripts/check-editorconfig.py` holds them to each other: a rule at `warning` in this repository's `.editorconfig` is
+the same rule at `suggestion` in `template/.editorconfig.template`.
+
+- **`--code-style`** writes the second into a solution's root. It is the team's from then on; a rule raised to
+  `warning` there makes a build of theirs fail on it, and nothing else does.
+- **`dotskit upgrade`** lays the template's side of every file it brings out by the team's rules before it merges -
+  both the output the solution came from and the one it goes to, on a copy in a folder of its own. The solution's
+  files, its `.editorconfig` among them, are never written. Why both sides and not just the new one: git compares
+  each side with the base, so a base left in the template's style makes every reformatted line of the team's look
+  like a change of the team's. On a file both sides touched and the team reformatted to another brace style, the
+  merge goes from one conflict to none, and the team's line arrives in the team's style.
+
+The merge reads the template's severities, not the `suggestion` of the file a solution takes: `suggestion` says a
+build of the team's does not fail on our style, not that the team does not want the layout. The formatter runs in
+two passes - `whitespace` for the brace and the indent, `style` for the usings, the namespace and the blank lines -
+and a team's rule at `none` stays off.
+
 ## Planned
 
 A pre-commit hook for the bytes and the layout of the files of a commit; the four line patterns of StyleCop about

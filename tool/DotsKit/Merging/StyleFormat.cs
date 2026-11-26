@@ -46,7 +46,6 @@ internal sealed class DotnetFormat(IProcessRunner runner, Func<string> style) : 
     /// <summary>The bytes: the indent, the spacing, the end of a line. The style pass leaves these to it.</summary>
     private const string Layout = "whitespace";
 
-
     public async Task<string> LaidOutAsync(string root, string tree, IReadOnlyCollection<string> paths, CancellationToken ct)
     {
         var team = Path.Combine(root, TeamFile);
