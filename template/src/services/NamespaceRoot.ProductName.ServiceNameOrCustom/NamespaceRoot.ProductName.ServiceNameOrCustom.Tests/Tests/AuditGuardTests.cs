@@ -1,4 +1,4 @@
-using NamespaceRoot.ProductName.Common.Tests.Audit;
+using NamespaceRoot.ProductName.Framework.Audit;
 
 namespace NamespaceRoot.ProductName.ServiceNameOrCustom.Tests.Tests;
 

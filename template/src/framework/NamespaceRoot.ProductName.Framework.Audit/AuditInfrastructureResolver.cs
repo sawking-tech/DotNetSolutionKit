@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Resolves the scoped services the audit interceptor needs from a singleton interceptor running

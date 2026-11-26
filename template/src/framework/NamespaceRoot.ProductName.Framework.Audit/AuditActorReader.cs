@@ -1,6 +1,6 @@
 using NamespaceRoot.ProductName.Common.Domain.Context;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Reads the acting user for a journal entry without ever failing the operation being audited.

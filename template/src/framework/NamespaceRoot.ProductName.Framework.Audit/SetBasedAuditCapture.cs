@@ -3,14 +3,15 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
 using NamespaceRoot.ProductName.Framework.Observability;
-using NamespaceRoot.ProductName.Common.Application.Auditing;
+using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
+using NamespaceRoot.ProductName.Framework.Audit;
 using NamespaceRoot.ProductName.Common.Application.Messaging;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Audit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <inheritdoc />
 internal sealed class SetBasedAuditCapture(

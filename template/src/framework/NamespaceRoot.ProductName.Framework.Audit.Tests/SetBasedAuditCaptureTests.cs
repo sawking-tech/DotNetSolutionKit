@@ -1,4 +1,4 @@
-using NamespaceRoot.ProductName.Common.Application.Auditing;
+using NamespaceRoot.ProductName.Framework.Audit;
 using NamespaceRoot.ProductName.Common.Application.Messaging;
 using NamespaceRoot.ProductName.Common.Attributes;
 using NamespaceRoot.ProductName.Common.Domain.Context;
@@ -6,15 +6,14 @@ using NamespaceRoot.ProductName.Common.Domain.Messaging;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Audit;
 using NamespaceRoot.ProductName.Common.Domain;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
-using NamespaceRoot.ProductName.Common.Tests.Audit;
-using NamespaceRoot.ProductName.Framework.Testing.Stubs;
+using NamespaceRoot.ProductName.Framework.Audit.Tests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using NamespaceRoot.ProductName.Framework.Testing;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit.Tests;
 
 /// <summary>
 /// Snapshots taken around a set-based write, which the change tracker never sees.

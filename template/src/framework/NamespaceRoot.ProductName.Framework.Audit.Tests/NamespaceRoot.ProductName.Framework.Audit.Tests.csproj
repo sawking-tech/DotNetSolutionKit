@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- The tests of the Audit module: the journal written in the same save as the change, the redaction, the
+         set-based capture, and the markers a service's entities carry. -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Moq" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit3TestAdapter" />
+        <PackageReference Include="Shouldly" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+        <ProjectReference Include="..\NamespaceRoot.ProductName.Framework.Audit\NamespaceRoot.ProductName.Framework.Audit.csproj" />
+        <ProjectReference Include="..\NamespaceRoot.ProductName.Framework.Observability\NamespaceRoot.ProductName.Framework.Observability.csproj" />
+        <ProjectReference Include="..\NamespaceRoot.ProductName.Framework.Testing\NamespaceRoot.ProductName.Framework.Testing.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NamespaceRoot.ProductName.Framework.Audit" />
+        <Using Include="NUnit.Framework" />
+        <Using Include="Shouldly" />
+        <Using Include="Moq" />
+    </ItemGroup>
+
+</Project>

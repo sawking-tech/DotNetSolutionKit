@@ -74,9 +74,19 @@ public sealed class AuditRecordedConsumer(JournalDbContext db) : IConsumer<Audit
 }
 ```
 
+## Where the code lives
+
+The mechanism is the `Framework.Audit` module of `src/framework`: the interceptor, the recorder, the
+set-based capture, the redaction, the value formatter, the two ports and the verifiers. It does not know of an
+external system - the interceptor saves through the same `DbContext` the change uses, and the entry leaves through
+the outbox - so it is framework, not a capability: nothing outside the solution is configured or spoken to.
+The module comes with `--audit`, as a project; a service without the flag carries neither its code nor its packages.
+What stays in the kernel is the team's: the `[Auditable]`, `[AuditIgnore]`, `[AuditRedact]` and `[SetBasedWrite]`
+attributes it sets on its own entities, and the `AuditRecordedV1` contracts, which cross a service's boundary.
+
 ## Tests
 
-`Common.Tests` covers the interceptor (creation, update, deletion, owned values, collections, dates,
+`Framework.Audit.Tests` covers the interceptor (creation, update, deletion, owned values, collections, dates,
 redaction, the subject tenant, the system actor, the correlation identifier) and the set-based capture.
 Checked live under compose: a created order published one `AuditRecordedV1` carrying the request's
 correlation identifier, and a rolled back one published nothing.

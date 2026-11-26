@@ -665,10 +665,8 @@
             "src/common/NamespaceRoot.ProductName.Common/Attributes/Audit*.cs",
             "src/common/NamespaceRoot.ProductName.Common/Attributes/SetBasedWriteAttribute.cs",
             "src/common/NamespaceRoot.ProductName.Common.Contracts/Messaging/Audit/**",
-            "src/common/NamespaceRoot.ProductName.Common.Application/Auditing/**",
-            "src/common/NamespaceRoot.ProductName.Common.Infrastructure/Persistence/EntityFramework/Audit/**",
-            "src/common/NamespaceRoot.ProductName.Common.Testing/Audit/**",
-            "src/common/NamespaceRoot.ProductName.Common.Tests/Tests/Audit/**",
+            "src/framework/NamespaceRoot.ProductName.Framework.Audit/**",
+            "src/framework/NamespaceRoot.ProductName.Framework.Audit.Tests/**",
             "src/framework/NamespaceRoot.ProductName.Framework.Testing/Stubs/NoOpAuditCapture.cs"
           ]
         },

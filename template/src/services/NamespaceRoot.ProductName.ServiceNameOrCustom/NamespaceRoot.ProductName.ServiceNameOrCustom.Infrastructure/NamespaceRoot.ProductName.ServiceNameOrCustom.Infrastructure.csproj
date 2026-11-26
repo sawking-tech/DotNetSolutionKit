@@ -38,6 +38,9 @@
       <!--#if (Hangfire) -->
       <ProjectReference Include="..\..\..\capabilities\NamespaceRoot.ProductName.Capabilities.Background\NamespaceRoot.ProductName.Capabilities.Background.Hangfire\NamespaceRoot.ProductName.Capabilities.Background.Hangfire.csproj" />
       <!--#endif -->
+      <!--#if (AuditEnabled) -->
+      <ProjectReference Include="..\..\..\framework\NamespaceRoot.ProductName.Framework.Audit\NamespaceRoot.ProductName.Framework.Audit.csproj" />
+      <!--#endif -->
       <ProjectReference Include="..\NamespaceRoot.ProductName.ServiceNameOrCustom.Application\NamespaceRoot.ProductName.ServiceNameOrCustom.Application.csproj" />
     </ItemGroup>
 

@@ -6,17 +6,17 @@ using NamespaceRoot.ProductName.Common.Domain.Messaging;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Audit;
 using NamespaceRoot.ProductName.Common.Domain;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+using NamespaceRoot.ProductName.Framework.Audit;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
-using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Shouldly;
 using NamespaceRoot.ProductName.Framework.Testing;
+using NamespaceRoot.ProductName.Framework.Testing.Stubs;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Tests.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit.Tests;
 
 /// <summary>
 /// Capture behaviour of <see cref="AuditSaveChangesInterceptor"/>: what reaches the journal,

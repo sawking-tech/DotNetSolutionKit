@@ -1,8 +1,9 @@
-using NamespaceRoot.ProductName.Common.Application.Auditing;
+using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
+using NamespaceRoot.ProductName.Framework.Audit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Registration of the audit capture pipeline.

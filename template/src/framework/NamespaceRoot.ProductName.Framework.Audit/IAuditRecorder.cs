@@ -1,4 +1,4 @@
-namespace NamespaceRoot.ProductName.Common.Application.Auditing;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Records a change the persistence layer cannot see, so it reaches the journal anyway.
