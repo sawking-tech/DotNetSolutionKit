@@ -269,3 +269,19 @@ The ADR binds the template project:
   in English and Russian.
 - The `.dotskitignore` mechanics with pins and the versioning of capabilities are part of the
   tool, maintained by releases.
+
+### The actor model stays in the kernel
+
+`Common.Infrastructure/Security` keeps nine files of the actor model - `IUserContext` and
+`IAuthContext` with their implementations, `AuthHeaders` and the claim names, `JobActorContext`,
+`SystemUserContext`, `ApplicationExecutionContext`, `BasicCredentials`. The 3.0 cut sent the whole
+folder to `Framework.Auth`; what moved is the token half, `RsaKeyProvider` and
+`RsaPublicKeyProvider` with their configuration.
+
+What stays is the kernel's by the rule above: `IUserContext` is the contract every layer of the
+solution names, `AuthHeaders` is the protocol between services that ten kernel files read and
+write, and `JobActorContext` is written by two capabilities through their reference to the kernel.
+Moving them would make the kernel reference `Framework.Auth`, and a kernel that depends on a module
+is the hard dependency this ADR calls out for `DomainEvents` alone - where it is a known debt, not a
+pattern to repeat. The model is also not a system the template owns: a team answers who its caller
+is from its own identity store, and the kernel is where it plugs that answer in.
