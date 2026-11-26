@@ -32,6 +32,27 @@ internal sealed class ManifestTests
         orders.Port.ShouldBe(5000);
     }
 
+    /// <summary>A flag of the solution's root asks for a file there; a service folder has no place for it.</summary>
+    [Test]
+    public void Should_GiveTheRootFlag_ToTheSolution_And_NotToTheService()
+    {
+        var next = Orders.WithService(TemplateArgs.Parse(["-S", "Billing", "--CodeStyle", "true"]));
+
+        next.SolutionArgs.IsOn("CodeStyle").ShouldBeTrue();
+        next.ServiceArgs.SelectMany(s => s.ToArgs()).ShouldNotContain("--CodeStyle");
+    }
+
+    [Test]
+    public void Should_KeepTheRootFlag_OutOfTheService_When_ItIsThereAlready()
+    {
+        var once = Orders.WithService(TemplateArgs.Parse(["-S", "Billing", "--CodeStyle", "true"]));
+
+        var twice = once.WithService(TemplateArgs.Parse(["-S", "Billing", "--CodeStyle", "true"]));
+
+        twice.ServiceArgs.SelectMany(s => s.ToArgs()).ShouldNotContain("--CodeStyle");
+        twice.SolutionArgs.IsOn("CodeStyle").ShouldBeTrue();
+    }
+
     [Test]
     public void Should_ChangeNothing_When_TheSameCommandRunsAgain()
     {

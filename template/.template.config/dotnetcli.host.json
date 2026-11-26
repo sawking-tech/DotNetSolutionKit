@@ -89,6 +89,10 @@
       "longName": "hierarchy-rules",
       "shortName": ""
     },
+    "CodeStyle": {
+      "longName": "code-style",
+      "shortName": ""
+    },
     "Solution": {
       "longName": "solution",
       "shortName": ""

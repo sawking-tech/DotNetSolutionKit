@@ -4,7 +4,9 @@ The rules of every file of the repository and how they are held. Why the style b
 the rules come from: [ADR-007](../adr/007-code-style.md).
 
 The rules are in `.editorconfig` at the root. It is outside `template/`, so the package and a generated solution do
-not carry it. A rule is in one of two layers:
+not carry it: the package carries `template/.editorconfig.template` instead - the same rules at `suggestion`,
+written into a solution's root by `--code-style`, and read by `dotskit` to format the code an upgrade brings
+(below). A rule is in one of two layers:
 
 - applied: a formatter fixes it with no person, and a build or CI fails on it (`warning`);
 - offered: no formatter applies it; the IDE shows it (`suggestion`) or it is off (`none`), and no build fails.

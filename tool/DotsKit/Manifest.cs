@@ -109,11 +109,10 @@ internal sealed record Manifest
         var existing = FindService(service.Service);
         // A service keeps the name it has: -S orders is Orders.
         var merged = existing is null ? service : existing.JoinedWith(service).With(TemplateArgs.ServiceName, existing.Service);
-        var services = ServiceArgs.Select(s => IsNamed(s, service.Service) ? merged : s).ToList();
-        if (existing is null)
-        {
-            services.Add(merged);
-        }
+        var services = (existing is null ? ServiceArgs.Append(merged) : ServiceArgs.Select(s => IsNamed(s, service.Service) ? merged : s))
+            // A flag of the solution's root asks for a file in the root, which a service folder has no place for: the
+            // solution carries it (WidenBy below reads the command as given), the service does not.
+            .Select(s => s.Without(TemplateArgs.SolutionFile)).ToList();
 
         return this with
         {

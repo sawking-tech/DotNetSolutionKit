@@ -59,6 +59,7 @@ internal static partial class TemplateVersions
         ["GitHubCiCd"] = "github-cicd",
         ["FeatureFlags"] = "feature-flags",
         ["HierarchyRules"] = "hierarchy-rules",
+        ["CodeStyle"] = "code-style",
         ["Solution"] = "solution",
         ["Minimal"] = "minimal",
     };
@@ -218,6 +219,7 @@ internal static partial class TemplateVersions
         ["MongoDB"] = new(2, 8, 0),
         ["Notify"] = new(2, 8, 0),
         ["Solution"] = new(2, 8, 0),
+        ["CodeStyle"] = new(3, 0, 0),
     };
 
     /// <summary>Whether the template of <paramref name="version"/> has the parameter <paramref name="name"/>.</summary>
