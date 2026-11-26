@@ -107,7 +107,4 @@ These follow this decision and are not in place yet:
 
 - a pre-commit hook that applies the bytes and the layout to the files of a commit;
 - the four line patterns of StyleCop in `check-style.py`;
-- `dotnet format` checked on the solutions CI generates, and the template's sources brought to it by the pack;
-- `dotskit upgrade` applying the whole pack, the bytes and `dotnet format`, to the sides of a merge, and then the
-  team's own `.editorconfig` over it;
-- the flag that gives a solution this `.editorconfig` at the level `suggestion`.
+- `dotnet format` checked on the solutions CI generates.
