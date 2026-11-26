@@ -148,8 +148,14 @@ internal sealed partial class GitTemplateMerge(IProcessRunner runner, string sel
         await GiveBothAddedABaseAsync(root, ct);
 
         // A conflict with no stage 2 is a file the solution's side removed: git ls-files -u lists the stages of each.
-        var ours = (await PathsAsync(root, ["ls-files", "-u", "-z"], null, ct))
-            .Select(e => e.Split('\t', 2)).Where(e => e.Length == 2 && e[0].EndsWith(" 2", StringComparison.Ordinal)).Select(e => e[1]).ToHashSet(StringComparer.Ordinal);
+        var stages = (await PathsAsync(root, ["ls-files", "-u", "-z"], null, ct))
+            .Select(e => e.Split('\t', 2)).Where(e => e.Length == 2)
+            .Select(e => (Stage: e[0].Split(' ', 3)[2], Path: e[1]))
+            .GroupBy(e => e.Path, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Select(e => e.Stage).ToHashSet(StringComparer.Ordinal), StringComparer.Ordinal);
+        var ours = stages.Where(s => s.Value.Contains("2")).Select(s => s.Key).ToHashSet(StringComparer.Ordinal);
+        // Only a file with both sides has the template's version to take: one the template removed has none.
+        var theirs = stages.Where(s => s.Value.Contains("3")).Select(s => s.Key).ToHashSet(StringComparer.Ordinal);
         var restyled = conflicts.Where(p => !ours.Contains(p) && OnlyRestyled(p, @base.Tree, next.Tree)).ToList();
         // --force: a delete/modify conflict follows the template too; -X theirs does not touch it.
         var resolvedByForce = preferTemplate ? await ResolveDeletedAsync(root, [.. conflicts.Except(restyled, StringComparer.Ordinal)], ct) : [];
@@ -158,7 +164,7 @@ internal sealed partial class GitTemplateMerge(IProcessRunner runner, string sel
         // using lines - takes the template's version: the build after the merge names what the file still misses,
         // and a using the team added by hand comes back with the same name.
         var repairAlone = new List<string>();
-        foreach (var path in conflicts.Except(restyled).Except(resolvedByForce, StringComparer.Ordinal).Where(ours.Contains))
+        foreach (var path in conflicts.Except(restyled).Except(resolvedByForce, StringComparer.Ordinal).Where(p => ours.Contains(p) && theirs.Contains(p)))
         {
             if (await OnlyAddedUsingsAsync(root, path, ct))
             {

@@ -133,7 +133,14 @@ git, the same three-way merge:
   merged file has the style. A solution file keeps its byte order mark, and the merged file keeps the line ends
   of the team's. A line break of two spaces at the end of a Markdown line is lost
   in a file both changed: write it as a backslash. A file with a merge of its own in `.gitattributes`, as one of
-  Git LFS, keeps it.
+  Git LFS, keeps it;
+- before the merge, the template's side of every C# file both sides changed is laid out by the team's style: the
+  rules of the template's `.editorconfig` with the solution's root `.editorconfig` after them, so the team's rule
+  wins where both name one, and `dotnet format whitespace` applies the union to a copy of the template's output.
+  What the merge then sees of that file differs from the team's by what the template changed in the code, not by
+  how it is laid out. Only the layout is applied, never an analyzer fix: the code keeps the text the template
+  wrote. The solution's side, its `.editorconfig` among its files, is not touched; a solution with no
+  `.editorconfig` of its own, and a formatter that cannot run, leave the merge as it was in 2.9 - by bytes alone.
 
 What git then shows: `git log dotskit/template` - what each version of the template gave the solution;
 `git diff dotskit/template HEAD`, once the merge is committed - the team's own changes over the template of its
@@ -162,7 +169,7 @@ a file (`--pathspec-from-file`), never on the command line, so a solution of any
 | | `git config user.name`, `git config user.email` | whether git knows the committer: the mechanical commits keep the team's identity when it does; when it does not, as on a fresh runner, they are made as dotskit |
 | | `git ls-files --others --ignored --exclude-standard` | the files the solution's git ignores, never written |
 | | `git diff --name-only --diff-filter=U` | the files left in conflict |
-| | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed; one with no side of the template's, under `--force`, is resolved with the template's removal; one with no base, added by both sides, gains the solution's side as its base |
+| | `git ls-files -u` | the sides of each conflict: one with no side of the solution's, whose template change is the style alone, is resolved as removed; one with no side of the template's, under `--force`, is resolved with the template's removal; one with no base, added by both sides, gains the solution's side as its base; the files of the repair take the template's side only where the template has one, so a file it removed conflicts instead |
 | | `git update-index --index-info` | the solution's side as the base of a file both sides added, so the IDE opens it with its merge view |
 | | `git diff --no-index -M` | the files the template moved, between two of its outputs outside the repository |
 | | `git init` in a folder of the tool's own, `git check-ignore --no-index --stdin` | the paths `.dotskitignore` holds, matched by git's own rules: each file goes into that folder in the shape of a `.gitignore`, at the depth it sits in, so git itself applies the subtree of a folder, a deeper file over a higher one and the numbering of the lines; the repository is empty, so neither the solution's `.gitignore` nor its config reaches the match, and a solution outside git reads its rules the same way |

@@ -18,7 +18,7 @@ internal interface IPlanner
 }
 
 internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRenames renames, IIgnoredFiles ignored, ReferenceRepair repair,
-    IIgnoreRules rules) : IPlanner
+    IIgnoreRules rules, IStyleFormat style) : IPlanner
 {
     /// <param name="root">The solution's root, or the folder a new solution is made in.</param>
     /// <param name="current">The solution's manifest; null when there is no solution yet, and the base is empty.</param>
@@ -34,6 +34,14 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
         // The two trees do not depend on each other: generated side by side.
         var baseDir = current is null ? null : await BaseAsync(current, ct);
         var nextDir = await staging.BuildAsync(next, withSolutionFile: current is null, ct);
+        // The team's style meets the template's on the files both sides changed, and only on them: the template's side
+        // is laid out by the union of the two styles, so the merge has no style difference left to report. The solution's
+        // side is the team's code and is not touched.
+        if (baseDir is not null && !mode.NoStyle)
+        {
+            var both = BothChanged.CSharp(root, baseDir, nextDir);
+            nextDir = await style.TemplateSideAsync(root, nextDir, both, ct);
+        }
         // The rules of .dotskitignore hold the paths a person took out of the template's reach: the next output takes
         // them from the base, so the merge finds nothing of the template there. Read before any move, so a held file
         // is no move either.
