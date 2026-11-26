@@ -41,9 +41,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!-- The style the template hands a solution: the same file the package carries (template/.editorconfig.template),
-             embedded so the merge of an upgrade formats the template's side by it (StyleUnion). -->
-        <EmbeddedResource Include="..\..\template\.editorconfig.template" LogicalName="DotsKit.Style.editorconfig" />
+        <!-- The style the repository holds its code to, at the severities a formatter applies: the merge of an upgrade
+             lays the template's side out by the union of this file and the solution's own (StyleUnion). The file a
+             solution takes with the CodeStyle flag is the other one, template/.editorconfig.template, offered at
+             suggestion. -->
+        <EmbeddedResource Include="..\..\.editorconfig" LogicalName="DotsKit.Style.editorconfig" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="DotsKit.Tests" />
