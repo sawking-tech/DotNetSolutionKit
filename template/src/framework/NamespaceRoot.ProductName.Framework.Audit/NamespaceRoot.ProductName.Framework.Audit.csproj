@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      The audit journal: the SaveChanges interceptor that publishes AuditRecordedV1 into the outbox in the same
+      transaction as the change, the recorder for what bypasses the change tracker, the redaction and the value
+      formatter, their ports, and the verifiers a service's tests use to hold its entities to their markers.
+      The marker attributes (Auditable, AuditIgnore, AuditRedact, SetBasedWrite) stay in the kernel: they are the
+      team's data, set on its own entities, and the kernel does not know this module. The message contracts stay
+      in Common.Contracts: they cross a service's boundary.
+      The module is on only with the flag, and the flag is a project: a service without the audit flag carries
+      neither this code nor its packages. See the Readme and template/src/framework/README.md.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common\NamespaceRoot.ProductName.Common.csproj" />
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Application\NamespaceRoot.ProductName.Common.Application.csproj" />
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Contracts\NamespaceRoot.ProductName.Common.Contracts.csproj" />
+        <ProjectReference Include="..\..\common\NamespaceRoot.ProductName.Common.Infrastructure\NamespaceRoot.ProductName.Common.Infrastructure.csproj" />
+        <ProjectReference Include="..\NamespaceRoot.ProductName.Framework.Observability\NamespaceRoot.ProductName.Framework.Observability.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+        <!-- The verifiers a service's tests call: a module carries what its tests need, as the capability modules do. -->
+        <PackageReference Include="Shouldly" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>NamespaceRoot.ProductName.Framework.Audit.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+</Project>

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Globalization;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Renders a property value the way the journal stores it.

@@ -5,7 +5,7 @@ using NamespaceRoot.ProductName.Common.Attributes;
 using NamespaceRoot.ProductName.Common.Domain;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Checks that every <see cref="AuditableAttribute"/> in a service assembly names properties that

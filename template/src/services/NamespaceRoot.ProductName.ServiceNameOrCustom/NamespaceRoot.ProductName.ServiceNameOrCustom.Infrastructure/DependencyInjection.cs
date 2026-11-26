@@ -14,7 +14,7 @@ using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramewor
 using NamespaceRoot.ProductName.Capabilities.Background.Hangfire;
 //#endif
 //#if (AuditEnabled)
-using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+using NamespaceRoot.ProductName.Framework.Audit;
 //#endif
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Events;
 using NamespaceRoot.ProductName.Common.Infrastructure.Persistence;

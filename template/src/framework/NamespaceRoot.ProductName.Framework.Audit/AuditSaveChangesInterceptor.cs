@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
+using NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework;
 using NamespaceRoot.ProductName.Framework.Observability;
 using NamespaceRoot.ProductName.Common.Attributes;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Audit;
@@ -12,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Captures changes to entities marked with <see cref="AuditableAttribute"/> and publishes

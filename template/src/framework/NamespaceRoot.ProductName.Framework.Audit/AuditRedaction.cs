@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using NamespaceRoot.ProductName.Common.Attributes;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Decides which properties may not have their values recorded, and what stands in for them.

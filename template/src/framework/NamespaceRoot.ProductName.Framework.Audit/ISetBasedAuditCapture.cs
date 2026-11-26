@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace NamespaceRoot.ProductName.Common.Application.Auditing;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Captures a write that bypasses the change tracker, by reading the affected rows either side of it.

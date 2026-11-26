@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Shouldly;
 
-namespace NamespaceRoot.ProductName.Common.Tests.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <summary>
 /// Fails when a repository writes past the change tracker without saying whether the audit journal

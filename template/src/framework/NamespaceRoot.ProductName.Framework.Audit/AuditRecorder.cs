@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using System.Text.Json;
 using NamespaceRoot.ProductName.Framework.Observability;
-using NamespaceRoot.ProductName.Common.Application.Auditing;
+using NamespaceRoot.ProductName.Framework.Audit;
 using NamespaceRoot.ProductName.Common.Application.Messaging;
 using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Contracts.Messaging.Audit;
 
-namespace NamespaceRoot.ProductName.Common.Infrastructure.Persistence.EntityFramework.Audit;
+namespace NamespaceRoot.ProductName.Framework.Audit;
 
 /// <inheritdoc />
 /// <remarks>
