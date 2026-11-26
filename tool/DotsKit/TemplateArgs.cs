@@ -59,11 +59,20 @@ internal sealed partial class TemplateArgs
         "GitHubCiCd",
         "FeatureFlags",
         "HierarchyRules",
+        "CodeStyle",
     ];
 
     /// <summary>One for the whole solution: a service takes them from the solution, a command need not name them.</summary>
     public static readonly string[] SolutionOnly =
         ["NamespaceRoot", "ProductName", "Database", "Deploy", "TestFramework", "Agent", "GitHubCiCd"];
+
+    /// <summary>
+    /// A parameter of the solution's root alone: a command asks for it, the solution carries it, and no service
+    /// folder takes it. Unlike the rest of <see cref="SolutionOnly"/>, a command may name it on a solution that has
+    /// it off - it asks for the file, it does not state a different value of the solution.
+    /// </summary>
+    public static readonly string[] SolutionFile =
+        ["CodeStyle"];
 
     /// <summary>The secret stores shared by the solution: every service reads its connection settings through them.</summary>
     private static readonly string[] SolutionInfrastructureFlags = ["Infisical", "Vault"];
@@ -73,7 +82,7 @@ internal sealed partial class TemplateArgs
         ["DiffApi", "FeatureFlags", "HierarchyRules", "Storage", "ClickHouse", "MongoDB", "Audit", "Hangfire"];
 
     /// <summary>The flags whose shared files the solution has when any of its services has the capability.</summary>
-    private static readonly string[] WidenedFlags = [.. SolutionInfrastructureFlags, .. ServiceCapabilityFlags];
+    private static readonly string[] WidenedFlags = [.. SolutionInfrastructureFlags, .. SolutionFile, .. ServiceCapabilityFlags];
 
     /// <summary>What says which command made the solution; a manifest keeps neither.</summary>
     private static readonly string[] Mode = [Solution, Minimal];
@@ -225,7 +234,11 @@ internal sealed partial class TemplateArgs
     /// <summary>What of a command belongs to the solution: everything but the service's name, its port and the mode.</summary>
     public TemplateArgs SolutionPart() => Without([ServiceName, HttpPort, ApiGateway, .. Mode]);
 
-    /// <summary>What of a command belongs to the service: everything but what is the solution's and the mode.</summary>
+    /// <summary>
+    /// What of a command belongs to the service: everything but what is the solution's and the mode. A flag of the
+    /// solution's root stays in: it widens the solution (<see cref="WidenBy"/>), and the manifest drops it from the
+    /// service it records.
+    /// </summary>
     public TemplateArgs ServicePart() => Without([.. SolutionOnly, .. Mode]);
 
     /// <summary>The service with the solution's secret stores filled in where the service states no choice of its own.</summary>

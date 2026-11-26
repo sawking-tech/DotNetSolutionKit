@@ -326,6 +326,12 @@
       "defaultValue": "false",
       "description": "Add access rules over a tenant tree stored as materialized paths (IHierarchicalEntity, HierarchyRules)"
     },
+    "CodeStyle": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Write the template's .editorconfig into the solution's root at suggestion: dotskit formats the code it brings by it, and it is the team's to edit"
+    },
     "HangfireLower": {
       "type": "generated",
       "generator": "casing",
@@ -435,6 +441,16 @@
       },
       "replaces": "DOTNETSOLUTIONKIT_HIERARCHYRULES",
       "description": "The HierarchyRules flag as the manifest keeps it: lowercase"
+    },
+    "CodeStyleLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "CodeStyle",
+        "toLower": true
+      },
+      "replaces": "DOTNETSOLUTIONKIT_CODESTYLE",
+      "description": "The CodeStyle flag as the manifest keeps it: lowercase"
     },
     "ApiGatewayLower": {
       "type": "generated",
@@ -546,9 +562,15 @@
         },
         {
           "rename": {
-            ".gitignore.template": ".gitignore"
+            ".gitignore.template": ".gitignore",
+            ".editorconfig.template": ".editorconfig"
           }
         },
+        {
+          "condition": "(!CodeStyle)",
+          "exclude": [".editorconfig.template"]
+        },
+
         {
           "condition": "(Agent == \"none\")",
           "exclude": [".claude/**", "CLAUDE.md"]
@@ -1015,6 +1037,15 @@
       "description": "--ApiGateway was not applied: the gateway is added to a solution already there, without --Solution",
       "manualInstructions": [
         { "text": "--ApiGateway was not applied: --Solution generates the solution with a service, and the gateway is added to that solution without --Solution. Generate the gateway again without it." }
+      ]
+    },
+    {
+      "condition": "(CodeStyle && !IsSolution)",
+      "actionId": "00000000-0000-0000-0000-000000000001",
+      "continueOnError": true,
+      "description": "--CodeStyle was not applied: a service folder is not where the solution's .editorconfig goes",
+      "manualInstructions": [
+        { "text": "--CodeStyle was not applied: the file goes into the root of a solution, and a service folder is not one. With the solution it is written by the run that takes --Solution; add it by hand from the template's package when the solution is already there." }
       ]
     }
 

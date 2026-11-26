@@ -74,12 +74,14 @@ dotnet new dotskit -N MyCompany -P MyProduct -S Billing
 | `--notify` | нет | Каналы [уведомлений](../features/notifications.md): `email` - через SMTP или Graph API, с песочницей вне Production; с `--messaging` другие сервисы просят письмо командой шины. |
 | `--test-framework` | `nunit` | Тестовый фреймворк для тестов сервиса, `nunit` или `xunit` (v3); задаётся для каждого сервиса. Собственные тесты `Common` остаются на NUnit. См. [тестирование](../architecture/testing.md). |
 | `--audit` | `false` | [Журнал аудита](../features/audit.md) изменений сущностей; действует только с `--messaging rabbitmq:outbox`; без него генерация сообщает, что флаг не применён. |
+| `--code-style` | `false` | Кладёт [`.editorconfig`](../architecture/code-style.md) шаблона в корень решения, все правила в `suggestion`: по нему `dotskit` форматирует код, который приносит обновление. Файл остаётся команде, и поднятое до `warning` правило валит сборку. С `--solution`; решение со своим `.editorconfig` получает наш как штатный git-конфликт. |
 | `--api-gateway` | `false` | [API-шлюз](../features/api-gateway.md) на YARP вместо сервиса. Только без `--solution`; с ним генерация сообщает, что флаг не применён. |
 | `--deploy` | `compose` | [Файлы развёртывания](../operations/deployment.md): `compose`, `k8s` или `none`. Одно значение на решение: передавайте то же самое каждому следующему сервису. |
 | `--agent` | `claude` | [Правила и скиллы для ИИ-агента](agents.md): `claude`, `opencode` или `none`. С `--solution`. |
 | `--http-port` | свободный порт | Порт в `launchSettings.json` и на хосте под compose. Без параметра берётся свободный порт из диапазона 5000-5999 на машине, где идёт генерация, поэтому сервисы, сгенерированные один за другим, не получают один и тот же порт. |
 
-`-I`, `--vault`, `--diff-api`, `--hierarchy-rules`, `--audit` и `--notify` добавляют файлы в `Common`, а
+`-I`, `--vault`, `--diff-api`, `--hierarchy-rules`, `--audit`, `--code-style` и `--notify` добавляют файлы в
+`Common` или в корень решения, а
 `--feature-flags` - модуль `Framework.FeatureFlags` в `src/framework`; их выбирают один раз на решение
 с `--solution`. `--mongodb`, `--clickhouse`, `--storage`, `-H` и `--messaging` добавляют проект в
 `src/capabilities`; сервис, которому такой флаг понадобился позже, добавляется через

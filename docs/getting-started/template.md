@@ -74,12 +74,14 @@ and, for a flag, from its file in [`src/package-versions/`](../../template/src/p
 | `--notify` | none | Channels of [notifications](../features/notifications.md): `email` - through SMTP or Graph API, with a sandbox outside Production; with `--messaging` other services ask for it by a bus command. |
 | `--test-framework` | `nunit` | Test framework of the service's tests, `nunit` or `xunit` (v3); per service. `Common`'s own tests stay on NUnit. See [testing](../architecture/testing.md). |
 | `--audit` | `false` | [Audit journal](../features/audit.md) of entity changes; takes effect only with `--messaging rabbitmq:outbox`; without it the generation says it was not applied. |
+| `--code-style` | `false` | Writes the template's [`.editorconfig`](../architecture/code-style.md) into the solution's root, every rule at `suggestion`: the style `dotskit` formats the code it brings on an upgrade by. The file is the team's to edit, and raising a rule to `warning` makes a build fail on it. With `--solution`; a solution that had a `.editorconfig` of its own takes ours as a git conflict. |
 | `--api-gateway` | `false` | An [API gateway](../features/api-gateway.md) on YARP in place of a service. Without `--solution` only; with it the generation says it was not applied. |
 | `--deploy` | `compose` | [Deployment files](../operations/deployment.md): `compose`, `k8s` or `none`. One value for the solution: pass the same to every service generated later. |
 | `--agent` | `claude` | [Rules and skills for an AI agent](agents.md): `claude`, `opencode` or `none`. With `--solution`. |
 | `--http-port` | free port | Port in `launchSettings.json` and on the host under compose; without it, a free port from 5000-5999 on the generating machine, so services generated one after another do not share a port. |
 
-`-I`, `--vault`, `--diff-api`, `--hierarchy-rules`, `--audit` and `--notify` add files to `Common`, and
+`-I`, `--vault`, `--diff-api`, `--hierarchy-rules`, `--audit`, `--code-style` and `--notify` add files to
+`Common` or the solution's root, and
 `--feature-flags` adds the `Framework.FeatureFlags` module to `src/framework`; they are chosen once for the
 solution with `--solution`. `--mongodb`, `--clickhouse`, `--storage`, `-H` and `--messaging` add a project to
 `src/capabilities`; a service that needs one later is added with [`dotskit new`](tool.md), which brings the
