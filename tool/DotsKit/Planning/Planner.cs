@@ -34,13 +34,16 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
         // The two trees do not depend on each other: generated side by side.
         var baseDir = current is null ? null : await BaseAsync(current, ct);
         var nextDir = await staging.BuildAsync(next, withSolutionFile: current is null, ct);
-        // The team's style meets the template's on the files both sides changed, and only on them: the template's side
-        // is laid out by the union of the two styles, so the merge has no style difference left to report. The solution's
-        // side is the team's code and is not touched.
+        // The team's style meets the template's on the files both sides changed, and only on them: both sides of the
+        // template - the output the solution came from and the one it goes to - are laid out by the union of the two
+        // styles, so the merge reads one style against one style. Laying out the next side alone is not enough: git
+        // compares each side with the base, and a base still in the template's style against a team that reformatted
+        // every line makes every line a change of the team's. The solution's own files are the team's and are not touched.
         if (baseDir is not null && !mode.NoStyle)
         {
             var both = BothChanged.CSharp(root, baseDir, nextDir);
-            nextDir = await style.TemplateSideAsync(root, nextDir, both, ct);
+            nextDir = await style.LaidOutAsync(root, nextDir, both, ct);
+            baseDir = await style.LaidOutAsync(root, baseDir, both, ct);
         }
         // The rules of .dotskitignore hold the paths a person took out of the template's reach: the next output takes
         // them from the base, so the merge finds nothing of the template there. Read before any move, so a held file

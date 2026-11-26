@@ -3,21 +3,22 @@ using DotsKit.Io;
 namespace DotsKit.Merging;
 
 /// <summary>
-/// The files both sides of a merge changed: those the template changed against the output the solution came from, and
-/// the team changed in its solution. The rest is nobody's change - a file the team alone touched keeps its bytes, a
-/// file the template alone changed keeps the template's - and a style applied to them would rewrite code neither side
-/// asked to change.
+/// The files a merge reads a style from: every C# file of the template's next output that the team has in its
+/// solution and did not edit alone. Two cases bring one in: a file both sides changed - the template against the
+/// output the solution came from, the team in its solution - and a file the template added, which has no base to
+/// compare against but arrives whole into the team's solution. A file the team alone touched is not here: laying it
+/// out would rewrite code neither side asked to change, and the merge has no template side for it anyway.
 /// </summary>
 internal static class BothChanged
 {
-    /// <summary>The paths of the C# files the two sides changed, in the order of the paths.</summary>
+    /// <summary>The paths of the C# files to lay out, in the order of the paths.</summary>
     /// <param name="root">The solution's root, where the team's files are.</param>
     /// <param name="baseDir">The template's output the solution came from.</param>
     /// <param name="nextDir">The template's output the solution goes to.</param>
     public static IReadOnlyList<string> CSharp(string root, string baseDir, string nextDir) =>
-        [.. Folders.RelativeFiles(baseDir)
+        [.. Folders.RelativeFiles(nextDir)
             .Where(p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-            .Where(p => ChangedAgainst(baseDir, root, p) && ChangedAgainst(baseDir, nextDir, p))
+            .Where(p => ChangedAgainst(baseDir, nextDir, p) && (FileText.Read(baseDir, p) is null || ChangedAgainst(baseDir, root, p)))
             .Order(StringComparer.Ordinal)];
 
     /// <summary>Whether the file at <paramref name="path"/> in <paramref name="side"/> differs from the base's, its absence included.</summary>

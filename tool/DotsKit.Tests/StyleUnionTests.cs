@@ -26,6 +26,27 @@ internal sealed class StyleUnionTests
     public void Should_KeepTheTeamsComments() =>
         StyleUnion.Of(Template, "# our style\n[*.cs]\nindent_size = 2\n").ShouldContain("# our style");
 
+    /// <summary>The team's file is offered at suggestion by the flag; the merge applies what it names.</summary>
+    [Test]
+    public void Should_RaiseTheTeamsSuggestion_ToTheSeverityAFormatterApplies() =>
+        StyleUnion.Of(Template, "dotnet_diagnostic.IDE0011.severity = suggestion\ncsharp_prefer_braces = true:suggestion\n")
+            .ShouldContain("dotnet_diagnostic.IDE0011.severity = warning\ncsharp_prefer_braces = true:warning\n");
+
+    /// <summary>A rule the team turned off is a rule they do not want; the merge leaves it off.</summary>
+    [Test]
+    public void Should_KeepTheTeamsNone_AsItIs() =>
+        StyleUnion.Of(Template, "dotnet_diagnostic.IDE0011.severity = none\n").ShouldContain("dotnet_diagnostic.IDE0011.severity = none");
+
+    /// <summary>A naming rule's severity is a severity too, and the merge raises it like any other.</summary>
+    [Test]
+    public void Should_RaiseEveryKindOfSeverity_TheTeamNames() =>
+        StyleUnion.Of(Template, "dotnet_naming_rule.x.severity = suggestion\n").ShouldContain("dotnet_naming_rule.x.severity = warning");
+
+    /// <summary>A rule with no severity at all is a value, and the merge leaves it as the team wrote it.</summary>
+    [Test]
+    public void Should_LeaveARuleWithoutASeverity_AsItIs() =>
+        StyleUnion.Of(Template, "indent_size = 2\n").ShouldContain("indent_size = 2\n");
+
     [Test]
     public void Should_EndTheFile_WithOneLineEnd() =>
         StyleUnion.Of(Template, "[*.cs]\nindent_size = 2").ShouldEndWith("indent_size = 2\n");
