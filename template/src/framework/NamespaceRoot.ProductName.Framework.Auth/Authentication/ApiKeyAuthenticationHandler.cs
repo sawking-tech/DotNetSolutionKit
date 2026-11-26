@@ -7,8 +7,14 @@ using NamespaceRoot.ProductName.Common.Domain.Context;
 using NamespaceRoot.ProductName.Common.Infrastructure.Security;
 using NamespaceRoot.ProductName.Common.Application.Configuration;
 
-namespace NamespaceRoot.ProductName.ServiceNameOrCustom.Infrastructure.Security.Handlers;
+namespace NamespaceRoot.ProductName.Framework.Auth.Authentication;
 
+/// <summary>
+/// The default key handler of <see cref="ServiceAuthenticationSetup"/>: calls between services and from the
+/// platform, with the internal key, as the system or as the user the gateway verified. A team that authenticates
+/// its callers otherwise registers its own handler in place of this one - the setup takes it as a type - and this
+/// file is the template's, never edited in a solution.
+/// </summary>
 public class ApiKeyAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     private readonly IInternalApiConfiguration _internalApiConfig;
