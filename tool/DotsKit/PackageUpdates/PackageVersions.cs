@@ -22,6 +22,18 @@ internal static partial class PackageVersions
         path == Central || path == RootCentral || (path.StartsWith(PerFlag, StringComparison.Ordinal) && path.EndsWith(".props", StringComparison.Ordinal));
 
     /// <summary>
+    /// The version files of a tree in the order MSBuild reads them: the central file, then the files it imports by the
+    /// mask <c>package-versions/*.props</c>, which MSBuild takes in the order of the paths. A later file's
+    /// <c>Update</c> overrides an earlier <c>Include</c>, and that is the reading the policy and the report must
+    /// reproduce, byte for byte the same on every file system - the plain enumeration of a folder is not ordered alike.
+    /// </summary>
+    private static IEnumerable<string> VersionFilesIn(string root) =>
+        Folders.RelativeFiles(root).Where(IsVersionsFile).OrderBy(OrderOf).ThenBy(p => p, StringComparer.Ordinal);
+
+    /// <summary>The central file first - MSBuild imports the others from it - then the rest by path, as MSBuild does.</summary>
+    private static int OrderOf(string path) => path is Central or RootCentral ? 0 : 1;
+
+    /// <summary>
     /// Central package management at the root of a solution, where MSBuild also looks and where the template kept it
     /// before 2.0: a solution of 1.x declares its versions there, and they are the team's to keep.
     /// </summary>
@@ -53,7 +65,7 @@ internal static partial class PackageVersions
         var had = baseDir is null ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) : All(baseDir);
         var lines = new SortedSet<string>(StringComparer.Ordinal);
         var brought = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var path in Folders.RelativeFiles(nextDir).Where(IsVersionsFile).Where(p => held is null || !held.Contains(p)))
+        foreach (var path in VersionFilesIn(nextDir).Where(p => held is null || !held.Contains(p)))
         {
             // Through FileText, so the byte order mark the template gives stays.
             var file = FileText.Read(nextDir, path)!;
@@ -162,7 +174,7 @@ internal static partial class PackageVersions
     public static Dictionary<string, string> All(string root)
     {
         var all = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var path in Folders.RelativeFiles(root).Where(IsVersionsFile))
+        foreach (var path in VersionFilesIn(root))
         {
             foreach (var (name, version) in Read(FileText.Read(root, path)!.Text))
             {

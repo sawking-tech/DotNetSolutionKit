@@ -10,6 +10,7 @@ namespace DotsKit.Tests;
 internal sealed class CentralVersionsTests
 {
     private const string Central = "src/Directory.Packages.props";
+    private const string Packages = Central;
     private const string Billing = "src/services/ST.Demo.Billing/ST.Demo.Billing.Application/ST.Demo.Billing.Application.csproj";
     private const string Orders = "src/services/ST.Demo.Orders/ST.Demo.Orders.Application/ST.Demo.Orders.Application.csproj";
     private const string Left = "src/services/ST.Demo.Stock/ST.Demo.Stock.Application/ST.Demo.Stock.Application.csproj";
@@ -103,5 +104,23 @@ internal sealed class CentralVersionsTests
         Put(root, Billing, References("<PackageReference Include=\"Scriban\" Version=\"5.10.0\" />"));
 
         CentralVersions.Decide(root, new HashSet<string>()).ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// MSBuild reads the central file, then the files of package-versions/ by the mask, in the order of their paths, and
+    /// a later Update overrides an earlier Include. The reading must be the same on every file system: a plain
+    /// enumeration of a folder is not ordered alike on Windows and Linux, and the report of the policy would differ.
+    /// </summary>
+    [Test]
+    public void TheVersionFiles_AreReadInTheOrderMsbuildTakesThem_WhateverTheFileSystemEnumerates()
+    {
+        var root = Folders.NewTemp("version-order");
+        Put(root, Packages, Managed + "  <ItemGroup>\n    <PackageVersion Include=\"Microsoft.IdentityModel.Tokens\" Version=\"7.7.3\" />\n  </ItemGroup>\n  <Import Project=\"package-versions/*.props\" />\n</Project>\n");
+        Put(root, "src/package-versions/framework-auth.props", "<Project>\n  <ItemGroup>\n    <PackageVersion Include=\"Microsoft.IdentityModel.Tokens\" Version=\"7.7.3\" />\n  </ItemGroup>\n</Project>\n");
+        Put(root, "src/package-versions/notify-email.props", "<Project>\n  <ItemGroup>\n    <PackageVersion Update=\"Microsoft.IdentityModel.Tokens\" Version=\"8.15.0\" />\n  </ItemGroup>\n</Project>\n");
+
+        PackageVersions.All(root)["Microsoft.IdentityModel.Tokens"].ShouldBe("8.15.0", "the later file's Update wins, as MSBuild reads the mask");
+
+        PackageVersions.All(root)["Microsoft.IdentityModel.Tokens"].ShouldBe("8.15.0", "the later file's Update wins, as MSBuild reads the mask");
     }
 }
