@@ -4,6 +4,8 @@
     "3.0.0-rc": {
       "headline": "The outside systems a flag turns on move out of Common into capabilities and the framework: a solution carries a system's driver only with its flag.",
       "highlights": [
+        "The template's .editorconfig travels in the package and a flag puts it into a solution at suggestion; dotskit upgrade lays the code the template brings out by the team's own style before it merges, so a team that writes braces or usings its own way meets no conflict from the layout.",
+        "The audit journal is a module of src/framework, not a part of Common: --audit brings it whole and a service without the flag carries neither its code nor its packages.",
         "ClickHouse of --ClickHouse and object storage of --Storage move to their own projects in src/capabilities; the drivers live only in a service that uses them.",
         "The domain events and the testing system move out of Common to src/framework, which the template owns the way it owns Common.",
         "The secret stores of --Infisical and --Vault move to Capabilities.Security.CredentialStore and become the configuration store: ISecretStore is IConfigurationStore, and a service with the flag carries the store's SDK.",
@@ -16,6 +18,8 @@
       "ru": {
         "headline": "Внешние системы, которые включает флаг, переезжают из Common в capabilities и framework: драйвер системы живёт только в сервисе с её флагом.",
         "highlights": [
+          "`.editorconfig` шаблона едет в пакете, а флаг кладёт его в решение в `suggestion`; dotskit upgrade раскладывает код, который приносит шаблон, по стилю самой команды до слияния, поэтому команда, пишущая скобки или usings по-своему, не получает конфликта из-за раскладки.",
+          "Журнал аудита - модуль в src/framework, а не часть Common: --audit приносит его целиком, а сервис без флага не несёт ни его кода, ни его пакетов.",
           "ClickHouse флага --ClickHouse и объектное хранилище флага --Storage переезжают в собственные проекты в src/capabilities; драйверы остаются только в сервисе, который их использует.",
           "Доменные события и тестовая система переезжают из Common в src/framework — то, чем владеет шаблон, как Common.",
           "Хранилища секретов флагов --Infisical и --Vault переезжают в Capabilities.Security.CredentialStore и становятся хранилищем конфигурации: ISecretStore теперь IConfigurationStore, а сервис с флагом несёт SDK хранилища.",
