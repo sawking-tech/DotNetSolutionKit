@@ -12,7 +12,6 @@ test wiring, stubs for the ports that leave a service, and the code rules.
   set for a test. It wires the EF pipeline from `Common.Infrastructure`
   (`AddDomainEventCore` / `AddDomainEventPersistence`), so this project references it; the pipeline
   itself is not portable and stays there.
-- `Stubs`: `UserContextMock`, `TimeProviderMock`, `RecordingMessageBus`, `NoOpAuditRecorder`, the
   in-memory case-insensitive searches and `LikePattern`.
 - `Rules`: `TokensInResponses`, a rule check over controllers.
 - `TestSkip`, `TestHelpers`, `TestDomainExecutionContext`: the small helpers every test project
@@ -24,11 +23,14 @@ test wiring, stubs for the ports that leave a service, and the code rules.
   solution was generated with, so this project references it conditionally, the same way
   `Common.Infrastructure` does.
 
-What stays in `NamespaceRoot.ProductName.Common.Testing`, because it is tied to the audit pipeline
-rather than to the way of testing:
+What stays in `NamespaceRoot.ProductName.Common.Testing`, because it is tied to the solution rather
+than to the way of testing:
 
-- The audit verifiers (`AuditMarkerVerifier`, `AuditRedactionVerifier`, `SetBasedWriteVerifier`)
-  and `TestCategories` alongside them.
+- `TestCategories` and the `global using Shouldly` a test project takes from there.
+
+The audit verifiers (`AuditMarkerVerifier`, `AuditRedactionVerifier`, `SetBasedWriteVerifier`) moved
+to `NamespaceRoot.ProductName.Framework.Audit`, which a service takes with `--Audit`: they hold an
+entity to the markers of the journal, so they belong with the journal.
 
 No test framework here: a test project adds its own and tells `TestSkip` how it skips a test, from
 its `TestFramework.cs`.

@@ -1,10 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <!--
-      Test helpers tied to the audit pipeline: the audit verifiers. The portable harness (execution
-      contexts, the real-database test servers, stubs, rules) lives in
-      NamespaceRoot.ProductName.Framework.Testing, referenced below. No test framework here; a test
-      project adds its own and tells TestSkip how that framework skips a test.
+      The categories a test declares and the Shouldly import every test project takes from here. The
+      portable harness (execution contexts, the real-database test servers, stubs, rules) lives in
+      NamespaceRoot.ProductName.Framework.Testing, referenced below; the audit verifiers live in
+      Framework.Audit. No test framework here; a test project adds its own and tells TestSkip how that
+      framework skips a test.
     -->
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
