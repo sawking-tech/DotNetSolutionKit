@@ -1,16 +1,24 @@
 name: Samples dispatch
 
-# The samples repository regenerates its branches from every release: the dispatch wakes its Regenerate
-# and lifecycle workflows the minute the publication is done, instead of the half hour its nuget.org
-# polling takes to notice (released.yml there).
+# The samples repository regenerates its branches from every release: this wakes its Regenerate and lifecycle
+# workflows the minute the publication is done, instead of the half hour its nuget.org polling took to notice.
 #
-# It is a workflow of its own rather than a step of release.yml: a release is published, and this wakes
-# the samples on that event, whatever published it. A run of Release on a commit without a v* tag is a
-# rehearsal (workflow_call with publish: false) and wakes nobody.
+# It listens on Promote, not on Release: a release is published by promote.yml calling release.yml as a
+# reusable workflow, and a called workflow makes no run of its own - its jobs are the caller run's. A run named
+# Release exists only when a tag v* is pushed by hand. The evidence is in this repository's history: the
+# releases of 2.9.2 (24.11) and 2.8.0 (28.10) are runs named Promote, and the last run named Release is a tag
+# push of 8.11. Listening on Release, this file would have woken nobody on a normal release.
+#
+# A run that published nothing wakes nobody: a rehearsal on a throwaway branch (release.yml with publish:
+# false), and a fast-forward of a target already moved, which publishes no new version. Both are Promote runs
+# whose log says so, so the job reads the log rather than trusting the run's success.
+#
+# It is a workflow of its own rather than a step of promote.yml: promote.yml may be called as a reusable
+# workflow by its own rehearsal, and a workflow_call run carries no event of its own to filter on.
 
 on:
   workflow_run:
-    workflows: [Release]
+    workflows: [Promote]
     types: [completed]
 
 permissions:
@@ -21,18 +29,36 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     steps:
-      - id: tag
+      - id: published
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN: ${{ github.event.workflow_run.id }}
         run: |
+          # The tag step of release.yml prints the tag it makes, or the one it finds already there; a run that
+          # published nothing - a target already moved, or a rehearsal - prints neither. Both runs carry that
+          # step: a called workflow's jobs are the caller's.
+          log=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN/jobs" --paginate \
+            --jq '.jobs[] | select(.name == "Publish") | .id' \
+            | while read -r job; do gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$job/logs" || true; done)
+          tagged=$(grep -cE '(^|[[:space:]])v[0-9]+\.[0-9]+\.[0-9]+([[:space:]]|$)' <<< "$log" || true)
+          echo "the Promote run $RUN: $tagged line(s) naming a version tag"
+          [ "$tagged" -gt 0 ] && echo "released=true" >> "$GITHUB_OUTPUT" || echo "released=false" >> "$GITHUB_OUTPUT"
+
+      - id: tag
+        if: steps.published.outputs.released == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ github.event.workflow_run.id }}
+        run: |
+          # The tag is on the commit Promote published, the head of the target it fast-forwarded to.
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN" -q .head_sha)
           tag=$(gh api "repos/$GITHUB_REPOSITORY/git/refs/tags" --paginate \
-            --jq ".[] | select(.object.sha == \"$SHA\") | .ref" | sed 's|^refs/tags/||' | head -1)
-          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-          echo "release run $SHA: ${tag:-(no tag, a rehearsal)}"
+            --jq ".[] | select(.object.sha == \"$sha\") | .ref" | sed 's|^refs/tags/||' | head -1)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "published $sha: ${tag:-(the tag is not on the run's head; the newest release wins in Regenerate)}"
 
       # The app is installed on the organization with Actions read and write on Samples alone.
-      - if: steps.tag.outputs.tag != ''
+      - if: steps.published.outputs.released == 'true'
         id: samples-app
         uses: actions/create-github-app-token@v2
         with:
@@ -41,11 +67,11 @@ jobs:
           owner: sawking-tech
           repositories: DotNetSolutionKit.Samples
 
-      - if: steps.tag.outputs.tag != ''
+      - if: steps.published.outputs.released == 'true'
         env:
           GH_TOKEN: ${{ steps.samples-app.outputs.token }}
           TAG: ${{ steps.tag.outputs.tag }}
         run: |
           gh api -X POST "/repos/sawking-tech/DotNetSolutionKit.Samples/dispatches" \
             -f event_type=released -f "client_payload[tag]=$TAG"
-          echo "dispatched 'released' for $TAG to DotNetSolutionKit.Samples"
+          echo "dispatched 'released' for ${TAG:-(the newest release)} to DotNetSolutionKit.Samples"
