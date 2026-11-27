@@ -40,9 +40,9 @@ window.SITE = {
       ["settings", "docs/architecture/settings", ["Settings", "Настройки"], true],
       ["domain-events", "docs/architecture/domain-events", ["Domain events", "Доменные события"], true],
       ["testing", "docs/architecture/testing", ["Testing", "Тестирование"], true],
-      ["code-style", "docs/architecture/code-style", ["Code style", "Стиль кода"], true],
     ]},
     { group: ["Features", "Возможности"], docs: [
+      ["code-style", "docs/features/code-style", ["Code style in a solution", "Стиль кода в решении"], true],
       ["jobs", "docs/features/background-jobs", ["Background jobs", "Фоновые задачи"], true],
       ["messaging", "docs/features/messaging", ["Message bus", "Шина сообщений"], true],
       ["secrets", "docs/features/secrets", ["Secrets from Infisical or Vault", "Секреты из Infisical или Vault"], true],
