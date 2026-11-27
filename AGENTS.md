@@ -159,6 +159,12 @@ file-byte violations and C# style violations in the tool.
   that carries it holds `3.x` under whatever name its release gives it. The review of a pull request is an agent's local review
   of the branch against its base before the PR; no approval is requested on GitHub. Green required status
   checks are the merge gate: a PR with green CI is merged without waiting for a person.
+- A pull request reaches `dev` by fast-forward, never by rebase or merge commit: `gh workflow run
+  promote.yml -f source=<branch> -f target=dev`. Rebase recreates every commit, and a recreated commit
+  loses its signature and the checks that ran on it - the history then shows unsigned commits with no CI
+  of their own. A fast-forward moves the branch and leaves each commit as it was, so signature and checks
+  stay on the commit they belong to. `promote.yml` takes any source and target, not only `dev` and
+  `master`.
 - No more than four branches live on the remote: `dev`, `master`, the current feature branch, and one
   spare for a parallel line. A branch is deleted once its pull request is merged; a stale branch is
   deleted without mercy - its commits either reached `dev` or were thrown away by decision.
