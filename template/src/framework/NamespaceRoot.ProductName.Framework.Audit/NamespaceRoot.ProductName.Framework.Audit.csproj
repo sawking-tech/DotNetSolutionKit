@@ -31,10 +31,10 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
-        <!-- The verifiers are for a service's tests; the package must not reach the service's deployment. A
-             service references this module from its infrastructure, so without PrivateAssets Shouldly.dll would
-             sit in its API's output. -->
-        <PackageReference Include="Shouldly" PrivateAssets="all" />
+        <!-- The verifiers are for a service's tests. PrivateAssets keeps Shouldly out of a consumer's compile and
+             runtime, and GeneratePathProperty is not needed: the package's own build props are excluded by
+             ExcludeAssets, or its content copies into the output of every project that references this one. -->
+        <PackageReference Include="Shouldly" PrivateAssets="all" ExcludeAssets="build;buildTransitive" />
     </ItemGroup>
 
     <ItemGroup>
