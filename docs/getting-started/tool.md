@@ -134,13 +134,29 @@ git, the same three-way merge:
   of the team's. A line break of two spaces at the end of a Markdown line is lost
   in a file both changed: write it as a backslash. A file with a merge of its own in `.gitattributes`, as one of
   Git LFS, keeps it;
-- before the merge, the template's side of every C# file both sides changed is laid out by the team's style: the
-  rules of the template's `.editorconfig` with the solution's root `.editorconfig` after them, so the team's rule
-  wins where both name one, and `dotnet format whitespace` applies the union to a copy of the template's output.
-  What the merge then sees of that file differs from the team's by what the template changed in the code, not by
-  how it is laid out. Only the layout is applied, never an analyzer fix: the code keeps the text the template
-  wrote. The solution's side, its `.editorconfig` among its files, is not touched; a solution with no
-  `.editorconfig` of its own, and a formatter that cannot run, leave the merge as it was in 2.9 - by bytes alone.
+- before the merge, the template's side of every C# file both sides changed is laid out by the team's style. The
+  two `.editorconfig` files are merged, the solution's root one last, so a rule both name is the team's; a solution
+  without the file gets the template's rules alone, and its own files, the `.editorconfig` among them, are never
+  written. Two passes apply the merged file to a copy of the template's output: `whitespace` for the bytes and the layout,
+  `style --severity info` for every code-style rule the file names - the braces, the usings, the namespace, the
+  blank lines, an expression body. `--severity info` is the
+  threshold at which a rule held at `suggestion` applies, the severity the template's file states. The file then
+  differs from the team's by what the template changed in the code. A formatter that cannot run leaves the merge as
+  it was in 2.9, by bytes alone.
+
+```
+template/.editorconfig   ┐
+                         ├─►  merged, the team's rules last and winning
+solution/.editorconfig   ┘         │
+                                   ├─►  dotnet format whitespace              the bytes and the layout
+                                   └─►  dotnet format style --severity info   every code-style rule the file names
+                                        on a copy of the template's output
+```
+
+`whitespace` alone applies no code-style rule, so a team that writes braces or usings otherwise still sees those
+lines conflict. Formatting the whole solution is the step after this
+one, not a choice: code a team left outside its own style would move into it everywhere at once, and the tool would
+then have to pass over every file on every upgrade to keep the tree one style.
 
 What git then shows: `git log dotskit/template` - what each version of the template gave the solution;
 `git diff dotskit/template HEAD`, once the merge is committed - the team's own changes over the template of its
