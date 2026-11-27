@@ -29,8 +29,7 @@ internal static partial class CentralVersions
     /// </summary>
     /// <param name="root">The solution's root.</param>
     /// <param name="conflicts">The files left in conflict: neither they nor the central file in conflict are touched.</param>
-    /// <param name="waiting">The template's files of the parts not merged yet: their projects wait for their part, which brings them as the template has them.</param>
-    public static IReadOnlyList<Repair> Decide(string root, IReadOnlyCollection<string> conflicts, IReadOnlySet<string>? waiting = null)
+    public static IReadOnlyList<Repair> Decide(string root, IReadOnlyCollection<string> conflicts)
     {
         var central = FileText.Read(root, Central);
         if (central is null || conflicts.Contains(Central) || !central.Text.Contains(Managed, StringComparison.OrdinalIgnoreCase))
@@ -43,7 +42,7 @@ internal static partial class CentralVersions
         var declared = PackageVersions.All(root);
         return [.. Folders.RelativeFiles(root)
             .Where(f => f.StartsWith(Source, StringComparison.Ordinal) && f.EndsWith(Layout.ProjectExtension, StringComparison.OrdinalIgnoreCase)
-                && !conflicts.Contains(f) && waiting?.Contains(f) != true)
+                && !conflicts.Contains(f))
             .Order(StringComparer.Ordinal)
             .Select(f => (Path: f, Text: FileText.Read(root, f)?.Text ?? ""))
             .Where(f => !f.Text.Contains(OptedOut, StringComparison.OrdinalIgnoreCase) && !OptsOutAbove(root, f.Path))
