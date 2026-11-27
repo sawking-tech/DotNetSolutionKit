@@ -277,3 +277,6 @@ deploy/compose/.bluegreen/
 
 # The plans and notes of an AI agent (plan-and-iterate): working memory, never committed
 .claude/session-context/
+
+# The report dotskit writes about each upgrade: a record of the run, not a part of the solution
+.dotskit/reports/

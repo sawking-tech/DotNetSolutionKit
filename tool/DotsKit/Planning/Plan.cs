@@ -38,7 +38,7 @@ namespace DotsKit.Planning;
 internal sealed record Plan(string Root, Manifest Next, IReadOnlyList<Change> Changes, MembershipChange Membership, IReadOnlyList<string>? Packages = null,
     TypeMap? Types = null, (TemplateCommit Base, TemplateCommit Next)? ByGit = null, bool PreferTemplate = false, bool MarkBase = false,
     Manifest? OnConflicts = null, IReadOnlyList<string>? Parts = null, IReadOnlySet<string>? Waiting = null, string? BaseTree = null,
-    string? NextTree = null, IgnoreDecision? Ignore = null)
+    string? NextTree = null, IgnoreDecision? Ignore = null, int Formatted = 0, string? From = null)
 {
     /// <summary>The manifest the solution has once the plan is written, by whether the merge left conflicts.</summary>
     public Manifest Written(bool conflicts) => conflicts && OnConflicts is { } open ? open : Next;
