@@ -18,6 +18,9 @@ internal interface IStyleFormat
     /// <param name="paths">The files both sides changed, as the two diffs against the base name them.</param>
     /// <param name="ct">Cancels the formatting.</param>
     Task<string> LaidOutAsync(string root, string tree, IReadOnlyCollection<string> paths, CancellationToken ct);
+
+    /// <summary>The files the last <see cref="LaidOutAsync"/> laid out, for the report of the upgrade.</summary>
+    int Formatted { get; }
 }
 
 /// <param name="runner">Runs dotnet format.</param>
@@ -38,6 +41,8 @@ internal sealed class DotnetFormat(IProcessRunner runner, Func<string> style) : 
 
     /// <summary>The union's name in the copy: not the team's file name, so a copy that carries one keeps it.</summary>
     private const string UnionName = "dotskit.editorconfig";
+
+    public int Formatted { get; private set; }
 
     public async Task<string> LaidOutAsync(string root, string tree, IReadOnlyCollection<string> paths, CancellationToken ct)
     {
@@ -86,8 +91,13 @@ internal sealed class DotnetFormat(IProcessRunner runner, Func<string> style) : 
             File.Delete(Path.Combine(styled, solution));
         }
         // A formatter that cannot run leaves the side by its bytes; the build after the merge is the real check.
+        Formatted = format.Code == 0 ? Count(include, tree, styled) : 0;
         return format.Code == 0 ? styled : tree;
     }
+
+    /// <summary>The files whose bytes the formatter changed.</summary>
+    private static int Count(IReadOnlyList<string> include, string before, string after) =>
+        include.Count(p => FileText.Read(before, p) is { } was && FileText.Read(after, p) is { } now && !now.SameTextAs(was));
 
     /// <summary>The solution file of a tree, its own or one written for the projects that hold the files; null when there is none.</summary>
     private async Task<string?> SolutionOfAsync(string tree, IReadOnlyList<string> include, CancellationToken ct)

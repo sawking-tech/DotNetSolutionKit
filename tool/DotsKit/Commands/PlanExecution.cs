@@ -46,7 +46,11 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
             }
         }
         var conflicts = written.Conflicts.Count > 0;
-        var code = conflicts ? Conflicts(written.Conflicts) : await BuildAsync(plan, options, ct);
+        var code = conflicts ? Conflicts(written.Conflicts) : await BuildAsync(plan, written, options, ct);
+        if (conflicts && UpgradeReport.Write(plan, written, null) is { } conflictReport)
+        {
+            terminal.Info($"  report    {Path.GetRelativePath(plan.Root, conflictReport)} (not in git)");
+        }
         if (!conflicts && plan.Next.Upgrade is { } upgrade)
         {
             // Conflicts keep the upgrade open: the command's own line names what is left and how the upgrade goes on.
@@ -88,7 +92,7 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         return ExitCode.Conflicts;
     }
 
-    private async Task<ExitCode> BuildAsync(Plan plan, Options options, CancellationToken ct)
+    private async Task<ExitCode> BuildAsync(Plan plan, WriteResult written, Options options, CancellationToken ct)
     {
         if (options.NoBuild)
         {
@@ -116,6 +120,11 @@ internal sealed class PlanExecution(PlanReport report, IPlanWriter writer, IBuil
         }
 
         var build = result.Build;
+        if (UpgradeReport.Write(plan, written, build.Output) is { } reportPath)
+        {
+            terminal.Info($"  report    {Path.GetRelativePath(plan.Root, reportPath)} (not in git)");
+        }
+
         if (build.Code == 0)
         {
             terminal.Info("Written; the solution builds.");

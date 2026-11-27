@@ -34,6 +34,7 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
         // The two trees do not depend on each other: generated side by side.
         var baseDir = current is null ? null : await BaseAsync(current, ct);
         var nextDir = await staging.BuildAsync(next, withSolutionFile: current is null, ct);
+        var formatted = 0;
         // The team's style meets the template's on the files both sides changed, and only on them: both sides of the
         // template - the output the solution came from and the one it goes to - are laid out by the union of the two
         // styles, so the merge reads one style against one style. Laying out the next side alone is not enough: git
@@ -44,6 +45,7 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
             var both = BothChanged.CSharp(root, baseDir, nextDir);
             nextDir = await style.LaidOutAsync(root, nextDir, both, ct);
             baseDir = await style.LaidOutAsync(root, baseDir, both, ct);
+            formatted = style.Formatted;
         }
         // The rules of .dotskitignore hold the paths a person took out of the template's reach: the next output takes
         // them from the base, so the merge finds nothing of the template there. Read before any move, so a held file
@@ -114,7 +116,8 @@ internal sealed class Planner(IStaging staging, ISolutionProjects projects, IRen
         var membership = await MembershipAsync(root, baseDir!, nextDir, ct);
         return new Plan(root, next, [.. changes.Where(c => !IsSolutionFile(c.Path))], membership, packages, types,
             (new TemplateCommit(baseDir!, current!.Template), new TemplateCommit(nextDir, next.Template)), mode.PreferTemplate, mode.MarkBase,
-            Parts: parts, Waiting: waiting, BaseTree: baseDir, NextTree: nextDir, Ignore: ignore);
+            Parts: parts, Waiting: waiting, BaseTree: baseDir, NextTree: nextDir, Ignore: ignore,
+            Formatted: formatted, From: current?.Template);
     }
 
     /// <summary>
