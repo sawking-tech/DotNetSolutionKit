@@ -58,4 +58,21 @@ internal sealed class StyleUnionTests
     [Test]
     public void Should_GiveTheTemplateAlone_When_TheTeamFileIsBlank() =>
         StyleUnion.Of(Template, "  \n\n").ShouldBe(Template.Replace("\r", ""));
+
+    /// <summary>
+    /// The blanket severity of the team's file stays out: raised to warning it turns every analyzer on, and the
+    /// formatter rewrites the code - a block namespace, an if turned into ?:, an unused variable dropped - which a
+    /// merge that lays code out must never do.
+    /// </summary>
+    [Test]
+    public void Should_LeaveTheTeamsBlanketSeverity_OutOfTheUnion() =>
+        StyleUnion.Of(Template, Lines("dotnet_analyzer_diagnostic.severity = suggestion", "indent_size = 2"))
+            .ShouldNotContain("suggestion");
+
+    [Test]
+    public void Should_KeepTheTemplatesOwnBlanketSeverity() =>
+        StyleUnion.Of(Lines("root = true", "dotnet_analyzer_diagnostic.severity = warning"), Lines("indent_size = 2"))
+            .ShouldContain("dotnet_analyzer_diagnostic.severity = warning");
+
+    private static string Lines(params string[] lines) => string.Join("\n", lines) + "\n";
 }

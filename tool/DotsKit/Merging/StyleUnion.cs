@@ -5,10 +5,18 @@ namespace DotsKit.Merging;
 /// <c>.editorconfig</c> after them, so the team's rule wins where both name one - the editorconfig rule that the file
 /// nearer the source wins.
 ///
-/// One thing of the team's file does not carry into the union: the severity. The file arrives from the template with
-/// every rule at <c>suggestion</c>, which says a build of theirs does not fail on our style - a statement about their
-/// build, not about the layout they want. The merge lays the template's side out by their rules, so a rule they hold
-/// at <c>suggestion</c> is raised to <c>warning</c>: the formatter applies it. A rule they set to <c>none</c> stays
+/// Two things of the team's file do not carry into the union.
+///
+/// The blanket line <c>dotnet_analyzer_diagnostic.severity</c> stays out whole. Raised to <c>warning</c> it turns
+/// every analyzer on at once, and `dotnet format style` then rewrites the code itself: a namespace drops to a block
+/// form, an <c>if</c> becomes a conditional expression, an unused variable disappears. The merge lays code out; it
+/// does not change what the code says. The template's own blanket line, at the severities this repository holds,
+/// still stands above the team's rules.
+///
+/// The severity of each named rule is raised. The file arrives from the template with every rule at
+/// <c>suggestion</c>, which says a build of theirs does not fail on our style - a statement about their build, not
+/// about the layout they want. The merge lays the template's side out by their rules, so a rule they hold at
+/// <c>suggestion</c> is raised to <c>warning</c> and the formatter applies it. A rule they set to <c>none</c> stays
 /// off - that is them saying they do not want it - and a rule they deleted is replaced by the template's line above,
 /// which is what 2.9 did with every style rule.
 /// </summary>
@@ -35,6 +43,7 @@ internal static class StyleUnion
         // one is no rule of the union.
         var theirs = LineEndings.ToLf(team).TrimEnd('\n').Split('\n')
             .Where(line => !line.TrimStart().StartsWith("root", StringComparison.Ordinal))
+            .Where(line => !line.Contains("dotnet_analyzer_diagnostic.severity", StringComparison.Ordinal))
             .Select(Raised);
         return text + "\n\n" + string.Join('\n', theirs).TrimStart('\n').TrimEnd('\n') + "\n";
     }
