@@ -35,6 +35,8 @@ namespace DotsKit.Planning;
 /// What <c>.dotskitignore</c> holds at the version the plan goes to, and the pins it spends: the report shows both, and
 /// the write returns the file for the review.
 /// </param>
+/// <param name="Formatted">The files the style pass laid out, for the report of the upgrade.</param>
+/// <param name="From">The version of the template the solution came from; null for a new solution.</param>
 internal sealed record Plan(string Root, Manifest Next, IReadOnlyList<Change> Changes, MembershipChange Membership, IReadOnlyList<string>? Packages = null,
     TypeMap? Types = null, (TemplateCommit Base, TemplateCommit Next)? ByGit = null, bool PreferTemplate = false, bool MarkBase = false,
     Manifest? OnConflicts = null, IReadOnlyList<string>? Parts = null, IReadOnlySet<string>? Waiting = null, string? BaseTree = null,
