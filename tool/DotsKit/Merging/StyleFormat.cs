@@ -12,12 +12,11 @@ namespace DotsKit.Merging;
 /// it would be the tool's opinion of its taste; laid out by the team's rules, the two sides meet with no style
 /// difference left for the merge to report as a conflict.
 ///
-/// The rules are the ones <c>dotnet format style</c> applies - the braces, the usings, the namespace, the blank lines -
-/// and not only the layout of <c>whitespace</c>: a team that writes braces differently sees exactly those lines
-/// conflict, and a merge that leaves them out has done nothing for the case it exists for. A fix of a rule that
-/// rewrites code rather than laying it out is the team's to make: the template's rules name none, and the ones they
-/// do name are the layout. The file is formatted by a rule at <c>warning</c> and up, which is how the template's own
-/// <c>.editorconfig</c> holds them.
+/// The pass is <c>dotnet format whitespace</c>, and never <c>style</c>. Both read the union, but whitespace only lays
+/// lines out - the brace of a new line, the indent, the spacing - while style applies analyzer fixes, and a fix
+/// rewrites the code: a file-scoped namespace becomes a block, an <c>if</c> becomes a conditional expression. A merge
+/// keeps what the code says; the cost is stated in <see cref="StyleUnion"/> - the order of the usings and the
+/// namespace declaration stay as the template wrote them.
 /// </summary>
 internal interface IStyleFormat
 {
@@ -40,21 +39,25 @@ internal sealed class DotnetFormat(IProcessRunner runner, Func<string> style) : 
     /// <summary>The team's file, read by the editorconfig rule from the folder of the file it formats.</summary>
     private const string TeamFile = ".editorconfig";
 
-    /// <summary>The style rules: the braces, the usings, the namespace, the blank lines.</summary>
-    private const string Style = "style";
-
-    /// <summary>The bytes: the indent, the spacing, the end of a line. The style pass leaves these to it.</summary>
+    /// <summary>The bytes and the layout: the brace, the indent, the spacing. It changes no code.</summary>
     private const string Layout = "whitespace";
+
+    /// <summary>The union's name in the copy: not the team's file name, so a copy that carries one keeps it.</summary>
+    private const string UnionName = "dotskit.editorconfig";
 
     public async Task<string> LaidOutAsync(string root, string tree, IReadOnlyCollection<string> paths, CancellationToken ct)
     {
         var team = Path.Combine(root, TeamFile);
-        var include = string.Join(' ', paths
+        // The paths go to dotnet format as separate arguments: --include takes the paths that follow it, and one
+        // argument holding several of them matches no file - the formatter reports nothing changed and exits zero,
+        // which is the worst way for a step to fail.
+        var include = paths
             .Where(p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             .Where(p => FileText.Read(tree, p) is not null)
             .Select(p => p.Replace('\\', '/'))
-            .Order(StringComparer.Ordinal));
-        if (include.Length == 0 || !File.Exists(team))
+            .Order(StringComparer.Ordinal)
+            .ToList();
+        if (include.Count == 0 || !File.Exists(team))
         {
             return tree;
         }
@@ -64,41 +67,40 @@ internal sealed class DotnetFormat(IProcessRunner runner, Func<string> style) : 
         var styled = Folders.NewTemp("styled");
         Folders.Copy(tree, styled);
         var wroteSolution = !Folders.RelativeFiles(tree).Any(IsSolution);
-        // The union sits in the root of the copy, where the team's file sits in the solution: the two files' rules in
-        // one, the team's last, so its rule wins where both name one.
-        await File.WriteAllTextAsync(Path.Combine(styled, StyleUnion.FileName), StyleUnion.Of(style(), await File.ReadAllTextAsync(team, ct)), ct);
+        // The template's own .editorconfig, when the output carries one, is the team's file in a solution and stays: the
+        // union is written beside it under the tool's name, so the copy never loses a file the merge expects.
+        var union = Path.Combine(styled, UnionName);
+        await File.WriteAllTextAsync(union, StyleUnion.Of(style(), await File.ReadAllTextAsync(team, ct)), ct);
         // The solution form, as the tool already builds one for the repairs: the files given, read through the projects
         // that compile them. The restore is the formatter's own: without it the projects load with no references and it
         // changes nothing, silently and with a zero exit code.
         var solution = await SolutionOfAsync(styled, include, ct);
         if (solution is null)
         {
+            File.Delete(union);
             return tree;
         }
 
-        // The layout first, and it carries most of a team's style: dotnet format applies the brace of a new line, the
-        // indent and the spacing of the token in whitespace, not in style. The style pass follows for the rules that are
-        // not layout - the order of the usings, the namespace, the blank lines - and does nothing for a rule it cannot
-        // fix. Whichever pass fails, the other still runs: a formatter that cannot do its part leaves that part as it
-        // was, and the merge falls back to the bytes for what is left.
+        // One pass, whitespace, and never style: whitespace reads the options of the union - the brace, the indent, the
+        // spacing - and changes nothing but the layout. `dotnet format style` applies analyzer fixes, and a fix rewrites
+        // the code; the order of the usings and the namespace declaration are style rules, so the merge leaves those as
+        // the template wrote them.
         var format = await runner.RunAsync("dotnet",
-            ["format", solution, Layout, "--include", include, "--verbosity", "quiet"], styled, ct);
-        var rules = await runner.RunAsync("dotnet",
-            ["format", solution, Style, "--include", include, "--verbosity", "quiet"], styled, ct);
+            ["format", solution, Layout, "--include", .. include, "--verbosity", "quiet"], styled, ct);
         // The union and the solution this run wrote are the tool's, not the template's: they go before the tree becomes
         // the template's side, or the merge reports them as files the template added and conflicts on the team's own.
-        File.Delete(Path.Combine(styled, StyleUnion.FileName));
+        File.Delete(union);
         if (wroteSolution)
         {
             File.Delete(Path.Combine(styled, solution));
         }
         // A formatter that cannot run leaves the merge as it was before this feature: the template's side by its bytes.
         // The build after the merge is the check of the result, and the tool does not fail an upgrade over a formatter.
-        return format.Code == 0 && rules.Code == 0 ? styled : tree;
+        return format.Code == 0 ? styled : tree;
     }
 
     /// <summary>The solution file of a tree, its own or one written for the projects that hold the files; null when there is none.</summary>
-    private async Task<string?> SolutionOfAsync(string tree, string include, CancellationToken ct)
+    private async Task<string?> SolutionOfAsync(string tree, IReadOnlyList<string> include, CancellationToken ct)
     {
         // The tree of a solution that already carries one has it; an output of the template carries none.
         if (Folders.RelativeFiles(tree).FirstOrDefault(IsSolution) is { } own)
@@ -106,7 +108,7 @@ internal sealed class DotnetFormat(IProcessRunner runner, Func<string> style) : 
             return own;
         }
 
-        HashSet<string> files = new(include.Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
+        HashSet<string> files = new(include, StringComparer.Ordinal);
         var projects = Folders.RelativeFiles(tree)
             .Where(p => p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
             .Where(p => files.Any(f => f.StartsWith(Path.GetDirectoryName(p)!.Replace('\\', '/') + "/", StringComparison.Ordinal)))

@@ -26,23 +26,28 @@ internal sealed class StyleUnionTests
     public void Should_KeepTheTeamsComments() =>
         StyleUnion.Of(Template, "# our style\n[*.cs]\nindent_size = 2\n").ShouldContain("# our style");
 
-    /// <summary>The team's file is offered at suggestion by the flag; the merge applies what it names.</summary>
+    /// <summary>
+    /// Every line of the team's file goes in as written. A severity is not raised: the formatter that applies the union
+    /// reads the option's value, and a raised severity on an analyzer rule makes the formatter rewrite the code.
+    /// </summary>
     [Test]
-    public void Should_RaiseTheTeamsSuggestion_ToTheSeverityAFormatterApplies() =>
+    public void Should_ChangeNoSeverity_TheTeamWrites() =>
         StyleUnion.Of(Template, "dotnet_diagnostic.IDE0011.severity = suggestion\ncsharp_prefer_braces = true:suggestion\n")
-            .ShouldContain("dotnet_diagnostic.IDE0011.severity = warning\ncsharp_prefer_braces = true:warning\n");
+            .ShouldContain("dotnet_diagnostic.IDE0011.severity = suggestion\ncsharp_prefer_braces = true:suggestion");
 
-    /// <summary>A rule the team turned off is a rule they do not want; the merge leaves it off.</summary>
+    /// <summary>
+    /// An option that takes a list of values - `all`, `before_and_after` - accepts no `:severity` suffix: appending one
+    /// gives a value the formatter cannot read, and the invalid line, being later, overrides the template's valid one.
+    /// </summary>
     [Test]
-    public void Should_KeepTheTeamsNone_AsItIs() =>
-        StyleUnion.Of(Template, "dotnet_diagnostic.IDE0011.severity = none\n").ShouldContain("dotnet_diagnostic.IDE0011.severity = none");
+    public void Should_NotAppendASeverity_ToAValueWithoutOne()
+    {
+        var union = StyleUnion.Of(Template, "csharp_new_line_before_open_brace = none\n");
 
-    /// <summary>A naming rule's severity is a severity too, and the merge raises it like any other.</summary>
-    [Test]
-    public void Should_RaiseEveryKindOfSeverity_TheTeamNames() =>
-        StyleUnion.Of(Template, "dotnet_naming_rule.x.severity = suggestion\n").ShouldContain("dotnet_naming_rule.x.severity = warning");
+        union.ShouldContain("csharp_new_line_before_open_brace = none\n");
+        union.ShouldNotContain("none:warning");
+    }
 
-    /// <summary>A rule with no severity at all is a value, and the merge leaves it as the team wrote it.</summary>
     [Test]
     public void Should_LeaveARuleWithoutASeverity_AsItIs() =>
         StyleUnion.Of(Template, "indent_size = 2\n").ShouldContain("indent_size = 2\n");
@@ -58,21 +63,4 @@ internal sealed class StyleUnionTests
     [Test]
     public void Should_GiveTheTemplateAlone_When_TheTeamFileIsBlank() =>
         StyleUnion.Of(Template, "  \n\n").ShouldBe(Template.Replace("\r", ""));
-
-    /// <summary>
-    /// The blanket severity of the team's file stays out: raised to warning it turns every analyzer on, and the
-    /// formatter rewrites the code - a block namespace, an if turned into ?:, an unused variable dropped - which a
-    /// merge that lays code out must never do.
-    /// </summary>
-    [Test]
-    public void Should_LeaveTheTeamsBlanketSeverity_OutOfTheUnion() =>
-        StyleUnion.Of(Template, Lines("dotnet_analyzer_diagnostic.severity = suggestion", "indent_size = 2"))
-            .ShouldNotContain("suggestion");
-
-    [Test]
-    public void Should_KeepTheTemplatesOwnBlanketSeverity() =>
-        StyleUnion.Of(Lines("root = true", "dotnet_analyzer_diagnostic.severity = warning"), Lines("indent_size = 2"))
-            .ShouldContain("dotnet_analyzer_diagnostic.severity = warning");
-
-    private static string Lines(params string[] lines) => string.Join("\n", lines) + "\n";
 }
