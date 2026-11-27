@@ -5,8 +5,8 @@
       InMemoryTestExecutionContext), the domain event test wiring, the real-database test servers
       (Integration/Postgres and Integration/SqlServer, tied to the database provider module this
       project references conditionally), stubs for the ports that leave a service and the code rules.
-      Helpers tied to the audit pipeline stay in Common.Testing; see
-      template/src/framework/README.md.
+      The audit verifiers are in Framework.Audit, with the journal they hold an entity to; the
+      categories and the Shouldly import stay in Common.Testing. See template/src/framework/README.md.
     -->
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>

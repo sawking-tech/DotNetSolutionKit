@@ -24,13 +24,18 @@ package of their own. A namespace names its kind: `NamespaceRoot.ProductName.Fra
   the service's assembly run before a handler, and a bad request answers in the common shape.
 - `NamespaceRoot.ProductName.Framework.FeatureFlags`, with `--FeatureFlags` — the platform feature
   flags: the shared `features.json` catalogue and the Microsoft.FeatureManagement wiring.
+- `NamespaceRoot.ProductName.Framework.Audit`, with `--Audit` — the audit journal: the interceptor
+  that writes an entry into the outbox in the same transaction as the change, the recorder for what
+  bypasses the change tracker, the redaction, the two ports, and the verifiers a service's tests hold
+  its entities to their markers with; see the project Readme.
 - `NamespaceRoot.ProductName.Framework.Testing` — the portable testing harness (ADR-005): the
   execution contexts, the domain event test wiring, stubs and code rules. Helpers tied to an
-  external system (the PostgreSQL and SQL Server test databases) and the audit verifiers stay in
+  external system (the PostgreSQL and SQL Server test databases) stay in
   `NamespaceRoot.ProductName.Common.Testing`; see the project Readme.
 
 Every module has the same skeleton: its directory, the project named after it, `.Tests` when there
 is something to test, a `README.md` when it owns a mechanism, and the versions it needs in
-`src/package-versions/<module>.props`. Apart from `FeatureFlags`, which a service takes with
-`--FeatureFlags`, nothing here is behind a flag: every generated service references these
-projects, as it references the Common projects.
+`src/package-versions/<module>.props`. Two are behind a flag: `FeatureFlags`, which a service takes
+with `--FeatureFlags`, and `Audit`, which it takes with `--Audit` and `--Messaging rabbitmq:outbox`.
+Both are a project a service references only with the flag. Everything else here is referenced by
+every generated service, as it references the Common projects.

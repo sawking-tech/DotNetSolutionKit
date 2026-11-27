@@ -30,8 +30,13 @@ internal static class Markers
         ("GitHubCiCd", [".github/workflows/ci.yml"]),
     ];
 
-    /// <summary>Audit leaves files only with the outbox, which is what the template turns it on with.</summary>
-    public const string AuditPath = "src/common/{P}.Common.Application/Auditing";
+    /// <summary>
+    /// Audit leaves files only with the outbox, which is what the template turns it on with. The first path is the
+    /// module an audit leaves since 3.0, the second the folder inside Common of 2.x that init of an old base reads;
+    /// the 2.x path goes with the 2.x support in 3.0.
+    /// </summary>
+    public static readonly string[] AuditPaths =
+        ["src/framework/{P}.Framework.Audit", "src/common/{P}.Common.Application/Auditing"];
 
     /// <summary>The email channel of --Notify, in the capability of its own since 2.8; the second path is the 2.x layout, gone in 3.0.</summary>
     public static readonly string[] NotifyEmailPaths =

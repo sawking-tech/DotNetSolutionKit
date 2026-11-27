@@ -183,7 +183,7 @@ internal static partial class SolutionReader
             args = args.With("Notify", "email");
         }
 
-        if (files.Exists(Markers.Of(Markers.AuditPath, prefix)))
+        if (Markers.AuditPaths.Any(p => files.Exists(Markers.Of(p, prefix))))
         {
             args = args.With("Audit", On).With("Messaging", Transport(version, "outbox"));
         }
