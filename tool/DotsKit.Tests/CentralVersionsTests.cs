@@ -94,7 +94,9 @@ internal sealed class CentralVersionsTests
         Put(root, Billing, References("<PackageReference Include=\"Scriban\" Version=\"5.10.0\" />"));
         Put(root, Orders, References("<PackageReference Include=\"Polly\" Version=\"8.0.0\" />"));
 
-        CentralVersions.Decide(root, new HashSet<string>(), new HashSet<string> { Billing }).Cast<CentralizeVersion>().Select(r => r.Package).ShouldBe(["Polly"]);
+        // A project of a part not merged yet is centralized with the rest: the build runs over the whole solution,
+        // and a version left inline there fails it with NU1008.
+        CentralVersions.Decide(root, new HashSet<string>()).Cast<CentralizeVersion>().Select(r => r.Package).ShouldBe(["Scriban", "Polly"]);
     }
 
     [Test]
